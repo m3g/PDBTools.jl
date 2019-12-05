@@ -21,6 +21,9 @@ type `Atom`.
 of type `MutableAtom`, which contains the same data, but the data can be
 modified.
 
+`writePDB(atoms,filename)`: Writes a PDB file of name `filename` from the vector
+`atoms` which contains the atom data in the `Atom` or `MutableAtom` structures.
+
 `read_atom(pdb_line)`: Given a line of a PDB file containing atom data,
 returns the data in a `Atom` structure.
 

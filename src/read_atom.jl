@@ -18,7 +18,7 @@ function read_atom(record :: String;
                    mmCIF :: Bool = false, 
                    mmCIF_fields :: Indexes_mmCIF_fields = empty_struct(Indexes_mmCIF_fields))
 
-  atom = ReadAtom()
+  atom = MutableAtom()
 
   if length(record) < 6
     return Nothing

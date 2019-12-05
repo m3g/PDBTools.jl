@@ -4,7 +4,7 @@
 
 # requires Printf
 
-function write_atom(atom :: ReadAtom)
+function write_atom(atom :: MutableAtom)
   imutt_atom = Atom(atom)
   return write_atom(imutt_atom)
 end

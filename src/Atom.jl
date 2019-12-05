@@ -15,10 +15,10 @@ end
 
 # Mutable structure used to read data only
 
-@eval mutable struct ReadAtom
+@eval mutable struct MutableAtom
   $AtomData
 end
-ReadAtom() = empty_struct(ReadAtom)
+MutableAtom() = empty_struct(MutableAtom)
 
 # Immutable structure used for critical code
 
@@ -28,6 +28,6 @@ end
 
 # Initialize mutable from immutable and vice-versa
 
-Atom( atom :: ReadAtom ) = Atom([ getfield(atom,i) for i in 1:nfields(atom) ]...)
-ReadAtom( atom :: Atom ) = ReadAtom([ getfield(atom,i) for i in 1:nfields(atom) ]... )
+Atom( atom :: MutableAtom ) = Atom([ getfield(atom,i) for i in 1:nfields(atom) ]...)
+MutableAtom( atom :: Atom ) = MutableAtom([ getfield(atom,i) for i in 1:nfields(atom) ]... )
 
