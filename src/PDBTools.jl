@@ -10,7 +10,6 @@ module PDBTools
   include("./empty_struct.jl")
 
   include("./Atom.jl")
-  export Atom
 
   include("./Indexes_mmCIF_fields.jl")
 
