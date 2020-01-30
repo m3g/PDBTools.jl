@@ -50,8 +50,7 @@ function write_atom(atom :: Atom)
                      "ATOM",
                      atom.index," ",name," ",atom.resname," ",atom.chain,atom.resnum,"    ",
                      atom.x,atom.y,atom.z,atom.occup,atom.b)
-  end if
-      
+  end
 
   return line
 end
