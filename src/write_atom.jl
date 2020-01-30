@@ -40,10 +40,18 @@ function write_atom(atom :: Atom)
   else
     name = atom.name
   end
-  line = @sprintf("%-6s%5i%1s%4s%1s%-3s%1s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
-                   "ATOM",
-                   atom.index," ",name," ",atom.resname," ",atom.chain,atom.resnum,"    ",
-                   atom.x,atom.y,atom.z,atom.occup,atom.b)
+  if atom.index < 100000
+    line = @sprintf("%-6s%5i%1s%4s%1s%-3s%1s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
+                     "ATOM",
+                     atom.index," ",name," ",atom.resname," ",atom.chain,atom.resnum,"    ",
+                     atom.x,atom.y,atom.z,atom.occup,atom.b)
+  else # Prints hexadecimal code for atom index
+    line = @sprintf("%-6s%5x%1s%4s%1s%-3s%1s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
+                     "ATOM",
+                     atom.index," ",name," ",atom.resname," ",atom.chain,atom.resnum,"    ",
+                     atom.x,atom.y,atom.z,atom.occup,atom.b)
+  end if
+      
 
   return line
 end
