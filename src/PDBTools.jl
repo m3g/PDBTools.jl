@@ -21,5 +21,6 @@ module PDBTools
   include("./read_atom.jl")
   include("./write_atom.jl")
   include("./readPDB.jl")
+  include("./writePDB.jl")
 
 end
