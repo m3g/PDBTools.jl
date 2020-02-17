@@ -36,6 +36,6 @@ returns the data in a `Atom` structure.
 `PDBTools.write_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
 a string formatted in the PDB format, to be written to a file. 
 
-
-
+`PDBTools.getseq(filename or Vector{Atom})`: Returns a list of residue names with three
+and one letter codes.
 
