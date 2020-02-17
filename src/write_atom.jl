@@ -30,7 +30,8 @@ function write_atom(atom :: Atom)
   #77 - 78        LString(2)    element      Element symbol, right-justified.
   #79 - 80        LString(2)    charge       Charge  on the atom.
 
-  l = length(atom.name)
+  name = strip(atom.name)
+  l = length(name)
   if l == 1
     name = "  $(atom.name) "
   elseif l == 2
@@ -40,15 +41,39 @@ function write_atom(atom :: Atom)
   else
     name = atom.name
   end
+  if isprotein(atom)
+    resname = strip(atom.resname)
+    l = length(resname)
+    if l == 3
+      resname = " $(atom.resname) "
+    elseif l == 4
+      resname = "$(atom.resname) "
+    end
+  else
+    resname = strip(atom.resname)
+    l = length(resname)
+    if l == 1
+      resname = " $(atom.resname)   "
+    elseif l == 2
+      resname = " $(atom.resname)  "
+    elseif l == 3
+      resname = " $(atom.resname) "
+    elseif l == 4
+      resname = " $(atom.resname)"
+    else
+      resname = atom.resname
+    end
+  end
+   
   if atom.index < 100000
-    line = @sprintf("%-6s%5i%1s%4s%1s%-3s%1s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
+    line = @sprintf("%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
                      "ATOM",
-                     atom.index," ",name," ",atom.resname," ",atom.chain,atom.resnum,"    ",
+                     atom.index," ",name,resname,atom.chain,atom.resnum,"    ",
                      atom.x,atom.y,atom.z,atom.occup,atom.b)
   else # Prints hexadecimal code for atom index
-    line = @sprintf("%-6s%5x%1s%4s%1s%-3s%1s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
+    line = @sprintf("%-6s%5x%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
                      "ATOM",
-                     atom.index," ",name," ",atom.resname," ",atom.chain,atom.resnum,"    ",
+                     atom.index," ",name,resname,atom.chain,atom.resnum,"    ",
                      atom.x,atom.y,atom.z,atom.occup,atom.b)
   end
 

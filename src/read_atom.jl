@@ -1,18 +1,26 @@
+# This function will return Nothing for alternate (BGLY, CARG, etc) conformations
+# of protein residues, which will then be ignored. Only "A" conformations are kept.
+# Other non-protein residues are always kept.
+
+function alternate_conformation( atom :: Union{Atom,MutableAtom} )
+  if isprotein(atom) 
+    if length(atom.resname) == 4
+      if name[1:1] == "A"
+        return atom.resname[2:4]
+      else 
+        return Nothing
+      end
+    else
+      return atom.resname
+    end
+  else
+    return atom.resname
+  end
+end
+
 #
 # Function that reads atom information from PDB or mmCIF files
 #
-
-function alternate_conformation( name :: String )
-  if length(name) == 4
-    if name[1:1] == "A"
-      return name[2:4]
-    else 
-      return Nothing
-    end
-  else
-    return name
-  end
-end
 
 function read_atom(record :: String; 
                    mmCIF :: Bool = false, 
@@ -31,13 +39,11 @@ function read_atom(record :: String;
       atom.name = strip(record[13:16])
 
       atom.resname = strip(record[17:21])
-      if isprotein(atom)
-        resname = alternate_conformation(atom.resname)
-        if resname == Nothing
-          return Nothing
-        else
-          atom.resname = resname
-        end
+      resname = alternate_conformation(atom)
+      if resname == Nothing
+        return Nothing
+      else
+        atom.resname = resname
       end
 
       atom.chain = strip(record[22:22])
@@ -67,7 +73,7 @@ function read_atom(record :: String;
       atom.index = parse(Int64,mmcif_data[mmCIF_fields.index])
       atom.name = mmcif_data[mmCIF_fields.name]
       atom.resname = mmcif_data[mmCIF_fields.resname]
-      resname = alternate_conformation(atom.resname)
+      resname = alternate_conformation(atom)
       if resname == Nothing
         return Nothing
       else
