@@ -31,11 +31,13 @@ function read_atom(record :: String;
       atom.name = strip(record[13:16])
 
       atom.resname = strip(record[17:21])
-      resname = alternate_conformation(atom.resname)
-      if resname == Nothing
-        return Nothing
-      else
-        atom.resname = resname
+      if isprotein(atom)
+        resname = alternate_conformation(atom.resname)
+        if resname == Nothing
+          return Nothing
+        else
+          atom.resname = resname
+        end
       end
 
       atom.chain = strip(record[22:22])

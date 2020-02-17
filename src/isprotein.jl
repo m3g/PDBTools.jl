@@ -3,32 +3,36 @@
 # residue name
 #
 
-function isprotein(atom :: Atom)
+function isprotein(atom :: Union{Atom,MutableAtom})
 
-  if atom.resname == "ALA" ; return true ; end
-  if atom.resname == "ARG" ; return true ; end
-  if atom.resname == "ASN" ; return true ; end
-  if atom.resname == "ASP" ; return true ; end
-  if atom.resname == "ASX" ; return true ; end
-  if atom.resname == "CYS" ; return true ; end
-  if atom.resname == "GLU" ; return true ; end
-  if atom.resname == "GLN" ; return true ; end
-  if atom.resname == "GLX" ; return true ; end
-  if atom.resname == "GLY" ; return true ; end
-  if atom.resname == "HIS" ; return true ; end
-  if atom.resname == "HSD" ; return true ; end
-  if atom.resname == "HSE" ; return true ; end
-  if atom.resname == "ILE" ; return true ; end
-  if atom.resname == "LEU" ; return true ; end
-  if atom.resname == "LYS" ; return true ; end
-  if atom.resname == "MET" ; return true ; end
-  if atom.resname == "PHE" ; return true ; end
-  if atom.resname == "PRO" ; return true ; end
-  if atom.resname == "SER" ; return true ; end
-  if atom.resname == "THR" ; return true ; end
-  if atom.resname == "TRP" ; return true ; end
-  if atom.resname == "TYR" ; return true ; end
-  if atom.resname == "VAL" ; return true ; end
+  # To take into account alternate conformations, such as "AGLY", "BGLY", etc.
+  l = length(atom.resname)
+  name = atom.resname[l-2:l]
+
+  if name == "ALA" ; return true ; end
+  if name == "ARG" ; return true ; end
+  if name == "ASN" ; return true ; end
+  if name == "ASP" ; return true ; end
+  if name == "ASX" ; return true ; end
+  if name == "CYS" ; return true ; end
+  if name == "GLU" ; return true ; end
+  if name == "GLN" ; return true ; end
+  if name == "GLX" ; return true ; end
+  if name == "GLY" ; return true ; end
+  if name == "HIS" ; return true ; end
+  if name == "HSD" ; return true ; end
+  if name == "HSE" ; return true ; end
+  if name == "ILE" ; return true ; end
+  if name == "LEU" ; return true ; end
+  if name == "LYS" ; return true ; end
+  if name == "MET" ; return true ; end
+  if name == "PHE" ; return true ; end
+  if name == "PRO" ; return true ; end
+  if name == "SER" ; return true ; end
+  if name == "THR" ; return true ; end
+  if name == "TRP" ; return true ; end
+  if name == "TYR" ; return true ; end
+  if name == "VAL" ; return true ; end
 
   return false
   
