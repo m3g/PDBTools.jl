@@ -12,7 +12,7 @@ function writePDB( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, filename; s
     end
   else
     for i in 1:length(sel)
-      println(file,write_atom(atom[sel[i]]))
+      println(file,write_atom(atoms[sel[i]]))
     end
   end
   close(file)
