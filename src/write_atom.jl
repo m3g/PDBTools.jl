@@ -68,9 +68,9 @@ function write_atom(atom :: Atom)
   if abs(atom.x) > 999.999 || 
      abs(atom.y) > 999.999 || 
      abs(atom.y) > 999.999  
-    println("Warning: coordinates of atom $(atom.index)"*
-            "($(atom.name) $(atom.resname)$(atom.resnum) $(atom.chain))"*
-            "greater than 999.999 and do not fit in PDB fixed format.")
+    println("Warning: coordinates of atom $(atom.index) "*
+            "($(atom.name) $(atom.resname)$(atom.resnum) $(atom.chain)) "*
+            "do not fit in PDB fixed format.")
   end
    
   if atom.index < 100000
