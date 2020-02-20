@@ -64,6 +64,14 @@ function write_atom(atom :: Atom)
       resname = atom.resname
     end
   end
+
+  if abs(atom.x) > 999.999 || 
+     abs(atom.y) > 999.999 || 
+     abs(atom.y) > 999.999  
+    println("Warning: coordinates of atom $atom.index"*
+            "(atom.name atom.resname$atom.resnum atom.chain)"*
+            "greater than 999.999 and do not fit in PDB fixed format.")
+  end
    
   if atom.index < 100000
     line = @sprintf("%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
