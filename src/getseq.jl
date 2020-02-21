@@ -4,19 +4,19 @@
 
 # From the file name
 
-function getseq( file :: String; chain = nothing, protein = true) 
+function getseq( file :: String; chain = nothing, protein = true, newres = Nothing ) 
   atoms = readPDB(file)
-  return getseq(atoms, chain = chain, protein = protein)
+  return getseq(atoms, chain = chain, protein = protein, newres = newres)
 end
 
 # From the vector of atoms already read
 
-function getseq( atoms :: Vector{Atom}; chain = nothing, protein = true )
+function getseq( atoms :: Vector{Atom}; chain = nothing, protein = true, newres = Nothing )
   natoms = length(atoms)
   nchain = 0
   iresidue = -1
   for i in 1:natoms
-    if protein && !( isprotein(atoms[i]) )
+    if protein && !( isprotein(atoms[i],newres=newres) )
       continue
     end
     if chain == nothing || atoms[i].chain == chain
@@ -30,7 +30,7 @@ function getseq( atoms :: Vector{Atom}; chain = nothing, protein = true )
   ichain = 0
   iresidue = -1
   for i in 1:natoms 
-    if protein && !( isprotein(atoms[i]) )
+    if protein && !( isprotein(atoms[i],newres=newres) )
       continue
     end
     if chain == nothing || atoms[i].chain == chain

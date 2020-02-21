@@ -3,7 +3,7 @@
 # residue name
 #
 
-function isprotein(atom :: Union{Atom,MutableAtom})
+function isprotein(atom :: Union{Atom,MutableAtom}; newres = Nothing)
 
   # To take into account alternate conformations, such as "AGLY", "BGLY", etc.
   l = length(atom.resname)
@@ -33,6 +33,15 @@ function isprotein(atom :: Union{Atom,MutableAtom})
   if name == "TRP" ; return true ; end
   if name == "TYR" ; return true ; end
   if name == "VAL" ; return true ; end
+
+  # If this is a new residue name indicated by the user
+  if newres != Nothing
+    if typeof(newres) == String 
+      if name == newres ; return true ; end 
+    elseif typeof(newres) <: Array{String} 
+       if name in newres ; return true ; end
+    end
+  end
 
   return false
   
