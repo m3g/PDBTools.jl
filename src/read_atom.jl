@@ -5,7 +5,7 @@
 function alternate_conformation( atom :: Union{Atom,MutableAtom} )
   if isprotein(atom) 
     if length(atom.resname) == 4
-      if name[1:1] == "A"
+      if atom.name[1:1] == "A"
         return atom.resname[2:4]
       else 
         return Nothing
