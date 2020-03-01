@@ -4,7 +4,7 @@ Simple structures and functions to read and write PDB files
 ## Installing:
 
 ```
-julia> ] add https://github.com/mcubeg/PDBTools
+julia> ] add https://github.com/m3g/PDBTools
 ```
 
 ## Using:
