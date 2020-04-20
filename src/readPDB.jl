@@ -15,7 +15,7 @@ function readPDB(file :: String; chain :: String = "0", model :: Int64 = 0)
   natoms = 0
   imodel = 1
   for line in eachline(file)
-     if occursin(line,"ENDMDL")
+     if occursin(line,"ENDMDL") || occursin(line,"END")
        imodel = imodel + 1
      end
      atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
@@ -41,7 +41,7 @@ function readPDB(file :: String; chain :: String = "0", model :: Int64 = 0)
   iatom = 0
   imodel = 1
   for line in eachline(file)
-     if occursin(line,"ENDMDL")
+     if occursin(line,"ENDMDL") || occursin(line,"END")
        imodel = imodel + 1
      end
      atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
