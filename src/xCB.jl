@@ -5,8 +5,7 @@
 
 function xCB( atoms :: Vector{Atom} )
 
-  ngly = count( atom -> atom.resname == "GLY", atoms )
-  n = count( atom -> atom.name == "CB", atoms ) + ngly
+  n = count( atom -> atom.name == "CA", atoms )
   x = Matrix{Float64}(undef,n,3)
   i = 0
   for atom in atoms
