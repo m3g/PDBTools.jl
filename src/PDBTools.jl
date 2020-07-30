@@ -16,7 +16,6 @@ module PDBTools
   #
 
   include("./oneletter.jl")
-  include("./isprotein.jl")
   include("./check_mmCIF.jl")
   include("./read_atom.jl")
   include("./write_atom.jl")
@@ -27,5 +26,10 @@ module PDBTools
   include("./xName.jl")
   include("./xCA.jl")
   include("./xCB.jl")
+
+  # For selections
+  include("./select/isprotein.jl")
+  include("./select/iswater.jl")
+  include("./select/select.jl")
 
 end
