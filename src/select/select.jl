@@ -4,25 +4,28 @@
 #
 
 function select( atoms :: Vector{PDBTools.Atom}, selection :: String )
-  query = parse_query(selection)
-  selection = Vector{PDBTools.Atom}(undef,0)
+  # disambiguate the "name" keyword
+  sel = replace(selection,"resname" => "RESNAME")
+  query = parse_query(sel)
+  selected_atoms = Vector{PDBTools.Atom}(undef,0)
   for atom in atoms
     if apply_query(query,atom) 
-      push!(selection,atom)
+      push!(selected_atoms,atom)
     end
   end
-  return selection
+  return selected_atoms
 end
 
 function selindex( atoms :: Vector{PDBTools.Atom}, selection :: String )
-  query = parse_query(selection)
-  selection = Vector{Int64}(undef,0)
+  sel = replace(selection,"resname" => "RESNAME")
+  query = parse_query(sel)
+  indexes = Vector{Int64}(undef,0)
   for atom in atoms
     if apply_query(query,atom) 
-      push!(selection,atom.index)
+      push!(indexes,atom.index)
     end
   end
-  return selection
+  return indexes
 end
 
 # parse_query and apply_query are a very gentle contribution given by 
@@ -30,6 +33,7 @@ end
 # while explaining to me how to creat a syntex interpreter
 
 function parse_query(s)
+
   try
     if occursin("or", s)
       (|, parse_query.(split(s, "or"))...)
@@ -38,37 +42,87 @@ function parse_query(s)
     elseif occursin("not", s)
       rest = match(r".*not(.*)", s)[1]
       (!, parse_query(rest))
+
+    # Index 
+    elseif occursin("index =", s)
+      k = parse(Int, match(r"index = ([0-9]*)", s)[1])
+      a -> a.index == k
     elseif occursin("index < ", s)
       k = parse(Int, match(r"index < ([0-9]*)", s)[1])
       a -> a.index < k
     elseif occursin("index > ", s)
       k = parse(Int, match(r"index > ([0-9]*)", s)[1])
       a -> a.index > k
-    elseif occursin("index =", s)
-      k = parse(Int, match(r"index = ([0-9]*)", s)[1])
-      a -> a.index == k
-    elseif occursin("index >=", s)
-      k = parse(Int, match(r"index >= ([0-9]*)", s)[1])
-      a -> a.index >= k
     elseif occursin("index <=", s)
       k = parse(Int, match(r"index <= ([0-9]*)", s)[1])
       a -> a.index <= k
-    elseif occursin("resname", s)
-      resname = match(r"resname ([A-Z,0-9]*)", s)[1]
+    elseif occursin("index >=", s)
+      k = parse(Int, match(r"index >= ([0-9]*)", s)[1])
+      a -> a.index >= k
+
+    # beta
+    elseif occursin("beta =", s)
+      beta = parse(Float64, match(r"beta = ([0-9]*)", s)[1])
+      a -> a.b == k
+    elseif occursin("beta >", s)
+      beta = parse(Float64,match(r"beta > ([.,0-9]*)", s)[1])
+      a -> a.b > beta
+    elseif occursin("beta <", s)
+      beta = parse(Float64,match(r"beta < ([.,0-9]*)", s)[1])
+      a -> a.b < beta
+    elseif occursin("beta <=", s)
+      beta = parse(Float64,match(r"beta <= ([.,0-9]*)", s)[1])
+      a -> a.b <= beta
+    elseif occursin("beta >=", s)
+      beta = parse(Float64,match(r"beta >= ([.,0-9]*)", s)[1])
+      a -> a.b >= beta
+    
+    # occup
+    elseif occursin("occup =", s)
+      occup = parse(Float64, match(r"occup = ([0-9]*)", s)[1])
+      a -> a.b == k
+    elseif occursin("occup >", s)
+      occup = parse(Float64,match(r"occup > ([.,0-9]*)", s)[1])
+      a -> a.b > occup
+    elseif occursin("occup <", s)
+      occup = parse(Float64,match(r"occup < ([.,0-9]*)", s)[1])
+      a -> a.b < occup
+    elseif occursin("occup <=", s)
+      occup = parse(Float64,match(r"occup <= ([.,0-9]*)", s)[1])
+      a -> a.b <= occup 
+    elseif occursin("occup >=", s)
+      occup = parse(Float64,match(r"occup >= ([.,0-9]*)", s)[1])
+      a -> a.b >= occup
+
+    # Names etc.
+    elseif occursin("name", s)
+      name = match(r"name ([A-Z,0-9]*)", s)[1]
+      a -> a.name == name
+    elseif occursin("RESNAME", s)
+      resname = match(r"RESNAME ([A-Z,0-9]*)", s)[1]
       a -> a.resname == resname
     elseif occursin("resnum", s)
       resnum = parse(Int, match(r"resnum ([0-9]*)", s)[1])
       a -> a.resnum == resname
-    elseif occursin("residue", s)
-      residue = parse(Int, match(r"residue ([0-9]*)", s)[1])
-      a -> a.residue == residue
+    elseif occursin("chain", s)
+      chain = match(r"residue ([A-Z,0-9]*)", s)[1]
+      a -> a.chain == chain
+    elseif occursin("model", s)
+      model = parse(Int,match(r"residue ([0-9]*)", s)[1])
+      a -> a.model == model
+
+    # Special functions 
     elseif occursin("water", s)
       iswater
     elseif occursin("protein", s)
       isprotein
+
+    # None found
     else
       parse_error()
     end
+
+  # Error in the syntax
   catch err
     parse_error()
   end

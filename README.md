@@ -39,3 +39,11 @@ a string formatted in the PDB format, to be written to a file.
 `PDBTools.getseq(filename or Vector{Atom})`: Returns a list of residue names with three
 and one letter codes.
 
+# Selection functions
+
+`PDBTools.select(atoms,"protein and resnum < 30")`: Simple selection tool that provides the
+most common selection features. Here, `atoms` is a vector obtained with `readPDB` or `editPDB`.
+
+`PDBTools.selindex(atoms,"protein and resnum < 30")`: Simple selection tool that provides the
+most common selection features. Here, `atoms` is a vector obtained with `readPDB` or `editPDB`.
+This one returns only the atomic indexes of corresponding to the selection.
