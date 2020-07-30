@@ -72,14 +72,24 @@ function write_atom(atom :: Atom)
             "($(atom.name) $(atom.resname)$(atom.resnum) $(atom.chain)) "*
             "do not fit in PDB fixed format.")
   end
-   
-  if atom.index < 100000
+
+  if atom.index <= 99999 && atom.resnum <= 9999
     line = @sprintf("%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
                      "ATOM",
                      atom.index," ",name,resname,atom.chain,atom.resnum,"    ",
                      atom.x,atom.y,atom.z,atom.occup,atom.b)
-  else # Prints hexadecimal code for atom index
+  elseif atom.index > 99999 && atom.resnum <= 9999 # Prints index in hexadecimal code for atom index
     line = @sprintf("%-6s%5x%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
+                     "ATOM",
+                     atom.index," ",name,resname,atom.chain,atom.resnum,"    ",
+                     atom.x,atom.y,atom.z,atom.occup,atom.b)
+  elseif atom.index <= 99999 && atom.resnum > 9999 # Prints resnum in hexadecimal code for atom index
+    line = @sprintf("%-6s%5i%1s%4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
+                     "ATOM",
+                     atom.index," ",name,resname,atom.chain,atom.resnum,"    ",
+                     atom.x,atom.y,atom.z,atom.occup,atom.b)
+  elseif atom.index > 99999 && atom.resnum > 9999 # Prints both in hexadecimal code for atom index
+    line = @sprintf("%-6s%5x%1s%4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
                      "ATOM",
                      atom.index," ",name,resname,atom.chain,atom.resnum,"    ",
                      atom.x,atom.y,atom.z,atom.occup,atom.b)
