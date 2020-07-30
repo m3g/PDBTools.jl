@@ -19,6 +19,22 @@ function alternate_conformation( atom :: Union{Atom,MutableAtom} )
 end
 
 #
+# Function that tries to read a number as an integer given a number
+# or, perhaps, an hexadecimal representation string
+#
+
+function parse_int(s :: String)
+  try
+    i = parse(Int64,s)
+    return i
+  catch
+    i = parse(Int64,s,base=16)
+    return i
+  end
+  error("Could not read integer from string: \"$s\"")
+end
+
+#
 # Function that reads atom information from PDB or mmCIF files
 #
 
@@ -51,8 +67,8 @@ function read_atom(record :: String;
         atom.chain = "0"
       end
 
-      atom.index = parse(Int64,record[7:11])
-      atom.resnum = parse(Int64,record[23:26])
+      atom.index = parse_int(record[7:11])
+      atom.resnum = parse_int(record[23:26])
       atom.x = parse(Float64,record[31:38])
       atom.y = parse(Float64,record[39:46])
       atom.z = parse(Float64,record[47:54])

@@ -5,6 +5,11 @@
 
 function isprotein(atom :: Union{Atom,MutableAtom}; newres = Nothing)
 
+  # If the residue name doesn't have at least three letters, this is not a protein atom
+  if length(atom.resname) < 3
+    return false
+  end
+
   # To take into account alternate conformations, such as "AGLY", "BGLY", etc.
   l = length(atom.resname)
   name = atom.resname[l-2:l]
