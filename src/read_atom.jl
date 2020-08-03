@@ -40,7 +40,8 @@ end
 
 function read_atom(record :: String; 
                    mmCIF :: Bool = false, 
-                   mmCIF_fields :: Indexes_mmCIF_fields = empty_struct(Indexes_mmCIF_fields))
+                   mmCIF_fields :: Indexes_mmCIF_fields = empty_struct(Indexes_mmCIF_fields),
+                   model :: Int64 = 1)
 
   atom = MutableAtom()
 
@@ -82,6 +83,7 @@ function read_atom(record :: String;
       catch
         atom.occup = 0.
       end
+      atom.model = model
 
     else # if mmCIF
 
@@ -106,6 +108,7 @@ function read_atom(record :: String;
       atom.z = parse(Float64,mmcif_data[mmCIF_fields.z])
       atom.b = parse(Float64,mmcif_data[mmCIF_fields.b])
       atom.occup = parse(Float64,mmcif_data[mmCIF_fields.occup])
+      atom.model = model
 
     end
 

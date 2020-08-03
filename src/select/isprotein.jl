@@ -3,7 +3,7 @@
 # residue name
 #
 
-function isprotein(atom :: Union{Atom,MutableAtom}; newres = Nothing)
+function isprotein(atom :: Union{Atom,MutableAtom}; newres = nothing)
 
   # If the residue name doesn't have at least three letters, this is not a protein atom
   if length(atom.resname) < 3
@@ -40,7 +40,7 @@ function isprotein(atom :: Union{Atom,MutableAtom}; newres = Nothing)
   if name == "VAL" ; return true ; end
 
   # If this is a new residue name indicated by the user
-  if newres != Nothing
+  if newres != nothing
     if typeof(newres) == String 
       if name == newres ; return true ; end 
     elseif typeof(newres) <: Array{String} 

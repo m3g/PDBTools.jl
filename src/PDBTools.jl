@@ -23,9 +23,7 @@ module PDBTools
   include("./editPDB.jl")
   include("./writePDB.jl")
   include("./getseq.jl")
-  include("./xName.jl")
-  include("./xCA.jl")
-  include("./xCB.jl")
+  include("./coor.jl")
 
   # For selections
   include("./select/isprotein.jl")
