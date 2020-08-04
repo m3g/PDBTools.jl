@@ -8,7 +8,7 @@ The documentation can be found [http://m3g.iqm.unicamp.br/PDBTools](http://m3g.i
 ## Installing:
 
 ```
-julia> ] add https://github.com/m3g/PDBTools
+julia> ] add PDBTools
 
 julia> using PDBTools
 
