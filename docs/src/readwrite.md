@@ -15,14 +15,15 @@ bellow), a list of atoms with the following structure will be generated:
 
 ```julia
 julia> atoms[1]
-PDBTools.Atom(1, "N", "MET", "A", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
+PDBTools.Atom(1, 1, "N", "MET", "A", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
 
 ```
 
 The data in the `Atom` structure is organized as follows:
 ```julia
 struct Atom
-  index :: Int64
+  index :: Int64 # the sequential index of the atom in the file
+  index_pdb :: Int64 # the number written in the index field of the PDB 
   name :: String
   resname :: String
   chain :: String
@@ -56,17 +57,17 @@ field can be modified. For example:
 ```julia
 julia> atoms = PDBTools.editPDB("file.pdb")
 1500-element Array{PDBTools.Atom,1}:
- PDBTools.MutableAtom(1, "N", "MET", "X", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
- PDBTools.MutableAtom(2, "H1", "MET", "X", 1, 39.84, 49.01, 34.79, 0.0, 0.0, 1)
- PDBTools.MutableAtom(3, "H2", "MET", "X", 1, 38.69, 48.52, 33.79, 0.0, 0.0, 1)
- PDBTools.MutableAtom(4, "H3", "MET", "X", 1, 38.99, 50.19, 33.92, 0.0, 0.0, 1)
+ PDBTools.MutableAtom(1, 1, "N", "MET", "X", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
+ PDBTools.MutableAtom(2, 2, "H1", "MET", "X", 1, 39.84, 49.01, 34.79, 0.0, 0.0, 1)
+ PDBTools.MutableAtom(3, 3, "H2", "MET", "X", 1, 38.69, 48.52, 33.79, 0.0, 0.0, 1)
+ PDBTools.MutableAtom(4, 4, "H3", "MET", "X", 1, 38.99, 50.19, 33.92, 0.0, 0.0, 1)
  ...
 
 julia> atoms[1].resname = "AAA"
 "AAA"
 
 julia> atoms[1]
-PDBTools.MutableAtom(1, "N", "AAA", "X", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
+PDBTools.MutableAtom(1, 1, "N", "AAA", "X", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
 
 ```
 
