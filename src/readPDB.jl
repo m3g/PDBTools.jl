@@ -2,8 +2,6 @@
 # Reads PDB file atom data
 #
 
-readPDB(file :: String) = readPDB(file,"all")
-
 function readPDB(file :: String, selection :: String)
 
   # Parse selection query
@@ -12,51 +10,40 @@ function readPDB(file :: String, selection :: String)
   # Check if structure is in mmCIF format
   mmCIF, mmCIF_fields = check_mmCIF(file)
 
-  # Check number of atoms
+  # Read file
   pdbfile = open(file,"r")
   natoms = 0
+  index = 0
   imodel = 1
-  for line in eachline(file)
-    if occursin(line,"ENDMDL") || occursin(line,"END")
+  atoms = Vector{Atom}(undef,0)
+  for line in eachline(pdbfile)
+    if occursin("END",line)
       imodel = imodel + 1
     end
-    atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields, model = imodel)
-    if atom != Nothing && apply_query(query,atom)
-      natoms = natoms + 1
-    end 
-  end
-  seek(pdbfile,0)
-  if natoms == 0
-    close(pdbfile)
-    error(" Could not find any atom in PDB file. ")
-  end
-  atoms = Vector{Atom}(undef,natoms)
-
-  # Read file
-  iatom = 0
-  imodel = 1
-  for line in eachline(file)
-    if occursin(line,"ENDMDL") || occursin(line,"END")
-      imodel = imodel + 1
-    end
-    atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields, model = imodel)
-    if atom != Nothing && apply_query(query,atom)
-      atom.model = imodel
-      iatom = iatom + 1 
-      atoms[iatom] = Atom(atom)
+    atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
+    if atom != nothing 
+      index = index + 1
+      if apply_query(query,atom)
+        atom.index = index
+        atom.model = imodel
+        natoms = natoms + 1 
+        push!(atoms,Atom(atom))
+      end
     end
   end
   close(pdbfile)
+  if natoms == 0
+    error(" Could not find any atom in PDB file matching the selection. ")
+  end
 
   return atoms
 end
+
+readPDB(file :: String) = readPDB(file,"all")
 
 import Base.show
 function Base.show( io :: IO, atoms :: Array{Atom} )
   println(" Structure file with ", length(atoms), " atoms. ")
 end
-
-
-
 
 

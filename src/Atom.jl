@@ -1,6 +1,7 @@
 
 AtomData = quote
-  index :: Int64
+  index :: Int64 # The sequential index of the atoms in the file
+  index_pdb :: Int64 # the index as written in the PDB file (might be anything)
   name :: String
   resname :: String
   chain :: String
