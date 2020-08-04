@@ -1,6 +1,6 @@
 # PDBTools
 
-PDBTools is A simple package to read and write Protein Data Bank files,
+PDBTools is a simple package to read and write Protein Data Bank files,
 select atoms, and work with their coordinates.  
 
 
