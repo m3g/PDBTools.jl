@@ -1,16 +1,7 @@
-# Installation
-A simple package to read and write Protein Data Bank files and work with them.
-Provides a simple selection syntax.
+# PDBTools
 
-Install the package using the package manager:
+PDBTools is A simple package to read and write Protein Data Bank files,
+select atoms, and work with their coordinates.  
 
-```julia
-julia> ] add PDBTools
 
-```
 
-and load it with
-```julia
-julia> using PDBTools
-
-```

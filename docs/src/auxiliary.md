@@ -32,7 +32,7 @@ The `getseq` function can of course be used on an `Atom` list, accepts selection
 last argument, as well as the reading and writting functions:
 
 ```julia
-atos = PDBTools.readPDB("file.pdb")
+atoms = PDBTools.readPDB("file.pdb")
 seq = PDBTools.getseq(atoms,"chain A")
 
 ```
