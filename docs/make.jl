@@ -1,4 +1,6 @@
 #using DocumenterLaTeX
+import Pkg
+Pkg.add("Documenter")
 using Documenter
 using PDBTools
 push!(LOAD_PATH,"../src/")
