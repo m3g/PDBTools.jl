@@ -26,7 +26,6 @@ julia> seq = PDBTools.getseq("file.pdb")
      "ARG"  "R"
      "GLY"  "G"
     ```
-    A list of new residues can also be provided, with `newres=["NEW1","NEW2",...]`
 
 The `getseq` function can of course be used on an `Atom` list, accepts selections as the
 last argument, as well as the reading and writting functions:
