@@ -1,6 +1,4 @@
 # Read and write files
-A simple package to read and write Protein Data Bank files and work with them.
-Provides a simple selection syntax.
 
 ## Read a PDB file
 
