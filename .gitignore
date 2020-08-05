@@ -4,3 +4,4 @@
 deps/deps.jl
 *.swp
 Manifest.toml
+docs/build*
