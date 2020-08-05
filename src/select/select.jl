@@ -75,22 +75,22 @@ function parse_query(selection)
       k = parse(Int, match(r"resnum >= ([0-9]*)", s)[1])
       a -> a.resnum >= k
 
-    # beta
-    elseif occursin("beta =", s)
-      beta = parse(Float64, match(r"beta = ([0-9]*)", s)[1])
+    # b factor
+    elseif occursin("b =", s)
+      b = parse(Float64, match(r"b = ([0-9]*)", s)[1])
       a -> a.b == k
-    elseif occursin("beta >", s)
-      beta = parse(Float64,match(r"beta > ([.,0-9]*)", s)[1])
-      a -> a.b > beta
-    elseif occursin("beta <", s)
-      beta = parse(Float64,match(r"beta < ([.,0-9]*)", s)[1])
-      a -> a.b < beta
-    elseif occursin("beta <=", s)
-      beta = parse(Float64,match(r"beta <= ([.,0-9]*)", s)[1])
-      a -> a.b <= beta
-    elseif occursin("beta >=", s)
-      beta = parse(Float64,match(r"beta >= ([.,0-9]*)", s)[1])
-      a -> a.b >= beta
+    elseif occursin("b >", s)
+      b = parse(Float64,match(r"b > ([.,0-9]*)", s)[1])
+      a -> a.b > b
+    elseif occursin("b <", s)
+      b = parse(Float64,match(r"b < ([.,0-9]*)", s)[1])
+      a -> a.b < b
+    elseif occursin("b <=", s)
+      b = parse(Float64,match(r"b <= ([.,0-9]*)", s)[1])
+      a -> a.b <= b
+    elseif occursin("b >=", s)
+      b = parse(Float64,match(r"b >= ([.,0-9]*)", s)[1])
+      a -> a.b >= b
     
     # occup
     elseif occursin("occup =", s)

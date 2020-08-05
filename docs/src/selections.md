@@ -20,7 +20,7 @@ The accepted keywords for the selection are:
 | `model`    |                       | Integer     | `model 1`     |
 | `protein`  |                       |             | `protein`     |
 | `water`    |                       |             | `water`       |
-| `beta`     | `=`,`>`,`<`,`<=`,`>=` | Real        | `beta > 0.5`  |
+| `b`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `b > 0.5`     |
 | `occup`    | `=`,`>`,`<`,`<=`,`>=` | Real        | `occup >= 0.3`|
 
 
