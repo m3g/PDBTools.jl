@@ -17,4 +17,8 @@ julia> PDBTools.name(atoms[1])
 
 julia> PDBTools.atomic_number(atoms[1])
 7
+
+julia> PDBTools.element(atoms[1])
+"N"
+
 ```
