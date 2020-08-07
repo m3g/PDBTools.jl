@@ -3,12 +3,13 @@
 #
 struct Element
  atomic_number  :: Int64
- code           :: String
+ element        :: String
  pdb_name       :: String
  name           :: String
  mass           :: Float64
 end
 elements = [
+             Element( 0      ,  "X"  ,  "X"   ,   "NotFound"    ,  0.00000   )
              Element( 1      ,  "H"  ,  "H"   ,   "Hydrogen"    ,  1.00797   )
              Element( 2      ,  "He" ,  "HE"  ,   "Helium"      ,  4.00260   )
              Element( 3      ,  "Li" ,  "LI"  ,   "Lithium"     ,  6.941     )

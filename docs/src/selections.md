@@ -22,6 +22,7 @@ The accepted keywords for the selection are:
 | `model`    |                       | Integer     | `model 1`     |
 | `b`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `b > 0.5`     |
 | `occup`    | `=`,`>`,`<`,`<=`,`>=` | Real        | `occup >= 0.3`|
+|            |                       |             |               |
 
 ## Special macros: proteins, water
 
@@ -41,21 +42,16 @@ aromatic = PDBTools.select(atoms,"charged")
 
 Available keywords:
 
-| Keyword       |
-|:-------------:|
-| `water`       |
-| `protein`     |
-| `backbone`    |
-| `sidechain`   |
-| `acidic`      |
-| `aliphatic`   |
-| `aromatic`    |
-| `basic`       |
-| `charged`     |
-| `hydrophobic` |
-| `neutral`     |
-| `nonpolar`    |
-| `polar`       |
+| Keywords      |               |               |
+|:-------------:|:-------------:|:-------------:|
+| `water`       |               |               |
+| `protein`     | `backbone`    | `sidechain`   |
+| `acidic`      | `basic`       |               |
+| `aliphatic`   | `aromatic`    |               |
+| `charged`     | `neutral`     |               |
+| `polar`       | `nonpolar`    |               |
+| `hydrophobic` |               |               |
+|               |               |               |
 
 !!! note  
     The properties refer to protein residues and will return `false`

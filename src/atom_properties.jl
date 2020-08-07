@@ -1,13 +1,12 @@
 #
-# Try to deduce element (atomic number) from the atom name.
-# Returns 0 instead.
+# Retrive index of element in elements list from name. Returns 1 of not found
 #
-function atomic_number(name :: String)
+function element_index(name :: String)
 
   # If the residue name doesn't have at least three letters, this is not a protein atom
   len = length(name)
   if len < 1
-    return 0
+    return 1
   end
 
   # Return the index of this amino acid in the element, or nothing
@@ -20,7 +19,7 @@ function atomic_number(name :: String)
 
   # If found, return the atomic number
   if i != nothing
-    return elements[i].atomic_number
+    return i
  
   # If not, check if the first character is a number, remove it and try again
   else
@@ -29,40 +28,26 @@ function atomic_number(name :: String)
       newname = name[2:length(name)]
       i = findfirst( el -> el.pdb_name == newname, elements )
       if i != nothing
-        return elements[i].atomic_number
+        return i
       else
-        return 0
+        return 1
       end
     catch
-      return 0
+      return 1
     end
   end
 
 end
 
+atomic_number(name :: String) = elements[element_index(name)].atomic_number
 atomic_number(atom :: Union{Atom,MutableAtom}) = atomic_number(atom.name)
 
-#
-# Retrieve mass of atom
-#
-function mass(atom :: Union{Atom,MutableAtom})
-  i = atomic_number(atom.name)
-  elements[i].mass
-end
+element(name :: String) = elements[element_index(name)].element
+element(atom :: Union{Atom,MutableAtom}) = element(atom.name)
 
-#
-# Retrieve name of atom
-#
-function name(atom :: Union{Atom,MutableAtom})
-  i = atomic_number(atom.name)
-  elements[i].name
-end
+mass(name :: String) = elements[element_index(name)].mass
+mass(atom :: Union{Atom,MutableAtom}) = mass(atom.name)
 
-#
-# Retrieve name of atom
-#
-function code(atom :: Union{Atom,MutableAtom})
-  i = atomic_number(atom.name)
-  elements[i].code
-end
+name(name :: String) = elements[element_index(name)].name
+name(atom :: Union{Atom,MutableAtom}) = name(atom.name)
 

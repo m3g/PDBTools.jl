@@ -26,7 +26,7 @@ module PDBTools
 
   # Element properties
   include("./elements.jl")
-  include("./element_properties.jl")
+  include("./atom_properties.jl")
 
   # For selections
   include("./select/select.jl")
