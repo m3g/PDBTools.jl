@@ -117,7 +117,7 @@ function parse_query(selection)
       resname = match(r"RESNAME ([A-Z,0-9]*)", s)[1]
       a -> a.resname == resname
     elseif occursin("chain", s)
-      chain = match(r"residue ([A-Z,0-9]*)", s)[1]
+      chain = match(r"chain ([A-Z,0-9]*)", s)[1]
       a -> a.chain == chain
     elseif occursin("model", s)
       model = parse(Int,match(r"model ([0-9]*)", s)[1])
