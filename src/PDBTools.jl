@@ -26,8 +26,8 @@ module PDBTools
   include("./coor.jl")
 
   # For selections
-  include("./select/isprotein.jl")
-  include("./select/iswater.jl")
   include("./select/select.jl")
+  include("./select/iswater.jl")
+  include("./select/proteins.jl")
 
 end

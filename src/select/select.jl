@@ -128,6 +128,24 @@ function parse_query(selection)
       iswater
     elseif occursin("protein", s)
       isprotein
+    elseif occursin("polar", s)
+      ispolar
+    elseif occursin("nonpolar", s)
+      isnonpolar
+    elseif occursin("basic", s)
+      isbasic
+    elseif occursin("acidic", s)
+      isacidic
+    elseif occursin("charged", s)
+      ischarged
+    elseif occursin("aliphatic", s)
+      isaliphatic
+    elseif occursin("aromatic", s)
+      isaromatic
+    elseif occursin("hydrophobic", s)
+      ishydrophobic
+    elseif occursin("neutral", s)
+      isneutral
 
     # Select everything
     elseif occursin("all", s)
