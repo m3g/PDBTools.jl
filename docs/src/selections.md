@@ -16,6 +16,7 @@ The accepted keywords for the selection are:
 |:----------:|:---------------------:|:-----------:|:-------------:|
 | `index`    | `=`,`>`,`<`,`<=`,`>=` | Integer     | `index <= 10` |
 | `name`     |                       | String      | `name CA`     |
+| `element`  |                       | String      | `element N`   |
 | `resname`  |                       | String      | `resname ALA` |
 | `resnum`   | `=`,`>`,`<`,`<=`,`>=` | Integer     | `resnum = 10` |
 | `chain`    |                       | String      | `chain A`     |
