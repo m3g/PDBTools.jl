@@ -14,7 +14,6 @@ module PDBTools
   #
   # Input and output functions
   #
-
   include("./oneletter.jl")
   include("./check_mmCIF.jl")
   include("./read_atom.jl")
@@ -24,6 +23,10 @@ module PDBTools
   include("./writePDB.jl")
   include("./getseq.jl")
   include("./coor.jl")
+
+  # Element properties
+  include("./elements.jl")
+  include("./element_properties.jl")
 
   # For selections
   include("./select/select.jl")

@@ -12,6 +12,7 @@ AtomData = quote
   b :: Float64
   occup :: Float64
   model :: Int64
+  atomic_number :: Int64
 end
 
 # Mutable structure used to read data only

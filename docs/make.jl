@@ -12,6 +12,7 @@ makedocs(
         "Installation" => "installation.md",
         "Read and Write" => "readwrite.md",
         "Selections" => "selections.md",
+        "Element properties" => "elements.md",
         "Auxiliary functions" => "auxiliary.md",
     ]
 )

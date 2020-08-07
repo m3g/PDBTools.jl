@@ -146,6 +146,10 @@ function parse_query(selection)
       ishydrophobic
     elseif occursin("neutral", s)
       isneutral
+    elseif occursin("backbone", s)
+      isbackbone
+    elseif occursin("sidechain", s)
+      issidechain
 
     # Select everything
     elseif occursin("all", s)
