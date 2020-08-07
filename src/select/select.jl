@@ -122,6 +122,9 @@ function parse_query(selection)
     elseif occursin("model", s)
       model = parse(Int,match(r"model ([0-9]*)", s)[1])
       a -> a.model == model
+    elseif occursin("element", s)
+      el = match(r"element ([A-Z]*)", s)[1]
+      a -> element(a.name) == el
 
     # Special functions 
     elseif occursin("water", s)
