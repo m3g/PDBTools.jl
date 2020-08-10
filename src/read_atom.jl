@@ -68,7 +68,11 @@ function read_atom(record :: String;
       end
       
       atom.index = 1
-      atom.index_pdb = parse_int(record[7:11])
+      try
+        atom.index_pdb = parse_int(record[7:11])
+      catch
+        atom.index_pdb = 0
+      end
       atom.resnum = parse_int(record[23:26])
       atom.x = parse(Float64,record[31:38])
       atom.y = parse(Float64,record[39:46])
