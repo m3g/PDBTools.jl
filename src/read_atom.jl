@@ -93,7 +93,11 @@ function read_atom(record :: String;
 
       mmcif_data = split(record)
       atom.index = 1
-      atom.index_pdb = parse(Int64,mmcif_data[mmCIF_fields.index])
+      try
+        atom.index_pdb = parse(Int64,mmcif_data[mmCIF_fields.index])
+      catch
+        atom.index_pdb = 0
+      end
       atom.name = mmcif_data[mmCIF_fields.name]
       atom.resname = mmcif_data[mmCIF_fields.resname]
       resname = alternate_conformation(atom)
