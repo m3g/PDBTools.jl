@@ -40,7 +40,5 @@ function getseq( file :: String, selection :: String)
   return getseq(atoms, selection)
 end
 
-getseq( file :: String ) = getseq(readPDB(file))
-
 getseq( file :: String; only = atom -> isprotein(atom)) = getseq(readPDB(file), only = only)
 
