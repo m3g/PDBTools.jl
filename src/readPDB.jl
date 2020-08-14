@@ -25,9 +25,9 @@ function readPDB(file :: String; only = atom -> true)
     atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
     if atom != nothing 
       index = index + 1
-      if only(atom)
-        atom.index = index
-        atom.model = imodel
+      atom.index = index
+      atom.model = imodel
+      if only(atom) 
         natoms = natoms + 1 
         push!(atoms,Atom(atom))
       end
