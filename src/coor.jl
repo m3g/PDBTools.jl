@@ -4,6 +4,11 @@
 
 function coor( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, selection :: String  )
   query = parse_query(selection)
+  return coor(atoms,only = atom -> apply_query(query,atom))
+end
+
+function coor( atoms :: Union{Vector{Atom},Vector{MutableAtom}}; only = atom -> true )
+
   n = 0
   for atom in atoms
     if apply_query(query,atom)
@@ -13,7 +18,7 @@ function coor( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, selection :: St
   x = Matrix{Float64}(undef,n,3)
   i = 0
   for atom in atoms
-    if apply_query(query,atom)
+    if only(atom)
       i = i + 1
       x[i,1] = atom.x
       x[i,2] = atom.y
@@ -22,5 +27,3 @@ function coor( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, selection :: St
   end 
   return x
 end
-
-coor(atoms :: Union{Vector{Atom},Vector{MutableAtom}}) = coor(atoms,"all")

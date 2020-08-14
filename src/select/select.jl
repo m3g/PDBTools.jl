@@ -3,26 +3,45 @@
 # analysis
 #
 
-function select( atoms :: Vector{PDBTools.Atom}, selection :: String )
-  query = parse_query(selection)
-  selected_atoms = Vector{PDBTools.Atom}(undef,0)
+# Main function: receives the atoms vector and a julia function to select
+
+function select( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}};
+                 by=x->x==x)
+  selected_atoms = typeof(atoms)(undef,0)
   for atom in atoms
-    if apply_query(query,atom) 
+    if by(atom)
       push!(selected_atoms,atom)
     end
   end
   return selected_atoms
 end
 
-function selindex( atoms :: Vector{PDBTools.Atom}, selection :: String )
+# Given a selection string
+
+function select( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}}, 
+                 selection :: String )
   query = parse_query(selection)
+  return select(atoms, by = atom -> apply_query(query,atom))
+end
+
+#
+# Return indexes only
+#
+function selindex( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}};
+                   by=x->x==x)
   indexes = Vector{Int64}(undef,0)
   for atom in atoms
-    if apply_query(query,atom) 
+    if by(atom)
       push!(indexes,atom.index)
     end
   end
   return indexes
+end
+
+function selindex( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}}, 
+                   selection :: String )
+  query = parse_query(selection)
+  return selindex(atoms, by = atom -> apply_query(query,atom))
 end
 
 # parse_query and apply_query are a very gentle contribution given by 

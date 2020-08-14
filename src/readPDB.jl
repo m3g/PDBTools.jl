@@ -3,9 +3,11 @@
 #
 
 function readPDB(file :: String, selection :: String)
-
-  # Parse selection query
   query = parse_query(selection)
+  return readPDB(file, only = atom -> apply_query(query,atom) )
+end
+
+function readPDB(file :: String; only = atom -> true)
 
   # Check if structure is in mmCIF format
   mmCIF, mmCIF_fields = check_mmCIF(file)
@@ -23,7 +25,7 @@ function readPDB(file :: String, selection :: String)
     atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
     if atom != nothing 
       index = index + 1
-      if apply_query(query,atom)
+      if only(atom)
         atom.index = index
         atom.model = imodel
         natoms = natoms + 1 
@@ -38,8 +40,6 @@ function readPDB(file :: String, selection :: String)
 
   return atoms
 end
-
-readPDB(file :: String) = readPDB(file,"all")
 
 import Base.show
 function Base.show( io :: IO, atoms :: Array{Atom} )
