@@ -9,7 +9,7 @@ function getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, selection :: 
   return getseq(atoms, only = atom -> apply_query(query,atom))
 end
 
-function getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}}; only = atom -> true)
+function getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}}; only = atom -> isprotein(atom))
   natoms = length(atoms)
   n = 0
   iresidue = -1
@@ -33,10 +33,6 @@ function getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}}; only = atom -
   return seq
 end
 
-# If no selection is provided, select everything that is a protein
-
-getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}} ) = getseq(atoms, only = atom -> isprotein(atom))
-  
 # From the file name
 
 function getseq( file :: String, selection :: String) 
@@ -44,9 +40,5 @@ function getseq( file :: String, selection :: String)
   return getseq(atoms, selection)
 end
 
-getseq(file :: String) = getseq(file, only = atom -> isprotein(atom))
-
-
-
-
+getseq( file :: String ) = getseq(readPDB(file))
 
