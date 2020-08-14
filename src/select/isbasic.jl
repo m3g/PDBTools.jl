@@ -1,4 +1,4 @@
-function isbasic(atom :: Union{Atom,MutableAtom})
+function isbasic(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

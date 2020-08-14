@@ -1,4 +1,4 @@
-function isacidic(atom :: Union{Atom,MutableAtom})
+function isacidic(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

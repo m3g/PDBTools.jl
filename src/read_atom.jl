@@ -2,7 +2,7 @@
 # of protein residues, which will then be ignored. Only "A" conformations are kept.
 # Other non-protein residues are always kept.
 
-function alternate_conformation( atom :: Union{Atom,MutableAtom} )
+function alternate_conformation( atom :: AtomType )
   if isprotein(atom) 
     if length(atom.resname) == 4
       if atom.name[1:1] == "A"

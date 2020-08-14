@@ -1,4 +1,4 @@
-function issidechain(atom :: Union{Atom,MutableAtom})
+function issidechain(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

@@ -1,4 +1,4 @@
-function ischarged(atom :: Union{Atom,MutableAtom})
+function ischarged(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

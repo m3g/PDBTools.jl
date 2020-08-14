@@ -4,12 +4,12 @@
 
 # From the vector of atoms already read
 
-function getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, selection :: String)
+function getseq( atoms :: AtomVector, selection :: String)
   query = parse_query(selection)
   return getseq(atoms, only = atom -> apply_query(query,atom))
 end
 
-function getseq( atoms :: Union{Vector{Atom},Vector{MutableAtom}}; only = atom -> isprotein(atom))
+function getseq( atoms :: AtomVector; only = atom -> isprotein(atom))
   natoms = length(atoms)
   n = 0
   iresidue = -1

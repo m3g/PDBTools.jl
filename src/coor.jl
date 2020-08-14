@@ -2,12 +2,12 @@
 # Return the coordinates of the atoms
 #
 
-function coor( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, selection :: String  )
+function coor( atoms :: AtomVector, selection :: String  )
   query = parse_query(selection)
   return coor(atoms,only = atom -> apply_query(query,atom))
 end
 
-function coor( atoms :: Union{Vector{Atom},Vector{MutableAtom}}; only = atom -> true )
+function coor( atoms :: AtomVector; only = atom -> true )
 
   n = 0
   for atom in atoms

@@ -1,4 +1,4 @@
-function isaliphatic(atom :: Union{Atom,MutableAtom})
+function isaliphatic(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

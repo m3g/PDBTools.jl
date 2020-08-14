@@ -33,3 +33,6 @@ end
 Atom( atom :: MutableAtom ) = Atom([ getfield(atom,i) for i in 1:nfields(atom) ]...)
 MutableAtom( atom :: Atom ) = MutableAtom([ getfield(atom,i) for i in 1:nfields(atom) ]... )
 
+AtomType = Union{Atom,MutableAtom}
+AtomVector = Union{Vector{Atom},Vector{MutableAtom}}
+

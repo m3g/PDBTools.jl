@@ -1,4 +1,4 @@
-function isbackbone(atom :: Union{Atom,MutableAtom})
+function isbackbone(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

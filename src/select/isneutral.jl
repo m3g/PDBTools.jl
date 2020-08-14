@@ -1,4 +1,4 @@
-function isneutral(atom :: Union{Atom,MutableAtom})
+function isneutral(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

@@ -1,7 +1,7 @@
 #
 # Returns the index in the natural_aminoacids list of the amino acid name given
 #
-function which_natural_aminoacid(atom :: Union{Atom,MutableAtom})
+function which_natural_aminoacid(atom :: AtomType)
 
   # If the residue name doesn't have at least three letters, this is not a protein atom
   if length(atom.resname) < 3

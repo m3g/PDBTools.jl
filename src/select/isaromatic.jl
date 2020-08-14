@@ -1,4 +1,4 @@
-function isaromatic(atom :: Union{Atom,MutableAtom})
+function isaromatic(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
   if iaa == nothing
     false

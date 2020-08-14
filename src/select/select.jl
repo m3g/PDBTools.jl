@@ -5,8 +5,7 @@
 
 # Main function: receives the atoms vector and a julia function to select
 
-function select( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}};
-                 by=x->x==x)
+function select( atoms :: AtomVector; by=x->x==x)
   selected_atoms = typeof(atoms)(undef,0)
   for atom in atoms
     if by(atom)
@@ -18,8 +17,7 @@ end
 
 # Given a selection string
 
-function select( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}}, 
-                 selection :: String )
+function select( atoms :: AtomVector, selection :: String )
   query = parse_query(selection)
   return select(atoms, by = atom -> apply_query(query,atom))
 end
@@ -27,8 +25,7 @@ end
 #
 # Return indexes only
 #
-function selindex( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}};
-                   by=x->x==x)
+function selindex( atoms :: AtomVector; by=x->x==x)
   indexes = Vector{Int64}(undef,0)
   for atom in atoms
     if by(atom)
@@ -38,8 +35,7 @@ function selindex( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableA
   return indexes
 end
 
-function selindex( atoms :: Union{Vector{PDBTools.Atom},Vector{PDBTools.MutableAtom}}, 
-                   selection :: String )
+function selindex( atoms :: AtomVector, selection :: String )
   query = parse_query(selection)
   return selindex(atoms, by = atom -> apply_query(query,atom))
 end
