@@ -8,7 +8,7 @@ atoms = PDBTools.select(atoms,"protein and resnum < 30")
 
 ## General selections 
 
-Accepted boolean operators: `and`, `or`, and `not`. 
+Accepted Boolean operators: `and`, `or`, and `not`. 
 
 The accepted keywords for the selection are: 
 
@@ -27,7 +27,7 @@ The accepted keywords for the selection are:
 
 ## Special macros: proteins, water
 
-Just use these keywords to select the residues mathching the properties
+Just use these keywords to select the residues matching the properties
 desired. 
 
 Examples:
@@ -75,7 +75,7 @@ indexes = PDBTools.selindex(atoms,"protein and name CA")
 ## Use Julia anonymous functions directly
 
 Selections can be done using Julia anonymous functions directly, providing a greater
-control over the selection and, possibibly, the use of user defined selection 
+control over the selection and, possibly, the use of user defined selection 
 functions. For example:
 
 ```julia

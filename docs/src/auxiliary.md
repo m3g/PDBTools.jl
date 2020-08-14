@@ -1,4 +1,4 @@
-# Some auxiliary functions to quickly retrive some data 
+# Some auxiliary functions to quickly retrieve some data 
 
 ## Get the protein sequence
 
@@ -28,7 +28,7 @@ julia> seq = PDBTools.getseq("file.pdb")
     ```
 
 The `getseq` function can of course be used on an `Atom` list, accepts selections as the
-last argument, as well as the reading and writting functions:
+last argument, as well as the reading and writing functions:
 
 ```julia
 atoms = PDBTools.readPDB("file.pdb")
@@ -51,7 +51,7 @@ julia> x = PDBTools.coor(atoms)
 
 ```
 
-Or use selections to retrive the coordinates of subsets of atoms:
+Or use selections to retrieve the coordinates of subsets of atoms:
 
 C``\alpha`` coordinates:
 
