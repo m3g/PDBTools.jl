@@ -42,3 +42,5 @@ end
 
 getseq( file :: String ) = getseq(readPDB(file))
 
+getseq( file :: String; only = atom -> isprotein(atom)) = getseq(readPDB(file), only = only)
+
