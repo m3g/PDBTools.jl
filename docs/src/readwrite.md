@@ -43,11 +43,21 @@ end
     in the [Selection](@ref selections) section. For example:
     ```julia
     protein = PDBTools.readPDB("file.pdb","protein")
+
     ```
     or
     ```julia
     arginines = PDBTools.readPDB("file.pdb","resname ARG")
+
     ```
+    The only difference is that, if using Julia anonymous functions, the
+    keyword is `only`:
+    ```julia
+    arginines = PDBTools.readPDB("file.pdb",only = atom -> atom.resname == "ARG")
+
+    ```
+    The same is valid for `edit` and `write` functions, below. 
+      
 
 ## Edit a PDB file
 

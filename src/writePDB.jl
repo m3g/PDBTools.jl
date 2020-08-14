@@ -9,7 +9,6 @@ function writePDB( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, filename, s
 end
 
 function writePDB( atoms :: Union{Vector{Atom},Vector{MutableAtom}}, filename; only = atom -> true)
-  query = parse_query(selection)
   file = open(filename,"w")
   for atom in atoms
     if only(atom)

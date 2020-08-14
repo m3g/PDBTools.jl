@@ -32,11 +32,10 @@ desired.
 
 Examples:
 ```julia
-aromatic = PDBTools.select("file.pdb","aromatic")
+aromatic = PDBTools.select(atoms,"aromatic")
 
 ```
 ```julia
-atoms = PDBTools.select("file.pdb") 
 aromatic = PDBTools.select(atoms,"charged")
 
 ```
@@ -72,4 +71,26 @@ indexes = PDBTools.selindex(atoms,"protein and name CA")
 
 !!! note
     All indexing is 1-based. Thus, the first atom of the structure is atom 1.
+
+## Use Julia anonymous functions directly
+
+Selections can be done using Julia anonymous functions directly, providing a greater
+control over the selection and, possibibly, the use of user defined selection 
+functions. For example:
+
+```julia
+atoms = PDBTools.select(atoms, by = atom -> atom.x < 10.)
+
+```
+With that, selections can become really complex, as:
+```julia
+sel = atom -> (atom.x < 10. && atom.resname == "GLY") || (atom.name == "CA") 
+atoms = PDBTools.select(atoms, by = sel )
+
+```
+
+
+
+
+
 
