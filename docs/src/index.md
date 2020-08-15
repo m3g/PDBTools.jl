@@ -17,7 +17,7 @@ select atoms, and work with their coordinates.
 
 > Allows use of Julia (possibly user-defined) functions for selection:
 > ```julia
-> `atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
+> atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
 > ```
 
 ### Not indicated for:
