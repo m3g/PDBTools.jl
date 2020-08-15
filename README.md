@@ -25,7 +25,7 @@ julia> using PDBTools
 > resname ARG and name CA
 > ```
 
-> Allows use of Julia (possibly user-defined) functions for selection.
+> Allows use of Julia (possibly user-defined) functions for selection:
 > ```julia
 > `atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
 > ```
