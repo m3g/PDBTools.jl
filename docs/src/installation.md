@@ -1,6 +1,4 @@
 # Installation
-A simple package to read and write Protein Data Bank files and work with them.
-Provides a simple selection syntax.
 
 Install the package using the package manager:
 
