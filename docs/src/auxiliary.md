@@ -42,12 +42,10 @@ All atoms:
 
 ```julia
 julia> x = PDBTools.coor(atoms)
-1476×3 Array{Float64,2}:
- 38.03  49.56  35.45
- 38.12  52.85  37.52
-  ⋮
- 60.05  47.5   57.34
- 63.52  46.9   58.93
+3×1463 Array{Float64,2}:
+  -9.229  -10.048 …    6.408    6.017
+ -14.861  -15.427    -12.034  -10.967
+  -5.481   -5.569     -8.343   -9.713
 
 ```
 
@@ -57,11 +55,16 @@ C``\alpha`` coordinates:
 
 ```julia
 julia> xCA = PDBTools.coor(atoms,"name CA")
-76×3 Array{Float64,2}:
- 38.03  49.56  35.45
- 38.12  52.85  37.52
-  ⋮
- 60.05  47.5   57.34
- 63.52  46.9   58.93
+3×104 Array{Float64,2}:
+  -8.483   -5.113  …  12.552   9.196 
+ -14.912  -13.737      0.892  -0.734 
+  -6.726   -5.466     -3.466  -4.108 
 
 ```
+
+By default, the output arrays are column based (the x, y and z coordinates of each
+atom are in each row). If you want a row-based output, add `column_based = false` to
+the input parameters of `coor`: `PDBTools.coor(atoms,column_based=false)`
+
+
+
