@@ -88,6 +88,11 @@ function read_atom(record :: String;
         atom.occup = 0.
       end
       atom.model = 1
+      try 
+        atom.segname = strip(record[73:76])
+      catch
+        atom.segname = ""
+      end
 
     else # if mmCIF
 
@@ -111,6 +116,11 @@ function read_atom(record :: String;
         atom.resnum = parse(Int64,mmcif_data[mmCIF_fields.resnum])
       catch
         atom.resnum = 0
+      end
+      try
+        atom.segname = mmcif_data[mmCIF_fields.segname]
+      catch
+        atom.segname = ""
       end
       atom.x = parse(Float64,mmcif_data[mmCIF_fields.x])
       atom.y = parse(Float64,mmcif_data[mmCIF_fields.y])

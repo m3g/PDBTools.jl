@@ -5,7 +5,8 @@ AtomData = quote
   name :: String
   resname :: String
   chain :: String
-  resnum :: Int64
+  resnum :: Int64 # Number of residue as written in PDB file
+  residue :: Int64 # Sequential residue (molecule) number in file
   x :: Float64
   y :: Float64
   z :: Float64
@@ -13,6 +14,7 @@ AtomData = quote
   occup :: Float64
   model :: Int64
   atomic_number :: Int64
+  segname :: String
 end
 
 # Mutable structure used to read data only

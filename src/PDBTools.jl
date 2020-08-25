@@ -23,6 +23,7 @@ module PDBTools
   include("./writePDB.jl")
   include("./getseq.jl")
   include("./coor.jl")
+  include("./same_residue.jl")
 
   # Element properties
   include("./elements.jl")

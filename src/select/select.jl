@@ -47,6 +47,7 @@ end
 function parse_query(selection)
   # disambiguate the "name" keyword
   s = replace(selection,"resname" => "RESNAME")
+  s = replace(selection,"segname" => "SEGNAME")
   try
     if occursin("or", s)
       (|, parse_query.(split(s, "or"))...)
@@ -73,7 +74,7 @@ function parse_query(selection)
       k = parse(Int, match(r"index >= ([0-9]*)", s)[1])
       a -> a.index >= k
 
-    # Resiue number
+    # Resiue number (as writtein in PDB)
     elseif occursin("resnum =", s)
       k = parse(Int, match(r"resnum = ([0-9]*)", s)[1])
       a -> a.resnum == k
@@ -89,6 +90,23 @@ function parse_query(selection)
     elseif occursin("resnum >=", s)
       k = parse(Int, match(r"resnum >= ([0-9]*)", s)[1])
       a -> a.resnum >= k
+
+    # Resiue number (sequential)
+    elseif occursin("residue =", s)
+      k = parse(Int, match(r"residue = ([0-9]*)", s)[1])
+      a -> a.residue == k
+    elseif occursin("residue < ", s)
+      k = parse(Int, match(r"residue < ([0-9]*)", s)[1])
+      a -> a.residue < k
+    elseif occursin("residue > ", s)
+      k = parse(Int, match(r"residue > ([0-9]*)", s)[1])
+      a -> a.residue > k
+    elseif occursin("residue <=", s)
+      k = parse(Int, match(r"residue <= ([0-9]*)", s)[1])
+      a -> a.residue <= k
+    elseif occursin("residue >=", s)
+      k = parse(Int, match(r"residue >= ([0-9]*)", s)[1])
+      a -> a.residue >= k
 
     # b factor
     elseif occursin("b =", s)
@@ -128,6 +146,9 @@ function parse_query(selection)
     elseif occursin("name", s)
       name = match(r"name ([A-Z,0-9]*)", s)[1]
       a -> a.name == name
+    elseif occursin("SEGNAME", s)
+      segname = match(r"SEGNAME ([A-Z,0-9]*)", s)[1]
+      a -> a.segname == segname
     elseif occursin("RESNAME", s)
       resname = match(r"RESNAME ([A-Z,0-9]*)", s)[1]
       a -> a.resname == resname

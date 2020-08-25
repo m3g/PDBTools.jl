@@ -17,7 +17,9 @@ function readPDB(file :: String; only = atom -> true)
   natoms = 0
   index = 0
   imodel = 1
+  iresidue = 1
   atoms = Vector{Atom}(undef,0)
+  local lastatom
   for line in eachline(pdbfile)
     if occursin("END",line)
       imodel = imodel + 1
@@ -27,10 +29,17 @@ function readPDB(file :: String; only = atom -> true)
       index = index + 1
       atom.index = index
       atom.model = imodel
+      if index > 1
+        if ! same_residue(atom,lastatom)
+          iresidue += 1
+        end
+      end
+      atom.residue = iresidue
       if only(atom) 
         natoms = natoms + 1 
         push!(atoms,Atom(atom))
       end
+      lastatom = atom
     end
   end
   close(pdbfile)
