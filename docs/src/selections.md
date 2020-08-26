@@ -15,15 +15,26 @@ The accepted keywords for the selection are:
 | Keyword    | Options               | Input value | Example       | 
 |:----------:|:---------------------:|:-----------:|:-------------:|
 | `index`    | `=`,`>`,`<`,`<=`,`>=` | Integer     | `index <= 10` |
+| `index_pdb`| `=`,`>`,`<`,`<=`,`>=` | Integer     | `index_pdb <= 10` |
 | `name`     |                       | String      | `name CA`     |
 | `element`  |                       | String      | `element N`   |
 | `resname`  |                       | String      | `resname ALA` |
 | `resnum`   | `=`,`>`,`<`,`<=`,`>=` | Integer     | `resnum = 10` |
+| `residue`  | `=`,`>`,`<`,`<=`,`>=` | Integer     | `residue = 10`|
 | `chain`    |                       | String      | `chain A`     |
 | `model`    |                       | Integer     | `model 1`     |
 | `b`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `b > 0.5`     |
 | `occup`    | `=`,`>`,`<`,`<=`,`>=` | Real        | `occup >= 0.3`|
+| `segname`  |                       | String      | `segname PROT`|
 |            |                       |             |               |
+
+!!! note
+    `resnum` is the residue number as written in the PDB file, while `residue`
+    is the residue number counted sequentially in the file.
+
+    `index_pdb` is the number written in the "atom index" field of the PDB file,
+    while `index` is the sequential index of the atom in the file. 
+
 
 ## Special macros: proteins, water
 

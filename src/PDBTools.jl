@@ -30,8 +30,22 @@ module PDBTools
   include("./atom_properties.jl")
 
   # For selections
-  include("./select/select.jl")
+  include("./select/aa_properties.jl")
+  include("./select/which_natural_aminoacid.jl")
+  include("./select/isacidic.jl")
+  include("./select/isaliphatic.jl")
+  include("./select/isaromatic.jl")
+  include("./select/isbackbone.jl")
+  include("./select/isbasic.jl")
+  include("./select/ischarged.jl")
+  include("./select/ishydrophobic.jl")
+  include("./select/isneutral.jl")
+  include("./select/isnonpolar.jl")
+  include("./select/ispolar.jl")
+  include("./select/isprotein.jl")
+  include("./select/issidechain.jl")
   include("./select/iswater.jl")
   include("./select/proteins.jl")
+  include("./select/select.jl")
 
 end

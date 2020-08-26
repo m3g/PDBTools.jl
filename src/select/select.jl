@@ -45,9 +45,11 @@ end
 # while explaining to me how to creat a syntex interpreter
 
 function parse_query(selection)
-  # disambiguate the "name" keyword
+  # disambiguate keywords
   s = replace(selection,"resname" => "RESNAME")
-  s = replace(selection,"segname" => "SEGNAME")
+  s = replace(s,"segname" => "SEGNAME")
+  s = replace(s,"sidechain" => "SIDECHAIN")
+  s = replace(s,"nonpolar" => "NONPOLAR")
   try
     if occursin("or", s)
       (|, parse_query.(split(s, "or"))...)
@@ -73,6 +75,23 @@ function parse_query(selection)
     elseif occursin("index >=", s)
       k = parse(Int, match(r"index >= ([0-9]*)", s)[1])
       a -> a.index >= k
+
+    # Index as written in the PDB file
+    elseif occursin("index_pdb =", s)
+      k = parse(Int, match(r"index_pdb = ([0-9]*)", s)[1])
+      a -> a.index_pdb == k
+    elseif occursin("index_pdb < ", s)
+      k = parse(Int, match(r"index_pdb < ([0-9]*)", s)[1])
+      a -> a.index_pdb < k
+    elseif occursin("index_pdb > ", s)
+      k = parse(Int, match(r"index_pdb > ([0-9]*)", s)[1])
+      a -> a.index_pdb > k
+    elseif occursin("index_pdb <=", s)
+      k = parse(Int, match(r"index_pdb <= ([0-9]*)", s)[1])
+      a -> a.index_pdb <= k
+    elseif occursin("index_pdb >=", s)
+      k = parse(Int, match(r"index_pdb >= ([0-9]*)", s)[1])
+      a -> a.index_pdb >= k
 
     # Resiue number (as writtein in PDB)
     elseif occursin("resnum =", s)
@@ -169,7 +188,7 @@ function parse_query(selection)
       isprotein
     elseif occursin("polar", s)
       ispolar
-    elseif occursin("nonpolar", s)
+    elseif occursin("NONPOLAR", s)
       isnonpolar
     elseif occursin("basic", s)
       isbasic
@@ -187,7 +206,7 @@ function parse_query(selection)
       isneutral
     elseif occursin("backbone", s)
       isbackbone
-    elseif occursin("sidechain", s)
+    elseif occursin("SIDECHAIN", s)
       issidechain
 
     # Select everything
