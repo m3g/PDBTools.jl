@@ -5,7 +5,7 @@
 To read a PDB file and return a vector of atoms of
 type `Atom`, do:
 ```julia
-atoms = PDBTools.readPDB("file.pdb")
+atoms = readPDB("file.pdb")
 
 ```
 
@@ -42,18 +42,18 @@ end
     to read or write a subset of the atoms, following the selection syntax described 
     in the [Selection](@ref selections) section. For example:
     ```julia
-    protein = PDBTools.readPDB("file.pdb","protein")
+    protein = readPDB("file.pdb","protein")
 
     ```
     or
     ```julia
-    arginines = PDBTools.readPDB("file.pdb","resname ARG")
+    arginines = readPDB("file.pdb","resname ARG")
 
     ```
     The only difference is that, if using Julia anonymous functions, the
     keyword is `only`:
     ```julia
-    arginines = PDBTools.readPDB("file.pdb",only = atom -> atom.resname == "ARG")
+    arginines = readPDB("file.pdb",only = atom -> atom.resname == "ARG")
 
     ```
     The same is valid for `edit` and `write` functions, below. 
@@ -65,7 +65,7 @@ Using the `editPDB` function, a vector of the same structure as above is
 returned, but of `MutableAtom` type, meaning that the content of every
 field can be modified. For example:
 ```julia
-julia> atoms = PDBTools.editPDB("file.pdb")
+julia> atoms = editPDB("file.pdb")
 1500-element Array{PDBTools.Atom,1}:
  PDBTools.MutableAtom(1, 1, "N", "MET", "X", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
  PDBTools.MutableAtom(2, 2, "H1", "MET", "X", 1, 39.84, 49.01, 34.79, 0.0, 0.0, 1)
@@ -86,7 +86,7 @@ PDBTools.MutableAtom(1, 1, "N", "AAA", "X", 1, 38.95, 49.3, 34.38, 0.0, 0.0, 1)
 To write a PDB file use the `writePDB` function, as:
 
 ```julia
-PDBTools.writePDB(atoms,"file.pdb")
+writePDB(atoms,"file.pdb")
 
 ```
 where `atoms` contain a list of atoms in the `Atom` or `MutableAtom` structures.

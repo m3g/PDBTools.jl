@@ -4,7 +4,7 @@
 
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
 ```julia
-julia> seq = PDBTools.getseq("file.pdb")
+julia> seq = getseq("file.pdb")
 76×2 Array{String,2}:
  "VAL"  "V"
  "LYS"  "K"
@@ -18,7 +18,7 @@ julia> seq = PDBTools.getseq("file.pdb")
     If there is some non-standard protein residue in the sequence,
     inform the `getseq` function by adding a selection:
     ```julia
-    julia> PDBTools.getseq("file.pdb","protein or resname NEW")
+    julia> getseq("file.pdb","protein or resname NEW")
     76×2 Array{String,2}:
      "VAL"  "V"
      "NEW"  "N"
@@ -31,8 +31,8 @@ The `getseq` function can of course be used on an `Atom` list, accepts selection
 last argument, as well as the reading and writing functions:
 
 ```julia
-atoms = PDBTools.readPDB("file.pdb")
-seq = PDBTools.getseq(atoms,"chain A")
+atoms = readPDB("file.pdb")
+seq = getseq(atoms,"chain A")
 
 ```
 
@@ -41,7 +41,7 @@ seq = PDBTools.getseq(atoms,"chain A")
 All atoms:
 
 ```julia
-julia> x = PDBTools.coor(atoms)
+julia> x = coor(atoms)
 3×1463 Array{Float64,2}:
   -9.229  -10.048 …    6.408    6.017
  -14.861  -15.427    -12.034  -10.967
@@ -54,7 +54,7 @@ Or use selections to retrieve the coordinates of subsets of atoms:
 C``\alpha`` coordinates:
 
 ```julia
-julia> xCA = PDBTools.coor(atoms,"name CA")
+julia> xCA = coor(atoms,"name CA")
 3×104 Array{Float64,2}:
   -8.483   -5.113  …  12.552   9.196 
  -14.912  -13.737      0.892  -0.734 
@@ -64,7 +64,7 @@ julia> xCA = PDBTools.coor(atoms,"name CA")
 
 By default, the output arrays are column based (the x, y and z coordinates of each
 atom are in each row). If you want a row-based output, add `column_based = false` to
-the input parameters of `coor`: `PDBTools.coor(atoms,column_based=false)`
+the input parameters of `coor`: `coor(atoms,column_based=false)`
 
 
 

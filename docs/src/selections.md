@@ -3,7 +3,7 @@
 A simple selection syntax is provided. Use it with, for example: 
 
 ```julia
-atoms = PDBTools.select(atoms,"protein and resnum < 30")
+atoms = select(atoms,"protein and resnum < 30")
 ```
 
 ## General selections 
@@ -43,11 +43,11 @@ desired.
 
 Examples:
 ```julia
-aromatic = PDBTools.select(atoms,"aromatic")
+aromatic = select(atoms,"aromatic")
 
 ```
 ```julia
-aromatic = PDBTools.select(atoms,"charged")
+aromatic = select(atoms,"charged")
 
 ```
 
@@ -76,7 +76,7 @@ If only the indexes of the atoms are of interest, a specific function
 will directly return them:
 
 ```julia
-indexes = PDBTools.selindex(atoms,"protein and name CA")
+indexes = selindex(atoms,"protein and name CA")
 
 ```
 
@@ -90,13 +90,13 @@ control over the selection and, possibly, the use of user defined selection
 functions. For example:
 
 ```julia
-atoms = PDBTools.select(atoms, by = atom -> atom.x < 10.)
+atoms = select(atoms, by = atom -> atom.x < 10.)
 
 ```
 With that, selections can become really complex, as:
 ```julia
 sel = atom -> (atom.x < 10. && atom.resname == "GLY") || (atom.name == "CA") 
-atoms = PDBTools.select(atoms, by = sel )
+atoms = select(atoms, by = sel )
 
 ```
 
