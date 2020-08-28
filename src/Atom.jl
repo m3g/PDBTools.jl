@@ -1,7 +1,7 @@
 
 AtomData = quote
   index :: Int64 # The sequential index of the atoms in the file
-  index_pdb :: Int64 # the index as written in the PDB file (might be anything)
+  index_pdb :: Int64 # The index as written in the PDB file (might be anything)
   name :: String
   resname :: String
   chain :: String
@@ -13,8 +13,7 @@ AtomData = quote
   b :: Float64
   occup :: Float64
   model :: Int64
-  atomic_number :: Int64
-  segname :: String
+  segname :: String # Segment name (cols 73:76)
 end
 
 # Mutable structure used to read data only

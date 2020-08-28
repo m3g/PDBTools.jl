@@ -1,5 +1,5 @@
 #
-# Retrive index of element in elements list from name. Returns 1 of not found
+# Retrive index of element in elements list from name. Returns 1 (element "X" of list) of not found
 #
 function element_index(name :: String)
 
