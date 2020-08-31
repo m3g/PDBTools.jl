@@ -1,39 +1,3 @@
-# This function will return 'nothing' for alternate (BGLY, CARG, etc) conformations
-# of protein residues, which will then be ignored. Only "A" conformations are kept.
-# Other non-protein residues are always kept.
-
-function alternate_conformation( atom :: AtomType )
-  if isprotein(atom) 
-    if length(atom.resname) == 4
-      if atom.name[1:1] == "A"
-        return atom.resname[2:4]
-      else 
-        return nothing
-      end
-    else
-      return atom.resname
-    end
-  else
-    return atom.resname
-  end
-end
-
-#
-# Function that tries to read a number as an integer given a number
-# or, perhaps, an hexadecimal representation string
-#
-
-function parse_int(s :: String)
-  try
-    i = parse(Int64,s)
-    return i
-  catch
-    i = parse(Int64,s,base=16)
-    return i
-  end
-  error("Could not read integer from string: \"$s\"")
-end
-
 #
 # Function that reads atom information from PDB or mmCIF files
 #

@@ -1,6 +1,6 @@
 function issidechain(atom :: AtomType)
   iaa = which_natural_aminoacid(atom)
-  if iaa == nothing
+  if iaa == 0
     false
   else
     if ! (atom.name in [ "N", "CA", "C", "O", "HN", "HA", "HT1", "HT2", "HT3" ])

@@ -16,6 +16,8 @@ module PDBTools
   #
   include("./oneletter.jl")
   include("./check_mmCIF.jl")
+  include("./alternate_conformation.jl")
+  include("./parse_int.jl")
   include("./read_atom.jl")
   include("./write_atom.jl")
   include("./readPDB.jl")

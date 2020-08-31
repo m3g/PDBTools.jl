@@ -7,7 +7,7 @@ function isprotein(atom :: AtomType; newres = nothing)
     true
   end
   iaa = which_natural_aminoacid(atom)
-  if iaa == nothing
+  if iaa == 0
     false
   else
     true
