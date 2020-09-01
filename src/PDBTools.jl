@@ -6,7 +6,6 @@ module PDBTools
   #
   # Data structures
   #
-
   include("./empty_struct.jl")
   include("./Atom.jl")
   include("./Indexes_mmCIF_fields.jl")
@@ -25,8 +24,10 @@ module PDBTools
   include("./writePDB.jl")
   include("./getseq.jl")
   include("./coor.jl")
+  include("./maxmin.jl")
   include("./same_residue.jl")
-  export readPDB, editPDB, writePDB, getseq, coor
+  export readPDB, editPDB, writePDB, getseq 
+  export coor, maxmin
 
   # Element properties
   include("./elements.jl")

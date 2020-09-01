@@ -66,5 +66,23 @@ By default, the output arrays are column based (the x, y and z coordinates of ea
 atom are in each row). If you want a row-based output, add `column_based = false` to
 the input parameters of `coor`: `coor(atoms,column_based=false)`
 
+## Maximum and minimum coordinates of the atoms
+
+Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
+
+```julia
+julia> m = maxmin(atoms,"chain A")
+
+ Minimum atom coordinates: xmin = [-41.5, -41.526, -41.517]
+ Maximum atom coordinates: xmax = [41.583, 41.502, 41.183]
+ Length in each direction: xlength = [83.083, 83.028, 82.7]
+
+```
+
+`m` is a structure containing the three vectors with minimum and maximum
+coordinates, and lengths.
+
+
+
 
 

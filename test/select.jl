@@ -42,4 +42,6 @@
 
   @test length(select(atoms,"nonpolar")) == 583
 
+  @test maxmin(atoms,"chain A").xlength ≈ [83.083, 83.028, 82.7] 
+
 end
