@@ -34,8 +34,8 @@ end
 
 # Initialize mutable from immutable and vice-versa
 
-Atom( atom :: MutableAtom ) = Atom([ getfield(atom,i) for i in 1:nfields(atom) ]...)
-MutableAtom( atom :: Atom ) = MutableAtom([ getfield(atom,i) for i in 1:nfields(atom) ]... )
+Atom( atom :: MutableAtom ) = Atom([ getfield(atom,field) for field in fieldnames(Atom) ]...)
+MutableAtom( atom :: Atom ) = MutableAtom([ getfield(atom,field) for field in 1:fieldnames(Atom) ]... )
 
 AtomType = Union{Atom,MutableAtom}
 AtomVector = Union{Vector{Atom},Vector{MutableAtom}}
