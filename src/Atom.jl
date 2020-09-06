@@ -32,6 +32,8 @@ struct Atom
   @SharedAtomData()
 end
 
+export Atom, MutableAtom
+
 # Initialize mutable from immutable and vice-versa
 
 Atom( atom :: MutableAtom ) = Atom([ getfield(atom,field) for field in fieldnames(Atom) ]...)
