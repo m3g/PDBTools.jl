@@ -61,10 +61,10 @@ function Base.show( io :: IO,::MIME"text/plain", atoms :: AtomVector )
     atom = atoms[i]
     print_atom_line(atom)
   end
-  if length(atoms) > 6
+  if length(atoms) > 7
     @printf("%57s\n","⋮ ")
   end
-  for i in length(atoms)-3:length(atoms)
+  for i in max(4,length(atoms)-2):length(atoms)
     atom = atoms[i]
     print_atom_line(atom)
   end
