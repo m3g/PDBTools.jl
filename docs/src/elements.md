@@ -7,7 +7,9 @@ operate on atoms of the type `Atom`. For example:
 julia> atoms = readPDB("./file.pdb");
 
 julia> atoms[1]
-PDBTools.Atom(1, 1, "N", "ALA", "A", 1, -9.229, -14.861, -5.481, 0.0, 1.0, 1, 0)
+   PDBTools.Atom with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1   OW     SOL     X        1        1   54.370   45.310   33.970  0.00  0.00     1       -         1
 
 julia> mass(atoms[1])
 14.0067

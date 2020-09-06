@@ -7,7 +7,10 @@ select atoms, and work with their coordinates.
 
 > Simple data structure: 
 > ```julia
->  Atom(5, 5, "CA", "ALA", "A", 1, -8.483, -14.912, -6.726, 0.0, 1.0, 1, 0)
+>julia> atoms[1]
+>   PDBTools.Atom with fields:
+>   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+>       1   OW     SOL     X        1        1   54.370   45.310   33.970  0.00  0.00     1       -         1
 > ```
 
 > Selection syntax:

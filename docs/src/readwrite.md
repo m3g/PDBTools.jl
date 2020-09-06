@@ -15,7 +15,9 @@ bellow), a list of atoms with the following structure will be generated:
 
 ```julia
 julia> atoms[1]
-PDBTools.Atom(1, 1, "N", "ALA", "A", 1, 1, -9.229, -14.861, -5.481, 0.0, 1.0, 1, "PROT")
+   PDBTools.Atom with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 
 ```
 
@@ -68,18 +70,20 @@ returned, but of `MutableAtom` type, meaning that the content of every
 field can be modified. For example:
 ```julia
 julia> atoms = editPDB("file.pdb")
-1500-element Array{PDBTools.Atom,1}:
- PDBTools.MutableAtom(1, 1, "N", "ALA", "A", 1, 1, -9.229, -14.861, -5.481, 0.0, 1.0, 1, "PROT")
- PDBTools.MutableAtom(2, 2, "HT1", "ALA", "A", 1, 1, -10.048, -15.427, -5.569, 0.0, 0.0, 1, "PROT")
- PDBTools.MutableAtom(3, 3, "HT2", "ALA", "A", 1, 1, -9.488, -13.913, -5.295, 0.0, 0.0, 1, "PROT")
- PDBTools.MutableAtom(4, 4, "HT3", "ALA", "A", 1, 1, -8.652, -15.208, -4.741, 0.0, 0.0, 1, "PROT")
- ...
+   Array{PDBTools.Atom,1} with 62026 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮ 
 
 julia> atoms[1].segname = "ABCD"
 "AAA"
 
 julia> atoms[1]
- PDBTools.MutableAtom(1, 1, "N", "ALA", "A", 1, 1, -9.229, -14.861, -5.481, 0.0, 1.0, 1, "ABCD")
+   PDBTools.MutableAtom with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 
 ```
 
