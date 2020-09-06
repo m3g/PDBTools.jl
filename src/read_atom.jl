@@ -54,8 +54,11 @@ function read_atom(record :: String;
       atom.model = 1
       try 
         atom.segname = strip(record[73:76])
+        if  length(atom.segname) == 0
+          atom.segname = "-"
+        end
       catch
-        atom.segname = ""
+        atom.segname = "-"
       end
 
     else # if mmCIF

@@ -40,3 +40,36 @@ MutableAtom( atom :: Atom ) = MutableAtom([ getfield(atom,field) for field in 1:
 AtomType = Union{Atom,MutableAtom}
 AtomVector = Union{Vector{Atom},Vector{MutableAtom}}
 
+print_atom_title() = 
+  @printf("%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s\n",
+          "index","name","resname","chain","resnum","residue","x","y","z","b","occup","model","segname","index_pdb") 
+print_atom_line(atom :: AtomType) =
+  @printf("%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i\n",
+           atom.index, atom.name, atom.resname, atom.chain, atom.resnum, atom.residue, 
+           atom.x, atom.y, atom.z, atom.b, atom.occup, atom.model, atom.segname, atom.index_pdb)
+
+function Base.show( io :: IO, atom :: AtomType )
+  println("   $(typeof(atom)) with fields:")
+  print_atom_title()
+  print_atom_line(atom)
+end
+
+function Base.show( io :: IO,::MIME"text/plain", atoms :: AtomVector )
+  println("   Array{$(typeof(atoms[1])),1} with $(length(atoms)) atoms with fields:")
+  print_atom_title()
+  for i in 1:min(length(atoms),3)
+    atom = atoms[i]
+    print_atom_line(atom)
+  end
+  if length(atoms) > 6
+    @printf("%57s\n","⋮ ")
+  end
+  for i in length(atoms)-3:length(atoms)
+    atom = atoms[i]
+    print_atom_line(atom)
+  end
+end
+
+
+
+
