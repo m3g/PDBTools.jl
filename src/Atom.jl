@@ -36,8 +36,8 @@ export Atom, MutableAtom
 
 # Initialize mutable from immutable and vice-versa
 
-Atom( atom :: MutableAtom ) = Atom([ getfield(atom,field) for field in fieldnames(Atom) ]...)
-MutableAtom( atom :: Atom ) = MutableAtom([ getfield(atom,field) for field in fieldnames(Atom) ]... )
+Atom( atom :: MutableAtom ) = Atom(( getfield(atom,field) for field in fieldnames(Atom) )...)
+MutableAtom( atom :: Atom ) = MutableAtom(( getfield(atom,field) for field in fieldnames(Atom) )... )
 
 AtomType = Union{Atom,MutableAtom}
 AtomVector = Union{Vector{Atom},Vector{MutableAtom}}

@@ -43,5 +43,14 @@
   @test length(select(atoms,"nonpolar")) == 583
 
   @test maxmin(atoms,"chain A").xlength ≈ [83.083, 83.028, 82.7] 
+ 
+  # Test converstion from immutable to mutable
+  mutable_atom = MutableAtom(atoms[1])
+  mutable_atom.index = 0
+  @test mutable_atom.index == 0
+
+  # Test conversion from mutable to immutable
+  atom = Atom(mutable_atom)
+  @test atom.index == 0
 
 end
