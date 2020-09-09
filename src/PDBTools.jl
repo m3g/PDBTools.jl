@@ -34,7 +34,7 @@ module PDBTools
   export atomic_number, element, mass, name
 
   # For selections
-  include("./select/Select.jl")
+  include("./select/select_includes.jl")
   include("./alternate_conformation.jl")
 
 end
