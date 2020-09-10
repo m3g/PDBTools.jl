@@ -19,16 +19,20 @@ macro SharedAtomData()
   esc(ex)
 end
 
+# Abstract type for atoms
+
+abstract type AtomType end
+
 # Mutable structure used to read data only
 
-mutable struct MutableAtom
+mutable struct MutableAtom <: AtomType
   @SharedAtomData()
 end
 MutableAtom() = empty_struct(MutableAtom)
 
 # Immutable structure used for critical code
 
-struct Atom
+struct Atom <: AtomType
   @SharedAtomData()
 end
 
@@ -38,9 +42,6 @@ export Atom, MutableAtom
 
 Atom( atom :: MutableAtom ) = Atom(( getfield(atom,field) for field in fieldnames(Atom) )...)
 MutableAtom( atom :: Atom ) = MutableAtom(( getfield(atom,field) for field in fieldnames(Atom) )... )
-
-AtomType = Union{Atom,MutableAtom}
-AtomVector = Union{Vector{Atom},Vector{MutableAtom}}
 
 print_atom_title() = 
   @printf("%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s\n",
@@ -56,7 +57,7 @@ function Base.show( io :: IO, atom :: AtomType )
   print_atom_line(atom)
 end
 
-function Base.show( io :: IO,::MIME"text/plain", atoms :: AtomVector )
+function Base.show( io :: IO,::MIME"text/plain", atoms :: Vector{<:AtomType} )
   println("   Array{$(typeof(atoms[1])),1} with $(length(atoms)) atoms with fields:")
   print_atom_title()
   for i in 1:min(length(atoms),3)

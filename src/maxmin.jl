@@ -8,12 +8,12 @@ struct MaxMinCoords
   xlength :: Vector{Float64}
 end
 
-function maxmin( atoms :: AtomVector, selection :: String )
+function maxmin( atoms :: Vector{<:AtomType}, selection :: String )
   query = parse_query(selection)
   return maxmin(atoms, only = atom -> apply_query(query,atom))
 end
 
-function maxmin( atoms :: AtomVector; only = atom -> true )
+function maxmin( atoms :: Vector{<:AtomType}; only = atom -> true )
   x = coor(atoms; only = only)
   xmin = [ minimum(x[1,:]), minimum(x[2,:]), minimum(x[3,:]) ]
   xmax = [ maximum(x[1,:]), maximum(x[2,:]), maximum(x[3,:]) ]

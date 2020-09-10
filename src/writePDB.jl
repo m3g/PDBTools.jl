@@ -3,12 +3,12 @@
 # optional definition of a selection to be print
 #
 
-function writePDB( atoms :: AtomVector, filename, selection)
+function writePDB( atoms :: Vector{<:AtomType}, filename, selection)
   query = parse_query(selection)
   writePDB(atoms,filename,only=atom->apply_query(query,atom))
 end
 
-function writePDB( atoms :: AtomVector, filename; only = atom -> true)
+function writePDB( atoms :: Vector{<:AtomType}, filename; only = atom -> true)
   file = open(filename,"w")
   for atom in atoms
     if only(atom)
