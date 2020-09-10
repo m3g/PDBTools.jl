@@ -62,6 +62,24 @@ end
     ```
     The same is valid for `edit` and `write` functions, below. 
       
+## Retrive from Protein Data Bank
+
+Uset the `wget` function to retrieve the atom data directly from the PDB database,
+optionally filtering the atoms with a selection:
+
+```
+julia> atoms = wget("1LBD","name CA")
+   Array{Atom,1} with 238 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
+       8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
+      13   CA     ASN     A      227        3   41.052   82.178   67.504 53.45  1.00     1       -        13
+                                                       ⋮
+    1847   CA     GLN     A      460      236  -22.650   79.082   50.023 71.46  1.00     1       -      1847
+    1856   CA     MET     A      461      237  -25.561   77.191   51.710 78.41  1.00     1       -      1856
+    1864   CA     THR     A      462      238  -26.915   73.645   51.198 82.96  1.00     1       -      1864
+
+```
 
 ## Edit a PDB file
 
