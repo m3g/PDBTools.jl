@@ -25,7 +25,8 @@ module PDBTools
   include("./coor.jl")
   include("./maxmin.jl")
   include("./same_residue.jl")
-  export readPDB, editPDB, writePDB, getseq 
+  include("./wget.jl")
+  export readPDB, editPDB, writePDB, getseq, wget
   export coor, maxmin
 
   # Element properties
