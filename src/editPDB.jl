@@ -8,7 +8,7 @@ function editPDB(file :: String, selection :: String)
   return editPDB(file, only = atom -> apply_query(query,atom))
 end
 
-function editPDB(file :: String; only = atom -> true)
+function editPDB(file :: String; only = all)
   pdb = readPDB(file, only = only)
   mutpdb = Vector{MutableAtom}(undef,length(pdb))
   @. mutpdb = MutableAtom(pdb)

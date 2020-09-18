@@ -7,7 +7,7 @@ function readPDB(file :: String, selection :: String)
   return readPDB(file, only = atom -> apply_query(query,atom) )
 end
 
-function readPDB(file :: String; only = atom -> true)
+function readPDB(file :: String; only = all)
 
   # Check if structure is in mmCIF format
   mmCIF, mmCIF_fields = check_mmCIF(file)

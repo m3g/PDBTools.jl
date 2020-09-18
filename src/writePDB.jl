@@ -8,7 +8,7 @@ function writePDB( atoms :: Vector{<:AtomType}, filename, selection)
   writePDB(atoms,filename,only=atom->apply_query(query,atom))
 end
 
-function writePDB( atoms :: Vector{<:AtomType}, filename; only = atom -> true)
+function writePDB( atoms :: Vector{<:AtomType}, filename; only = all)
   file = open(filename,"w")
   for atom in atoms
     if only(atom)

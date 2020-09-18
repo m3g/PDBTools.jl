@@ -13,6 +13,7 @@ module PDBTools
   #
   # Input and output functions
   #
+  include("./all.jl")
   include("./oneletter.jl")
   include("./check_mmCIF.jl")
   include("./parse_int.jl")

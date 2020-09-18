@@ -7,7 +7,7 @@ function coor( atoms :: Vector{<:AtomType}, selection :: String; column_based ::
   return coor(atoms,only = atom -> apply_query(query,atom), column_based = column_based)
 end
 
-function coor( atoms :: Vector{<:AtomType}; only = atom -> true, column_based :: Bool = true )
+function coor( atoms :: Vector{<:AtomType}; only = all, column_based :: Bool = true )
   n = 0
   for atom in atoms
     if only(atom)
