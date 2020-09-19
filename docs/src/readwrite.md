@@ -42,7 +42,7 @@ end
 ```
 
 !!! tip
-    For all these reading and writting function, a final argument can be provided
+    For all these reading and writting functions, a final argument can be provided
     to read or write a subset of the atoms, following the selection syntax described 
     in the [Selection](@ref selections) section. For example:
     ```julia
@@ -64,7 +64,7 @@ end
       
 ## Retrive from Protein Data Bank
 
-Uset the `wget` function to retrieve the atom data directly from the PDB database,
+Use the `wget` function to retrieve the atom data directly from the PDB database,
 optionally filtering the atoms with a selection:
 
 ```
@@ -96,12 +96,12 @@ julia> atoms = editPDB("file.pdb")
                                                        ⋮ 
 
 julia> atoms[1].segname = "ABCD"
-"AAA"
+"ABCD"
 
 julia> atoms[1]
    PDBTools.MutableAtom with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    ABCD         1
 
 ```
 
