@@ -5,7 +5,7 @@
 
 # Main function: receives the atoms vector and a julia function to select
 
-function select( atoms :: Vector{<:AtomType}; by=x->x==x)
+function select( atoms :: Vector{<:AtomType}; by=all)
   selected_atoms = typeof(atoms)(undef,0)
   for atom in atoms
     if by(atom)
@@ -25,7 +25,7 @@ end
 #
 # Return indexes only
 #
-function selindex( atoms :: Vector{<:AtomType}; by=x->x==x)
+function selindex( atoms :: Vector{<:AtomType}; by=all)
   indexes = Vector{Int64}(undef,0)
   for atom in atoms
     if by(atom)
