@@ -1,4 +1,3 @@
-#using DocumenterLaTeX
 import Pkg
 Pkg.add("Documenter")
 using Documenter
