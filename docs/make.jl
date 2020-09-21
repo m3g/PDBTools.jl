@@ -16,5 +16,5 @@ makedocs(
     ]
 )
 deploydocs(
-    repo = "github.com/m3g/PDBTools.jl.git",
+    repo = "github.com/m3g/PDBTools.git",
 )
