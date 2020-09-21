@@ -17,4 +17,5 @@ makedocs(
 )
 deploydocs(
     repo = "github.com/m3g/PDBTools.git",
+    versions = ["stable" => "v^", "v#.#", devurl => devurl],
 )
