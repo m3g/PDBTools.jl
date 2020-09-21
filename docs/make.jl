@@ -15,6 +15,6 @@ makedocs(
         "Auxiliary functions" => "auxiliary.md",
     ]
 )
-
-
-
+deploydocs(
+    repo = "github.com/m3g/PDBTools.jl.git",
+)
