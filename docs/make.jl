@@ -19,6 +19,5 @@ deploydocs(
     repo = "github.com/m3g/PDBTools.git",
     target = "build",
     branch = "gh-pages",
-    devurl = "dev",
-    versions = ["stable" => "v^", "v#.#", devurl => devurl],
+    versions = ["stable" => "v^", "v#.#" ],
 )
