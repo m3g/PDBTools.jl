@@ -1,6 +1,6 @@
 # PDBTools
 
-Package to perform minimum-distance distribution analyses of complex solute-solvent interactions
+Package to work with PDB files.
 
 Documentation of the latest stable version: [https://m3g.github.io/PDBTools/stable](https://m3g.github.io/PDBTools/stable)
 
