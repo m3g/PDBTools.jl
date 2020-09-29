@@ -4,11 +4,6 @@
 
 # requires Printf
 
-function write_atom(atom :: MutableAtom)
-  imutt_atom = Atom(atom)
-  return write_atom(imutt_atom)
-end
-
 function write_atom(atom :: Atom)
 
   #ATOM      2  CA  GLY A   1      -1.774   6.778  32.054  1.00  0.08           C

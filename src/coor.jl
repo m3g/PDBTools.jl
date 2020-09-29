@@ -2,12 +2,12 @@
 # Return the coordinates of the atoms
 #
 
-function coor( atoms :: Vector{<:AtomType}, selection :: String; column_based :: Bool = true  )
+function coor( atoms :: Vector{Atom}, selection :: String; column_based :: Bool = true  )
   query = parse_query(selection)
   return coor(atoms,only = atom -> apply_query(query,atom), column_based = column_based)
 end
 
-function coor( atoms :: Vector{<:AtomType}; only = all, column_based :: Bool = true )
+function coor( atoms :: Vector{Atom}; only = all, column_based :: Bool = true )
   n = 0
   for atom in atoms
     if only(atom)

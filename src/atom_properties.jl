@@ -40,14 +40,14 @@ function element_index(name :: String)
 end
 
 atomic_number(name :: String) = elements[element_index(name)].atomic_number
-atomic_number(atom :: AtomType) = atomic_number(atom.name)
+atomic_number(atom :: Atom) = atomic_number(atom.name)
 
 element(name :: String) = elements[element_index(name)].element
-element(atom :: AtomType) = element(atom.name)
+element(atom :: Atom) = element(atom.name)
 
 mass(name :: String) = elements[element_index(name)].mass
-mass(atom :: AtomType) = mass(atom.name)
+mass(atom :: Atom) = mass(atom.name)
 
 name(name :: String) = elements[element_index(name)].name
-name(atom :: AtomType) = name(atom.name)
+name(atom :: Atom) = name(atom.name)
 

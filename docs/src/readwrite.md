@@ -60,7 +60,7 @@ end
     arginines = readPDB("file.pdb",only = atom -> atom.resname == "ARG")
 
     ```
-    The same is valid for `edit` and `write` functions, below. 
+    The same is valid for the `write` function, below. 
       
 ## Retrive from Protein Data Bank
 
@@ -83,25 +83,44 @@ julia> atoms = wget("1LBD","name CA")
 
 ## Edit a PDB file
 
-Using the `editPDB` function, a vector of the same structure as above is
-returned, but of `MutableAtom` type, meaning that the content of every
-field can be modified. For example:
+The `Atom` structure is mutable, meaning that the fields can be edited. For example:
+
 ```julia
-julia> atoms = editPDB("file.pdb")
+julia> atoms = readPDB("file.pdb")
    Array{PDBTools.Atom,1} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
        3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
-                                                       ⋮ 
 
 julia> atoms[1].segname = "ABCD"
 "ABCD"
 
 julia> atoms[1]
-   PDBTools.MutableAtom with fields:
+   PDBTools.Atom with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    ABCD         1
+
+```
+
+Additionally, With the `edit!` function, you can directly edit or view the data in a
+vector of `Atoms` in your preferred text editor. 
+
+```julia
+
+julia> edit!(atoms)
+
+```
+
+This will open a text editor, and we changed the data in the `resname` field of the first atom
+to `ABC`. Saving and closing the file will update the `atoms` array:
+
+```julia
+
+julia> atoms[1]
+   PDBTools.Atom with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     ABC     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 
 ```
 
@@ -113,13 +132,12 @@ To write a PDB file use the `writePDB` function, as:
 writePDB(atoms,"file.pdb")
 
 ```
-where `atoms` contain a list of atoms in the `Atom` or `MutableAtom` structures.
+where `atoms` contain a list of atoms with the `Atom` structures.
 
 # Read and write single-atom lines 
 
 `PDBTools.read_atom(pdb_line)`: Given a line of a PDB file containing atom data,
-returns the data in a `Atom` structure. To convert the `atom` read with
-this function into a mutable structure, use `atom = MutableAtom(atom)`.
+returns the data in a `Atom` structure. 
 
 `PDBTools.write_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
 a string formatted in the PDB format, to be written to a file. 

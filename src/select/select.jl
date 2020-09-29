@@ -5,7 +5,7 @@
 
 # Main function: receives the atoms vector and a julia function to select
 
-function select( atoms :: Vector{<:AtomType}; by=all)
+function select( atoms :: Vector{Atom}; by=all)
   selected_atoms = typeof(atoms)(undef,0)
   for atom in atoms
     if by(atom)
@@ -17,7 +17,7 @@ end
 
 # Given a selection string
 
-function select( atoms :: Vector{<:AtomType}, selection :: String )
+function select( atoms :: Vector{Atom}, selection :: String )
   query = parse_query(selection)
   return select(atoms, by = atom -> apply_query(query,atom))
 end
@@ -25,7 +25,7 @@ end
 #
 # Return indexes only
 #
-function selindex( atoms :: Vector{<:AtomType}; by=all)
+function selindex( atoms :: Vector{Atom}; by=all)
   indexes = Vector{Int64}(undef,0)
   for atom in atoms
     if by(atom)
@@ -35,7 +35,7 @@ function selindex( atoms :: Vector{<:AtomType}; by=all)
   return indexes
 end
 
-function selindex( atoms :: Vector{<:AtomType}, selection :: String )
+function selindex( atoms :: Vector{Atom}, selection :: String )
   query = parse_query(selection)
   return selindex(atoms, by = atom -> apply_query(query,atom))
 end

@@ -37,7 +37,7 @@ function readPDB(file :: String; only = all)
       atom.residue = iresidue
       if only(atom) 
         natoms = natoms + 1 
-        push!(atoms,Atom(atom))
+        push!(atoms,atom)
       end
       lastatom = atom
     end

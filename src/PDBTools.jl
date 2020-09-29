@@ -2,6 +2,7 @@
 module PDBTools
 
   using Printf
+  using InteractiveUtils
 
   #
   # Data structures
@@ -20,14 +21,14 @@ module PDBTools
   include("./read_atom.jl")
   include("./write_atom.jl")
   include("./readPDB.jl")
-  include("./editPDB.jl")
+  include("./edit.jl")
   include("./writePDB.jl")
   include("./getseq.jl")
   include("./coor.jl")
   include("./maxmin.jl")
   include("./same_residue.jl")
   include("./wget.jl")
-  export readPDB, editPDB, writePDB, getseq, wget
+  export readPDB, writePDB, getseq, wget, edit!
   export coor, maxmin
 
   # Element properties
