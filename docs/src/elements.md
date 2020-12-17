@@ -3,7 +3,7 @@
 Some simple atom properties can be retrieved using special functions, which
 operate on atoms of the type `Atom`. For example:
 
-```julia
+```julia-repl
 julia> atoms = readPDB("./file.pdb");
 
 julia> atoms[1]

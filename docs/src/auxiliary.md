@@ -3,7 +3,7 @@
 ## Get the protein sequence
 
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
-```julia
+```julia-repl
 julia> seq = getseq("file.pdb")
 76×2 Array{String,2}:
  "VAL"  "V"
@@ -17,7 +17,7 @@ julia> seq = getseq("file.pdb")
 !!! note
     If there is some non-standard protein residue in the sequence,
     inform the `getseq` function by adding a selection:
-    ```julia
+    ```julia-repl
     julia> getseq("file.pdb","protein or resname NEW")
     76×2 Array{String,2}:
      "VAL"  "V"
@@ -40,7 +40,7 @@ seq = getseq(atoms,"chain A")
 
 All atoms:
 
-```julia
+```julia-repl
 julia> x = coor(atoms)
 3×1463 Array{Float64,2}:
   -9.229  -10.048 …    6.408    6.017
@@ -53,7 +53,7 @@ Or use selections to retrieve the coordinates of subsets of atoms:
 
 C``\alpha`` coordinates:
 
-```julia
+```julia-repl
 julia> xCA = coor(atoms,"name CA")
 3×104 Array{Float64,2}:
   -8.483   -5.113  …  12.552   9.196 
@@ -70,7 +70,7 @@ the input parameters of `coor`: `coor(atoms,column_based=false)`
 
 Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
 
-```julia
+```julia-repl
 julia> m = maxmin(atoms,"chain A")
 
  Minimum atom coordinates: xmin = [-41.5, -41.526, -41.517]

@@ -13,7 +13,7 @@ atoms = readPDB("file.pdb")
 residue, coordinates, etc. For example, after reading a file (as shown
 bellow), a list of atoms with the following structure will be generated:
 
-```julia
+```julia-repl
 julia> atoms[1]
    PDBTools.Atom with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
@@ -67,7 +67,7 @@ end
 Use the `wget` function to retrieve the atom data directly from the PDB database,
 optionally filtering the atoms with a selection:
 
-```
+```julia-repl
 julia> atoms = wget("1LBD","name CA")
    Array{Atom,1} with 238 atoms with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
@@ -85,7 +85,7 @@ julia> atoms = wget("1LBD","name CA")
 
 The `Atom` structure is mutable, meaning that the fields can be edited. For example:
 
-```julia
+```julia-repl
 julia> atoms = readPDB("file.pdb")
    Array{PDBTools.Atom,1} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
@@ -106,17 +106,15 @@ julia> atoms[1]
 Additionally, With the `edit!` function, you can directly edit or view the data in a
 vector of `Atoms` in your preferred text editor. 
 
-```julia
-
+```julia-repl
 julia> edit!(atoms)
 
 ```
 
-This will open a text editor, and we changed the data in the `resname` field of the first atom
+This will open a text editor. Here, we modified the data in the `resname` field of the first atom
 to `ABC`. Saving and closing the file will update the `atoms` array:
 
-```julia
-
+```julia-repl
 julia> atoms[1]
    PDBTools.Atom with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb

@@ -6,7 +6,7 @@ select atoms, and work with their coordinates.
 ### Features:
 
 > Simple data structure: 
-> ```julia
+> ```julia-repl
 >julia> atoms[1]
 >   PDBTools.Atom with fields:
 >   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb

@@ -2,13 +2,13 @@
 
 Install the package using the package manager:
 
-```julia
+```julia-repl
 julia> ] add PDBTools
 
 ```
 
 and load it with
-```julia
+```julia-repl
 julia> using PDBTools
 
 ```
