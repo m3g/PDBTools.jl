@@ -40,16 +40,30 @@ function selindex( atoms :: Vector{Atom}, selection :: String )
   return selindex(atoms, by = atom -> apply_query(query,atom))
 end
 
+#
+# Keywords that have to be disambiguated 
+#
+
+function disambiguate(selection)
+   ambiguous = [ "resname",   # because of "name"
+                 "segname",   # because of "name"
+                 "sidechain", # because of "chain"
+                 "nonpolar",  # because of "polar"
+               ]
+   s = selection
+   for str in ambiguous
+     s = replace(s, str => uppercase(str))
+   end
+   s
+end
+
 # parse_query and apply_query are a very gentle contribution given by 
 # CameronBieganek in https://discourse.julialang.org/t/parsing-selection-syntax/43632/9
 # while explaining to me how to creat a syntex interpreter
 
 function parse_query(selection)
   # disambiguate keywords
-  s = replace(selection,"resname" => "RESNAME")
-  s = replace(s,"segname" => "SEGNAME")
-  s = replace(s,"sidechain" => "SIDECHAIN")
-  s = replace(s,"nonpolar" => "NONPOLAR")
+  s = disambiguate(selection)
   try
     if occursin("or", s)
       (|, parse_query.(split(s, "or"))...)
