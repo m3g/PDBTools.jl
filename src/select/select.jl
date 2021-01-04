@@ -40,21 +40,132 @@ function selindex( atoms :: Vector{Atom}, selection :: String )
   return selindex(atoms, by = atom -> apply_query(query,atom))
 end
 
+# Comparison operators
+
+const operators = ( " = " =>  (x,y) -> isequal(x,y),
+                    " < " =>  (x,y) -> isless(x,y),
+                    " > " =>  (x,y) -> isless(y,x), 
+                    " <= " => (x,y) -> (! isless(y,x)),
+                    " >= " => (x,y) -> (! isless(x,y)),
+                   ) 
+
+using Parameters
+
+#
+# Numerical syntax keywords
+#
+
+@with_kw struct NumericalKeyword
+  syntax_name :: String
+  name :: String # Disambiguated if necessary
+  symbol :: Symbol
+  operations :: Tuple
+end
+
+function (key :: NumericalKeyword)(str)
+  @unpack name, operations, symbol = key
+  parse_keyword(name, str, op) = parse(Int, match(name*op*r"([0-9]*)", str)[1])  
+  for op in operations
+    if occursin(name*op.first, str)
+      k = parse_keyword(name,str,op.first)
+      return atom -> op.second(getfield(atom,symbol),k)
+    end
+  end
+  nothing
+end
+
+numerical_keywords = [ NumericalKeyword("index", "index", :index, operators), 
+                       NumericalKeyword("index_pdb", "index_pdb", :index_pdb, operators),
+                       NumericalKeyword("resnum", "resnum", :resnum, operators),
+                       NumericalKeyword("residue", "residue", :residue, operators),
+                       NumericalKeyword("b", "b", :b, operators),
+                       NumericalKeyword("occup", "occup", :occup, operators),
+                       NumericalKeyword("model", "model", :model, operators),
+                     ]
+
+#
+# String syntax keywords
+#
+
+@with_kw struct StringKeyword
+  syntax_name :: String
+  name :: String # Disambiguated if necessary
+  symbol :: Symbol
+  operations :: Tuple
+end
+
+function (key :: StringKeyword)(str)
+  @unpack name, operations, symbol = key
+  parse_keyword(name, str, op) = match(name*op*r"([A-Z,0-9]*)", str)[1] 
+  for op in operations
+    if occursin(name*op.first, str)
+      k = parse_keyword(name,str,op.first)
+      return atom -> op.second(getfield(atom,symbol),k)
+    end
+  end
+  nothing
+end
+
+string_keywords = [ StringKeyword("name", "name", :name, operators), 
+                    StringKeyword("segname", "SEGNAME", :segname, operators), 
+                    StringKeyword("resname", "RESNAME", :resname, operators), 
+                    StringKeyword("chain", "chain", :chain, operators), 
+                    StringKeyword("element", "element", :element, operators), 
+                  ]
+
+#
+# Special functions keywords
+#
+
+@with_kw struct SpecialKeyword
+  syntax_name :: String
+  name :: String # Disambiguated if necessary
+  fname :: Function
+end
+
+(key :: SpecialKeyword)(str) = key.fname
+
+special_keywords = [ SpecialKeyword("water", "water", iswater), 
+                     SpecialKeyword("protein", "protein", isprotein), 
+                     SpecialKeyword("polar", "polar", ispolar), 
+                     SpecialKeyword("nonpolar", "NONPOLAR", isnonpolar), 
+                     SpecialKeyword("basic", "basic", isbasic), 
+                     SpecialKeyword("isacidic", "isacidic", isacidic), 
+                     SpecialKeyword("charged", "charged", ischarged), 
+                     SpecialKeyword("aliphatic", "aliphatic", isaliphatic), 
+                     SpecialKeyword("aromatic", "aromatic", isaromatic), 
+                     SpecialKeyword("hydrophobic", "hydrophobic", ishydrophobic), 
+                     SpecialKeyword("neutral", "neutral", isneutral), 
+                     SpecialKeyword("backbone", "backbone", isbackbone), 
+                     SpecialKeyword("sidechain", "SIDECHAIN", issidechain), 
+                     SpecialKeyword("all", "all", isequal), 
+                   ]
+
+#
+# Remove trailing and multiple spaces
+#
+
+function remove_spaces(str)
+  str = split(str)
+  s = str[1]
+  for i in 2:length(str)
+    s = s*' '*str[i]
+  end
+  s
+end
+
 #
 # Keywords that have to be disambiguated 
 #
 
 function disambiguate(selection)
-   ambiguous = [ "resname",   # because of "name"
-                 "segname",   # because of "name"
-                 "sidechain", # because of "chain"
-                 "nonpolar",  # because of "polar"
-               ]
-   s = selection
-   for str in ambiguous
-     s = replace(s, str => uppercase(str))
-   end
-   s
+  for key in numerical_keywords
+    selection = replace(selection,key.syntax_name => key.name)
+  end
+  for key in string_keywords
+    selection = replace(selection,key.syntax_name => key.name)
+  end
+  s
 end
 
 # parse_query and apply_query are a very gentle contribution given by 
@@ -63,7 +174,8 @@ end
 
 function parse_query(selection)
   # disambiguate keywords
-  s = disambiguate(selection)
+  s = remove_spaces(selection) 
+  s = disambiguate(s)
   try
     if occursin("or", s)
       (|, parse_query.(split(s, "or"))...)
@@ -73,162 +185,17 @@ function parse_query(selection)
       rest = match(r".*not(.*)", s)[1]
       (!, parse_query(rest))
 
-    # Index 
-    elseif occursin("index =", s)
-      k = parse(Int, match(r"index = ([0-9]*)", s)[1])
-      a -> a.index == k
-    elseif occursin("index < ", s)
-      k = parse(Int, match(r"index < ([0-9]*)", s)[1])
-      a -> a.index < k
-    elseif occursin("index > ", s)
-      k = parse(Int, match(r"index > ([0-9]*)", s)[1])
-      a -> a.index > k
-    elseif occursin("index <=", s)
-      k = parse(Int, match(r"index <= ([0-9]*)", s)[1])
-      a -> a.index <= k
-    elseif occursin("index >=", s)
-      k = parse(Int, match(r"index >= ([0-9]*)", s)[1])
-      a -> a.index >= k
-
-    # Index as written in the PDB file
-    elseif occursin("index_pdb =", s)
-      k = parse(Int, match(r"index_pdb = ([0-9]*)", s)[1])
-      a -> a.index_pdb == k
-    elseif occursin("index_pdb < ", s)
-      k = parse(Int, match(r"index_pdb < ([0-9]*)", s)[1])
-      a -> a.index_pdb < k
-    elseif occursin("index_pdb > ", s)
-      k = parse(Int, match(r"index_pdb > ([0-9]*)", s)[1])
-      a -> a.index_pdb > k
-    elseif occursin("index_pdb <=", s)
-      k = parse(Int, match(r"index_pdb <= ([0-9]*)", s)[1])
-      a -> a.index_pdb <= k
-    elseif occursin("index_pdb >=", s)
-      k = parse(Int, match(r"index_pdb >= ([0-9]*)", s)[1])
-      a -> a.index_pdb >= k
-
-    # Resiue number (as writtein in PDB)
-    elseif occursin("resnum =", s)
-      k = parse(Int, match(r"resnum = ([0-9]*)", s)[1])
-      a -> a.resnum == k
-    elseif occursin("resnum < ", s)
-      k = parse(Int, match(r"resnum < ([0-9]*)", s)[1])
-      a -> a.resnum < k
-    elseif occursin("resnum > ", s)
-      k = parse(Int, match(r"resnum > ([0-9]*)", s)[1])
-      a -> a.resnum > k
-    elseif occursin("resnum <=", s)
-      k = parse(Int, match(r"resnum <= ([0-9]*)", s)[1])
-      a -> a.resnum <= k
-    elseif occursin("resnum >=", s)
-      k = parse(Int, match(r"resnum >= ([0-9]*)", s)[1])
-      a -> a.resnum >= k
-
-    # Resiue number (sequential)
-    elseif occursin("residue =", s)
-      k = parse(Int, match(r"residue = ([0-9]*)", s)[1])
-      a -> a.residue == k
-    elseif occursin("residue < ", s)
-      k = parse(Int, match(r"residue < ([0-9]*)", s)[1])
-      a -> a.residue < k
-    elseif occursin("residue > ", s)
-      k = parse(Int, match(r"residue > ([0-9]*)", s)[1])
-      a -> a.residue > k
-    elseif occursin("residue <=", s)
-      k = parse(Int, match(r"residue <= ([0-9]*)", s)[1])
-      a -> a.residue <= k
-    elseif occursin("residue >=", s)
-      k = parse(Int, match(r"residue >= ([0-9]*)", s)[1])
-      a -> a.residue >= k
-
-    # b factor
-    elseif occursin("b =", s)
-      b = parse(Float64, match(r"b = ([0-9]*)", s)[1])
-      a -> a.b == k
-    elseif occursin("b >", s)
-      b = parse(Float64,match(r"b > ([.,0-9]*)", s)[1])
-      a -> a.b > b
-    elseif occursin("b <", s)
-      b = parse(Float64,match(r"b < ([.,0-9]*)", s)[1])
-      a -> a.b < b
-    elseif occursin("b <=", s)
-      b = parse(Float64,match(r"b <= ([.,0-9]*)", s)[1])
-      a -> a.b <= b
-    elseif occursin("b >=", s)
-      b = parse(Float64,match(r"b >= ([.,0-9]*)", s)[1])
-      a -> a.b >= b
-    
-    # occup
-    elseif occursin("occup =", s)
-      occup = parse(Float64, match(r"occup = ([0-9]*)", s)[1])
-      a -> a.b == k
-    elseif occursin("occup >", s)
-      occup = parse(Float64,match(r"occup > ([.,0-9]*)", s)[1])
-      a -> a.b > occup
-    elseif occursin("occup <", s)
-      occup = parse(Float64,match(r"occup < ([.,0-9]*)", s)[1])
-      a -> a.b < occup
-    elseif occursin("occup <=", s)
-      occup = parse(Float64,match(r"occup <= ([.,0-9]*)", s)[1])
-      a -> a.b <= occup 
-    elseif occursin("occup >=", s)
-      occup = parse(Float64,match(r"occup >= ([.,0-9]*)", s)[1])
-      a -> a.b >= occup
-
-    # Names etc.
-    elseif occursin("name", s)
-      name = match(r"name ([A-Z,0-9]*)", s)[1]
-      a -> a.name == name
-    elseif occursin("SEGNAME", s)
-      segname = match(r"SEGNAME ([A-Z,0-9]*)", s)[1]
-      a -> a.segname == segname
-    elseif occursin("RESNAME", s)
-      resname = match(r"RESNAME ([A-Z,0-9]*)", s)[1]
-      a -> a.resname == resname
-    elseif occursin("chain", s)
-      chain = match(r"chain ([A-Z,0-9]*)", s)[1]
-      a -> a.chain == chain
-    elseif occursin("model", s)
-      model = parse(Int,match(r"model ([0-9]*)", s)[1])
-      a -> a.model == model
-    elseif occursin("element", s)
-      el = match(r"element ([A-Z]*)", s)[1]
-      a -> element(a.name) == el
-
-    # Special functions 
-    elseif occursin("water", s)
-      iswater
-    elseif occursin("protein", s)
-      isprotein
-    elseif occursin("polar", s)
-      ispolar
-    elseif occursin("NONPOLAR", s)
-      isnonpolar
-    elseif occursin("basic", s)
-      isbasic
-    elseif occursin("acidic", s)
-      isacidic
-    elseif occursin("charged", s)
-      ischarged
-    elseif occursin("aliphatic", s)
-      isaliphatic
-    elseif occursin("aromatic", s)
-      isaromatic
-    elseif occursin("hydrophobic", s)
-      ishydrophobic
-    elseif occursin("neutral", s)
-      isneutral
-    elseif occursin("backbone", s)
-      isbackbone
-    elseif occursin("SIDECHAIN", s)
-      issidechain
-
-    # Select everything
-    elseif occursin("all", s)
-      a -> true
-
-    # None found
+    # keywords 
     else
+      for key in numerical_keywords
+        occursin(key.name, s) && return key(s)
+      end
+      for key in string_keywords
+        occursin(key.name, s) && return key(s)
+      end
+      for key in special_keywords
+        occursin(key.name, s) && return key(s)
+      end
       parse_error()
     end
 
