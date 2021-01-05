@@ -6,7 +6,7 @@
 # Main function: receives the atoms vector and a julia function to select
 
 function select( atoms :: Vector{Atom}; by=all)
-  selected_atoms = typeof(atoms)(undef,0)
+  selected_atoms = Atom[]
   for atom in atoms
     if by(atom)
       push!(selected_atoms,atom)
@@ -46,8 +46,7 @@ const operators = ( " = " =>  (x,y) -> isequal(x,y),
                     " < " =>  (x,y) -> isless(x,y),
                     " > " =>  (x,y) -> isless(y,x), 
                     " <= " => (x,y) -> (! isless(y,x)),
-                    " >= " => (x,y) -> (! isless(x,y)),
-                   ) 
+                    " >= " => (x,y) -> (! isless(x,y)) ) 
 
 using Parameters
 
@@ -55,91 +54,89 @@ using Parameters
 # Numerical syntax keywords
 #
 
-@with_kw struct NumericalKeyword
-  syntax_name :: String
-  name :: String # Disambiguated if necessary
+struct NumericalKeyword
+  name :: String
   symbol :: Symbol
   operations :: Tuple
 end
 
-function (key :: NumericalKeyword)(str)
-  @unpack name, operations, symbol = key
-  parse_keyword(name, str, op) = parse(Int, match(name*op*r"([0-9]*)", str)[1])  
-  for op in operations
-    if occursin(name*op.first, str)
-      k = parse_keyword(name,str,op.first)
-      return atom -> op.second(getfield(atom,symbol),k)
-    end
-  end
-  nothing
+function parse_keyword(key::NumericalKeyword,str,op) 
+  return parse(Int, match(key.name*op*r"([0-9]*)", str)[1])   
 end
-
-numerical_keywords = [ NumericalKeyword("index", "index", :index, operators), 
-                       NumericalKeyword("index_pdb", "index_pdb", :index_pdb, operators),
-                       NumericalKeyword("resnum", "resnum", :resnum, operators),
-                       NumericalKeyword("residue", "residue", :residue, operators),
-                       NumericalKeyword("b", "b", :b, operators),
-                       NumericalKeyword("occup", "occup", :occup, operators),
-                       NumericalKeyword("model", "model", :model, operators),
-                     ]
 
 #
 # String syntax keywords
 #
 
-@with_kw struct StringKeyword
-  syntax_name :: String
-  name :: String # Disambiguated if necessary
+struct StringKeyword
+  name :: String
   symbol :: Symbol
   operations :: Tuple
 end
 
-function (key :: StringKeyword)(str)
-  @unpack name, operations, symbol = key
-  parse_keyword(name, str, op) = match(name*op*r"([A-Z,0-9]*)", str)[1] 
-  for op in operations
-    if occursin(name*op.first, str)
-      k = parse_keyword(name,str,op.first)
-      return atom -> op.second(getfield(atom,symbol),k)
-    end
-  end
-  nothing
+function parse_keyword(key::StringKeyword,str,op) 
+  return match(key.name*op*r"([A-Z,0-9]*)", str)[1] 
 end
 
-string_keywords = [ StringKeyword("name", "name", :name, operators), 
-                    StringKeyword("segname", "SEGNAME", :segname, operators), 
-                    StringKeyword("resname", "RESNAME", :resname, operators), 
-                    StringKeyword("chain", "chain", :chain, operators), 
-                    StringKeyword("element", "element", :element, operators), 
+#
+# Function that returns the anonymous functions that evaluates if a condition
+# is satisfied or not for a given atom, given numerical or string keywords
+#
+
+function getfunc(key::T, str) where T <: Union{NumericalKeyword,StringKeyword}
+  @unpack name, operations, symbol = key
+  for op in operations
+    if occursin(name*op.first, str)
+      val = parse_keyword(key,str,op.first)
+      return atom -> op.second(getfield(atom,symbol),val)
+    end
+  end
+  # If got here, no operator was found, then we assume is is an implicit equal
+  val = parse_keyword(key,str," ")
+  return atom -> isequal(getfield(atom,symbol),val)
+end
+
+numerical_keywords = [ NumericalKeyword("index", :index, operators), 
+                       NumericalKeyword("index_pdb",  :index_pdb, operators),
+                       NumericalKeyword("resnum", :resnum, operators),
+                       NumericalKeyword("residue", :residue, operators),
+                       NumericalKeyword("b", :b, operators),
+                       NumericalKeyword("occup", :occup, operators),
+                       NumericalKeyword("model", :model, operators),
+                     ]
+
+string_keywords = [ StringKeyword("name", :name, operators), 
+                    StringKeyword("segname", :segname, operators), 
+                    StringKeyword("resname", :resname, operators), 
+                    StringKeyword("chain", :chain, operators), 
+                    StringKeyword("element", :element, operators), 
                   ]
 
 #
 # Special functions keywords
 #
 
-@with_kw struct SpecialKeyword
-  syntax_name :: String
-  name :: String # Disambiguated if necessary
+struct MacroKeyword
+  name :: String
   fname :: Function
 end
+getfunc(key::MacroKeyword,str) = key.fname
 
-(key :: SpecialKeyword)(str) = key.fname
-
-special_keywords = [ SpecialKeyword("water", "water", iswater), 
-                     SpecialKeyword("protein", "protein", isprotein), 
-                     SpecialKeyword("polar", "polar", ispolar), 
-                     SpecialKeyword("nonpolar", "NONPOLAR", isnonpolar), 
-                     SpecialKeyword("basic", "basic", isbasic), 
-                     SpecialKeyword("isacidic", "isacidic", isacidic), 
-                     SpecialKeyword("charged", "charged", ischarged), 
-                     SpecialKeyword("aliphatic", "aliphatic", isaliphatic), 
-                     SpecialKeyword("aromatic", "aromatic", isaromatic), 
-                     SpecialKeyword("hydrophobic", "hydrophobic", ishydrophobic), 
-                     SpecialKeyword("neutral", "neutral", isneutral), 
-                     SpecialKeyword("backbone", "backbone", isbackbone), 
-                     SpecialKeyword("sidechain", "SIDECHAIN", issidechain), 
-                     SpecialKeyword("all", "all", isequal), 
-                   ]
+macro_keywords = [ MacroKeyword("water", iswater), 
+                   MacroKeyword("protein", isprotein), 
+                   MacroKeyword("polar", ispolar), 
+                   MacroKeyword("nonpolar", isnonpolar), 
+                   MacroKeyword("basic", isbasic), 
+                   MacroKeyword("acidic", isacidic), 
+                   MacroKeyword("charged", ischarged), 
+                   MacroKeyword("aliphatic", isaliphatic), 
+                   MacroKeyword("aromatic", isaromatic), 
+                   MacroKeyword("hydrophobic", ishydrophobic), 
+                   MacroKeyword("neutral", isneutral), 
+                   MacroKeyword("backbone", isbackbone), 
+                   MacroKeyword("sidechain", issidechain), 
+                   MacroKeyword("all", isequal), 
+                 ]
 
 #
 # Remove trailing and multiple spaces
@@ -151,21 +148,7 @@ function remove_spaces(str)
   for i in 2:length(str)
     s = s*' '*str[i]
   end
-  s
-end
-
-#
-# Keywords that have to be disambiguated 
-#
-
-function disambiguate(selection)
-  for key in numerical_keywords
-    selection = replace(selection,key.syntax_name => key.name)
-  end
-  for key in string_keywords
-    selection = replace(selection,key.syntax_name => key.name)
-  end
-  s
+  return " "*s*" "
 end
 
 # parse_query and apply_query are a very gentle contribution given by 
@@ -173,28 +156,29 @@ end
 # while explaining to me how to creat a syntex interpreter
 
 function parse_query(selection)
-  # disambiguate keywords
+  # Remove spaces
   s = remove_spaces(selection) 
-  s = disambiguate(s)
+
+  # Parse syntax
   try
-    if occursin("or", s)
+    if occursin(" or ", s)
       (|, parse_query.(split(s, "or"))...)
-    elseif occursin("and", s)
+    elseif occursin(" and ", s)
       (&, parse_query.(split(s, "and"))...)
-    elseif occursin("not", s)
+    elseif occursin(" not ", s)
       rest = match(r".*not(.*)", s)[1]
       (!, parse_query(rest))
 
     # keywords 
     else
       for key in numerical_keywords
-        occursin(key.name, s) && return key(s)
+        occursin(" "*key.name*" ", s) && return getfunc(key,s)
       end
       for key in string_keywords
-        occursin(key.name, s) && return key(s)
+        occursin(" "*key.name*" ", s) && return getfunc(key,s)
       end
-      for key in special_keywords
-        occursin(key.name, s) && return key(s)
+      for key in macro_keywords
+        occursin(" "*key.name*" ", s) && return getfunc(key,s)
       end
       parse_error()
     end

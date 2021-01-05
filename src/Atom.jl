@@ -38,7 +38,7 @@ function Base.show( io :: IO, atom :: Atom)
 end
 
 function Base.show( io :: IO,::MIME"text/plain", atoms :: Vector{Atom} )
-  println("   Array{$(typeof(atoms[1])),1} with $(length(atoms)) atoms with fields:")
+  println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
   print_atom_title()
   for i in 1:min(length(atoms),3)
     atom = atoms[i]
