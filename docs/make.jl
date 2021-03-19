@@ -16,7 +16,7 @@ makedocs(
     ]
 )
 deploydocs(
-    repo = "github.com/m3g/PDBTools.git",
+    repo = "github.com/m3g/PDBTools.jl.git",
     target = "build",
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#" ],
