@@ -31,14 +31,10 @@ print_atom_line(atom :: Atom) =
            atom.index, atom.name, atom.resname, atom.chain, atom.resnum, atom.residue, 
            atom.x, atom.y, atom.z, atom.b, atom.occup, atom.model, atom.segname, atom.index_pdb)
 
-function Base.show( io :: IO, atom :: Atom)
-  println("   $(typeof(atom)) with fields:")
-  print_atom_title()
-  print_atom_line(atom)
-end
-
-function Base.show( io :: IO,::MIME"text/plain", atoms :: AbstractVector{Atom} )
-  println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
+#
+# Print a formatted list of atoms
+#
+function print_short_atom_list(atoms::AbstractVector{Atom})
   print_atom_title()
   for i in 1:min(length(atoms),3)
     atom = atoms[i]
@@ -51,4 +47,15 @@ function Base.show( io :: IO,::MIME"text/plain", atoms :: AbstractVector{Atom} )
     atom = atoms[i]
     print_atom_line(atom)
   end
+end
+
+function Base.show( io :: IO, atom :: Atom)
+  println("   $(typeof(atom)) with fields:")
+  print_atom_title()
+  print_atom_line(atom)
+end
+
+function Base.show( io :: IO,::MIME"text/plain", atoms :: AbstractVector{Atom} )
+  println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
+  print_short_atom_list(atoms)
 end
