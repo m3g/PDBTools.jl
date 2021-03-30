@@ -50,7 +50,6 @@ function print_short_atom_list(atoms::AbstractVector{Atom})
 end
 
 function Base.show( io :: IO, atom :: Atom)
-  println("   $(typeof(atom)) with fields:")
   print_atom_title()
   print_atom_line(atom)
 end

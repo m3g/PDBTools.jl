@@ -1,8 +1,13 @@
-
 module PDBTools
 
   using Printf
   using InteractiveUtils
+
+  export readPDB, writePDB, getseq, wget, edit!
+  export Atom
+  export Residue, eachresidue
+  export coor, maxmin
+  export atomic_number, element, mass, name
 
   #
   # Data structures
@@ -10,6 +15,7 @@ module PDBTools
   include("./empty_struct.jl")
   include("./Atom.jl")
   include("./Indexes_mmCIF_fields.jl")
+  include("./Residue.jl")
 
   #
   # Input and output functions
@@ -28,17 +34,13 @@ module PDBTools
   include("./maxmin.jl")
   include("./same_residue.jl")
   include("./wget.jl")
-  export readPDB, writePDB, getseq, wget, edit!
-  export coor, maxmin
 
   # Element properties
   include("./elements.jl")
   include("./atom_properties.jl")
-  export atomic_number, element, mass, name
 
   # For selections
   include("./select/select_includes.jl")
   include("./alternate_conformation.jl")
 
 end
-
