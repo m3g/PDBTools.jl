@@ -37,7 +37,7 @@ function Base.show( io :: IO, atom :: Atom)
   print_atom_line(atom)
 end
 
-function Base.show( io :: IO,::MIME"text/plain", atoms :: Vector{Atom} )
+function Base.show( io :: IO,::MIME"text/plain", atoms :: AbstractVector{Atom} )
   println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
   print_atom_title()
   for i in 1:min(length(atoms),3)
