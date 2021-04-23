@@ -13,13 +13,13 @@ julia> printatom(atoms[1])
 julia> mass(atoms[1])
 14.0067
 
-julia> name(atoms[1])
-"Nitrogen"
-
 julia> atomic_number(atoms[1])
 7
 
 julia> element(atoms[1])
 "N"
+
+julia> element_name(atoms[1])
+"Nitrogen"
 
 ```

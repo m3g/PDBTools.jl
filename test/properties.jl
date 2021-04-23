@@ -19,10 +19,13 @@
   @test m.xmin ≈ [-14.18, -17.561, -15.369]
   @test m.xmax ≈ [18.694, 14.182, 15.909]
   @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278]
-  @test coor(select(atoms,"residue = 3")) ==
+  s = select(atoms,"residue = 3")
+  r = Residue(select(atoms,"residue = 3"))  
+  @test coor(s) ==
           [  -4.383   -4.51    -3.903   -3.731   -4.938  -4.417  -5.543   -5.867   -5.451   -6.974   -2.626   -1.94
             -11.903  -11.263  -11.262  -12.076  -10.279  -9.552  -9.911  -10.85   -10.837  -11.289  -10.48   -10.014
              -6.849   -6.096   -8.062   -8.767   -8.612  -9.06   -7.784   -9.684  -10.863   -9.3     -7.749   -8.658 ]
+  @test coor(s) == coor(r)
   @test coor(select(atoms,"residue = 3"),column_based=false)' == coor(select(atoms,"residue = 3"))
   @test PDBTools.same_residue(atoms[1],atoms[2]) == true
   @test PDBTools.same_residue(atoms[1],atoms[20]) == false

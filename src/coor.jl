@@ -34,6 +34,10 @@ function coor(atoms::Vector{Atom}; only=all, column_based::Bool=true)
   return x
 end
 
+#
 # Coordinates of the atoms of a residue/molecule
-coor(residue::Residue; column_based::Bool=true) = 
-  coor(residue.atoms, only = atom -> (atom.index in residue.range), column_based=column_based)
+#
+coor(residue::Residue; only=all, column_based::Bool=true) = 
+  coor(residue.atoms, only=only, column_based=column_based)
+coor(residue::Residue, selection::String; column_based::Bool=true) = 
+  coor(residue.atoms, selection, column_based=column_based)
