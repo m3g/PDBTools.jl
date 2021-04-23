@@ -47,10 +47,9 @@ element(atom::Atom) = element(atom.name)
 
 mass(name::String) = elements[element_index(name)].mass
 mass(atom::Atom) = mass(atom.name)
-mass(atoms::Vector{Atom}) = sum(at -> mass(at), atoms)
+mass(atoms::AbstractVector{Atom}) = sum(mass(atoms[i]) for i in eachindex(atoms))
 
-name(name::String) = elements[element_index(name)].name
-name(atom::Atom) = name(atom.name)
-
+element_name(name::String) = elements[element_index(name)].name  
+element_name(atom::Atom) = element_name(atom.name) 
 
 

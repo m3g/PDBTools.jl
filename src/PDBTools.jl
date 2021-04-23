@@ -4,11 +4,11 @@ module PDBTools
   using InteractiveUtils
 
   export readPDB, writePDB, getseq, wget, edit!
-  export Atom, printatom
+  export Atom, printatom, name
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname
   export coor, maxmin
-  export atomic_number, element, mass, name
+  export atomic_number, element, mass, element_name
 
   #
   # Data structures

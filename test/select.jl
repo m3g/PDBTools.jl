@@ -65,11 +65,11 @@
 
   # Residue properties (discontinous set)
   lessresidues = select(someresidues,"residue < 3 or residue > 12")
-  @test residue.(eachresidue(lessresidues)) = [1, 2, 13, 14]
-  @test resnum.(eachresidue(lessresidues)) = [1, 2, 13, 14]
-  @test name.(eachresidue(lessresidues)) = ["ALA", "CYS", "SER", "SER"]
-  @test resname.(eachresidue(lessresidues)) = ["ALA", "CYS", "SER", "SER"]
-  @test chain.(eachresidue(lessresidues)) = ["A", "A", "A", "A"]
-  @test model.(eachresidue(lessresidues)) = [1, 1, 1, 1]
+  @test residue.(eachresidue(lessresidues)) == [1, 2, 13, 14]
+  @test resnum.(eachresidue(lessresidues)) == [1, 2, 13, 14]
+  @test name.(eachresidue(lessresidues)) == ["ALA", "CYS", "SER", "SER"]
+  @test resname.(eachresidue(lessresidues)) == ["ALA", "CYS", "SER", "SER"]
+  @test chain.(eachresidue(lessresidues)) == ["A", "A", "A", "A"]
+  @test model.(eachresidue(lessresidues)) == [1, 1, 1, 1]
 
 end

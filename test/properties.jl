@@ -2,13 +2,13 @@
 
   atoms = readPDB("./structure.pdb","protein")
   
-  @test mass(atoms) == 22454.638340000096
+  @test mass(atoms) ≈ 22454.638340000096
   @test element.(select(atoms,"residue = 1")) == ["N", "H", "H", "H", "C", "H", 
                                                   "C", "H", "H", "H", "C", "O" ] 
-  @test name.(select(atoms,"residue = 1")) == [ "Nitrogen", "Hydrogen", "Hydrogen",
-                                                "Hydrogen", "Carbon", "Hydrogen",
-                                                "Carbon", "Hydrogen", "Hydrogen",
-                                                "Hydrogen", "Carbon", "Oxygen" ]
+  @test element_name.(select(atoms,"residue = 1")) == [ "Nitrogen", "Hydrogen", "Hydrogen",
+                                                        "Hydrogen", "Carbon", "Hydrogen",
+                                                        "Carbon", "Hydrogen", "Hydrogen",
+                                                        "Hydrogen", "Carbon", "Oxygen" ]
   @test atomic_number.(select(atoms,"residue = 1")) == [ 7, 1, 1, 1, 6, 1, 6, 1,
                                                          1, 1, 6, 8 ]
   @test length(eachresidue(atoms)) == 104

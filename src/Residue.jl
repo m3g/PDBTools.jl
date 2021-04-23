@@ -53,6 +53,7 @@ resnum(residue::Residue) = residue.resnum
 chain(residue::Residue) = residue.chain
 model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
+mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
 function Residue(atoms::AbstractVector{Atom},range::UnitRange{Int})
   i = range[begin]
