@@ -11,22 +11,6 @@ compose the residue.
 The purpose of this structure is the create an iterator over the residues of a
 vector of atoms.
 
-### Example
-
-```julia-repl
-
-julia> atoms = readPDB("../test/structure.pdb","protein");
-
-julia> for res in eachresidue(atoms)
-         name(res) == "ALA" && println(res[1])
-       end
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
-     232    N     ALA     A       19       19   -6.690   -3.943    3.356  0.00  1.00     1    PROT       232
-
-```
 
 """
 struct Residue{T<:AbstractVector{Atom}}
@@ -42,6 +26,43 @@ range(residue::Residue) = residue.range
 struct EachResidue{T<:AbstractVector{Atom}}
   atoms::T
 end
+
+"""
+
+`eachresidue(atoms::AbstractVector{Atom})`
+
+Iterator for the residues (or molecules) of a selection. 
+
+### Example
+
+```julia-repl
+julia> atoms = wget("1LBD");
+
+julia> length(eachresidue(atoms))
+238
+
+julia> for res in eachresidue(atoms)
+         println(res)
+       end
+ Residue of name SER with 6 atoms.
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
+       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
+       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
+       4    O     SER     A      225        1   45.823   80.796   69.974 64.85  1.00     1       -         4
+       5   CB     SER     A      225        1   47.147   82.980   71.413 70.79  1.00     1       -         5
+       6   OG     SER     A      225        1   46.541   82.639   72.662 73.55  1.00     1       -         6
+
+ Residue of name ALA with 5 atoms.
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       7    N     ALA     A      226        2   43.940   81.982   70.474 67.09  1.00     1       -         7
+       8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
+       9    C     ALA     A      226        2   41.996   80.878   69.340 59.69  1.00     1       -         9
+                                                      ...
+
+```
+
+"""
 eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
 
 # Collect residues default constructor
