@@ -1,7 +1,53 @@
-#
-# Structure that contains the atom properties. It is mutable, so it can be edited.
-#
+"""
 
+`Atom` data type.
+
+Structure that contains the atom properties. It is mutable, so it can be edited. 
+Fields:
+
+```
+struct Atom
+  index :: Int64 # The sequential index of the atoms in the file
+  index_pdb :: Int64 # The index as written in the PDB file (might be anything)
+  name :: String # Atom name
+  resname :: String # Residue name
+  chain :: String # Chain identifier
+  resnum :: Int64 # Number of residue as written in PDB file
+  residue :: Int64 # Sequential residue (molecule) number in file
+  x :: Float64 # x coordinate
+  y :: Float64 # y coordinate
+  z :: Float64 # z coordinate
+  b :: Float64 # temperature factor
+  occup :: Float64 # occupancy
+  model :: Int64 # model number
+  segname :: String # Segment name (cols 73:76)
+end
+```
+
+### Example
+
+```julia-repl
+julia> pdb = wget("1LBD");
+
+julia> printatom(pdb[1])
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     ALA     P        1        1    2.062  -13.995   21.747  0.00  1.00     1    PROT         1
+
+julia> pdb[1].resname
+"ALA"
+
+julia> pdb[1].chain
+"P"
+
+julia> element(pdb[1])
+"N"
+
+julia> mass(pdb[1])
+14.0067
+
+```
+
+"""
 mutable struct Atom
   index :: Int64 # The sequential index of the atoms in the file
   index_pdb :: Int64 # The index as written in the PDB file (might be anything)
