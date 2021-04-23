@@ -39,10 +39,13 @@ range(residue::Residue) = residue.range
 #
 # Structure and function to define the eachresidue iterator
 #
-struct EachResidue
-  atoms::AbstractVector{Atom}
+struct EachResidue{T<:AbstractVector{Atom}}
+  atoms::T
 end
 eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
+
+# Collect residues default constructor
+Base.collect(r::EachResidue) = collect(Residue,r)
 
 #
 # Iterate over the resiudes
@@ -59,6 +62,18 @@ function Base.iterate(residues::EachResidue, state=1)
     r1 += 1
   end
   return (Residue(residues.atoms,r0:r1-1),r1)
+end
+
+#
+# Iterate over atoms of one residue
+#
+function Base.iterate(residue::Residue, state=1)
+  i1 = residue.range[begin] + state - 1
+  if i1 <= residue.range[end]
+    return (residue.atoms[i1],state+1)
+  else
+    return nothing
+  end
 end
 
 #
@@ -89,4 +104,10 @@ end
 function Base.show(io::IO, residues::EachResidue)
   println(" Iterator with $(length(residues)) residues.")
 end
+
+function Base.show( io :: IO,::MIME"text/plain", residues::AbstractVector{Residue} )
+  println("   Array{Residue,1} with $(length(residues)) residues.")
+end
+
+
 

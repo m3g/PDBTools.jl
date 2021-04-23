@@ -4,7 +4,7 @@ module PDBTools
   using InteractiveUtils
 
   export readPDB, writePDB, getseq, wget, edit!
-  export Atom
+  export Atom, printatom
   export Residue, eachresidue
   export coor, maxmin
   export atomic_number, element, mass, name

@@ -48,4 +48,19 @@
   atoms[1].index = 0
   @test atoms[1].index == 0
 
+  # Test residue iterator
+  someresidues = select(atoms,"residue < 15")
+  n = 0
+  m = 0.
+  for res in eachresidue(someresidues)
+    if name(res) == "SER"
+      n += 1
+      for atom in res
+        m += mass(atom)
+      end
+    end
+  end
+  @test n == 4
+  @test m ≈ 348.31340000000006
+
 end
