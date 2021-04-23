@@ -1,7 +1,7 @@
 #
 # Retrive index of element in elements list from name. Returns 1 (element "X" of list) of not found
 #
-function element_index(name :: String)
+function element_index(name::String)
 
   # If the residue name doesn't have at least three letters, this is not a protein atom
   len = length(name)

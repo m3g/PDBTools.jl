@@ -64,8 +64,19 @@ mutable struct Atom
   model :: Int64
   segname :: String # Segment name (cols 73:76)
 end
-
 Atom() = empty_struct(Atom)
+
+index(atom::Atom) = atom.index
+index_pdb(atom::Atom) = atom.index_pdb
+name(atom::Atom) = atom.name
+resname(atom::Atom) = atom.resname
+chain(atom::Atom) = atom.chain
+resnum(atom::Atom) = atom.resnum
+residue(atom::Atom) = atom.residue
+bfac(atom::Atom) = atom.b
+occup(atom::Atom) = atom.occup
+model(atom::Atom) = atom.model
+segname(atom::Atom) = atom.segname
 
 const atom_title = 
   @sprintf("%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",

@@ -5,7 +5,8 @@ module PDBTools
 
   export readPDB, writePDB, getseq, wget, edit!
   export Atom, printatom
-  export Residue, eachresidue
+  export Residue, eachresidue, resname, residue, resnum, 
+         chain, model, segname
   export coor, maxmin
   export atomic_number, element, mass, name
 

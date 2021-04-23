@@ -8,17 +8,72 @@ Residue data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
 compose the residue.
 
-The purpose of this structure is the create an iterator over the residues of a
-vector of atoms.
+The Residue structure carries the properties of the residue or molecule of the atoms
+it contains, but it does not copy the original vector of atoms, only the residue
+meta data for each residue.
 
+### Example
+
+```julia-repl
+julia> pdb = wget("1LBD");
+
+julia> residues = collect(eachresidue(pdb))
+   Array{Residue,1} with 238 residues.
+
+julia> resnum.(residues[1:3])
+3-element Vector{Int64}:
+ 225
+ 226
+ 227
+
+julia> residues[5].chain
+"A"
+
+julia> residues[8].range
+52:58
+
+```
 
 """
 struct Residue{T<:AbstractVector{Atom}}
   atoms::T
   range::UnitRange{Int}
+  name::String
+  resname::String
+  residue::Int
+  resnum::Int
+  chain::String
+  model::Int
+  segname::String
 end
-name(residue::Residue) = residue[1].resname
-range(residue::Residue) = residue.range
+name(residue::Residue) = residue.name
+resname(residue::Residue) = residue.resname
+residue(residue::Residue) = residue.residue
+resnum(residue::Residue) = residue.resnum
+chain(residue::Residue) = residue.chain
+model(residue::Residue) = residue.model
+segname(residue::Residue) = residue.segname
+
+function Residue(atoms::AbstractVector{Atom},range::UnitRange{Int})
+  i = range[begin]
+  # Check if the range effectivelly corresponds to a single residue (unsafe check)
+  for j in range[begin]+1:range[end]
+    if atoms[j].residue != atoms[i].residue
+      error("Range $range does not correspond to a single residue or molecule.")
+    end
+  end
+  Residue(atoms,range,
+          atoms[i].resname, atoms[i].resname, atoms[i].residue,
+          atoms[i].resnum, atoms[i].chain, atoms[i].model, atoms[i].segname)
+end
+Residue(atoms::AbstractVector{Atom}) = Residue(atoms,1:length(atoms))
+
+function Base.getindex(residue::Residue,i) 
+  @assert i > 0 "Index must be in 1:$(residue.range[end]-residue.range[begin])"
+  @assert (i <= length(residue.range)) "Residue has $(residue.range[end]-residue.range[begin]+1) atoms."
+  i = residue.range[begin] + i - 1
+  residue.atoms[i]
+end
 
 #
 # Structure and function to define the eachresidue iterator
@@ -100,22 +155,11 @@ end
 #
 # Length of the eachresidue iterator (number of residues)
 #
-function Base.length(residues::EachResidue)
-  n = 0
-  for residue in residues
-    n += 1
-  end
-  n
-end
+Base.length(residues::EachResidue) = sum( 1 for residue in residues )
 
-import Base.getindex
-function getindex(residue::Residue,i) 
-  @assert i > 0 "Index must be in 1:$(residue.range[end]-residue.range[begin])"
-  @assert (i <= length(residue.range)) "Residue has $(residue.range[end]-residue.range[begin]+1) atoms."
-  i = residue.range[begin] + i - 1
-  residue.atoms[i]
-end
-
+#
+# io show functions
+#
 function Base.show(io::IO, residue::Residue)
   natoms = residue.range[end]-residue.range[begin]+1
   println(" Residue of name $(name(residue)) with $natoms atoms.")
