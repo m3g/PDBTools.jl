@@ -7,20 +7,20 @@ Fields:
 
 ```
 struct Atom
-  index :: Int64 # The sequential index of the atoms in the file
-  index_pdb :: Int64 # The index as written in the PDB file (might be anything)
-  name :: String # Atom name
-  resname :: String # Residue name
-  chain :: String # Chain identifier
-  resnum :: Int64 # Number of residue as written in PDB file
-  residue :: Int64 # Sequential residue (molecule) number in file
-  x :: Float64 # x coordinate
-  y :: Float64 # y coordinate
-  z :: Float64 # z coordinate
-  b :: Float64 # temperature factor
-  occup :: Float64 # occupancy
-  model :: Int64 # model number
-  segname :: String # Segment name (cols 73:76)
+  index::Int # The sequential index of the atoms in the file
+  index_pdb::Int # The index as written in the PDB file (might be anything)
+  name::String # Atom name
+  resname::String # Residue name
+  chain::String # Chain identifier
+  resnum::Int # Number of residue as written in PDB file
+  residue::Int # Sequential residue (molecule) number in file
+  x::Float64 # x coordinate
+  y::Float64 # y coordinate
+  z::Float64 # z coordinate
+  b::Float64 # temperature factor
+  occup::Float64 # occupancy
+  model::Int # model number
+  segname::String # Segment name (cols 73:76)
 end
 ```
 
@@ -49,20 +49,20 @@ julia> mass(pdb[1])
 
 """
 mutable struct Atom
-  index :: Int64 # The sequential index of the atoms in the file
-  index_pdb :: Int64 # The index as written in the PDB file (might be anything)
-  name :: String
-  resname :: String
-  chain :: String
-  resnum :: Int64 # Number of residue as written in PDB file
-  residue :: Int64 # Sequential residue (molecule) number in file
-  x :: Float64
-  y :: Float64
-  z :: Float64
-  b :: Float64
-  occup :: Float64
-  model :: Int64
-  segname :: String # Segment name (cols 73:76)
+  index::Int # The sequential index of the atoms in the file
+  index_pdb::Int # The index as written in the PDB file (might be anything)
+  name::String
+  resname::String
+  chain::String
+  resnum::Int # Number of residue as written in PDB file
+  residue::Int # Sequential residue (molecule) number in file
+  x::Float64
+  y::Float64
+  z::Float64
+  b::Float64
+  occup::Float64
+  model::Int
+  segname::String # Segment name (cols 73:76)
 end
 Atom() = empty_struct(Atom)
 

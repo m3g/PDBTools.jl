@@ -1,4 +1,4 @@
-function edit!(atoms :: Vector{Atom})
+function edit!(atoms::Vector{Atom})
   tmp_file_name = tempname()
   writePDB(atoms,tmp_file_name)
   InteractiveUtils.edit(tmp_file_name)

@@ -55,7 +55,7 @@ model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
-function Residue(atoms::AbstractVector{Atom},range::UnitRange{Int})
+function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
   i = range[begin]
   # Check if the range effectivelly corresponds to a single residue (unsafe check)
   for j in range[begin]+1:range[end]
@@ -171,7 +171,7 @@ function Base.show(io::IO, residues::EachResidue)
   println(" Iterator with $(length(residues)) residues.")
 end
 
-function Base.show( io :: IO,::MIME"text/plain", residues::AbstractVector{Residue} )
+function Base.show(io::IO,::MIME"text/plain", residues::AbstractVector{Residue} )
   println("   Array{Residue,1} with $(length(residues)) residues.")
 end
 

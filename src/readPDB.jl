@@ -2,12 +2,12 @@
 # Reads PDB file atom data
 #
 
-function readPDB(file :: String, selection :: String)
+function readPDB(file::String, selection::String)
   query = parse_query(selection)
   return readPDB(file, only = atom -> apply_query(query,atom) )
 end
 
-function readPDB(file :: String; only = all)
+function readPDB(file::String; only = all)
 
   # Check if structure is in mmCIF format
   mmCIF, mmCIF_fields = check_mmCIF(file)
@@ -51,7 +51,7 @@ function readPDB(file :: String; only = all)
 end
 
 import Base.show
-function Base.show( io :: IO, atoms :: Array{Atom} )
+function Base.show(io::IO, atoms::Array{Atom})
   println(" Structure file with ", length(atoms), " atoms. ")
 end
 

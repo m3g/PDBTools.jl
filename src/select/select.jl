@@ -28,7 +28,7 @@ end
 # Return indexes only
 #
 function selindex(set::AbstractVector{T}; by=all) where T
-  indexes = Vector{Int64}(undef,0)
+  indexes = Vector{Int}(undef,0)
   for i in eachindex(set)
     if by(set[i])
       push!(indexes,i)
@@ -55,10 +55,10 @@ const operators = ( "=" => (x,y) -> isequal(x,y),
 #
 
 struct Keyword
-  ValueType :: Type
-  name :: String
-  field :: Symbol
-  operators :: Tuple
+  ValueType::Type
+  name::String
+  field::Symbol
+  operators::Tuple
 end
 
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
@@ -94,10 +94,10 @@ will define a keyword "element" to be used as `element C`, which will return
 
 """
 struct FunctionalKeyword{FunctionType}
-  ValueType :: Type
-  name :: String
-  by :: FunctionType
-  operators :: Tuple 
+  ValueType::Type
+  name::String
+  by::FunctionType
+  operators::Tuple 
 end
 
 function (key::FunctionalKeyword)(s::AbstractVector{<:AbstractString})
@@ -117,8 +117,8 @@ end
 #
 
 struct MacroKeyword{FunctionType}
-  name :: String
-  by :: FunctionType
+  name::String
+  by::FunctionType
 end
 
 function (key::MacroKeyword)(s::AbstractVector{<:AbstractString})
@@ -132,7 +132,7 @@ end
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
 """
-function parse_to_type(key::Union{Keyword,FunctionalKeyword},val)
+function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
   if key.ValueType == String
     return val
   end
@@ -203,7 +203,7 @@ julia> PDBTools.has_key("and",["name","CA","or","index","1"])
 ```
 
 """
-function has_key(key::String ,s::AbstractVector{<:AbstractString})
+function has_key(key::String, s::AbstractVector{<:AbstractString})
   i = findfirst(isequal(key),s)
   if i == nothing
     0

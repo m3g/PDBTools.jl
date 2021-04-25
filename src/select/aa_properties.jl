@@ -1,12 +1,12 @@
 
 struct AA
-  name :: String
-  three_letter_code :: String
-  one_letter_code :: String
-  type :: String
-  polar :: Bool
-  hydrophobic :: Bool
-  charge :: Int64
+  name::String
+  three_letter_code::String
+  one_letter_code::String
+  type::String
+  polar::Bool
+  hydrophobic::Bool
+  charge::Int
 end
 
 ALA = AA("Alanine"       , "ALA", "A",   "Aliphatic" , false, false,  0)

@@ -2,9 +2,9 @@
 # Function that reads atom information from PDB or mmCIF files
 #
 
-function read_atom(record :: String; 
-                   mmCIF :: Bool = false, 
-                   mmCIF_fields :: Indexes_mmCIF_fields = empty_struct(Indexes_mmCIF_fields))
+function read_atom(record::String; 
+                   mmCIF::Bool = false, 
+                   mmCIF_fields::Indexes_mmCIF_fields = empty_struct(Indexes_mmCIF_fields))
 
   atom = Atom()
 
@@ -66,7 +66,7 @@ function read_atom(record :: String;
       mmcif_data = split(record)
       atom.index = 1
       try
-        atom.index_pdb = parse(Int64,mmcif_data[mmCIF_fields.index])
+        atom.index_pdb = parse(Int,mmcif_data[mmCIF_fields.index])
       catch
         atom.index_pdb = 0
       end
@@ -80,7 +80,7 @@ function read_atom(record :: String;
       end
       atom.chain = mmcif_data[mmCIF_fields.chain]
       try
-        atom.resnum = parse(Int64,mmcif_data[mmCIF_fields.resnum])
+        atom.resnum = parse(Int,mmcif_data[mmCIF_fields.resnum])
       catch
         atom.resnum = 0
       end

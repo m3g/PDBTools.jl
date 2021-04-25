@@ -3,17 +3,17 @@
 #
 
 struct MaxMinCoords
-  xmin :: Vector{Float64}
-  xmax :: Vector{Float64}
-  xlength :: Vector{Float64}
+  xmin::Vector{Float64}
+  xmax::Vector{Float64}
+  xlength::Vector{Float64}
 end
 
-function maxmin( atoms :: Vector{Atom}, selection :: String )
+function maxmin(atoms::Vector{Atom}, selection::String)
   query = parse_query(selection)
   return maxmin(atoms, only = atom -> apply_query(query,atom))
 end
 
-function maxmin( atoms :: Vector{Atom}; only = all)
+function maxmin(atoms::Vector{Atom}; only = all)
   x = coor(atoms; only = only)
   xmin = [ minimum(x[1,:]), minimum(x[2,:]), minimum(x[3,:]) ]
   xmax = [ maximum(x[1,:]), maximum(x[2,:]), maximum(x[3,:]) ]
@@ -21,7 +21,7 @@ function maxmin( atoms :: Vector{Atom}; only = all)
   return MaxMinCoords(xmin,xmax,xlength)
 end
 
-function Base.show( io :: IO, m :: MaxMinCoords )
+function Base.show(io::IO, m::MaxMinCoords)
   println(" ")
   println(" Minimum atom coordinates: xmin = ", m.xmin)
   println(" Maximum atom coordinates: xmax = ", m.xmax)

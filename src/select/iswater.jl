@@ -2,7 +2,7 @@
 # Function to return if an atom is an atom from a water molecule
 #
 
-function iswater(atom :: Atom)
+function iswater(atom::Atom)
 
   if atom.resname == "HOH"   ; return true ; end
   if atom.resname == "OH2"   ; return true ; end

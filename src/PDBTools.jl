@@ -3,7 +3,7 @@ module PDBTools
   using Printf
   using InteractiveUtils
 
-  export readPDB, writePDB, getseq, wget, edit!
+  export readPDB, writePDB, getseq, wget, edit!, oneletter 
   export Atom, printatom, name
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname

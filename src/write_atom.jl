@@ -4,7 +4,7 @@
 
 # requires Printf
 
-function write_atom(atom :: Atom)
+function write_atom(atom::Atom)
 
   #ATOM      2  CA  GLY A   1      -1.774   6.778  32.054  1.00  0.08           C
   #COLUMNS        DATA  TYPE    FIELD        DEFINITION

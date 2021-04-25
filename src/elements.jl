@@ -2,11 +2,11 @@
 # List of elements with properties
 #
 struct Element
- atomic_number  :: Int64
- element        :: String
- pdb_name       :: String
- name           :: String
- mass           :: Float64
+ atomic_number::Int
+ element::String
+ pdb_name::String
+ name::String
+ mass::Float64
 end
 elements = [
              Element( 0      ,  "X"  ,  "X"   ,   "NotFound"    ,  0.00000   )

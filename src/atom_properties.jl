@@ -24,7 +24,7 @@ function element_index(name::String)
   # If not, check if the first character is a number, remove it and try again
   else
     try 
-      parse(Int64,name[1:1])
+      parse(Int, name[1:1])
       newname = name[2:length(name)]
       i = findfirst( el -> el.pdb_name == newname, elements )
       if i != nothing
