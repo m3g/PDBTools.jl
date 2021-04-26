@@ -2,7 +2,6 @@
 # Check if structure is in mmCIF format and returns the list of 
 # desired fields if that is the case
 #
-
 function check_mmCIF(file)
 
   local ifield, mmCIF, line

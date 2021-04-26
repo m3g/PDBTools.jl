@@ -1,10 +1,9 @@
 #
 # Function that reads atom information from PDB or mmCIF files
 #
-
 function read_atom(record::String; 
                    mmCIF::Bool = false, 
-                   mmCIF_fields::Indexes_mmCIF_fields = empty_struct(Indexes_mmCIF_fields))
+                   mmCIF_fields::Indexes_mmCIF_fields = Indexes_mmCIF_fields())
 
   atom = Atom()
 

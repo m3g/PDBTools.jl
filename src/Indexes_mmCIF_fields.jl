@@ -1,18 +1,15 @@
 #
 # Structure to read mmCIF field data indexes
 #
-
-mutable struct Indexes_mmCIF_fields
-  index::Int
-  name::Int
-  resname::Int
-  chain::Int
-  resnum::Int
-  x::Int
-  y::Int
-  z::Int
-  b::Int
-  occup::Int
+Base.@kwdef mutable struct Indexes_mmCIF_fields
+  index::Int = 0
+  name::Int = 0
+  resname::Int = 0
+  chain::Int = 0
+  resnum::Int = 0
+  x::Int = 0
+  y::Int = 0
+  z::Int = 0
+  b::Int = 0
+  occup::Int = 0
 end
-Indexes_mmCIF_fields() = empty_struct(Indexes_mmCIF_fields)
-

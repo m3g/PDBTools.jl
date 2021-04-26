@@ -1,5 +1,6 @@
 module PDBTools
 
+  using Parameters
   using Printf
   using InteractiveUtils
 
@@ -13,7 +14,6 @@ module PDBTools
   #
   # Data structures
   #
-  include("./empty_struct.jl")
   include("./Atom.jl")
   include("./Indexes_mmCIF_fields.jl")
   include("./Residue.jl")

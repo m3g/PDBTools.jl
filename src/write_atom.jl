@@ -1,7 +1,6 @@
 #
 # Function that returns an ATOM line in PDB format
 #
-
 # requires Printf
 
 function write_atom(atom::Atom)

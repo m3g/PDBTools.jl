@@ -1,6 +1,8 @@
 """
 
-`Atom` data type.
+```
+Atom::DataType
+```
 
 Structure that contains the atom properties. It is mutable, so it can be edited. 
 Fields:
@@ -48,23 +50,22 @@ julia> mass(pdb[1])
 ```
 
 """
-mutable struct Atom
-  index::Int # The sequential index of the atoms in the file
-  index_pdb::Int # The index as written in the PDB file (might be anything)
-  name::String
-  resname::String
-  chain::String
-  resnum::Int # Number of residue as written in PDB file
-  residue::Int # Sequential residue (molecule) number in file
-  x::Float64
-  y::Float64
-  z::Float64
-  b::Float64
-  occup::Float64
-  model::Int
-  segname::String # Segment name (cols 73:76)
+Base.@kwdef mutable struct Atom
+  index::Int = 0 # The sequential index of the atoms in the file
+  index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
+  name::String = "X"
+  resname::String = "XXX"
+  chain::String = "X"
+  resnum::Int = 0 # Number of residue as written in PDB file
+  residue::Int = 0 # Sequential residue (molecule) number in file
+  x::Float64 = 0.
+  y::Float64 = 0.
+  z::Float64 = 0.
+  b::Float64 = 0.
+  occup::Float64 = 0.
+  model::Int = 0
+  segname::String = "XXXX" # Segment name (cols 73:76)
 end
-Atom() = empty_struct(Atom)
 
 index(atom::Atom) = atom.index
 index_pdb(atom::Atom) = atom.index_pdb

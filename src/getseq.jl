@@ -1,9 +1,24 @@
-#
-# Functions to read the sequence of a PDB file
-#
+"""
 
-# From the vector of atoms already read
+```
+getseq(Vector{Atom} or filename; selection)
+```
 
+Returns the sequence of aminoacids from the vector of atoms or file name. Selections may be applied. Returns both three- and one-letter residue codes.
+
+### Example
+
+```julia-repl
+julia> protein = wget("1LBD");
+
+julia> getseq(protein,"residue < 3")
+2×2 Matrix{String}:
+ "SER"  "S"
+ "ALA"  "A"
+
+```
+
+"""
 function getseq(atoms::Vector{Atom}, selection::String)
   query = parse_query(selection)
   return getseq(atoms, only = atom -> apply_query(query,atom))
@@ -40,5 +55,6 @@ function getseq(file::String, selection::String)
   return getseq(atoms, selection)
 end
 
-getseq(file::String; only = atom -> isprotein(atom)) = getseq(readPDB(file), only = only)
+getseq(file::String; only = atom -> isprotein(atom)) = 
+   getseq(readPDB(file), only = only)
 

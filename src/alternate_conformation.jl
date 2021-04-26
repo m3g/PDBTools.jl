@@ -1,7 +1,6 @@
 # This function will return 'nothing' for alternate (BGLY, CARG, etc) conformations
 # of protein residues, which will then be ignored. Only "A" conformations are kept.
 # Other non-protein residues are always kept.
-
 function alternate_conformation(atom::Atom)
   if which_natural_aminoacid(atom) != 0
     if length(atom.resname) == 4

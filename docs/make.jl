@@ -13,6 +13,7 @@ makedocs(
         "Selections" => "selections.md",
         "Element properties" => "elements.md",
         "Auxiliary functions" => "auxiliary.md",
+        "Help entries" => "help.md",
     ]
 )
 deploydocs(

@@ -1,11 +1,26 @@
-#
-# Function to return a three-letter code residue name from the one-letter or residue names
-#
-function threeletter(resname::String)
-  if length(resname) == 1
-    ires = findfirst(r->lowercase(r.one_letter_code) == lowercase(resname), natural_aminoacids)
+"""
+
+`threeletter(residue::String)` 
+
+Function to return a three-letter residue code from the one-letter code or residue name. The function is case-insensitive.
+
+### Examples
+
+```julia-repl
+julia> threeletter("A")
+"ALA"
+
+julia> threeletter("Aspartic acid")
+"ASP"
+
+```
+
+"""
+function threeletter(residue::String)
+  if length(residue) == 1
+    ires = findfirst(r->lowercase(r.one_letter_code) == lowercase(residue), natural_aminoacids)
   else
-    ires = findfirst(r->lowercase(r.name) == lowercase(resname), natural_aminoacids)
+    ires = findfirst(r->lowercase(r.name) == lowercase(residue), natural_aminoacids)
   end
   if ires == nothing
     return nothing

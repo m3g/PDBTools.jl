@@ -1,8 +1,13 @@
-#
-# Function that writes a PDB file given the vector of atoms, with
-# optional definition of a selection to be print
-#
+"""
 
+```
+writePDB(atoms::Vector{Atom}, filename, selection)
+```
+
+Function that writes a PDB file given the vector of atoms, with
+optional definition of a selection to be print.
+
+"""
 function writePDB(atoms::Vector{Atom}, filename, selection)
   query = parse_query(selection)
   writePDB(atoms,filename,only=atom->apply_query(query,atom))
