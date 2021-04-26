@@ -3,7 +3,7 @@ module PDBTools
   using Printf
   using InteractiveUtils
 
-  export readPDB, writePDB, getseq, wget, edit!, oneletter 
+  export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter
   export Atom, printatom, name
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname
@@ -23,6 +23,7 @@ module PDBTools
   #
   include("./all.jl")
   include("./oneletter.jl")
+  include("./threeletter.jl")
   include("./check_mmCIF.jl")
   include("./parse_int.jl")
   include("./read_atom.jl")
