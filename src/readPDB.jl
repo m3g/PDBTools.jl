@@ -49,7 +49,7 @@ function readPDB(file::String; only = all)
   index = 0
   imodel = 1
   iresidue = 1
-  atoms = StructArray(Atom[])
+  atoms = Atom[]
   local lastatom
   for line in eachline(pdbfile)
     if occursin("END",line)

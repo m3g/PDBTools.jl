@@ -3,7 +3,6 @@ module PDBTools
   using Parameters
   using Printf
   using InteractiveUtils
-  using StructArrays
   using Formatting
 
   export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter,
@@ -12,7 +11,8 @@ module PDBTools
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname
   export coor, maxmin
-  export atomic_number, element, mass, element_name, formula
+  export atomic_number, element, mass, element_name
+  export formula, stoichiometry
 
   #
   # Data structures
@@ -28,6 +28,7 @@ module PDBTools
   include("./oneletter.jl")
   include("./threeletter.jl")
   include("./residuename.jl")
+  include("./formula.jl")
   include("./check_mmCIF.jl")
   include("./parse_int.jl")
   include("./read_atom.jl")

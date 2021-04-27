@@ -1,4 +1,4 @@
-# Atom properties
+# Atomic and molecular properties
 
 Some simple atom properties can be retrieved using special functions, which
 operate on atoms of the type `Atom`. For example:
@@ -21,5 +21,18 @@ julia> element(atoms[1])
 
 julia> element_name(atoms[1])
 "Nitrogen"
+
+```
+
+The formula or stoichiometry of a selection can also be retrieved:
+
+```julia-repl
+julia> atoms = wget("1LBD","protein and residue 1");
+
+julia> f = formula(atoms)
+C₃N₁O₂
+
+julia> stoichiometry(select(atoms,"water"))
+H₂O₁
 
 ```
