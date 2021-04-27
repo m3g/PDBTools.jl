@@ -1,6 +1,7 @@
 """
-
-`residuename(residue::String)` 
+```
+residuename(residue::String)
+```
 
 Function to return the long residue name from other residue codes. The function is case-insensitive.
 

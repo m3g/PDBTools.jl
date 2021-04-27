@@ -74,8 +74,9 @@ function (key::Keyword)(s::AbstractVector{<:AbstractString})
 end
 
 """
-
-`FunctionalKeyword{T}`
+```
+FunctionalKeyword{T}
+```
 
 This is a structure that will store a keyword that depends on an external function
 requiring an operator and an argument. 
@@ -185,8 +186,9 @@ functional_keywords = [ FunctionalKeyword(String, "element", element, operators)
 # while explaining to me how to creat a syntex interpreter
 #
 """
-
-`has_key(key::String, s::AbstractVector{<:AbstractString})`
+```
+has_key(key::String, s::AbstractVector{<:AbstractString})
+```
 
 Returns the first index of the vector `s` in which where `key` is found, or 0. 
 
@@ -213,15 +215,20 @@ function has_key(key::String, s::AbstractVector{<:AbstractString})
 end
 
 """
+```
+parse_query(selection:String)
+```
 
-`parse_query(selection:String)`
+Calls `parse_query_vector` after splitting the selection string.
 
 """
 parse_query(selection::String) = parse_query_vector(split(selection))
 
 """
 
-`parse_query_vector(s::AbstractVector{<:AbstractString})`
+```
+parse_query_vector(s::AbstractVector{<:AbstractString})
+```
 
 """
 function parse_query_vector(s)
