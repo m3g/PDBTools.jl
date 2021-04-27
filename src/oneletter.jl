@@ -1,6 +1,7 @@
 """
-
-`oneletter(residue::String)` 
+```
+oneletter(residue::String)
+```
 
 Function to return a one-letter residue code from the three letter code or residue name. The function is case-insensitive.
 
@@ -17,15 +18,16 @@ julia> oneletter("Glutamic acid")
 
 """
 function oneletter(residue::String)
-  if length(residue) == 3
-    ires = findfirst(r->lowercase(r.three_letter_code) == lowercase(residue), natural_aminoacids)
-  else
-    ires = findfirst(r->lowercase(r.name) == lowercase(residue), natural_aminoacids)
+  l = length(residue)
+  code = uppercase(residue)
+  if l > 1
+    if l == 3
+      ires = findfirst(r->r.three_letter_code == code, natural_aminoacids)
+    else
+      ires = findfirst(r->uppercase(r.name) == code, natural_aminoacids)
+    end
+    code = (ires == nothing ? nothing : natural_aminoacids[ires].one_letter_code)
   end
-  if ires == nothing
-    return nothing
-  else
-    return natural_aminoacids[ires].one_letter_code
-  end
+  return code
 end
 

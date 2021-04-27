@@ -7,7 +7,7 @@ edit!(atoms::Vector{Atom})
 Opens a temporary PDB file in which the fields of the vector of atoms can be edited.   
 
 """
-function edit!(atoms::Vector{Atom})
+function edit!(atoms::AbstractVector{Atom})
   tmp_file_name = tempname()
   writePDB(atoms,tmp_file_name)
   InteractiveUtils.edit(tmp_file_name)

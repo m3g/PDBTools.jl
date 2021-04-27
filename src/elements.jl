@@ -8,7 +8,7 @@ struct Element
  name::String
  mass::Float64
 end
-elements = [
+const elements = [
              Element( 0      ,  "X"  ,  "X"   ,   "NotFound"    ,  0.00000   )
              Element( 1      ,  "H"  ,  "H"   ,   "Hydrogen"    ,  1.00797   )
              Element( 2      ,  "He" ,  "HE"  ,   "Helium"      ,  4.00260   )
@@ -19,7 +19,7 @@ elements = [
              Element( 7      ,  "N"  ,  "N"   ,   "Nitrogen"    ,  14.0067   )
              Element( 8      ,  "O"  ,  "O"   ,   "Oxygen"      ,  15.9994   )
              Element( 9      ,  "F"  ,  "F"   ,   "Fluorine"    ,  18.998403 )
-             Element( 10     ,  "Ne" ,  "NE"  ,   "Neon"        ,  20.179    )
+             Element( 10     ,  "Ne" ,  "NEO" ,   "Neon"        ,  20.179    )
              Element( 11     ,  "Na" ,  "NA"  ,   "Sodium"      ,  22.98977  )
              Element( 11     ,  "Na" ,  "SOD" ,   "Sodium"      ,  22.98977  )
              Element( 12     ,  "Mg" ,  "MG"  ,   "Magnesium"   ,  24.305    )
@@ -60,7 +60,7 @@ elements = [
              Element( 45     ,  "Rh" ,  "RH"  ,   "Rhodium"     ,  102.9055  )
              Element( 46     ,  "Pd" ,  "PD"  ,   "Palladium"   ,  106.4     )
              Element( 47     ,  "Ag" ,  "AG"  ,   "Silver"      ,  107.868   )
-             Element( 48     ,  "Cd" ,  "CD"  ,   "Cadmium"     ,  112.41    )
+             Element( 48     ,  "Cd" ,  "CAD" ,   "Cadmium"     ,  112.41    )
              Element( 49     ,  "In" ,  "IN"  ,   "Indium"      ,  114.82    )
              Element( 50     ,  "Sn" ,  "SN"  ,   "Tin"         ,  118.69    )
              Element( 51     ,  "Sb" ,  "SB"  ,   "Antimony"    ,  121.75    )
@@ -70,7 +70,7 @@ elements = [
              Element( 55     ,  "Cs" ,  "CES" ,   "Cesium"      ,  132.9054  )
              Element( 56     ,  "Ba" ,  "BA"  ,   "Barium"      ,  137.33    )
              Element( 57     ,  "La" ,  "LA"  ,   "Lanthanum"   ,  138.9055  )
-             Element( 58     ,  "Ce" ,  "CE"  ,   "Cerium"      ,  140.12    )
+             Element( 58     ,  "Ce" ,  "CER" ,   "Cerium"      ,  140.12    )
              Element( 59     ,  "Pr" ,  "PR"  ,   "Praseodymium",  140.9077  )
              Element( 60     ,  "Nd" ,  "ND"  ,   "Neodymium"   ,  144.24    )
              Element( 61     ,  "Pm" ,  "PM"  ,   "Promethium"  ,  145       )
@@ -106,5 +106,38 @@ elements = [
              Element( 91     ,  "Pa" ,  "PA"  ,   "Protactinium",  231.0359  )
              Element( 92     ,  "U"  ,  "U"   ,   "Uranium"     ,  238.029   )
            ]                        
+
+
+#
+# Retrive index of element in elements list from name. Returns 1 (element "X" of list) if not found
+#
+function element_index(name::String)
+  # Try to find if there is any exact match
+  i = findfirst(el -> (el.element == name || 
+                       el.name == name ||
+                       el.pdb_name == name ), elements)
+  (i != nothing) && return i
+  #
+  # Try to find by PDB name, note that NT2 and 2NT2 must match N, for example
+  # 
+  # First, check if the first char is a number
+  i0 = try 
+    parse(Int,name[1:1])
+    2
+  catch
+    1
+  end
+  # Now check if the start of this name matches some PDB code
+  for (iel,el) in pairs(elements)
+    lpdb = length(el.pdb_name)
+    # If the name is shorter than the PDB name, no match
+    (length(name) - i0 + 1) < lpdb && continue
+    if name[i0:i0+lpdb-1] == el.pdb_name
+      return iel
+    end
+  end
+  return 1
+end
+
 
 

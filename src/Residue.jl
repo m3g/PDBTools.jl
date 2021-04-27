@@ -85,7 +85,9 @@ end
 
 """
 
-`eachresidue(atoms::AbstractVector{Atom})`
+```
+eachresidue(atoms::AbstractVector{Atom})
+```
 
 Iterator for the residues (or molecules) of a selection. 
 
@@ -154,9 +156,10 @@ function Base.iterate(residue::Residue, state=1)
 end
 
 #
-# Length of the eachresidue iterator (number of residues)
+# Length of the Residue struct and eachresidue iterator (number of residues)
 #
 Base.length(residues::EachResidue) = sum( 1 for residue in residues )
+Base.length(residue::Residue) = length(residue.range)
 
 #
 # io show functions

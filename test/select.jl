@@ -45,7 +45,7 @@
   @test maxmin(atoms,"chain A").xlength ≈ [83.083, 83.028, 82.7] 
  
   # Test editing a field
-  atoms[1].index = 0
+  atoms.index[1] = 0
   @test atoms[1].index == 0
 
   # Test residue iterator

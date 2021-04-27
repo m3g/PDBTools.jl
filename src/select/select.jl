@@ -8,7 +8,7 @@ using Parameters
 # Main function: receives the atoms vector and a julia function to select
 
 function select(set::AbstractVector{T}; by=all) where T
-  selected = T[]
+  selected = similar(set,0)
   for el in set
     if by(el)
       push!(selected,el)

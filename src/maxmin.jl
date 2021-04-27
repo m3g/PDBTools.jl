@@ -32,12 +32,12 @@ julia> maxmin(protein)
 
 
 """
-function maxmin(atoms::Vector{Atom}, selection::String)
+function maxmin(atoms::AbstractVector{Atom}, selection::String)
   query = parse_query(selection)
   return maxmin(atoms, only = atom -> apply_query(query,atom))
 end
 
-function maxmin(atoms::Vector{Atom}; only = all)
+function maxmin(atoms::AbstractVector{Atom}; only=all)
   x = coor(atoms; only = only)
   xmin = [ minimum(x[1,:]), minimum(x[2,:]), minimum(x[3,:]) ]
   xmax = [ maximum(x[1,:]), maximum(x[2,:]), maximum(x[3,:]) ]

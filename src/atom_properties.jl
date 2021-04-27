@@ -1,44 +1,3 @@
-#
-# Retrive index of element in elements list from name. Returns 1 (element "X" of list) of not found
-#
-function element_index(name::String)
-
-  # If the residue name doesn't have at least three letters, this is not a protein atom
-  len = length(name)
-  if len < 1
-    return 1
-  end
-
-  # Return the index of this amino acid in the element, or nothing
-  i = nothing
-  l = len
-  while i == nothing && l >= 0  
-    i = findfirst( el -> el.pdb_name == name[1:l], elements )
-    l = l - 1 
-  end
-
-  # If found, return the atomic number
-  if i != nothing
-    return i
- 
-  # If not, check if the first character is a number, remove it and try again
-  else
-    try 
-      parse(Int, name[1:1])
-      newname = name[2:length(name)]
-      i = findfirst( el -> el.pdb_name == newname, elements )
-      if i != nothing
-        return i
-      else
-        return 1
-      end
-    catch
-      return 1
-    end
-  end
-
-end
-
 """
 ```
 atomic_number(name::String or atom::Atom)
@@ -119,4 +78,93 @@ julia> mass(atoms)
 mass(name::String) = elements[element_index(name)].mass
 mass(atom::Atom) = mass(atom.name)
 mass(atoms::AbstractVector{Atom}) = sum(mass(atoms[i]) for i in eachindex(atoms))
+
+"""
+```
+Formula::DataType
+```
+
+Formula data type. Contains the number of atoms of each type in a vector of tuples.
+
+### Example
+
+```julia-repl
+julia> atoms = wget("1LBD","protein and residue 1");
+
+julia> f = formula(atoms)
+C₃N₁O₂
+
+
+julia> f[1]
+("C", 3)
+
+julia> f[2]
+("N", 1)
+
+julia> f[3]
+("O", 2)
+
+```
+
+"""
+struct Formula
+  formula::Vector{Tuple{String,Int}}
+end
+Base.getindex(f::Formula,i) = f.formula[i]
+"""
+
+```
+formula(atoms::AbstractVector{Atom})
+```
+
+Returns the molecular formula of the current selection. 
+
+### Example
+
+```julia-repl
+julia> first_residue = wget("1LBD","protein and residue 1")
+   Array{Atoms,1} with 6 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
+       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
+       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
+       4    O     SER     A      225        1   45.823   80.796   69.974 64.85  1.00     1       -         4
+       5   CB     SER     A      225        1   47.147   82.980   71.413 70.79  1.00     1       -         5
+       6   OG     SER     A      225        1   46.541   82.639   72.662 73.55  1.00     1       -         6
+
+
+julia> formula(first_residue)
+C₃N₁O₂
+
+```
+
+"""
+function formula(atoms::AbstractVector{Atom})
+  f = Formula(Tuple{String,Int}[])
+  for el in elements
+    nel = count(at -> element(at) == el.element, atoms)
+    nel > 0 && push!(f.formula,(el.element,nel))
+  end
+  return f
+end
+function Base.show(io::IO, f::Formula)
+  s = ""
+  for el in f.formula
+    s *= el[1]*format(el[2])
+  end
+  for sub in sub_int
+    s = replace(s,sub)
+  end
+  println(s)
+end
+const sub_int = ( "0" => "₀" ,
+                  "1" => "₁" ,
+                  "2" => "₂" ,
+                  "3" => "₃" ,
+                  "4" => "₄" ,
+                  "5" => "₅" ,
+                  "6" => "₆" ,
+                  "7" => "₇" ,
+                  "8" => "₈" ,
+                  "9" => "₉" )
 

@@ -49,7 +49,7 @@ function readPDB(file::String; only = all)
   index = 0
   imodel = 1
   iresidue = 1
-  atoms = Vector{Atom}(undef,0)
+  atoms = StructArray(Atom[])
   local lastatom
   for line in eachline(pdbfile)
     if occursin("END",line)
@@ -81,8 +81,7 @@ function readPDB(file::String; only = all)
   return atoms
 end
 
-import Base.show
-function Base.show(io::IO, atoms::Array{Atom})
+function Base.show(io::IO, atoms::AbstractVector{Atom})
   println(" Structure file with ", length(atoms), " atoms. ")
 end
 

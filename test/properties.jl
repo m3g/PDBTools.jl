@@ -2,7 +2,10 @@
 
   atoms = readPDB("./structure.pdb","protein")
   
-  @test mass(atoms) ≈ 22454.638340000096
+  @test mass(atoms) ≈ 11082.699070000157
+  f = formula(select(atoms,"residue < 5"))
+  @test f.formula == [("H", 25), ("C", 19), ("N", 4), ("O", 7), ("S", 1)]
+
   @test element.(select(atoms,"residue = 1")) == ["N", "H", "H", "H", "C", "H", 
                                                   "C", "H", "H", "H", "C", "O" ] 
   @test element_name.(select(atoms,"residue = 1")) == [ "Nitrogen", "Hydrogen", "Hydrogen",
@@ -29,5 +32,9 @@
   @test coor(select(atoms,"residue = 3"),column_based=false)' == coor(select(atoms,"residue = 3"))
   @test PDBTools.same_residue(atoms[1],atoms[2]) == true
   @test PDBTools.same_residue(atoms[1],atoms[20]) == false
+
+  @test residuename("glu") == "Glutamic acid"
+  @test oneletter("Glu") == "E"
+  @test threeletter("E") == "GLU"
 
 end
