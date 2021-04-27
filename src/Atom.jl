@@ -1,13 +1,13 @@
 """
 
-```
+```julia
 Atom::DataType
 ```
 
 Structure that contains the atom properties. It is mutable, so it can be edited. 
 Fields:
 
-```
+```julia
 mutable struct Atom
   index::Int # The sequential index of the atoms in the file
   index_pdb::Int # The index as written in the PDB file (might be anything)
