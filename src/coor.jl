@@ -20,9 +20,6 @@ julia> coor(protein,"residue = 1")
  84.358  83.165  81.872  80.796  82.98   82.639
  70.638  70.327  70.236  69.974  71.413  72.662
 
-julia> coor(protein, only = at -> at.name == "ALA" )
-3×0 Matrix{Float64}
-
 julia> coor(protein, only = at -> at.resname == "ALA" )
 3×110 Matrix{Float64}:
  43.94   43.02   41.996  41.228  42.293  28.854  27.821  26.415  …  17.282  -16.085  -16.377  -17.866  -18.496  -15.888
