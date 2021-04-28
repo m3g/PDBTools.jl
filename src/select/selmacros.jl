@@ -28,18 +28,19 @@ ispolar(atom::Atom) =
 isprotein(atom::Atom; newres = nothing) = 
   (atom.resname == newres || which_natural_aminoacid(atom) != 0) ? true : false
 
-const backbone_atoms = [ "N", "CA", "C", "O" ] 
-isbackbone(atom::Atom) =
+backbone_atoms = [ "N", "CA", "C", "O" ] 
+isbackbone(atom::Atom; backbone_atoms = backbone_atoms) =
   which_natural_aminoacid(atom) == 0 ? false : (atom.name in backbone_atoms)
 
-const not_side_chain_atoms = [ "N", "CA", "C", "O", "HN", "HA", "HT1", "HT2", "HT3" ]
-issidechain(atom::Atom) =
+not_side_chain_atoms = [ "N", "CA", "C", "O", "HN", "HA", "HT1", "HT2", "HT3" ]
+issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) =
   which_natural_aminoacid(atom) == 0 ? false : (! (atom.name in not_side_chain_atoms))
 
-const water_residues = [ "HOH"  , "OH2"  ,
-                         "TIP3" , "TIP3P",
-                         "TIP4P", "TIP5P",
-                         "TIP7P", "SPC"  ,
-                         "SPCE" ] 
-iswater(atom::Atom) = (findfirst(isequal(atom.resname),water_residues) != nothing) 
+water_residues = [ "HOH"  , "OH2"  ,
+                   "TIP3" , "TIP3P",
+                   "TIP4P", "TIP5P",
+                   "TIP7P", "SPC"  ,
+                   "SPCE" ] 
+iswater(atom::Atom; water_residues=water_residues) = 
+  (findfirst(isequal(atom.resname),water_residues) != nothing) 
 
