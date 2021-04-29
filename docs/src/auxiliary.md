@@ -46,7 +46,7 @@ julia> model = wget("1BSX");
 
 julia> protein = select(model,"protein");
 
-julia> ligand = select(model,"ligand");
+julia> ligand = select(model,"resname T3");
 
 julia> distance(protein,ligand)
 2.7775834820937417
