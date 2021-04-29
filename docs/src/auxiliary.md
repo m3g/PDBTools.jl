@@ -42,10 +42,14 @@ All atoms:
 
 ```julia-repl
 julia> x = coor(atoms)
-3×1463 Array{Float64,2}:
-  -9.229  -10.048 …    6.408    6.017
- -14.861  -15.427    -12.034  -10.967
-  -5.481   -5.569     -8.343   -9.713
+1870×3 Matrix{Float64}:
+  45.228  84.358  70.638
+  46.08   83.165  70.327
+  45.257  81.872  70.236
+   ⋮              
+ -26.929  77.888  51.398
+ -27.112  78.62   50.033
+ -27.481  77.605  48.554
 
 ```
 
@@ -54,17 +58,21 @@ Or use selections to retrieve the coordinates of subsets of atoms:
 C``\alpha`` coordinates:
 
 ```julia-repl
-julia> xCA = coor(atoms,"name CA")
-3×104 Array{Float64,2}:
-  -8.483   -5.113  …  12.552   9.196 
- -14.912  -13.737      0.892  -0.734 
-  -6.726   -5.466     -3.466  -4.108 
+julia> xCA = coor(protein,"name CA")
+238×3 Matrix{Float64}:
+  46.08   83.165  70.327
+  43.02   80.825  70.455
+  41.052  82.178  67.504
+   ⋮              
+ -10.342  80.743  58.658
+ -10.352  84.347  57.613
+ -10.768  83.294  53.989
 
 ```
 
 By default, the output arrays are column based (the x, y and z coordinates of each
-atom are in each row). If you want a row-based output, add `column_based = false` to
-the input parameters of `coor`: `coor(atoms,column_based=false)`
+atom are in each column). If you want a column-major output, add `row_major=false` to
+the input parameters of `coor`: `coor(atoms,row_major=false)`
 
 ## Maximum and minimum coordinates of the atoms
 
