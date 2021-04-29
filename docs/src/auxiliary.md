@@ -6,13 +6,16 @@ To obtain a list of the residue names of the protein with three- and one-letter 
 ```julia-repl
 julia> seq = getseq("file.pdb")
 76×2 Array{String,2}:
- "VAL"  "V"
- "LYS"  "K"
- ⋮      
- "ARG"  "R"
- "GLY"  "G"
+ "V"
+ "K"
+  ⋮      
+ "R"
+ "G"
 
 ```
+
+Use `getseq(atoms,code=2)` to get the sequence as three-letter residue codes, or `code=3` to get 
+full natural-aminoacid names, like "Alanine", "Proline", etc.
 
 !!! note
     If there is some non-standard protein residue in the sequence,
@@ -20,12 +23,13 @@ julia> seq = getseq("file.pdb")
     ```julia-repl
     julia> getseq("file.pdb","protein or resname NEW")
     76×2 Array{String,2}:
-     "VAL"  "V"
-     "NEW"  "N"
-     ⋮      
-     "ARG"  "R"
-     "GLY"  "G"
+     "V"
+     "N"
+      ⋮      
+     "R"
+     "G"
     ```
+    By default the selection will only return the sequence of natural amino acids. 
 
 The `getseq` function can of course be used on an `Atom` list, accepts selections as the
 last argument, as well as the reading and writing functions:

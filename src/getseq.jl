@@ -29,24 +29,26 @@ function getseq(atoms::AbstractVector{Atom}, selection::String; code::Int=1)
   return getseq(atoms, only = atom -> apply_query(query,atom),code=code)
 end
 
-function getseq(atoms::AbstractVector{Atom}; only=all, code::Int=1)
+function getseq(atoms::AbstractVector{Atom}; only=isprotein, code::Int=1)
   seq = String[]
   for residue in eachresidue(atoms) 
     # If any atom of this residue is in the selection, add it
     consider = false
     for at in residue
-      if isprotein(at) && only(at)
+      if only(at)
         consider = true
         break
       end
     end
     if consider
-      if code == 1
-        push!(seq,oneletter(residue.name))
-      elseif code == 2
-        push!(seq,threeletter(residue.name))
-      elseif code == 3
-        push!(seq,residuename(residue.name))
+      if isprotein(residue)
+        code == 1 && push!(seq,oneletter(residue.name))
+        code == 2 && push!(seq,threeletter(residue.name))
+        code == 3 && push!(seq,residuename(residue.name))
+      else
+        code == 1 && push!(seq,name(residue)[1:1])
+        code == 2 && push!(seq,name(residue))
+        code == 3 && push!(seq,name(residue))
       end
     end
   end

@@ -28,6 +28,9 @@ ispolar(atom::Atom) =
 isprotein(atom::Atom; newres = nothing) = 
   (atom.resname == newres || which_natural_aminoacid(atom) != 0) ? true : false
 
+isprotein(residue::Residue; newres = nothing) = 
+  isprotein(residue.atoms[residue.range[begin]]; newres = newres)
+
 backbone_atoms = [ "N", "CA", "C", "O" ] 
 isbackbone(atom::Atom; backbone_atoms = backbone_atoms) =
   which_natural_aminoacid(atom) == 0 ? false : (atom.name in backbone_atoms)
