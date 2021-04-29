@@ -36,6 +36,23 @@ seq = getseq(atoms,"chain A")
 
 ```
 
+## Distance between sets of atoms
+
+The distance between atoms, or sets of atoms, can be computed with the `distance` function. This
+function returns the *minimum distance* between the atoms of the sets involved. For example:
+
+```julia-repl
+julia> model = wget("1BSX");
+
+julia> protein = select(model,"protein");
+
+julia> ligand = select(model,"ligand");
+
+julia> distance(protein,ligand)
+2.7775834820937417
+  
+```
+
 ## Obtain arrays with coordinates
 
 All atoms:
