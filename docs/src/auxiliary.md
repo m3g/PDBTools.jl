@@ -5,7 +5,7 @@
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
 ```julia-repl
 julia> seq = getseq("file.pdb")
-76×2 Array{String,2}:
+76-element Vector{String}:
  "V"
  "K"
   ⋮      
@@ -22,7 +22,7 @@ full natural-aminoacid names, like "Alanine", "Proline", etc.
     inform the `getseq` function by adding a selection:
     ```julia-repl
     julia> getseq("file.pdb","protein or resname NEW")
-    76×2 Array{String,2}:
+    77-element Vector{String}:
      "V"
      "N"
       ⋮      
