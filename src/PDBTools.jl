@@ -4,13 +4,14 @@ module PDBTools
   using Printf
   using InteractiveUtils
   using Formatting
+  using LoopVectorization
 
   export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter,
          residuename
   export Atom, printatom, name
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname
-  export coor, maxmin
+  export coor, maxmin, distance
   export atomic_number, element, mass, element_name
   export formula, stoichiometry
 
@@ -38,6 +39,7 @@ module PDBTools
   include("./writePDB.jl")
   include("./getseq.jl")
   include("./coor.jl")
+  include("./distance.jl")
   include("./maxmin.jl")
   include("./same_residue.jl")
   include("./wget.jl")

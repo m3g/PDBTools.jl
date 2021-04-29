@@ -14,7 +14,8 @@
                                                         "Hydrogen", "Carbon", "Oxygen" ]
   @test atomic_number.(select(atoms,"residue = 1")) == [ 7, 1, 1, 1, 6, 1, 6, 1,
                                                          1, 1, 6, 8 ]
-  @test length(eachresidue(atoms)) == 104
+  residues = collect(eachresidue(atoms))
+  @test length(residues) == 104
   @test name(Residue(atoms,1:12)) == "ALA"
   @test Residue(atoms,1:12).range == 1:12
 
@@ -24,14 +25,25 @@
   @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278]
 
   s = select(atoms,"residue = 3")
-  @test coor(s) ==
-          [  -4.383   -4.51    -3.903   -3.731   -4.938  -4.417  -5.543   -5.867   -5.451   -6.974   -2.626   -1.94
-            -11.903  -11.263  -11.262  -12.076  -10.279  -9.552  -9.911  -10.85   -10.837  -11.289  -10.48   -10.014
-             -6.849   -6.096   -8.062   -8.767   -8.612  -9.06   -7.784   -9.684  -10.863   -9.3     -7.749   -8.658 ]
+  @test coor(s) == [-4.383 -11.903 -6.849; -4.51 -11.263 -6.096; 
+                    -3.903 -11.262 -8.062; -3.731 -12.076 -8.767; 
+                    -4.938 -10.279 -8.612; -4.417 -9.552 -9.06; 
+                    -5.543 -9.911 -7.784; -5.867 -10.85 -9.684; 
+                    -5.451 -10.837 -10.863; -6.974 -11.289 -9.3; 
+                    -2.626 -10.48 -7.749; -1.94 -10.014 -8.658]
+
+  s2 = select(atoms,"residue = 5")
+  @test distance(s, s2) ≈ 3.6750402718881863
+  x1 = coor(s); x2 = coor(s2);
+  @test distance(x1, x2) ≈ 3.6750402718881863
+  x1 = coor(s,xyz_in_cols=false); x2 = coor(s2,xyz_in_cols=false);
+  @test distance(x1, x2, xyz_in_cols=false) ≈ 3.6750402718881863
+  @test distance(residues[3],residues[5]) ≈ 3.6750402718881863 
 
   r = Residue(select(atoms,"residue = 3"))  
   @test coor(s) == coor(r)
-  @test coor(select(atoms,"residue = 3"),column_based=false)' == coor(select(atoms,"residue = 3"))
+  @test coor(select(atoms,"residue = 3")) == coor(residues[3])
+  @test coor(residues[3])' == coor(residues[3],xyz_in_cols=false)
   @test PDBTools.same_residue(atoms[1],atoms[2]) == true
   @test PDBTools.same_residue(atoms[1],atoms[20]) == false
 

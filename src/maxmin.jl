@@ -29,8 +29,6 @@ julia> maxmin(protein)
 
 ```
 
-
-
 """
 function maxmin(atoms::AbstractVector{Atom}, selection::String)
   query = parse_query(selection)
@@ -38,9 +36,14 @@ function maxmin(atoms::AbstractVector{Atom}, selection::String)
 end
 
 function maxmin(atoms::AbstractVector{Atom}; only=all)
-  x = coor(atoms; only = only)
-  xmin = [ minimum(x[1,:]), minimum(x[2,:]), minimum(x[3,:]) ]
-  xmax = [ maximum(x[1,:]), maximum(x[2,:]), maximum(x[3,:]) ]
+  xmin = [ +Inf, +Inf, +Inf ]
+  xmax = zeros(3)
+  for at in atoms
+    if only(at)
+      xmin .= (min(at.x,xmin[1]), min(at.y,xmin[2]), min(at.z,xmin[3]))
+      xmax .= (max(at.x,xmax[1]), max(at.y,xmax[2]), max(at.z,xmax[3]))
+    end
+  end
   xlength = @. xmax - xmin
   return MaxMinCoords(xmin,xmax,xlength)
 end
