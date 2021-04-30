@@ -43,13 +43,18 @@ julia> @btime distance(\$xprot,\$xlig)
 @inline distance(at::Atom,x,y,z) = distance(x,y,z,at)
 @inline distance(x::Atom,y::Atom) = distance(x.x,x.y,x.z,y.x,y.y,y.z)
 
+@inline distance_sq(x₁,y₁,z₁,x₂,y₂,z₂) = (x₂-x₁)^2+(y₂-y₁)^2+(z₂-z₁)^2
+@inline distance_sq(x,y,z,at::Atom) = distance_sq(x,y,z,at.x,at.y,at.z)
+@inline distance_sq(at::Atom,x,y,z) = distance_sq(x,y,z,at)
+@inline distance_sq(x::Atom,y::Atom) = distance_sq(x.x,x.y,x.z,y.x,y.y,y.z)
+
 # Atom and vector of atoms
 function distance(x::Atom, y::AbstractVector{Atom})
   d = +Inf
   for at in y
-    d = min(d,distance(x,at))
+    d = min(d,distance_sq(x,at))
   end
-  d
+  sqrt(d)
 end
 
 # Two vectors of atoms
@@ -70,10 +75,6 @@ distance(r1::Residue,r2::Residue) =
 # are provided as matrices
 #
 
-# One Atom and a matrix of coordinates
-distance(at::Atom,A::Matrix{T}; xyz_in_cols=true) where T =
-  distance(at.x,at.y,at.z,A,xyz_in_cols=xyz_in_cols)
-
 # Three coordinates and a matrix of coordinates
 function distance(x,y,z,A::Matrix{T}; xyz_in_cols=true) where T
   n, m = size(A)
@@ -81,16 +82,20 @@ function distance(x,y,z,A::Matrix{T}; xyz_in_cols=true) where T
   if xyz_in_cols
     @assert m == 3 "Number of columns of coordinates matrix must be 3 when xyz_in_cols=true"
     @avx for i in 1:n
-      d = min(d,distance(x,y,z,A[i,1],A[i,2],A[i,3]))
+      d = min(d,distance_sq(x,y,z,A[i,1],A[i,2],A[i,3]))
     end
   else
     @assert n == 3 "Number of rows of coordinates matrix must be 3 when xyz_in_cols=false"
     @avx for j in 1:m
-      d = min(d,distance(x,y,z,A[1,j],A[2,j],A[3,j]))
+      d = min(d,distance_sq(x,y,z,A[1,j],A[2,j],A[3,j]))
     end
   end
-  d
+  sqrt(d)
 end
+
+# One Atom and a matrix of coordinates
+distance(at::Atom,A::Matrix{T}; xyz_in_cols=true) where T =
+  distance(at.x,at.y,at.z,A,xyz_in_cols=xyz_in_cols)
 
 #
 # Two matrices of coordinates. The smallest matrix is iterated atom by atom,
