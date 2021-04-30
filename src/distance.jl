@@ -88,11 +88,11 @@ julia> @btime closest(\$ligand[1],\$xprot)
 ```
 
 """
-function closest(x::Atom, y::AbstractVector{Atom})
+function closest(x,y,z,atoms::AbstractVector{Atom})
   d = +Inf
   imin = -1
-  for (i,at) in pairs(y)
-    dᵢ = distance_sq(x,at)
+  for (i,at) in pairs(atoms)
+    dᵢ = distance_sq(x,y,z,at)
     if dᵢ < d
       d = dᵢ
       imin = i
@@ -100,7 +100,8 @@ function closest(x::Atom, y::AbstractVector{Atom})
   end
   imin, sqrt(d)
 end
-distance(x::Atom, y::AbstractVector{Atom}) = closest(x,y)[2]
+closest(at::Atom, y::AbstractVector{Atom}) = closest(at.x,at.y,at.z,y)
+distance(at::Atom, y::AbstractVector{Atom}) = closest(at,y)[2]
 
 # Two vectors of atoms
 function closest(x::AbstractVector{Atom}, y::AbstractVector{Atom})
