@@ -4,14 +4,13 @@ module PDBTools
   using Printf
   using InteractiveUtils
   using Formatting
-  using LoopVectorization
 
   export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter,
          residuename
   export Atom, printatom, name
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname
-  export coor, maxmin, distance
+  export coor, maxmin, distance, closest
   export atomic_number, element, mass, element_name
   export formula, stoichiometry
 

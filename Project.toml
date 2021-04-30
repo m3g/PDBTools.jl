@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <leandro@iqm.unicamp.br>"]
-version = "0.12.7"
+version = "0.12.8"
 
 [deps]
 Formatting = "59287772-0a20-5a39-b81b-1366585eb4c0"
@@ -14,5 +14,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Formatting = "0.4"
 Parameters = "0.12"
-LoopVectorization = "0.12"
 julia = "1"
