@@ -43,6 +43,7 @@ julia> @btime distance(\$xprot,\$xlig)
 @inline distance(at::Atom,x,y,z) = distance(x,y,z,at)
 @inline distance(x::Atom,y::Atom) = distance(x.x,x.y,x.z,y.x,y.y,y.z)
 
+# Atom and vector of atoms
 function distance(x::Atom, y::AbstractVector{Atom})
   d = +Inf
   for at in y
@@ -51,6 +52,7 @@ function distance(x::Atom, y::AbstractVector{Atom})
   d
 end
 
+# Two vectors of atoms
 function distance(x::AbstractVector{Atom}, y::AbstractVector{Atom})
   d = +Inf
   for atx in x
@@ -59,14 +61,20 @@ function distance(x::AbstractVector{Atom}, y::AbstractVector{Atom})
   d
 end
 
+# Two residues
 distance(r1::Residue,r2::Residue) = 
   distance(@view(r1.atoms[r1.range]),@view(r2.atoms[r2.range]))
 
-using LoopVectorization
+#
+# The following versions are thought to be faster because the coordinates
+# are provided as matrices
+#
 
+# One Atom and a matrix of coordinates
 distance(at::Atom,A::Matrix{T}; xyz_in_cols=true) where T =
   distance(at.x,at.y,at.z,A,xyz_in_cols=xyz_in_cols)
 
+# Three coordinates and a matrix of coordinates
 function distance(x,y,z,A::Matrix{T}; xyz_in_cols=true) where T
   n, m = size(A)
   d = +Inf
@@ -84,6 +92,10 @@ function distance(x,y,z,A::Matrix{T}; xyz_in_cols=true) where T
   d
 end
 
+#
+# Two matrices of coordinates. The smallest matrix is iterated atom by atom,
+# and the largest matrix is iterated on the above function, which is loop-vectorized   
+#
 function distance(A::Matrix{T},B::Matrix{S}; xyz_in_cols=true) where {T,S}
   nA, mA = size(A)
   nB, mB = size(B)
