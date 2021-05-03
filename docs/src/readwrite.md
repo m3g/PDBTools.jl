@@ -15,7 +15,7 @@ bellow), a list of atoms with the following structure will be generated:
 
 ```julia-repl
 julia> printatom(atoms[1])
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 
 ```
@@ -33,7 +33,7 @@ struct Atom
   x :: Float64
   y :: Float64
   z :: Float64
-  b :: Float64
+  beta :: Float64
   occup :: Float64
   model :: Int64
   segname :: String # Segment name (cols 73:76)
@@ -68,7 +68,7 @@ optionally filtering the atoms with a selection:
 
 ```julia-repl
 julia> atoms = wget("1LBD","name CA")
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
        8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
       13   CA     ASN     A      227        3   41.052   82.178   67.504 53.45  1.00     1       -        13
@@ -86,7 +86,7 @@ The `Atom` structure is mutable, meaning that the fields can be edited. For exam
 ```julia-repl
 julia> atoms = readPDB("file.pdb")
    Array{PDBTools.Atom,1} with 62026 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
        3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
@@ -95,7 +95,7 @@ julia> atoms[1].segname = "ABCD"
 "ABCD"
 
 julia> printatom(atoms[1])
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    ABCD         1
 
 ```
@@ -113,7 +113,7 @@ to `ABC`. Saving and closing the file will update the `atoms` array:
 
 ```julia-repl
 julia> printatom(atoms[1])
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ABC     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 
 ```

@@ -41,9 +41,9 @@ function read_atom(record::String;
       atom.y = parse(Float64,record[39:46])
       atom.z = parse(Float64,record[47:54])
       try
-        atom.b = parse(Float64,record[61:66])
+        atom.beta = parse(Float64,record[61:66])
       catch
-        atom.b = 0.
+        atom.beta = 0.
       end
       try 
         atom.occup = parse(Float64,record[56:60])
@@ -91,7 +91,7 @@ function read_atom(record::String;
       atom.x = parse(Float64,mmcif_data[mmCIF_fields.x])
       atom.y = parse(Float64,mmcif_data[mmCIF_fields.y])
       atom.z = parse(Float64,mmcif_data[mmCIF_fields.z])
-      atom.b = parse(Float64,mmcif_data[mmCIF_fields.b])
+      atom.beta = parse(Float64,mmcif_data[mmCIF_fields.beta])
       atom.occup = parse(Float64,mmcif_data[mmCIF_fields.occup])
       atom.model = 1
 

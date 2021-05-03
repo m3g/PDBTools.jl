@@ -19,7 +19,7 @@ mutable struct Atom
   x::Float64 # x coordinate
   y::Float64 # y coordinate
   z::Float64 # z coordinate
-  b::Float64 # temperature factor
+  beta::Float64 # temperature factor
   occup::Float64 # occupancy
   model::Int # model number
   segname::String # Segment name (cols 73:76)
@@ -32,7 +32,7 @@ end
 julia> pdb = wget("1LBD");
 
 julia> printatom(pdb[1])
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     P        1        1    2.062  -13.995   21.747  0.00  1.00     1    PROT         1
 
 julia> pdb[1].resname
@@ -61,7 +61,7 @@ Base.@kwdef mutable struct Atom
   x::Float64 = 0.
   y::Float64 = 0.
   z::Float64 = 0.
-  b::Float64 = 0.
+  beta::Float64 = 0.
   occup::Float64 = 0.
   model::Int = 0
   segname::String = "XXXX" # Segment name (cols 73:76)
@@ -74,18 +74,18 @@ resname(atom::Atom) = atom.resname
 chain(atom::Atom) = atom.chain
 resnum(atom::Atom) = atom.resnum
 residue(atom::Atom) = atom.residue
-bfac(atom::Atom) = atom.b
+beta(atom::Atom) = atom.beta
 occup(atom::Atom) = atom.occup
 model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
 
 const atom_title = 
   @sprintf("%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
-           "index","name","resname","chain","resnum","residue","x","y","z","b","occup","model","segname","index_pdb") 
+           "index","name","resname","chain","resnum","residue","x","y","z","beta","occup","model","segname","index_pdb") 
 atom_line(atom::Atom) = 
   @sprintf("%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i",
            atom.index, atom.name, atom.resname, atom.chain, atom.resnum, atom.residue, 
-           atom.x, atom.y, atom.z, atom.b, atom.occup, atom.model, atom.segname, atom.index_pdb)
+           atom.x, atom.y, atom.z, atom.beta, atom.occup, atom.model, atom.segname, atom.index_pdb)
 
 function printatom(atom::Atom)
   println(atom_title)

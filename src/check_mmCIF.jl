@@ -43,7 +43,7 @@ function check_mmCIF(file)
           if occursin("_atom_site.Cartn_x",line) ; mmCIF_fields.x = ifield ; end 
           if occursin("_atom_site.Cartn_y",line) ; mmCIF_fields.y = ifield ; end 
           if occursin("_atom_site.Cartn_z",line) ; mmCIF_fields.z = ifield ; end 
-          if occursin("_atom_site.B_iso_or_equiv",line) ; mmCIF_fields.b = ifield ; end 
+          if occursin("_atom_site.B_iso_or_equiv",line) ; mmCIF_fields.beta = ifield ; end 
           if occursin("_atom_site.occupancy",line) ; mmCIF_fields.occup = ifield ; end 
           if occursin("ATOM",line) && occursin("HETATOM",line)
             break

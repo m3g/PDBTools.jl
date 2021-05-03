@@ -23,7 +23,7 @@ The accepted keywords for the selection are:
 | `residue`  | `=`,`>`,`<`,`<=`,`>=` | Integer     | `residue = 10`|
 | `chain`    |                       | String      | `chain A`     |
 | `model`    |                       | Integer     | `model 1`     |
-| `b`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `b > 0.5`     |
+| `beta`     | `=`,`>`,`<`,`<=`,`>=` | Real        | `beta > 0.5`  |
 | `occup`    | `=`,`>`,`<`,`<=`,`>=` | Real        | `occup >= 0.3`|
 | `segname`  |                       | String      | `segname PROT`|
 |            |                       |             |               |
@@ -107,7 +107,7 @@ The `eachresidue` iterator allows iteration over the resiudes of a structure (in
 ```julia
 julia> protein = wget("1LBD")
    Array{Atoms,1} with 1870 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
        2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
        3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
@@ -135,7 +135,7 @@ julia> residues = collect(eachresidue(protein))
 
 julia> residues[1]
  Residue of name SER with 6 atoms.
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
        2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
        3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3

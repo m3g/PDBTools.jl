@@ -10,6 +10,6 @@ Base.@kwdef mutable struct Indexes_mmCIF_fields
   x::Int = 0
   y::Int = 0
   z::Int = 0
-  b::Int = 0
+  beta::Int = 0
   occup::Int = 0
 end

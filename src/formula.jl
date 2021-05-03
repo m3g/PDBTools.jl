@@ -43,7 +43,7 @@ Returns the molecular formula of the current selection.
 ```julia-repl
 julia> first_residue = wget("1LBD","protein and residue 1")
    Array{Atoms,1} with 6 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
        2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
        3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3

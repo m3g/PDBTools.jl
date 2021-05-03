@@ -8,7 +8,7 @@ select atoms, and work with their coordinates.
  Simple data structure: 
 ```julia-repl
 julia> printatom(atoms[1])
-  index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
+  index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
       1   OW     SOL     X        1        1   54.370   45.310   33.970  0.00  0.00     1       -         1
 ```
 

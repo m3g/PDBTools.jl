@@ -7,7 +7,7 @@ module PDBTools
 
   export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter,
          residuename
-  export Atom, printatom, index, index_pdb, name, bfac, occup 
+  export Atom, printatom, index, index_pdb, name, beta, occup 
   export Residue, eachresidue, resname, residue, resnum, 
          chain, model, segname
   export coor, maxmin, distance, closest
