@@ -175,7 +175,7 @@ macro_keywords = [ MacroKeyword("water", iswater),
                    MacroKeyword("neutral", isneutral), 
                    MacroKeyword("backbone", isbackbone), 
                    MacroKeyword("sidechain", issidechain), 
-                   MacroKeyword("all", isequal), 
+                   MacroKeyword("all", all), 
                  ]
 
 functional_keywords = [ FunctionalKeyword(String, "element", element, operators) ]
