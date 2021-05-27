@@ -35,7 +35,7 @@ backbone_atoms = [ "N", "CA", "C", "O" ]
 isbackbone(atom::Atom; backbone_atoms = backbone_atoms) =
   which_natural_aminoacid(atom) == 0 ? false : (atom.name in backbone_atoms)
 
-not_side_chain_atoms = [ "N", "CA", "C", "O", "HN", "HA", "HT1", "HT2", "HT3" ]
+not_side_chain_atoms = [ "N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3" ]
 issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) =
   which_natural_aminoacid(atom) == 0 ? false : (! (atom.name in not_side_chain_atoms))
 
