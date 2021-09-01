@@ -4,7 +4,7 @@ Simple structures and functions to read and write PDB files
 
 ## Documentation
 
-The documentation can be found at: [http://m3g.iqm.unicamp.br/PDBTools](http://m3g.iqm.unicamp.br/PDBTools)
+The documentation can be found at: [https://m3g.github.io/PDBTools.jl/stable/](https://m3g.github.io/PDBTools.jl/stable/)
 
 ## Installing:
 
