@@ -104,7 +104,7 @@ function mass(s::Sequence)
       iaa = findfirst(x -> x.name == string(aa), natural_aminoacids)
     end
     if isnothing(iaa)
-        error("Could not residue $aa in natural amino acid list.")
+      error("Could not residue $aa in natural amino acid list.")
     end
     m += natural_aminoacids[iaa].mass
   end
