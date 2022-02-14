@@ -13,6 +13,7 @@ module PDBTools
   export coor, maxmin, distance, closest
   export atomic_number, element, mass, element_name
   export formula, stoichiometry
+  export Sequence
 
   #
   # Data structures

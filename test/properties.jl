@@ -51,4 +51,15 @@
   @test oneletter("Glu") == "E"
   @test threeletter("E") == "GLU"
 
+  seq = "AEG"
+  @test mass(Sequence(seq)) ≈ 257.2432
+  seq = ["A", "E", "G"]
+  @test mass(Sequence(seq)) ≈ 257.2432
+  seq = ['A', 'E', 'G']
+  @test mass(Sequence(seq)) ≈ 257.2432
+  seq = ["ALA", "GLU", "GLY"]
+  @test mass(Sequence(seq)) ≈ 257.2432
+  seq = ["Alanine", "Glutamic acid", "Glycine"]
+  @test mass(Sequence(seq)) ≈ 257.2432
+
 end
