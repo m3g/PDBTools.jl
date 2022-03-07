@@ -1,19 +1,21 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <leandro@iqm.unicamp.br>"]
-version = "0.12.13-DEV"
+version = "0.13.1-DEV"
 
 [deps]
-Formatting = "59287772-0a20-5a39-b81b-1366585eb4c0"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
-Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+Formatting = "59287772-0a20-5a39-b81b-1366585eb4c0"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
 Formatting = "0.4"
 Parameters = "0.12"
 StaticArrays = "1"
 julia = "1"
+Parameters = "0.12"
+Formatting = "0.4"
