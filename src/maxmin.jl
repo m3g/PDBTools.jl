@@ -3,9 +3,9 @@
 #
 
 struct MaxMinCoords
-  xmin::Vector{Float64}
-  xmax::Vector{Float64}
-  xlength::Vector{Float64}
+    xmin::Vector{Float64}
+    xmax::Vector{Float64}
+    xlength::Vector{Float64}
 end
 
 """
@@ -31,27 +31,26 @@ julia> maxmin(protein)
 
 """
 function maxmin(atoms::AbstractVector{Atom}, selection::String)
-  query = parse_query(selection)
-  return maxmin(atoms, only = atom -> apply_query(query,atom))
+    query = parse_query(selection)
+    return maxmin(atoms, only = atom -> apply_query(query, atom))
 end
 
-function maxmin(atoms::AbstractVector{Atom}; only=all)
-  xmin = [ +Inf, +Inf, +Inf ]
-  xmax = zeros(3)
-  for at in atoms
-    if only(at)
-      xmin .= (min(at.x,xmin[1]), min(at.y,xmin[2]), min(at.z,xmin[3]))
-      xmax .= (max(at.x,xmax[1]), max(at.y,xmax[2]), max(at.z,xmax[3]))
+function maxmin(atoms::AbstractVector{Atom}; only = all)
+    xmin = [+Inf, +Inf, +Inf]
+    xmax = zeros(3)
+    for at in atoms
+        if only(at)
+            xmin .= (min(at.x, xmin[1]), min(at.y, xmin[2]), min(at.z, xmin[3]))
+            xmax .= (max(at.x, xmax[1]), max(at.y, xmax[2]), max(at.z, xmax[3]))
+        end
     end
-  end
-  xlength = @. xmax - xmin
-  return MaxMinCoords(xmin,xmax,xlength)
+    xlength = @. xmax - xmin
+    return MaxMinCoords(xmin, xmax, xlength)
 end
 
 function Base.show(io::IO, m::MaxMinCoords)
-  println(" ")
-  println(" Minimum atom coordinates: xmin = ", m.xmin)
-  println(" Maximum atom coordinates: xmax = ", m.xmax)
-  println(" Length in each direction: xlength = ", m.xlength)
+    println(" ")
+    println(" Minimum atom coordinates: xmin = ", m.xmin)
+    println(" Maximum atom coordinates: xmax = ", m.xmax)
+    println(" Length in each direction: xlength = ", m.xlength)
 end
-

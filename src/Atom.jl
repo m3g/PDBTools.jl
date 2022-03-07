@@ -51,20 +51,20 @@ julia> mass(pdb[1])
 
 """
 Base.@kwdef mutable struct Atom
-  index::Int = 0 # The sequential index of the atoms in the file
-  index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
-  name::String = "X"
-  resname::String = "XXX"
-  chain::String = "X"
-  resnum::Int = 0 # Number of residue as written in PDB file
-  residue::Int = 0 # Sequential residue (molecule) number in file
-  x::Float64 = 0.
-  y::Float64 = 0.
-  z::Float64 = 0.
-  beta::Float64 = 0.
-  occup::Float64 = 0.
-  model::Int = 0
-  segname::String = "XXXX" # Segment name (cols 73:76)
+    index::Int = 0 # The sequential index of the atoms in the file
+    index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
+    name::String = "X"
+    resname::String = "XXX"
+    chain::String = "X"
+    resnum::Int = 0 # Number of residue as written in PDB file
+    residue::Int = 0 # Sequential residue (molecule) number in file
+    x::Float64 = 0.0
+    y::Float64 = 0.0
+    z::Float64 = 0.0
+    beta::Float64 = 0.0
+    occup::Float64 = 0.0
+    model::Int = 0
+    segname::String = "XXXX" # Segment name (cols 73:76)
 end
 
 index(atom::Atom) = atom.index
@@ -79,40 +79,67 @@ occup(atom::Atom) = atom.occup
 model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
 
-const atom_title = 
-  @sprintf("%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
-           "index","name","resname","chain","resnum","residue","x","y","z","beta","occup","model","segname","index_pdb") 
-atom_line(atom::Atom) = 
-  @sprintf("%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i",
-           atom.index, atom.name, atom.resname, atom.chain, atom.resnum, atom.residue, 
-           atom.x, atom.y, atom.z, atom.beta, atom.occup, atom.model, atom.segname, atom.index_pdb)
+const atom_title = @sprintf(
+    "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
+    "index",
+    "name",
+    "resname",
+    "chain",
+    "resnum",
+    "residue",
+    "x",
+    "y",
+    "z",
+    "beta",
+    "occup",
+    "model",
+    "segname",
+    "index_pdb"
+)
+atom_line(atom::Atom) = @sprintf(
+    "%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i",
+    atom.index,
+    atom.name,
+    atom.resname,
+    atom.chain,
+    atom.resnum,
+    atom.residue,
+    atom.x,
+    atom.y,
+    atom.z,
+    atom.beta,
+    atom.occup,
+    atom.model,
+    atom.segname,
+    atom.index_pdb
+)
 
 function printatom(atom::Atom)
-  println(atom_title)
-  println(atom_line(atom))
+    println(atom_title)
+    println(atom_line(atom))
 end
 
 #
 # Print a formatted list of atoms
 #
 function print_short_atom_list(atoms::AbstractVector{Atom})
-  println(atom_title)
-  for i in 1:min(length(atoms),3)
-    println(atom_line(atoms[i]))
-  end
-  if length(atoms) > 7
-    @printf("%57s\n","⋮ ")
-  end
-  for i in max(4,length(atoms)-2):length(atoms)
-    println(atom_line(atoms[i]))
-  end
+    println(atom_title)
+    for i = 1:min(length(atoms), 3)
+        println(atom_line(atoms[i]))
+    end
+    if length(atoms) > 7
+        @printf("%57s\n", "⋮ ")
+    end
+    for i = max(4, length(atoms) - 2):length(atoms)
+        println(atom_line(atoms[i]))
+    end
 end
 
 function Base.show(io::IO, atom::Atom)
-  println(atom_line(atom))
+    println(atom_line(atom))
 end
 
-function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom} )
-  println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
-  print_short_atom_list(atoms)
+function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom})
+    println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
+    print_short_atom_list(atoms)
 end

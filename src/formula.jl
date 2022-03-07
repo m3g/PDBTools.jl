@@ -27,9 +27,9 @@ julia> f[3]
 
 """
 struct Formula
-  formula::Vector{Tuple{String,Int}}
+    formula::Vector{Tuple{String,Int}}
 end
-Base.getindex(f::Formula,i) = f.formula[i]
+Base.getindex(f::Formula, i) = f.formula[i]
 """
 
 ```
@@ -59,29 +59,29 @@ C₃N₁O₂
 
 """
 function formula(atoms::AbstractVector{Atom})
-  f = Formula(Tuple{String,Int}[])
-  for at in atoms
-    el = element(at)
-    i = findfirst(elm -> elm[1] == el, f.formula)
-    if i == nothing
-      push!(f.formula,(el,1))
-    else
-      f.formula[i] = (el,f.formula[i][2]+1)
+    f = Formula(Tuple{String,Int}[])
+    for at in atoms
+        el = element(at)
+        i = findfirst(elm -> elm[1] == el, f.formula)
+        if i == nothing
+            push!(f.formula, (el, 1))
+        else
+            f.formula[i] = (el, f.formula[i][2] + 1)
+        end
     end
-  end
-  # Sort by atomic number
-  sort!(f.formula, by = x -> element_index(x[1]))
-  return f
+    # Sort by atomic number
+    sort!(f.formula, by = x -> element_index(x[1]))
+    return f
 end
 function Base.show(io::IO, f::Formula)
-  s = ""
-  for el in f.formula
-    s *= el[1]*format(el[2])
-  end
-  for sub in sub_int
-    s = replace(s,sub)
-  end
-  println(s)
+    s = ""
+    for el in f.formula
+        s *= el[1] * format(el[2])
+    end
+    for sub in sub_int
+        s = replace(s, sub)
+    end
+    println(s)
 end
 
 """
@@ -101,22 +101,23 @@ H₂O₁
 
 """
 function stoichiometry(atoms::AbstractVector{Atom})
-  f = formula(atoms)
-  d = gcd( (x[2] for x in f.formula)... ) 
-  for (i,p) in pairs(f.formula)
-    f.formula[i] = (p[1],p[2]÷d)
-  end
-  f
+    f = formula(atoms)
+    d = gcd((x[2] for x in f.formula)...)
+    for (i, p) in pairs(f.formula)
+        f.formula[i] = (p[1], p[2] ÷ d)
+    end
+    f
 end
 
-const sub_int = ( "0" => "₀" ,
-                  "1" => "₁" ,
-                  "2" => "₂" ,
-                  "3" => "₃" ,
-                  "4" => "₄" ,
-                  "5" => "₅" ,
-                  "6" => "₆" ,
-                  "7" => "₇" ,
-                  "8" => "₈" ,
-                  "9" => "₉" )
-
+const sub_int = (
+    "0" => "₀",
+    "1" => "₁",
+    "2" => "₂",
+    "3" => "₃",
+    "4" => "₄",
+    "5" => "₅",
+    "6" => "₆",
+    "7" => "₇",
+    "8" => "₈",
+    "9" => "₉",
+)

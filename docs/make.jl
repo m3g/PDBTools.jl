@@ -2,10 +2,10 @@ import Pkg
 Pkg.add("Documenter")
 using Documenter
 using PDBTools
-push!(LOAD_PATH,"../src/")
+push!(LOAD_PATH, "../src/")
 makedocs(
-    modules=[PDBTools],
-    sitename="PDBTools.jl",
+    modules = [PDBTools],
+    sitename = "PDBTools.jl",
     pages = [
         "Home" => "index.md",
         "Installation" => "installation.md",
@@ -14,11 +14,11 @@ makedocs(
         "Element properties" => "elements.md",
         "Auxiliary functions" => "auxiliary.md",
         "Help entries" => "help.md",
-    ]
+    ],
 )
 deploydocs(
     repo = "github.com/m3g/PDBTools.jl.git",
     target = "build",
     branch = "gh-pages",
-    versions = ["stable" => "v^", "v#.#" ],
+    versions = ["stable" => "v^", "v#.#"],
 )

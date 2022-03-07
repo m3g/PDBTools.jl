@@ -9,17 +9,16 @@ optional definition of a selection to be print.
 
 """
 function writePDB(atoms::AbstractVector{Atom}, filename, selection)
-  query = parse_query(selection)
-  writePDB(atoms,filename,only=atom->apply_query(query,atom))
+    query = parse_query(selection)
+    writePDB(atoms, filename, only = atom -> apply_query(query, atom))
 end
 
 function writePDB(atoms::AbstractVector{Atom}, filename; only = all)
-  file = open(filename,"w")
-  for atom in atoms
-    if only(atom)
-      println(file,write_atom(atom))
+    file = open(filename, "w")
+    for atom in atoms
+        if only(atom)
+            println(file, write_atom(atom))
+        end
     end
-  end
-  close(file)
+    close(file)
 end
-

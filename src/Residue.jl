@@ -36,15 +36,15 @@ julia> residues[8].range
 
 """
 struct Residue{T<:AbstractVector{Atom}}
-  atoms::T
-  range::UnitRange{Int}
-  name::String
-  resname::String
-  residue::Int
-  resnum::Int
-  chain::String
-  model::Int
-  segname::String
+    atoms::T
+    range::UnitRange{Int}
+    name::String
+    resname::String
+    residue::Int
+    resnum::Int
+    chain::String
+    model::Int
+    segname::String
 end
 name(residue::Residue) = residue.name
 resname(residue::Residue) = residue.resname
@@ -56,31 +56,39 @@ segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
 function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
-  i = range[begin]
-  # Check if the range effectivelly corresponds to a single residue (unsafe check)
-  for j in range[begin]+1:range[end]
-    if atoms[j].residue != atoms[i].residue
-      error("Range $range does not correspond to a single residue or molecule.")
+    i = range[begin]
+    # Check if the range effectivelly corresponds to a single residue (unsafe check)
+    for j = range[begin]+1:range[end]
+        if atoms[j].residue != atoms[i].residue
+            error("Range $range does not correspond to a single residue or molecule.")
+        end
     end
-  end
-  Residue(atoms,range,
-          atoms[i].resname, atoms[i].resname, atoms[i].residue,
-          atoms[i].resnum, atoms[i].chain, atoms[i].model, atoms[i].segname)
+    Residue(
+        atoms,
+        range,
+        atoms[i].resname,
+        atoms[i].resname,
+        atoms[i].residue,
+        atoms[i].resnum,
+        atoms[i].chain,
+        atoms[i].model,
+        atoms[i].segname,
+    )
 end
-Residue(atoms::AbstractVector{Atom}) = Residue(atoms,1:length(atoms))
+Residue(atoms::AbstractVector{Atom}) = Residue(atoms, 1:length(atoms))
 
-function Base.getindex(residue::Residue,i) 
-  @assert i > 0 "Index must be in 1:$(residue.range[end]-residue.range[begin])"
-  @assert (i <= length(residue.range)) "Residue has $(residue.range[end]-residue.range[begin]+1) atoms."
-  i = residue.range[begin] + i - 1
-  residue.atoms[i]
+function Base.getindex(residue::Residue, i)
+    @assert i > 0 "Index must be in 1:$(residue.range[end]-residue.range[begin])"
+    @assert (i <= length(residue.range)) "Residue has $(residue.range[end]-residue.range[begin]+1) atoms."
+    i = residue.range[begin] + i - 1
+    residue.atoms[i]
 end
 
 #
 # Structure and function to define the eachresidue iterator
 #
 struct EachResidue{T<:AbstractVector{Atom}}
-  atoms::T
+    atoms::T
 end
 
 """
@@ -124,59 +132,56 @@ julia> for res in eachresidue(atoms)
 eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
 
 # Collect residues default constructor
-Base.collect(r::EachResidue) = collect(Residue,r)
+Base.collect(r::EachResidue) = collect(Residue, r)
 
 #
 # Iterate over the resiudes
 #
-function Base.iterate(residues::EachResidue, state=1)
-  r0 = state
-  r0 > length(residues.atoms) && return nothing
-  residue0 = residues.atoms[r0].residue
-  r1 = r0
-  while r1 <= length(residues.atoms)
-    if residues.atoms[r1].residue != residue0 
-      return (Residue(residues.atoms,r0:r1-1),r1)
+function Base.iterate(residues::EachResidue, state = 1)
+    r0 = state
+    r0 > length(residues.atoms) && return nothing
+    residue0 = residues.atoms[r0].residue
+    r1 = r0
+    while r1 <= length(residues.atoms)
+        if residues.atoms[r1].residue != residue0
+            return (Residue(residues.atoms, r0:r1-1), r1)
+        end
+        r1 += 1
     end
-    r1 += 1
-  end
-  return (Residue(residues.atoms,r0:r1-1),r1)
+    return (Residue(residues.atoms, r0:r1-1), r1)
 end
 
 #
 # Iterate over atoms of one residue
 #
-function Base.iterate(residue::Residue, state=1)
-  i1 = residue.range[begin] + state - 1
-  if i1 <= residue.range[end]
-    return (residue.atoms[i1],state+1)
-  else
-    return nothing
-  end
+function Base.iterate(residue::Residue, state = 1)
+    i1 = residue.range[begin] + state - 1
+    if i1 <= residue.range[end]
+        return (residue.atoms[i1], state + 1)
+    else
+        return nothing
+    end
 end
 
 #
 # Length of the Residue struct and eachresidue iterator (number of residues)
 #
-Base.length(residues::EachResidue) = sum( 1 for residue in residues )
+Base.length(residues::EachResidue) = sum(1 for residue in residues)
 Base.length(residue::Residue) = length(residue.range)
 
 #
 # io show functions
 #
 function Base.show(io::IO, residue::Residue)
-  natoms = residue.range[end]-residue.range[begin]+1
-  println(" Residue of name $(name(residue)) with $natoms atoms.")
-  print_short_atom_list(@view residue.atoms[residue.range])
+    natoms = residue.range[end] - residue.range[begin] + 1
+    println(" Residue of name $(name(residue)) with $natoms atoms.")
+    print_short_atom_list(@view residue.atoms[residue.range])
 end
 
 function Base.show(io::IO, residues::EachResidue)
-  println(" Iterator with $(length(residues)) residues.")
+    println(" Iterator with $(length(residues)) residues.")
 end
 
-function Base.show(io::IO,::MIME"text/plain", residues::AbstractVector{Residue} )
-  println("   Array{Residue,1} with $(length(residues)) residues.")
+function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
+    println("   Array{Residue,1} with $(length(residues)) residues.")
 end
-
-
-

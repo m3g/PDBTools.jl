@@ -48,8 +48,8 @@ julia> element_name("CA")
 """
 element(name::String) = elements[element_index(name)].element
 element(atom::Atom) = element(atom.name)
-element_name(name::String) = elements[element_index(name)].name  
-element_name(atom::Atom) = element_name(atom.name) 
+element_name(name::String) = elements[element_index(name)].name
+element_name(atom::Atom) = element_name(atom.name)
 
 """
 ```
@@ -78,4 +78,3 @@ julia> mass(atoms)
 mass(name::String) = elements[element_index(name)].mass
 mass(atom::Atom) = mass(atom.name)
 mass(atoms::AbstractVector{Atom}) = sum(mass(atoms[i]) for i in eachindex(atoms))
-

@@ -18,16 +18,15 @@ julia> oneletter("Glutamic acid")
 
 """
 function oneletter(residue::String)
-  l = length(residue)
-  code = uppercase(residue)
-  if l > 1
-    if l == 3
-      ires = findfirst(r->r.three_letter_code == code, natural_aminoacids)
-    else
-      ires = findfirst(r->uppercase(r.name) == code, natural_aminoacids)
+    l = length(residue)
+    code = uppercase(residue)
+    if l > 1
+        if l == 3
+            ires = findfirst(r -> r.three_letter_code == code, natural_aminoacids)
+        else
+            ires = findfirst(r -> uppercase(r.name) == code, natural_aminoacids)
+        end
+        code = (ires == nothing ? nothing : natural_aminoacids[ires].one_letter_code)
     end
-    code = (ires == nothing ? nothing : natural_aminoacids[ires].one_letter_code)
-  end
-  return code
+    return code
 end
-

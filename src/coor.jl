@@ -47,41 +47,41 @@ julia> coor(residues[1])
 """
 coor(atom::Atom) = atom.x, atom.y, atom.z
 
-function coor(atoms::AbstractVector{Atom}, selection::String; xyz_in_cols::Bool=true)
-  query = parse_query(selection)
-  return coor(atoms,only = atom -> apply_query(query,atom), xyz_in_cols=xyz_in_cols)
+function coor(atoms::AbstractVector{Atom}, selection::String; xyz_in_cols::Bool = true)
+    query = parse_query(selection)
+    return coor(atoms, only = atom -> apply_query(query, atom), xyz_in_cols = xyz_in_cols)
 end
 
-function coor(atoms::AbstractVector{Atom}; only=all, xyz_in_cols::Bool=true)
-  n = 0
-  for atom in atoms
-    if only(atom)
-      n = n + 1
+function coor(atoms::AbstractVector{Atom}; only = all, xyz_in_cols::Bool = true)
+    n = 0
+    for atom in atoms
+        if only(atom)
+            n = n + 1
+        end
     end
-  end 
-  if xyz_in_cols
-    x = Matrix{Float64}(undef,n,3)
-  else
-    x = Matrix{Float64}(undef,3,n)
-  end
-  i = 0
-  for atom in atoms
-    if only(atom)
-      i = i + 1
-      if xyz_in_cols
-        x[i,1:3] .= coor(atom)
-      else
-        x[1:3,i] .= coor(atom)
-      end
+    if xyz_in_cols
+        x = Matrix{Float64}(undef, n, 3)
+    else
+        x = Matrix{Float64}(undef, 3, n)
     end
-  end 
-  return x
+    i = 0
+    for atom in atoms
+        if only(atom)
+            i = i + 1
+            if xyz_in_cols
+                x[i, 1:3] .= coor(atom)
+            else
+                x[1:3, i] .= coor(atom)
+            end
+        end
+    end
+    return x
 end
 
 #
 # Coordinates of the atoms of a residue/molecule
 #
-coor(residue::Residue; only=all, xyz_in_cols::Bool=true) = 
-  coor(residue.atoms[residue.range], only=only, xyz_in_cols=xyz_in_cols)
-coor(residue::Residue, selection::String; xyz_in_cols::Bool=true) = 
-  coor(residue.atoms[residue.range], selection, xyz_in_cols=xyz_in_cols)
+coor(residue::Residue; only = all, xyz_in_cols::Bool = true) =
+    coor(residue.atoms[residue.range], only = only, xyz_in_cols = xyz_in_cols)
+coor(residue::Residue, selection::String; xyz_in_cols::Bool = true) =
+    coor(residue.atoms[residue.range], selection, xyz_in_cols = xyz_in_cols)

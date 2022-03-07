@@ -18,15 +18,15 @@ julia> threeletter("Aspartic acid")
 
 """
 function threeletter(residue::String)
-  l = length(residue)
-  code = uppercase(residue)
-  if l != 3
-    if l == 1
-      ires = findfirst(r->r.one_letter_code == code, natural_aminoacids)
-    else
-      ires = findfirst(r->uppercase(r.name) == code, natural_aminoacids)
+    l = length(residue)
+    code = uppercase(residue)
+    if l != 3
+        if l == 1
+            ires = findfirst(r -> r.one_letter_code == code, natural_aminoacids)
+        else
+            ires = findfirst(r -> uppercase(r.name) == code, natural_aminoacids)
+        end
+        code = (ires == nothing ? nothing : natural_aminoacids[ires].three_letter_code)
     end
-    code = (ires == nothing ? nothing : natural_aminoacids[ires].three_letter_code)  
-  end
-  return code
+    return code
 end
