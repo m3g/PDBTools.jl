@@ -29,7 +29,7 @@ julia&gt; protein = select(model,&quot;protein&quot;);
 julia&gt; ligand = select(model,&quot;resname T3&quot;);
 
 julia&gt; closest(ligand,protein)
-((43, 3684), 2.7775834820937417)
+(43, 3684, 2.7775834820937417)
 
 julia&gt; ligand[43]
     4037   O1      T3     B        2      512  -22.568   81.625    3.159 36.59  1.00     1       -      4041
@@ -40,26 +40,27 @@ julia&gt; protein[3684]
 julia&gt; distance(ligand[43],protein[3684])
 2.7775834820937417
   </code></pre><h2 id="Obtain-arrays-with-coordinates"><a class="docs-heading-anchor" href="#Obtain-arrays-with-coordinates">Obtain arrays with coordinates</a><a id="Obtain-arrays-with-coordinates-1"></a><a class="docs-heading-anchor-permalink" href="#Obtain-arrays-with-coordinates" title="Permalink"></a></h2><p>All atoms:</p><pre><code class="language-julia-repl hljs">julia&gt; x = coor(atoms)
-1870×3 Matrix{Float64}:
-  45.228  84.358  70.638
-  46.08   83.165  70.327
-  45.257  81.872  70.236
-   ⋮              
- -26.929  77.888  51.398
- -27.112  78.62   50.033
- -27.481  77.605  48.554
+1463-element Vector{SVector{3, Float64}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]
+ [-9.488, -13.913, -5.295]
+ ⋮
+ [5.772, -10.399, -8.044]
+ [6.408, -12.034, -8.343]
+ [6.017, -10.967, -9.713]
 </code></pre><p>Or use selections to retrieve the coordinates of subsets of atoms:</p><p>C<span>$\alpha$</span> coordinates:</p><pre><code class="language-julia-repl hljs">julia&gt; xCA = coor(protein,&quot;name CA&quot;)
-238×3 Matrix{Float64}:
-  46.08   83.165  70.327
-  43.02   80.825  70.455
-  41.052  82.178  67.504
-   ⋮              
- -10.342  80.743  58.658
- -10.352  84.347  57.613
- -10.768  83.294  53.989
-</code></pre><p>By default, the output arrays are column based (the x, y and z coordinates of each atom are in each column). If you want a column-major output, add <code>row_major=false</code> to the input parameters of <code>coor</code>: <code>coor(atoms,row_major=false)</code></p><h2 id="Maximum-and-minimum-coordinates-of-the-atoms"><a class="docs-heading-anchor" href="#Maximum-and-minimum-coordinates-of-the-atoms">Maximum and minimum coordinates of the atoms</a><a id="Maximum-and-minimum-coordinates-of-the-atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Maximum-and-minimum-coordinates-of-the-atoms" title="Permalink"></a></h2><p>Use <code>maxmin(atoms)</code>, or <code>maxmin(atoms,&quot;resname CA&quot;)</code>, for example:</p><pre><code class="language-julia-repl hljs">julia&gt; m = maxmin(atoms,&quot;chain A&quot;)
+104-element Vector{SVector{3, Float64}}:
+ [-8.483, -14.912, -6.726]
+ [-5.113, -13.737, -5.466]
+ [-3.903, -11.262, -8.062]
+ ⋮
+ 7.836, -2.933, -6.873]
+ [4.414, -4.302, -7.734]
+ [4.134, -7.811, -6.344]
+ [3.244, -10.715, -8.603]
+</code></pre><p>The coordinates are output as arrays of static arrays (more specifically, as a <code>Vector{SVector{3,Float64}}</code>, from </p><h2 id="Maximum-and-minimum-coordinates-of-the-atoms"><a class="docs-heading-anchor" href="#Maximum-and-minimum-coordinates-of-the-atoms">Maximum and minimum coordinates of the atoms</a><a id="Maximum-and-minimum-coordinates-of-the-atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Maximum-and-minimum-coordinates-of-the-atoms" title="Permalink"></a></h2><p>Use <code>maxmin(atoms)</code>, or <code>maxmin(atoms,&quot;resname CA&quot;)</code>, for example:</p><pre><code class="language-julia-repl hljs">julia&gt; m = maxmin(atoms,&quot;chain A&quot;)
 
  Minimum atom coordinates: xmin = [-41.5, -41.526, -41.517]
  Maximum atom coordinates: xmax = [41.583, 41.502, 41.183]
  Length in each direction: xlength = [83.083, 83.028, 82.7]
-</code></pre><p><code>m</code> is a structure containing the three vectors with minimum and maximum coordinates, and lengths.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../elements/">« Element properties</a><a class="docs-footer-nextpage" href="../help/">Help entries »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.14 on <span class="colophon-date" title="Monday 7 March 2022 16:55">Monday 7 March 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+</code></pre><p><code>m</code> is a structure containing the three vectors with minimum and maximum coordinates, and lengths.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../elements/">« Element properties</a><a class="docs-footer-nextpage" href="../help/">Help entries »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.14 on <span class="colophon-date" title="Monday 7 March 2022 19:33">Monday 7 March 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
