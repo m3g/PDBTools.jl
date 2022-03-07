@@ -4,6 +4,8 @@ using Parameters
 using Printf
 using InteractiveUtils
 using Formatting
+using StaticArrays
+using LinearAlgebra: norm
 
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
 export Atom, printatom, index, index_pdb, name, beta, occup
