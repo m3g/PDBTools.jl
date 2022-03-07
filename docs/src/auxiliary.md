@@ -70,7 +70,7 @@ julia> protein = select(model,"protein");
 julia> ligand = select(model,"resname T3");
 
 julia> closest(ligand,protein)
-((43, 3684), 2.7775834820937417)
+(43, 3684, 2.7775834820937417)
 
 julia> ligand[43]
     4037   O1      T3     B        2      512  -22.568   81.625    3.159 36.59  1.00     1       -      4041
@@ -89,14 +89,14 @@ All atoms:
 
 ```julia-repl
 julia> x = coor(atoms)
-1870×3 Matrix{Float64}:
-  45.228  84.358  70.638
-  46.08   83.165  70.327
-  45.257  81.872  70.236
-   ⋮              
- -26.929  77.888  51.398
- -27.112  78.62   50.033
- -27.481  77.605  48.554
+1463-element Vector{SVector{3, Float64}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]
+ [-9.488, -13.913, -5.295]
+ ⋮
+ [5.772, -10.399, -8.044]
+ [6.408, -12.034, -8.343]
+ [6.017, -10.967, -9.713]
 
 ```
 
@@ -106,20 +106,19 @@ C``\alpha`` coordinates:
 
 ```julia-repl
 julia> xCA = coor(protein,"name CA")
-238×3 Matrix{Float64}:
-  46.08   83.165  70.327
-  43.02   80.825  70.455
-  41.052  82.178  67.504
-   ⋮              
- -10.342  80.743  58.658
- -10.352  84.347  57.613
- -10.768  83.294  53.989
+104-element Vector{SVector{3, Float64}}:
+ [-8.483, -14.912, -6.726]
+ [-5.113, -13.737, -5.466]
+ [-3.903, -11.262, -8.062]
+ ⋮
+ 7.836, -2.933, -6.873]
+ [4.414, -4.302, -7.734]
+ [4.134, -7.811, -6.344]
+ [3.244, -10.715, -8.603]
 
 ```
 
-By default, the output arrays are column based (the x, y and z coordinates of each
-atom are in each column). If you want a column-major output, add `row_major=false` to
-the input parameters of `coor`: `coor(atoms,row_major=false)`
+The coordinates are output as arrays of static arrays (more specifically, as a `Vector{SVector{3,Float64}}`, from 
 
 ## Maximum and minimum coordinates of the atoms
 

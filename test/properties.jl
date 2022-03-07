@@ -35,19 +35,19 @@
     @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278]
 
     s = select(atoms, "residue = 3")
-    @test coor(s) == [
-        -4.383 -11.903 -6.849
-        -4.51 -11.263 -6.096
-        -3.903 -11.262 -8.062
-        -3.731 -12.076 -8.767
-        -4.938 -10.279 -8.612
-        -4.417 -9.552 -9.06
-        -5.543 -9.911 -7.784
-        -5.867 -10.85 -9.684
-        -5.451 -10.837 -10.863
-        -6.974 -11.289 -9.3
-        -2.626 -10.48 -7.749
-        -1.94 -10.014 -8.658
+    @test coor(s) ≈ [
+        SVector{3,Float64}(-4.383, -11.903, -6.849),
+        SVector{3,Float64}(-4.51, -11.263, -6.096),
+        SVector{3,Float64}(-3.903, -11.262, -8.062),
+        SVector{3,Float64}(-3.731, -12.076, -8.767),
+        SVector{3,Float64}(-4.938, -10.279, -8.612),
+        SVector{3,Float64}(-4.417, -9.552, -9.06),
+        SVector{3,Float64}(-5.543, -9.911, -7.784),
+        SVector{3,Float64}(-5.867, -10.85, -9.684),
+        SVector{3,Float64}(-5.451, -10.837, -10.863),
+        SVector{3,Float64}(-6.974, -11.289, -9.3),
+        SVector{3,Float64}(-2.626, -10.48, -7.749),
+        SVector{3,Float64}(-1.94, -10.014, -8.658)
     ]
 
     s2 = select(atoms, "residue = 5")
@@ -55,22 +55,58 @@
     x1 = coor(s)
     x2 = coor(s2)
     @test distance(x1, x2) ≈ 3.6750402718881863
-    x1 = coor(s, xyz_in_cols = false)
-    x2 = coor(s2, xyz_in_cols = false)
-    @test distance(x1, x2, xyz_in_cols = false) ≈ 3.6750402718881863
     @test distance(residues[3], residues[5]) ≈ 3.6750402718881863
 
     r = Residue(select(atoms, "residue = 3"))
     @test coor(s) == coor(r)
     @test coor(select(atoms, "residue = 3")) == coor(residues[3])
-    @test coor(residues[3])' == coor(residues[3], xyz_in_cols = false)
     @test PDBTools.same_residue(atoms[1], atoms[2]) == true
     @test PDBTools.same_residue(atoms[1], atoms[20]) == false
 
+    #
+    # Dispatch of closest and distance functions 
+    #
+    r1 = select(atoms, "residue = 3")
+    r2 = select(atoms, "residue = 5")
+
+    @test all(closest(r1,r2) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(coor(r1),r2) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(r1,coor(r2)) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(coor(r1),coor(r2)) .≈ (11, 2, 3.6750402718881863))
+
+    @test all(closest(r1[1],coor(r2)) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]),coor(r2)) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]),r2) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]),coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+
+    @test all(closest(r1[1],coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(coor(r1[1]),r2[2]) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(r1[1],r2[2]) .≈ (1, 1, 5.121218702613667))
+
+    @test distance(r1,r2) ≈ 3.6750402718881863
+    @test distance(coor(r1),r2) ≈ 3.6750402718881863
+    @test distance(r1,coor(r2)) ≈ 3.6750402718881863
+    @test distance(coor(r1),coor(r2)) ≈ 3.6750402718881863
+
+    @test distance(r1[1],coor(r2)) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),coor(r2)) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),r2) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),coor(r2[2])) ≈ 5.121218702613667
+
+    @test distance(r1[1],coor(r2[2])) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),r2[2]) ≈ 5.121218702613667
+    @test distance(r1[1],r2[2]) ≈ 5.121218702613667
+
+    #
+    # Resiude name functions
+    #
     @test residuename("glu") == "Glutamic acid"
     @test oneletter("Glu") == "E"
     @test threeletter("E") == "GLU"
 
+    #
+    # Mass of sequences
+    #
     seq = "AEG"
     @test mass(Sequence(seq)) ≈ 257.2432
     seq = ["A", "E", "G"]
