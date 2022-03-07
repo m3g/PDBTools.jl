@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <leandro@iqm.unicamp.br>"]
-version = "0.13.1"
+version = "0.13.2-DEV"
 
 [deps]
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
