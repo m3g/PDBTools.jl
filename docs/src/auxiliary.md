@@ -118,7 +118,7 @@ julia> xCA = coor(protein,"name CA")
 
 ```
 
-The coordinates are output as arrays of static arrays (more specifically, as a `Vector{SVector{3,Float64}}`, from 
+The coordinates are output as arrays of static arrays (more specifically, as a `Vector{SVector{3,Float64}}`, from `StaticArrays`). 
 
 ## Maximum and minimum coordinates of the atoms
 
