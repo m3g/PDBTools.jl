@@ -82,5 +82,5 @@ function readPDB(file::String; only = all)
 end
 
 function Base.show(io::IO, atoms::AbstractVector{Atom})
-    println(" Structure file with ", length(atoms), " atoms. ")
+    println(io, " Structure file with ", length(atoms), " atoms. ")
 end

@@ -49,8 +49,8 @@ function maxmin(atoms::AbstractVector{Atom}; only = all)
 end
 
 function Base.show(io::IO, m::MaxMinCoords)
-    println(" ")
-    println(" Minimum atom coordinates: xmin = ", m.xmin)
-    println(" Maximum atom coordinates: xmax = ", m.xmax)
-    println(" Length in each direction: xlength = ", m.xlength)
+    println(io, " ")
+    println(io, " Minimum atom coordinates: xmin = ", m.xmin)
+    println(io, " Maximum atom coordinates: xmax = ", m.xmax)
+    println(io, " Length in each direction: xlength = ", m.xlength)
 end

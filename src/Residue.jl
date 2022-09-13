@@ -174,14 +174,14 @@ Base.length(residue::Residue) = length(residue.range)
 #
 function Base.show(io::IO, residue::Residue)
     natoms = residue.range[end] - residue.range[begin] + 1
-    println(" Residue of name $(name(residue)) with $natoms atoms.")
-    print_short_atom_list(@view residue.atoms[residue.range])
+    println(io, " Residue of name $(name(residue)) with $natoms atoms.")
+    print_short_atom_list(io, @view residue.atoms[residue.range])
 end
 
 function Base.show(io::IO, residues::EachResidue)
-    println(" Iterator with $(length(residues)) residues.")
+    println(io, " Iterator with $(length(residues)) residues.")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
-    println("   Array{Residue,1} with $(length(residues)) residues.")
+    println(io, "   Array{Residue,1} with $(length(residues)) residues.")
 end

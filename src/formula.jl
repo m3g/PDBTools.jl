@@ -81,7 +81,7 @@ function Base.show(io::IO, f::Formula)
     for sub in sub_int
         s = replace(s, sub)
     end
-    println(s)
+    println(io, s)
 end
 
 """

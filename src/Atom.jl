@@ -122,24 +122,24 @@ end
 #
 # Print a formatted list of atoms
 #
-function print_short_atom_list(atoms::AbstractVector{Atom})
-    println(atom_title)
+function print_short_atom_list(io::IO, atoms::AbstractVector{Atom})
+    println(io, atom_title)
     for i = 1:min(length(atoms), 3)
-        println(atom_line(atoms[i]))
+        println(io, atom_line(atoms[i]))
     end
     if length(atoms) > 7
-        @printf("%57s\n", "⋮ ")
+        @printf(io, "%57s\n", "⋮ ")
     end
     for i = max(4, length(atoms) - 2):length(atoms)
-        println(atom_line(atoms[i]))
+        println(io, atom_line(atoms[i]))
     end
 end
 
 function Base.show(io::IO, atom::Atom)
-    println(atom_line(atom))
+    println(io, atom_line(atom))
 end
 
 function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom})
-    println("   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
-    print_short_atom_list(atoms)
+    println(io, "   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
+    print_short_atom_list(io, atoms)
 end
