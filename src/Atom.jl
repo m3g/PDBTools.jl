@@ -125,18 +125,20 @@ end
 function print_short_atom_list(io::IO, atoms::AbstractVector{Atom})
     println(io, atom_title)
     for i = 1:min(length(atoms), 3)
-        println(io, atom_line(atoms[i]))
+        print(io, atom_line(atoms[i]))
+        i == length(atoms) || print(io, "\n")
     end
     if length(atoms) > 7
         @printf(io, "%57s\n", "⋮ ")
     end
     for i = max(4, length(atoms) - 2):length(atoms)
-        println(io, atom_line(atoms[i]))
+        print(io, atom_line(atoms[i]))
+        i == length(atoms) || print(io, "\n")
     end
 end
 
 function Base.show(io::IO, atom::Atom)
-    println(io, atom_line(atom))
+    print(io, atom_line(atom))
 end
 
 function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom})
