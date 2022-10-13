@@ -8,13 +8,21 @@ function which_natural_aminoacid(atom::Atom)
         return 0
     end
 
-    # To take into account alternate conformations, such as "AGLY", "BGLY", etc.
+    i = 0
+    # First, check if there is a 4-letter code that matches the atom name
+    i = findfirst(aa -> aa.three_letter_code == atom.resname, natural_aminoacids)
+    if !isnothing(i)
+        return i
+    end
+
+    # If not, try the same but removing the first char, to take into account
+    # alternate conformations, such as "AGLY", "BGLY", etc.
     l = length(atom.resname)
     name = atom.resname[l-2:l]
 
     # Return the index of this amino acid in the amino acid list, or nothing
     i = findfirst(aa -> aa.three_letter_code == name, natural_aminoacids)
-    if i == nothing
+    if isnothing(i)
         return 0
     end
 
