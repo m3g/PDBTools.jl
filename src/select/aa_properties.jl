@@ -11,58 +11,39 @@ struct AA
     mass::Float64
 end
 
-const ALA = AA("Alanine", "ALA", "A", "Aliphatic", false, false, 0, 71.037114, 71.0779)
-const ARG = AA("Arginine", "ARG", "R", "Basic", true, false, 1, 156.101111, 156.1857)
-const ASN = AA("Asparagine", "ASN", "N", "Amide", true, false, 0, 114.042927, 114.1026)
-const ASP = AA("Aspartic acid", "ASP", "D", "Acidic", true, false, -1, 115.026943, 115.0874)
-const CYS = AA("Cysteine", "CYS", "C", "Sulfuric", false, false, 0, 103.009185, 103.1429)
-const GLN = AA("Glutamine", "GLN", "Q", "Amide", true, false, 0, 128.058578, 128.1292)
-const GLU = AA("Glutamic acid", "GLU", "E", "Acidic", true, false, -1, 129.042593, 129.1140)
-const GLY = AA("Glycine", "GLY", "G", "Aliphatic", false, false, 0, 57.021464, 57.0513)
-
-const HIS = AA("Histidine", "HIS", "H", "Aromatic", true, false, 0, 137.058912, 137.1393)
+natural_aminoacids_dict = Dict{Symbol,AA}(
+:ALA => AA("Alanine", "ALA", "A", "Aliphatic", false, false, 0, 71.037114, 71.0779),
+:ARG => AA("Arginine", "ARG", "R", "Basic", true, false, 1, 156.101111, 156.1857),
+:ASN => AA("Asparagine", "ASN", "N", "Amide", true, false, 0, 114.042927, 114.1026),
+:ASP => AA("Aspartic acid", "ASP", "D", "Acidic", true, false, -1, 115.026943, 115.0874),
+:CYS => AA("Cysteine", "CYS", "C", "Sulfuric", false, false, 0, 103.009185, 103.1429),
+:GLN => AA("Glutamine", "GLN", "Q", "Amide", true, false, 0, 128.058578, 128.1292),
+:GLU => AA("Glutamic acid", "GLU", "E", "Acidic", true, false, -1, 129.042593, 129.1140),
+:GLY => AA("Glycine", "GLY", "G", "Aliphatic", false, false, 0, 57.021464, 57.0513),
+:HIS => AA("Histidine", "HIS", "H", "Aromatic", true, false, 0, 137.058912, 137.1393),
+:ILE => AA("Isoleucine", "ILE", "I", "Aliphatic", false, true, 0, 113.084064, 113.1576),
+:LEU => AA("Leucine", "LEU", "L", "Aliphatic", false, true, 0, 113.084064, 113.1576),
+:LYS => AA("Lysine", "LYS", "K", "Basic", true, false, 1, 128.094963, 128.1723),
+:MET => AA("Methionine", "MET", "M", "Sulfuric", false, false, 0, 131.040485, 131.1961),
+:PHE => AA("Phenylalanine", "PHE", "F", "Aromatic", false, true, 0, 147.068414, 147.1739),
+:PRO => AA("Proline", "PRO", "P", "Cyclic", false, false, 0, 97.052764, 97.1152),
+:SER => AA("Serine", "SER", "S", "Hydroxylic", true, false, 0, 87.032028, 87.07730),
+:THR => AA("Threonine", "THR", "T", "Hydroxylic", true, false, 0, 101.047679, 101.1039),
+:TRP => AA("Tryptophan", "TRP", "W", "Aromatic", false, true, 0, 186.079313, 186.2099),
+:TYR => AA("Tyrosine", "TYR", "Y", "Aromatic", true, false, 0, 163.063320, 163.1733),
+:VAL => AA("Valine", "VAL", "V", "Aliphatic", false, true, 0, 99.068414, 99.1311),
 # CHARMM
-const HSD = AA("Histidine", "HSD", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
-const HSE = AA("Histidine", "HSE", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
-const HSP = AA("Histidine", "HSP", "H", "Aromatic", true, false, 1, 138.067000, 138.1470)
+:HSD => AA("Histidine", "HSD", "H", "Aromatic", true, false, 0, 138.067000, 138.1470),
+:HSE => AA("Histidine", "HSE", "H", "Aromatic", true, false, 0, 138.067000, 138.1470),
+:HSP => AA("Histidine", "HSP", "H", "Aromatic", true, false, 1, 138.067000, 138.1470),
+:GLUP => AA("Glutamic acid (protonated)", "GLUP", "E", "Acidic", true, false,  0, 129.042593, 129.1140),
+:ASPP => AA("Aspartic acid (protonated)", "ASPP", "D", "Acidic", true, false,  0, 115.026943, 115.0874),
 # AMBER
-const HID = AA("Histidine", "HSD", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
-const HIE = AA("Histidine", "HSE", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
-const HIP = AA("Histidine", "HSP", "H", "Aromatic", true, false, 1, 138.067000, 138.1470)
-
-const ILE = AA("Isoleucine", "ILE", "I", "Aliphatic", false, true, 0, 113.084064, 113.1576)
-const LEU = AA("Leucine", "LEU", "L", "Aliphatic", false, true, 0, 113.084064, 113.1576)
-const LYS = AA("Lysine", "LYS", "K", "Basic", true, false, 1, 128.094963, 128.1723)
-const MET = AA("Methionine", "MET", "M", "Sulfuric", false, false, 0, 131.040485, 131.1961)
-const PHE = AA("Phenylalanine", "PHE", "F", "Aromatic", false, true, 0, 147.068414, 147.1739)
-const PRO = AA("Proline", "PRO", "P", "Cyclic", false, false, 0, 97.052764, 97.1152)
-const SER = AA("Serine", "SER", "S", "Hydroxylic", true, false, 0, 87.032028, 87.07730)
-const THR = AA("Threonine", "THR", "T", "Hydroxylic", true, false, 0, 101.047679, 101.1039)
-const TRP = AA("Tryptophan", "TRP", "W", "Aromatic", false, true, 0, 186.079313, 186.2099)
-const TYR = AA("Tyrosine", "TYR", "Y", "Aromatic", true, false, 0, 163.063320, 163.1733)
-const VAL = AA("Valine", "VAL", "V", "Aliphatic", false, true, 0, 99.068414, 99.1311)
-const natural_aminoacids = [
-    ALA,
-    ARG,
-    ASN,
-    ASP,
-    CYS,
-    GLN,
-    GLU,
-    GLY,
-    HIS, HSD, HSE, HSP, HID, HIE, HIP,
-    ILE,
-    LEU,
-    LYS,
-    MET,
-    PHE,
-    PRO,
-    SER,
-    THR,
-    TRP,
-    TYR,
-    VAL,
-]
+:HID => AA("Histidine", "HID", "H", "Aromatic", true, false, 0, 138.067000, 138.1470),
+:HIE => AA("Histidine", "HIE", "H", "Aromatic", true, false, 0, 138.067000, 138.1470),
+:HIP => AA("Histidine", "HIP", "H", "Aromatic", true, false, 1, 138.067000, 138.1470),
+)
+const natural_aminoacids = collect(values(natural_aminoacids_dict))
 
 """
 
