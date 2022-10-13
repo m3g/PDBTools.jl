@@ -4,7 +4,7 @@
 getseq(Vector{Atom} or filename; selection, code)
 ```
 
-Returns the sequence of aminoacids from the vector of atoms or file name. Selections may be applied. Returns both three- and one-letter residue codes. Code defines if the output will be a one-letter, three-letter or full-residue name array.
+Returns the sequence of aminoacids from the vector of atoms or file name. Selections may be applied. Code defines if the output will be a one-letter, three-letter or full-residue name array.
 
 ### Example
 
@@ -15,6 +15,11 @@ julia> getseq(protein,"residue < 3")
 2-element Vector{String}:
  "S"
  "A"
+
+julia> getseq(protein,"residue < 3", code=2)
+2-element Vector{String}:
+ "SER"
+ "ALA"
 
 julia> getseq(protein,"residue < 3",code=3)
 2-element Vector{String}:
@@ -52,15 +57,13 @@ function getseq(atoms::AbstractVector{Atom}; only = isprotein, code::Int = 1)
             end
         end
     end
-    seq
+    return seq
 end
 
 # From the file name
-
 function getseq(file::String, selection::String; code::Int = 1)
     atoms = readPDB(file)
     return getseq(atoms, selection, code = code)
 end
 
-getseq(file::String; only = all, code::Int = 1) =
-    getseq(readPDB(file), only = only, code = code)
+getseq(file::String; only = all, code::Int = 1) = getseq(readPDB(file), only = only, code = code)
