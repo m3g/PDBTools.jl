@@ -19,15 +19,22 @@ const CYS = AA("Cysteine", "CYS", "C", "Sulfuric", false, false, 0, 103.009185, 
 const GLN = AA("Glutamine", "GLN", "Q", "Amide", true, false, 0, 128.058578, 128.1292)
 const GLU = AA("Glutamic acid", "GLU", "E", "Acidic", true, false, -1, 129.042593, 129.1140)
 const GLY = AA("Glycine", "GLY", "G", "Aliphatic", false, false, 0, 57.021464, 57.0513)
+
 const HIS = AA("Histidine", "HIS", "H", "Aromatic", true, false, 0, 137.058912, 137.1393)
-const HSD = AA("Histidine", "HSD", "H", "Aromatic", true, false, 1, 138.067000, 138.1470)
-const HSE = AA("Histidine", "HSE", "H", "Aromatic", true, false, 1, 138.067000, 138.1470)
+# CHARMM
+const HSD = AA("Histidine", "HSD", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
+const HSE = AA("Histidine", "HSE", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
+const HSP = AA("Histidine", "HSP", "H", "Aromatic", true, false, 1, 138.067000, 138.1470)
+# AMBER
+const HID = AA("Histidine", "HSD", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
+const HIE = AA("Histidine", "HSE", "H", "Aromatic", true, false, 0, 138.067000, 138.1470)
+const HIP = AA("Histidine", "HSP", "H", "Aromatic", true, false, 1, 138.067000, 138.1470)
+
 const ILE = AA("Isoleucine", "ILE", "I", "Aliphatic", false, true, 0, 113.084064, 113.1576)
 const LEU = AA("Leucine", "LEU", "L", "Aliphatic", false, true, 0, 113.084064, 113.1576)
 const LYS = AA("Lysine", "LYS", "K", "Basic", true, false, 1, 128.094963, 128.1723)
 const MET = AA("Methionine", "MET", "M", "Sulfuric", false, false, 0, 131.040485, 131.1961)
-const PHE =
-    AA("Phenylalanine", "PHE", "F", "Aromatic", false, true, 0, 147.068414, 147.1739)
+const PHE = AA("Phenylalanine", "PHE", "F", "Aromatic", false, true, 0, 147.068414, 147.1739)
 const PRO = AA("Proline", "PRO", "P", "Cyclic", false, false, 0, 97.052764, 97.1152)
 const SER = AA("Serine", "SER", "S", "Hydroxylic", true, false, 0, 87.032028, 87.07730)
 const THR = AA("Threonine", "THR", "T", "Hydroxylic", true, false, 0, 101.047679, 101.1039)
@@ -43,9 +50,7 @@ const natural_aminoacids = [
     GLN,
     GLU,
     GLY,
-    HIS,
-    HSD,
-    HSE,
+    HIS, HSD, HSE, HSP, HID, HIE, HIP,
     ILE,
     LEU,
     LYS,

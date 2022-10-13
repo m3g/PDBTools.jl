@@ -20,9 +20,9 @@
 
     @test length(select(atoms, "residue = 2")) == 11
 
-    @test length(select(atoms, "neutral")) == 1182
+    @test length(select(atoms, "neutral")) == 1233
 
-    @test length(select(atoms, "charged")) == 281
+    @test length(select(atoms, "charged")) == 230
 
     @test length(select(atoms, "sidechain")) == 854
 
