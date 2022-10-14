@@ -102,3 +102,49 @@ distance(x::Atom, y::SVector) = norm(coor(x) - y)
 distance(x::SVector, y::Atom) = norm(x - coor(y))
 distance(x,y) = closest(x,y)[3]
 
+@testitem "distance/closest" begin
+    atoms = readPDB(PDBTools.TESTPDB)
+    s = select(atoms, "residue = 3")
+    s2 = select(atoms, "residue = 5")
+    @test distance(s, s2) ≈ 3.6750402718881863
+    x1 = coor(s)
+    x2 = coor(s2)
+    @test distance(x1, x2) ≈ 3.6750402718881863
+    residues = collect(eachresidue(atoms))
+    @test distance(residues[3], residues[5]) ≈ 3.6750402718881863
+
+       #
+    # Dispatch of closest and distance functions 
+    #
+    r1 = select(atoms, "residue = 3")
+    r2 = select(atoms, "residue = 5")
+
+    @test all(closest(r1,r2) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(coor(r1),r2) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(r1,coor(r2)) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(coor(r1),coor(r2)) .≈ (11, 2, 3.6750402718881863))
+
+    @test all(closest(r1[1],coor(r2)) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]),coor(r2)) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]),r2) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]),coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+
+    @test all(closest(r1[1],coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(coor(r1[1]),r2[2]) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(r1[1],r2[2]) .≈ (1, 1, 5.121218702613667))
+
+    @test distance(r1,r2) ≈ 3.6750402718881863
+    @test distance(coor(r1),r2) ≈ 3.6750402718881863
+    @test distance(r1,coor(r2)) ≈ 3.6750402718881863
+    @test distance(coor(r1),coor(r2)) ≈ 3.6750402718881863
+
+    @test distance(r1[1],coor(r2)) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),coor(r2)) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),r2) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),coor(r2[2])) ≈ 5.121218702613667
+
+    @test distance(r1[1],coor(r2[2])) ≈ 5.121218702613667
+    @test distance(coor(r1[1]),r2[2]) ≈ 5.121218702613667
+    @test distance(r1[1],r2[2]) ≈ 5.121218702613667
+end
+

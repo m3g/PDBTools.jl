@@ -70,7 +70,7 @@ function formula(atoms::AbstractVector{Atom})
         end
     end
     # Sort by atomic number
-    sort!(f.formula, by = x -> element_index(x[1]))
+    sort!(f.formula, by = x -> atomic_number(x[1]))
     return f
 end
 function Base.show(io::IO, f::Formula)
@@ -121,3 +121,9 @@ const sub_int = (
     "8" => "₈",
     "9" => "₉",
 )
+
+@testitem "formula" begin
+    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    f = formula(select(atoms, "residue < 5"))
+    @test f.formula == [("H", 25), ("C", 19), ("N", 4), ("O", 7), ("S", 1)]
+end

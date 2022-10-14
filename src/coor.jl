@@ -84,3 +84,27 @@ end
 #
 coor(residue::Residue; only = all) = coor(residue.atoms[residue.range], only = only)
 coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], selection)
+
+@testitem "coor" begin
+    using StaticArrays
+    atoms = readPDB(PDBTools.TESTPDB)
+    s = select(atoms, "residue = 3")
+    @test coor(s) ≈ [
+        SVector{3,Float64}(-4.383, -11.903, -6.849),
+        SVector{3,Float64}(-4.51, -11.263, -6.096),
+        SVector{3,Float64}(-3.903, -11.262, -8.062),
+        SVector{3,Float64}(-3.731, -12.076, -8.767),
+        SVector{3,Float64}(-4.938, -10.279, -8.612),
+        SVector{3,Float64}(-4.417, -9.552, -9.06),
+        SVector{3,Float64}(-5.543, -9.911, -7.784),
+        SVector{3,Float64}(-5.867, -10.85, -9.684),
+        SVector{3,Float64}(-5.451, -10.837, -10.863),
+        SVector{3,Float64}(-6.974, -11.289, -9.3),
+        SVector{3,Float64}(-2.626, -10.48, -7.749),
+        SVector{3,Float64}(-1.94, -10.014, -8.658)
+    ]
+    r = Residue(select(atoms, "residue = 3"))
+    @test coor(s) == coor(r)
+    residues = collect(eachresidue(atoms))
+    @test coor(select(atoms, "residue = 3")) == coor(residues[3])
+end

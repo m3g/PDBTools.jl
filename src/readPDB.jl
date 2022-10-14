@@ -1,8 +1,5 @@
 """
-
-```
-readPDB(filename; selection)
-```
+    readPDB(filename; selection)
 
 Reads a PDB file and stores the data in a vector of type `Atom`.
 
