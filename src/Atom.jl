@@ -145,3 +145,138 @@ function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom})
     println(io, "   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
     print_short_atom_list(io, atoms)
 end
+
+#
+# atom properties on the structure
+#
+export isprotein, isbackbone, issidechain
+isprotein(atom::Atom) = haskey(protein_residues, atom.resname)
+
+const backbone_atoms = ["N", "CA", "C", "O"]
+isbackbone(atom::Atom; backbone_atoms = backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms 
+
+const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
+issidechain(atom::Atom; not_side_chain_atoms = not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
+
+@testitem "atoms in struct" begin
+    pdb = readPDB(PDBTools.TESTPDB)
+    glu = select(pdb, "resname GLU")
+    @test isbackbone(glu[1])
+    @test !issidechain(glu[1])
+    phe = select(pdb, "resname PHE") 
+    @test isbackbone(phe[1])
+    @test !issidechain(phe[1])
+    @test issidechain(phe[8])
+end
+
+#
+# Function that checks if two atoms belong to the same residue
+# without, of course, checking the residue counter
+#
+function same_residue(atom1::Atom, atom2::Atom)
+    atom1.resnum != atom2.resnum && return false
+    atom1.model != atom2.model && return false
+    atom1.chain != atom2.chain && return false
+    atom1.resname != atom2.resname && return false
+    atom1.segname != atom2.segname && return false
+    return true
+end
+
+@testitem "same_residue" begin
+    pdb = readPDB(PDBTools.TESTPDB, "protein")
+    import PDBTools: same_residue
+    @test same_residue(pdb[1], pdb[2])
+    @test !same_residue(pdb[1], pdb[50])
+end
+
+
+#
+# Atom elemental properties
+#
+"""
+```
+atomic_number(name::String or atom::Atom)
+```
+
+Returns the atomic number of an atom given its name, or `Atom` structure.
+
+### Example
+
+```julia-repl
+julia> at = Atom(name="NT3");
+
+julia> atomic_number(at)
+7
+
+julia> atomic_number("CA")
+6
+
+```
+
+"""
+atomic_number(atom::Atom) = atomic_number(atom.name)
+
+"""
+```
+element_name(name::String or atom::Atom)
+```
+
+Returns the element name of an atom given its name, or `Atom` structure.
+
+### Example
+
+```julia-repl
+julia> at = Atom(name="NT3");
+
+julia> element_name(at)
+"Nitrogen"
+
+julia> element_name("NT3")
+"Nitrogen"
+
+julia> element_name("CA")
+"Carbon"
+
+```
+
+"""
+element(atom::Atom) = element(atom.name)
+element_name(atom::Atom) = element_name(atom.name)
+
+"""
+```
+mass(name::String or atom::Atom or Vector{Atom})
+```
+
+Returns the mass of an atom given its name, or `Atom` structure, or the total mass of a vector of `Atom`s. 
+
+### Example
+
+```julia-repl
+julia> atoms = [ Atom(name="NT3"), Atom(name="CA") ];
+
+julia> mass(atoms[1])
+14.0067
+
+julia> mass("CA")
+12.011
+
+julia> mass(atoms)
+26.017699999999998
+
+```
+
+"""
+mass(atom::Atom) = mass(atom.name)
+mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
+
+@testitem "fetch atomic element properties" begin
+    at = Atom(name="NT3")
+    @test atomic_number(at) == 7
+    @test element(at) == "N" 
+    @test element_name(at) == "Nitrogen"
+    @test mass(at) == 14.0067
+    @test mass([at, at]) == 28.0134
+    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    @test mass(atoms) ≈ 11079.704440000156
+end
