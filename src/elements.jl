@@ -117,7 +117,7 @@ function element_index(name::String)
         el -> (el.element == name || el.name == name || el.pdb_name == name),
         elements,
     )
-    (i != nothing) && return i
+    !isnothing(i) && return i
     #
     # Try to find by PDB name, note that NT2 and 2NT2 must match N, for example
     # 

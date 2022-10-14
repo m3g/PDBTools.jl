@@ -26,7 +26,7 @@ function oneletter(residue::String)
         else
             ires = findfirst(r -> uppercase(r.name) == code, natural_aminoacids)
         end
-        code = (ires == nothing ? nothing : natural_aminoacids[ires].one_letter_code)
+        code = (isnothing(ires) ? nothing : natural_aminoacids[ires].one_letter_code)
     end
     return code
 end

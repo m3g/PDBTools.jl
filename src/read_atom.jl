@@ -21,7 +21,7 @@ function read_atom(
 
             atom.resname = strip(record[17:21])
             resname = alternate_conformation(atom)
-            if resname == nothing
+            if isnothing(resname)
                 return nothing
             else
                 atom.resname = resname
@@ -74,7 +74,7 @@ function read_atom(
             atom.name = mmcif_data[mmCIF_fields.name]
             atom.resname = mmcif_data[mmCIF_fields.resname]
             resname = alternate_conformation(atom)
-            if resname == nothing
+            if isnothing(resname)
                 return nothing
             else
                 atom.resname = resname

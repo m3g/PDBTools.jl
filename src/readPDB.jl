@@ -56,7 +56,7 @@ function readPDB(file::String; only = all)
             imodel = imodel + 1
         end
         atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
-        if atom != nothing
+        if !isnothing(atom)
             index = index + 1
             atom.index = index
             atom.model = imodel

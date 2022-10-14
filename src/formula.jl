@@ -63,7 +63,7 @@ function formula(atoms::AbstractVector{Atom})
     for at in atoms
         el = element(at)
         i = findfirst(elm -> elm[1] == el, f.formula)
-        if i == nothing
+        if isnothing(i)
             push!(f.formula, (el, 1))
         else
             f.formula[i] = (el, f.formula[i][2] + 1)
