@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "0.13.6-DEV"
+version = "0.14.0"
 
 [deps]
 Formatting = "59287772-0a20-5a39-b81b-1366585eb4c0"
@@ -17,7 +17,7 @@ Formatting = "0.4"
 Parameters = "0.12"
 StaticArrays = "1"
 TestItems = "0.1"
-julia = "1"
+julia = "1.6"
 
 [extras]
 TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
