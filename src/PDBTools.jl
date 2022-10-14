@@ -6,6 +6,7 @@ using InteractiveUtils
 using Formatting
 using StaticArrays
 using LinearAlgebra: norm
+using TestItems
 
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
 export Atom, printatom, index, index_pdb, name, beta, occup
@@ -26,9 +27,6 @@ include("./Residue.jl")
 # Input and output functions
 #
 include("./all.jl")
-include("./oneletter.jl")
-include("./threeletter.jl")
-include("./residuename.jl")
 include("./formula.jl")
 include("./check_mmCIF.jl")
 include("./parse_int.jl")

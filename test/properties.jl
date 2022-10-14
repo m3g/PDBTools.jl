@@ -97,25 +97,4 @@
     @test distance(coor(r1[1]),r2[2]) ≈ 5.121218702613667
     @test distance(r1[1],r2[2]) ≈ 5.121218702613667
 
-    #
-    # Resiude name functions
-    #
-    @test residuename("glu") == "Glutamic acid"
-    @test oneletter("Glu") == "E"
-    @test threeletter("E") == "GLU"
-
-    #
-    # Mass of sequences
-    #
-    seq = "AEG"
-    @test mass(Sequence(seq)) ≈ 257.2432
-    seq = ["A", "E", "G"]
-    @test mass(Sequence(seq)) ≈ 257.2432
-    seq = ['A', 'E', 'G']
-    @test mass(Sequence(seq)) ≈ 257.2432
-    seq = ["ALA", "GLU", "GLY"]
-    @test mass(Sequence(seq)) ≈ 257.2432
-    seq = ["Alanine", "Glutamic acid", "Glycine"]
-    @test mass(Sequence(seq)) ≈ 257.2432
-
 end
