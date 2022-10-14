@@ -10,7 +10,6 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [compat]
@@ -19,3 +18,11 @@ Parameters = "0.12"
 StaticArrays = "1"
 TestItems = "0.1"
 julia = "1"
+
+[extras]
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[targets]
+test = ["Test", "TestItemRunner", "StaticArrays"]
