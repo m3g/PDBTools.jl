@@ -18,15 +18,7 @@ function read_atom(
         if !mmCIF
 
             atom.name = strip(record[13:16])
-
             atom.resname = strip(record[17:21])
-            resname = alternate_conformation(atom)
-            if isnothing(resname)
-                return nothing
-            else
-                atom.resname = resname
-            end
-
             atom.chain = strip(record[22:22])
             if atom.chain == " "
                 atom.chain = "0"
@@ -73,12 +65,6 @@ function read_atom(
             end
             atom.name = mmcif_data[mmCIF_fields.name]
             atom.resname = mmcif_data[mmCIF_fields.resname]
-            resname = alternate_conformation(atom)
-            if isnothing(resname)
-                return nothing
-            else
-                atom.resname = resname
-            end
             atom.chain = mmcif_data[mmCIF_fields.chain]
             try
                 atom.resnum = parse(Int, mmcif_data[mmCIF_fields.resnum])

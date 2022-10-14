@@ -50,6 +50,5 @@ include("./atom_properties.jl")
 
 # For selections
 include("./select/select_includes.jl")
-include("./alternate_conformation.jl")
 
 end
