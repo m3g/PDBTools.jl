@@ -163,6 +163,14 @@ function Base.iterate(residue::Residue, state = 1)
     end
 end
 
+@testitem "Residue iterator" begin
+    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    residues = collect(eachresidue(atoms))
+    @test length(residues) == 104
+    @test name(Residue(atoms, 1:12)) == "ALA"
+    @test Residue(atoms, 1:12).range == 1:12
+end
+
 #
 # Length of the Residue struct and eachresidue iterator (number of residues)
 #
@@ -184,4 +192,96 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
     println(io, "   Array{Residue,1} with $(length(residues)) residues.")
+end
+
+#
+# Properties of residues
+#
+isprotein(residue::Residue) = haskey(protein_residues, residue.resname)
+
+export isprotein
+export isacidic, isaliphatic, isaromatic, isbasic, ischarged,
+       ishydrophobic, isneutral, isnonpolar, ispolar 
+export iswater
+
+isacidic(r::Residue)      = isprotein(r) && protein_residues[r.resname].type == "Acidic" 
+isaliphatic(r::Residue)   = isprotein(r) && protein_residues[r.resname].type == "Aliphatic" 
+isaromatic(r::Residue)    = isprotein(r) && protein_residues[r.resname].type == "Aromatic" 
+isbasic(r::Residue)       = isprotein(r) && protein_residues[r.resname].type == "Basic"
+ischarged(r::Residue)     = isprotein(r) && protein_residues[r.resname].charge != 0
+isneutral(r::Residue)     = isprotein(r) && protein_residues[r.resname].charge == 0
+ishydrophobic(r::Residue) = isprotein(r) && protein_residues[r.resname].hydrophobic
+ispolar(r::Residue)       = isprotein(r) && protein_residues[r.resname].polar
+isnonpolar(r::Residue)    = isprotein(r) && !ispolar(r)
+
+isacidic(atom::Atom)      = isprotein(atom) && protein_residues[atom.resname].type == "Acidic" 
+isaliphatic(atom::Atom)   = isprotein(atom) && protein_residues[atom.resname].type == "Aliphatic" 
+isaromatic(atom::Atom)    = isprotein(atom) && protein_residues[atom.resname].type == "Aromatic" 
+isbasic(atom::Atom)       = isprotein(atom) && protein_residues[atom.resname].type == "Basic"
+ischarged(atom::Atom)     = isprotein(atom) && protein_residues[atom.resname].charge != 0
+isneutral(atom::Atom)     = isprotein(atom) && protein_residues[atom.resname].charge == 0
+ishydrophobic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].hydrophobic
+ispolar(atom::Atom)       = isprotein(atom) && protein_residues[atom.resname].polar
+isnonpolar(atom::Atom)    = isprotein(atom) && !ispolar(atom)
+
+const water_residues = ["HOH", "OH2", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
+iswater(r::Residue; water_residues = water_residues) = r.resname in water_residues
+iswater(atom::Atom; water_residues = water_residues) = atom.resname in water_residues
+
+@testitem "residue of atom" begin
+    pdb = readPDB(PDBTools.TESTPDB)
+    glu = select(pdb, "resname GLU")
+    @test isacidic(glu[1])
+    @test !isaliphatic(glu[1])
+    @test !isaromatic(glu[1])
+    @test !isbasic(glu[1])
+    @test ischarged(glu[1])
+    @test !isneutral(glu[1])
+    @test !ishydrophobic(glu[1])
+    @test ispolar(glu[1])
+    @test !isnonpolar(glu[1])
+    @test !iswater(glu[1])
+    phe = select(pdb, "resname PHE") 
+    @test !isacidic(phe[1])
+    @test !isaliphatic(phe[1])
+    @test isaromatic(phe[1])
+    @test !isbasic(phe[1])
+    @test !ischarged(phe[1])
+    @test isneutral(phe[1])
+    @test ishydrophobic(phe[1])
+    @test !ispolar(phe[1])
+    @test isnonpolar(phe[1])
+    @test !iswater(glu[1])
+    wat = select(pdb, "water")
+    @test iswater(wat[1])
+end
+
+@testitem "full residue" begin
+    pdb = readPDB(PDBTools.TESTPDB)
+    glu_atoms = select(pdb, "resname GLU")
+    glu = collect(eachresidue(glu_atoms))
+    @test isacidic(glu[1])
+    @test !isaliphatic(glu[1])
+    @test !isaromatic(glu[1])
+    @test !isbasic(glu[1])
+    @test ischarged(glu[1])
+    @test !isneutral(glu[1])
+    @test !ishydrophobic(glu[1])
+    @test ispolar(glu[1])
+    @test !isnonpolar(glu[1])
+    @test !iswater(glu[1])
+    phe_atoms = select(pdb, "resname PHE") 
+    phe = collect(eachresidue(phe_atoms))
+    @test !isacidic(phe[1])
+    @test !isaliphatic(phe[1])
+    @test isaromatic(phe[1])
+    @test !isbasic(phe[1])
+    @test !ischarged(phe[1])
+    @test isneutral(phe[1])
+    @test ishydrophobic(phe[1])
+    @test !ispolar(phe[1])
+    @test isnonpolar(phe[1])
+    @test !iswater(glu[1])
+    wat = select(pdb, "water")
+    @test iswater(wat[1])
 end
