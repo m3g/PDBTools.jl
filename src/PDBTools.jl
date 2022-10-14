@@ -16,12 +16,19 @@ export atomic_number, element, mass, element_name
 export formula, stoichiometry
 export Sequence
 
+const TESTPDB = "$(@__DIR__)/../test/structure.pdb"
+
+# Basic chemistry
+include("./elements.jl")
+include("./protein_residues.jl")
+
 #
 # Data structures
 #
 include("./Atom.jl")
-include("./Indexes_mmCIF_fields.jl")
 include("./Residue.jl")
+
+include("./Indexes_mmCIF_fields.jl")
 
 #
 # Input and output functions
@@ -29,7 +36,6 @@ include("./Residue.jl")
 include("./all.jl")
 include("./formula.jl")
 include("./check_mmCIF.jl")
-include("./parse_int.jl")
 include("./read_atom.jl")
 include("./write_atom.jl")
 include("./readPDB.jl")
@@ -39,14 +45,9 @@ include("./getseq.jl")
 include("./coor.jl")
 include("./distance.jl")
 include("./maxmin.jl")
-include("./same_residue.jl")
 include("./wget.jl")
 
-# Element properties
-include("./elements.jl")
-include("./atom_properties.jl")
-
 # For selections
-include("./select/select_includes.jl")
+include("./select.jl")
 
 end
