@@ -84,7 +84,7 @@ end
 @testitem "threeletter" begin
     @test threeletter("ALA") == "ALA"
     @test threeletter("A") == "ALA"
-    @test threeletter("A") == "ALA"
+    @test threeletter('A') == "ALA"
     @test threeletter("Alanine") == "ALA"
     @test threeletter("GLUP") == "GLU"
     @test threeletter("HSP") == "HIS"

@@ -154,6 +154,4 @@ element_name(name::String) = isnothing(match_element(name)) ? nothing : elements
         "Oxygen",
     ]
     @test atomic_number.(select(atoms, "residue = 1")) == [7, 1, 1, 1, 6, 1, 6, 1, 1, 1, 6, 8]
-#    @test mass.(select(atoms, "residue = 1")) == 
-#voltar
 end
