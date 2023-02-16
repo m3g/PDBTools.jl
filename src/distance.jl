@@ -1,8 +1,5 @@
 """
-
-```
-closest(x,y)
-```
+    closest(x,y)
 
 Computes the minimum distance between two sets of atoms and returns the indexes of the atoms 
 and their distance. Both vector of atoms or vectors of coordinates can be used as input.
@@ -39,12 +36,12 @@ julia> closest(ligand,x)
 ```
 
 """
-function closest(x::AbstractVector{T1}, y::AbstractVector{T2}) where {T1,T2 <: Union{SVector, Atom}}
+function closest(x::AbstractVector{T1}, y::AbstractVector{T2}) where {T1,T2<:Union{SVector,Atom}}
     imin = -1
     jmin = -1
     dmin = +Inf
-    for (i,xatom) in pairs(x) 
-        for (j,yatom) in pairs(y)
+    for (i, xatom) in pairs(x)
+        for (j, yatom) in pairs(y)
             d = distance(xatom, yatom)
             if d < dmin
                 imin = i
@@ -53,23 +50,20 @@ function closest(x::AbstractVector{T1}, y::AbstractVector{T2}) where {T1,T2 <: U
             end
         end
     end
-    return imin, jmin, dmin 
+    return imin, jmin, dmin
 end
-closest(x::Atom, y::AbstractVector{<:Union{SVector, Atom}}) = closest(SVector(x),y)
-closest(x::AbstractVector{<:Union{SVector, Atom}}, y::Atom) = closest(x,SVector(y))
-closest(x::AbstractVector{<:Union{SVector, Atom}}, y::SVector{3,<:Real}) = closest(x,SVector{1,typeof(y)}(y))
-closest(x::SVector{3,<:Real},y::AbstractVector{<:Union{SVector, Atom}}) = closest(SVector{1,typeof(x)}(x),y)
-closest(x::Atom, y::Atom) = closest(SVector(x),SVector(y))
-closest(x::SVector{3,<:Real}, y::SVector{3,<:Real}) = closest(SVector{1,typeof(x)}(x),SVector{1,typeof(y)}(y))
-closest(x::Atom, y::SVector{3,<:Real}) = closest(SVector(x),SVector{1,typeof(y)}(y))
-closest(x::SVector{3,<:Real}, y::Atom) = closest(SVector{1,typeof(x)}(x),SVector(y))
-closest(x::Residue,y::Residue) = closest(x.atoms[x.range],y.atoms[y.range])
+closest(x::Atom, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector(x), y)
+closest(x::AbstractVector{<:Union{SVector,Atom}}, y::Atom) = closest(x, SVector(y))
+closest(x::AbstractVector{<:Union{SVector,Atom}}, y::SVector{3,<:Real}) = closest(x, SVector{1,typeof(y)}(y))
+closest(x::SVector{3,<:Real}, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1,typeof(x)}(x), y)
+closest(x::Atom, y::Atom) = closest(SVector(x), SVector(y))
+closest(x::SVector{3,<:Real}, y::SVector{3,<:Real}) = closest(SVector{1,typeof(x)}(x), SVector{1,typeof(y)}(y))
+closest(x::Atom, y::SVector{3,<:Real}) = closest(SVector(x), SVector{1,typeof(y)}(y))
+closest(x::SVector{3,<:Real}, y::Atom) = closest(SVector{1,typeof(x)}(x), SVector(y))
+closest(x::Residue, y::Residue) = closest(x.atoms[x.range], y.atoms[y.range])
 
 """
-
-```
-distance(x,y)
-```
+    distance(x,y)
 
 Computes the minimum distance between two sets of atoms, between an atom and a set of atoms, or simply 
 the distance between two atoms. The input may be a vector of `Atom`s, or the 
@@ -100,7 +94,7 @@ distance(x::SVector, y::SVector) = norm(x - y)
 distance(x::Atom, y::Atom) = norm(coor(x) - coor(y))
 distance(x::Atom, y::SVector) = norm(coor(x) - y)
 distance(x::SVector, y::Atom) = norm(x - coor(y))
-distance(x,y) = closest(x,y)[3]
+distance(x, y) = closest(x, y)[3]
 
 @testitem "distance/closest" begin
     atoms = readPDB(PDBTools.TESTPDB)
@@ -113,38 +107,38 @@ distance(x,y) = closest(x,y)[3]
     residues = collect(eachresidue(atoms))
     @test distance(residues[3], residues[5]) ≈ 3.6750402718881863
 
-       #
+    #
     # Dispatch of closest and distance functions 
     #
     r1 = select(atoms, "residue = 3")
     r2 = select(atoms, "residue = 5")
 
-    @test all(closest(r1,r2) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(coor(r1),r2) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(r1,coor(r2)) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(coor(r1),coor(r2)) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(r1, r2) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(coor(r1), r2) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(r1, coor(r2)) .≈ (11, 2, 3.6750402718881863))
+    @test all(closest(coor(r1), coor(r2)) .≈ (11, 2, 3.6750402718881863))
 
-    @test all(closest(r1[1],coor(r2)) .≈ (1, 2, 5.121218702613667))
-    @test all(closest(coor(r1[1]),coor(r2)) .≈ (1, 2, 5.121218702613667))
-    @test all(closest(coor(r1[1]),r2) .≈ (1, 2, 5.121218702613667))
-    @test all(closest(coor(r1[1]),coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(r1[1], coor(r2)) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]), coor(r2)) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]), r2) .≈ (1, 2, 5.121218702613667))
+    @test all(closest(coor(r1[1]), coor(r2[2])) .≈ (1, 1, 5.121218702613667))
 
-    @test all(closest(r1[1],coor(r2[2])) .≈ (1, 1, 5.121218702613667))
-    @test all(closest(coor(r1[1]),r2[2]) .≈ (1, 1, 5.121218702613667))
-    @test all(closest(r1[1],r2[2]) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(r1[1], coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(coor(r1[1]), r2[2]) .≈ (1, 1, 5.121218702613667))
+    @test all(closest(r1[1], r2[2]) .≈ (1, 1, 5.121218702613667))
 
-    @test distance(r1,r2) ≈ 3.6750402718881863
-    @test distance(coor(r1),r2) ≈ 3.6750402718881863
-    @test distance(r1,coor(r2)) ≈ 3.6750402718881863
-    @test distance(coor(r1),coor(r2)) ≈ 3.6750402718881863
+    @test distance(r1, r2) ≈ 3.6750402718881863
+    @test distance(coor(r1), r2) ≈ 3.6750402718881863
+    @test distance(r1, coor(r2)) ≈ 3.6750402718881863
+    @test distance(coor(r1), coor(r2)) ≈ 3.6750402718881863
 
-    @test distance(r1[1],coor(r2)) ≈ 5.121218702613667
-    @test distance(coor(r1[1]),coor(r2)) ≈ 5.121218702613667
-    @test distance(coor(r1[1]),r2) ≈ 5.121218702613667
-    @test distance(coor(r1[1]),coor(r2[2])) ≈ 5.121218702613667
+    @test distance(r1[1], coor(r2)) ≈ 5.121218702613667
+    @test distance(coor(r1[1]), coor(r2)) ≈ 5.121218702613667
+    @test distance(coor(r1[1]), r2) ≈ 5.121218702613667
+    @test distance(coor(r1[1]), coor(r2[2])) ≈ 5.121218702613667
 
-    @test distance(r1[1],coor(r2[2])) ≈ 5.121218702613667
-    @test distance(coor(r1[1]),r2[2]) ≈ 5.121218702613667
-    @test distance(r1[1],r2[2]) ≈ 5.121218702613667
+    @test distance(r1[1], coor(r2[2])) ≈ 5.121218702613667
+    @test distance(coor(r1[1]), r2[2]) ≈ 5.121218702613667
+    @test distance(r1[1], r2[2]) ≈ 5.121218702613667
 end
 

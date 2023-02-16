@@ -1,7 +1,6 @@
 #
 # Data for natural protein residues
 #
-
 struct ProteinResidue
     name::String
     three_letter_code::String
@@ -14,6 +13,7 @@ struct ProteinResidue
     charge::Int
 end
 
+#! format: off
 protein_residues = Dict{String,ProteinResidue}(
     "ALA" => ProteinResidue("Alanine",       "ALA", "A", "Aliphatic",  false, false,  71.037114,  71.0779,  0),
     "ARG" => ProteinResidue("Arginine",      "ARG", "R", "Basic",      true,  false, 156.101111, 156.1857,  1),
@@ -45,11 +45,10 @@ protein_residues = Dict{String,ProteinResidue}(
     "HIE"  => ProteinResidue("Histidine (E)", "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  0), 
     "HIP"  => ProteinResidue("Histidine (doubly protonated)", "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  1), 
 )
+#! format: on
 
 """
-```
-threeletter(residue::String) 
-```
+    threeletter(residue::String) 
 
 Function to return the three-letter natural-amino acid residue code from the one-letter 
 code or residue name. The function is case-insensitive.
@@ -196,10 +195,7 @@ end
 end
 
 """
-
-```
-Sequence
-```
+    Sequence
 
 Wrapper for strings, or vectors of chars, strings, or residue names, to dispatch on 
 functions that operate on amino acid sequences.
@@ -224,10 +220,7 @@ struct Sequence{T}
 end
 
 """
-
-```
-mass(s::Sequence)
-```
+    mass(s::Sequence)
 
 Returns the mass of a sequence of amino acids, given a `Sequence` struct type.
 

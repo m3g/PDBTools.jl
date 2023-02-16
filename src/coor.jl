@@ -1,8 +1,5 @@
 """
-
-```
-coor(atoms; selection) 
-```
+    coor(atoms; selection) 
 
 Returns the coordinates of the atoms. The input may be one atom (type `Atom`), a vector of atoms, or a `Residue`. 
 The coordinates are returned as a vector of static vectors (from `StaticArrays`), more specifically
@@ -60,16 +57,16 @@ coor(atom::Atom) = SVector{3,Float64}(atom.x, atom.y, atom.z)
 
 function coor(atoms::AbstractVector{Atom}, selection::String)
     query = parse_query(selection)
-    return coor(atoms, only = atom -> apply_query(query, atom))
+    return coor(atoms, only=atom -> apply_query(query, atom))
 end
 
-function coor(atoms::AbstractVector{Atom}; only = all)
+function coor(atoms::AbstractVector{Atom}; only=all)
     n = 0
     for atom in atoms
         !only(atom) && continue
         n = n + 1
     end
-    x = fill(zero(SVector{3,Float64}),n)
+    x = fill(zero(SVector{3,Float64}), n)
     i = 0
     for atom in atoms
         !only(atom) && continue
@@ -82,7 +79,7 @@ end
 #
 # Coordinates of the atoms of a residue/molecule
 #
-coor(residue::Residue; only = all) = coor(residue.atoms[residue.range], only = only)
+coor(residue::Residue; only=all) = coor(residue.atoms[residue.range], only=only)
 coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], selection)
 
 @testitem "coor" begin

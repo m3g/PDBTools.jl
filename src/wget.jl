@@ -1,8 +1,6 @@
 """
+    wget(PDBid; selection)
 
-```
-wget(PDBid; selection)
-```
 Retrieves a PDB file from the protein data bank. Selections may be applied.
 
 ### Example
@@ -23,10 +21,10 @@ julia> protein = wget("1LBD","chain A")
 """
 function wget(pdb_id::String, selection::String)
     query = parse_query(selection)
-    return wget(pdb_id, only = atom -> apply_query(query, atom))
+    return wget(pdb_id, only=atom -> apply_query(query, atom))
 end
 
-function wget(pdb_id::String; only = all)
+function wget(pdb_id::String; only=all)
     file = download("https://files.rcsb.org/download/$(pdb_id).pdb")
-    return readPDB(file, only = only)
+    return readPDB(file, only=only)
 end

@@ -1,8 +1,5 @@
 """
-
-```
-edit!(atoms::Vector{Atom})
-```
+    edit!(atoms::Vector{Atom})
 
 Opens a temporary PDB file in which the fields of the vector of atoms can be edited.   
 

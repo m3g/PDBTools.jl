@@ -8,7 +8,7 @@ export select, selindex
 
 # Main function: receives the atoms vector and a julia function to select
 
-function select(set::AbstractVector{T}; by = all) where {T}
+function select(set::AbstractVector{T}; by=all) where {T}
     selected = similar(set, 0)
     for el in set
         if by(el)
@@ -22,13 +22,13 @@ end
 
 function select(set::AbstractVector{T}, selection::String) where {T}
     query = parse_query(selection)
-    return select(set, by = el -> apply_query(query, el))
+    return select(set, by=el -> apply_query(query, el))
 end
 
 #
 # Return indexes only
 #
-function selindex(set::AbstractVector{T}; by = all) where {T}
+function selindex(set::AbstractVector{T}; by=all) where {T}
     indexes = Vector{Int}(undef, 0)
     for i in eachindex(set)
         if by(set[i])
@@ -40,7 +40,7 @@ end
 
 function selindex(set::AbstractVector{T}, selection::String) where {T}
     query = parse_query(selection)
-    return selindex(set, by = el -> apply_query(query, el))
+    return selindex(set, by=el -> apply_query(query, el))
 end
 
 # Comparison operators
@@ -77,9 +77,7 @@ function (key::Keyword)(s::AbstractVector{<:AbstractString})
 end
 
 """
-```
-FunctionalKeyword{T}
-```
+    FunctionalKeyword{T}
 
 This is a structure that will store a keyword that depends on an external function
 requiring an operator and an argument. 
@@ -130,8 +128,7 @@ function (key::MacroKeyword)(s::AbstractVector{<:AbstractString})
 end
 
 """
-
-`parse_to_type(key::Keyword, val::String)`
+    parse_to_type(key::Keyword, val::String)
 
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
@@ -193,9 +190,7 @@ functional_keywords = [FunctionalKeyword(String, "element", element, operators)]
 # while explaining to me how to creat a syntex interpreter
 #
 """
-```
-has_key(key::String, s::AbstractVector{<:AbstractString})
-```
+    has_key(key::String, s::AbstractVector{<:AbstractString})
 
 Returns the first index of the vector `s` in which where `key` is found, or 0. 
 
@@ -222,9 +217,7 @@ function has_key(key::String, s::AbstractVector{<:AbstractString})
 end
 
 """
-```
-parse_query(selection:String)
-```
+    parse_query(selection:String)
 
 Calls `parse_query_vector` after splitting the selection string.
 
@@ -232,10 +225,7 @@ Calls `parse_query_vector` after splitting the selection string.
 parse_query(selection::String) = parse_query_vector(split(selection))
 
 """
-
-```
-parse_query_vector(s::AbstractVector{<:AbstractString})
-```
+    parse_query_vector(s::AbstractVector{<:AbstractString})
 
 """
 function parse_query_vector(s)
@@ -290,7 +280,7 @@ struct NoBackTraceException
     exc::Exception
 end
 
-function Base.showerror(io::IO, ex::NoBackTraceException, bt; backtrace = true)
+function Base.showerror(io::IO, ex::NoBackTraceException, bt; backtrace=true)
     Base.with_output_color(get(io, :color, false) ? Base.error_color() : :nothing, io) do io
         showerror(io, ex.exc)
     end
@@ -351,7 +341,7 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
     # Test residue iterator
     someresidues = select(atoms, "residue < 15")
-    let 
+    let
         n = 0
         m = 0.0
         for res in eachresidue(someresidues)

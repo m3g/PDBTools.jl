@@ -1,8 +1,5 @@
 """
-
-```julia
-Atom::DataType
-```
+    Atom::DataType
 
 Structure that contains the atom properties. It is mutable, so it can be edited. 
 Fields:
@@ -153,17 +150,17 @@ export isprotein, isbackbone, issidechain
 isprotein(atom::Atom) = haskey(protein_residues, atom.resname)
 
 const backbone_atoms = ["N", "CA", "C", "O"]
-isbackbone(atom::Atom; backbone_atoms = backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms 
+isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms
 
 const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
-issidechain(atom::Atom; not_side_chain_atoms = not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
+issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
 
 @testitem "atoms in struct" begin
     pdb = readPDB(PDBTools.TESTPDB)
     glu = select(pdb, "resname GLU")
     @test isbackbone(glu[1])
     @test !issidechain(glu[1])
-    phe = select(pdb, "resname PHE") 
+    phe = select(pdb, "resname PHE")
     @test isbackbone(phe[1])
     @test !issidechain(phe[1])
     @test issidechain(phe[8])
@@ -194,9 +191,7 @@ end
 # Atom elemental properties
 #
 """
-```
-atomic_number(name::String or atom::Atom)
-```
+    atomic_number(name::String or atom::Atom)
 
 Returns the atomic number of an atom given its name, or `Atom` structure.
 
@@ -217,9 +212,7 @@ julia> atomic_number("CA")
 atomic_number(atom::Atom) = atomic_number(atom.name)
 
 """
-```
-element_name(name::String or atom::Atom)
-```
+    element_name(name::String or atom::Atom)
 
 Returns the element name of an atom given its name, or `Atom` structure.
 
@@ -244,9 +237,7 @@ element(atom::Atom) = element(atom.name)
 element_name(atom::Atom) = element_name(atom.name)
 
 """
-```
-mass(name::String or atom::Atom or Vector{Atom})
-```
+    mass(name::String or atom::Atom or Vector{Atom})
 
 Returns the mass of an atom given its name, or `Atom` structure, or the total mass of a vector of `Atom`s. 
 
@@ -273,7 +264,7 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
 @testitem "fetch atomic element properties" begin
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
-    @test element(at) == "N" 
+    @test element(at) == "N"
     @test element_name(at) == "Nitrogen"
     @test mass(at) == 14.0067
     @test mass([at, at]) == 28.0134

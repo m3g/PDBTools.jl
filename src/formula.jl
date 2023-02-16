@@ -1,7 +1,5 @@
 """
-```
-Formula::DataType
-```
+    Formula::DataType
 
 Formula data type. Contains the number of atoms of each type in a vector of tuples.
 
@@ -31,10 +29,7 @@ struct Formula
 end
 Base.getindex(f::Formula, i) = f.formula[i]
 """
-
-```
-formula(atoms::AbstractVector{Atom})
-```
+    formula(atoms::AbstractVector{Atom})
 
 Returns the molecular formula of the current selection. 
 
@@ -70,7 +65,7 @@ function formula(atoms::AbstractVector{Atom})
         end
     end
     # Sort by atomic number
-    sort!(f.formula, by = x -> atomic_number(x[1]))
+    sort!(f.formula, by=x -> atomic_number(x[1]))
     return f
 end
 function Base.show(io::IO, f::Formula)
@@ -85,9 +80,7 @@ function Base.show(io::IO, f::Formula)
 end
 
 """
-```
-stoichiometry(atoms::AbstractVector{Atom})
-```
+    stoichiometry(atoms::AbstractVector{Atom})
 
 Returns the stoichiometry of atom selection in a `Formula` structure. 
 

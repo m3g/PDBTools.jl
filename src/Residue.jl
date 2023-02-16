@@ -1,8 +1,5 @@
 """
-
-```
-Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
-```
+    Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
 
 Residue data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
@@ -92,10 +89,7 @@ struct EachResidue{T<:AbstractVector{Atom}}
 end
 
 """
-
-```
-eachresidue(atoms::AbstractVector{Atom})
-```
+    eachresidue(atoms::AbstractVector{Atom})
 
 Iterator for the residues (or molecules) of a selection. 
 
@@ -137,7 +131,7 @@ Base.collect(r::EachResidue) = collect(Residue, r)
 #
 # Iterate over the resiudes
 #
-function Base.iterate(residues::EachResidue, state = 1)
+function Base.iterate(residues::EachResidue, state=1)
     r0 = state
     r0 > length(residues.atoms) && return nothing
     residue0 = residues.atoms[r0].residue
@@ -154,7 +148,7 @@ end
 #
 # Iterate over atoms of one residue
 #
-function Base.iterate(residue::Residue, state = 1)
+function Base.iterate(residue::Residue, state=1)
     i1 = residue.range[begin] + state - 1
     if i1 <= residue.range[end]
         return (residue.atoms[i1], state + 1)
@@ -201,32 +195,32 @@ isprotein(residue::Residue) = haskey(protein_residues, residue.resname)
 
 export isprotein
 export isacidic, isaliphatic, isaromatic, isbasic, ischarged,
-       ishydrophobic, isneutral, isnonpolar, ispolar 
+    ishydrophobic, isneutral, isnonpolar, ispolar
 export iswater
 
-isacidic(r::Residue)      = isprotein(r) && protein_residues[r.resname].type == "Acidic" 
-isaliphatic(r::Residue)   = isprotein(r) && protein_residues[r.resname].type == "Aliphatic" 
-isaromatic(r::Residue)    = isprotein(r) && protein_residues[r.resname].type == "Aromatic" 
-isbasic(r::Residue)       = isprotein(r) && protein_residues[r.resname].type == "Basic"
-ischarged(r::Residue)     = isprotein(r) && protein_residues[r.resname].charge != 0
-isneutral(r::Residue)     = isprotein(r) && protein_residues[r.resname].charge == 0
+isacidic(r::Residue) = isprotein(r) && protein_residues[r.resname].type == "Acidic"
+isaliphatic(r::Residue) = isprotein(r) && protein_residues[r.resname].type == "Aliphatic"
+isaromatic(r::Residue) = isprotein(r) && protein_residues[r.resname].type == "Aromatic"
+isbasic(r::Residue) = isprotein(r) && protein_residues[r.resname].type == "Basic"
+ischarged(r::Residue) = isprotein(r) && protein_residues[r.resname].charge != 0
+isneutral(r::Residue) = isprotein(r) && protein_residues[r.resname].charge == 0
 ishydrophobic(r::Residue) = isprotein(r) && protein_residues[r.resname].hydrophobic
-ispolar(r::Residue)       = isprotein(r) && protein_residues[r.resname].polar
-isnonpolar(r::Residue)    = isprotein(r) && !ispolar(r)
+ispolar(r::Residue) = isprotein(r) && protein_residues[r.resname].polar
+isnonpolar(r::Residue) = isprotein(r) && !ispolar(r)
 
-isacidic(atom::Atom)      = isprotein(atom) && protein_residues[atom.resname].type == "Acidic" 
-isaliphatic(atom::Atom)   = isprotein(atom) && protein_residues[atom.resname].type == "Aliphatic" 
-isaromatic(atom::Atom)    = isprotein(atom) && protein_residues[atom.resname].type == "Aromatic" 
-isbasic(atom::Atom)       = isprotein(atom) && protein_residues[atom.resname].type == "Basic"
-ischarged(atom::Atom)     = isprotein(atom) && protein_residues[atom.resname].charge != 0
-isneutral(atom::Atom)     = isprotein(atom) && protein_residues[atom.resname].charge == 0
+isacidic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].type == "Acidic"
+isaliphatic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].type == "Aliphatic"
+isaromatic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].type == "Aromatic"
+isbasic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].type == "Basic"
+ischarged(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].charge != 0
+isneutral(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].charge == 0
 ishydrophobic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].hydrophobic
-ispolar(atom::Atom)       = isprotein(atom) && protein_residues[atom.resname].polar
-isnonpolar(atom::Atom)    = isprotein(atom) && !ispolar(atom)
+ispolar(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].polar
+isnonpolar(atom::Atom) = isprotein(atom) && !ispolar(atom)
 
 const water_residues = ["HOH", "OH2", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
-iswater(r::Residue; water_residues = water_residues) = r.resname in water_residues
-iswater(atom::Atom; water_residues = water_residues) = atom.resname in water_residues
+iswater(r::Residue; water_residues=water_residues) = r.resname in water_residues
+iswater(atom::Atom; water_residues=water_residues) = atom.resname in water_residues
 
 @testitem "residue of atom" begin
     pdb = readPDB(PDBTools.TESTPDB)
@@ -241,7 +235,7 @@ iswater(atom::Atom; water_residues = water_residues) = atom.resname in water_res
     @test ispolar(glu[1])
     @test !isnonpolar(glu[1])
     @test !iswater(glu[1])
-    phe = select(pdb, "resname PHE") 
+    phe = select(pdb, "resname PHE")
     @test !isacidic(phe[1])
     @test !isaliphatic(phe[1])
     @test isaromatic(phe[1])
@@ -270,7 +264,7 @@ end
     @test ispolar(glu[1])
     @test !isnonpolar(glu[1])
     @test !iswater(glu[1])
-    phe_atoms = select(pdb, "resname PHE") 
+    phe_atoms = select(pdb, "resname PHE")
     phe = collect(eachresidue(phe_atoms))
     @test !isacidic(phe[1])
     @test !isaliphatic(phe[1])

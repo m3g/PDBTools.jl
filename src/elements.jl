@@ -9,6 +9,7 @@ struct Element
 end
 import Base.Broadcast.broadcastable
 broadcastable(element::Element) = Ref(element)
+#! format: off
 const elements = Dict{String,Element}([
     ["X" , "NotFound" ]              .=> Element("X" , "NotFound", 0,  0.00000);
     ["H" , "Hydrogen" ]              .=> Element("H" , "Hydrogen", 1,  1.00797);
@@ -104,7 +105,7 @@ const elements = Dict{String,Element}([
     ["Pa", "PA" , "Protactinium" ]   .=> Element("Pa", "Protactinium", 91,  231.0359);
     ["U" , "U"  , "Uranium" ]        .=> Element("U" , "Uranium", 92,  238.029);
 ])
-
+#! format: on
 
 # Function that tries to match an atom name, PDB style, with one of the
 # element names
@@ -116,7 +117,7 @@ function match_element(name::String)
         return name
     end
     # Check if the first character is number
-    i0 = 1 + isdigit(first(name))    
+    i0 = 1 + isdigit(first(name))
     imatch = searchsortedfirst(element_names, name[i0:i0]; by=x -> x[1])
     lmatch = searchsortedlast(element_names, name[i0:i0]; by=x -> x[1])
     for iel in imatch:lmatch

@@ -32,10 +32,10 @@ julia> protein = readPDB("../test/structure.pdb","resname = ALA")
 """
 function readPDB(file::String, selection::String)
     query = parse_query(selection)
-    return readPDB(file, only = atom -> apply_query(query, atom))
+    return readPDB(file, only=atom -> apply_query(query, atom))
 end
 
-function readPDB(file::String; only = all)
+function readPDB(file::String; only=all)
     mmCIF, mmCIF_fields = check_mmCIF(file)
     # Read file
     pdbfile = open(file, "r")
@@ -49,7 +49,7 @@ function readPDB(file::String; only = all)
         if occursin("END", line)
             imodel = imodel + 1
         end
-        atom = read_atom(line, mmCIF = mmCIF, mmCIF_fields = mmCIF_fields)
+        atom = read_atom(line, mmCIF=mmCIF, mmCIF_fields=mmCIF_fields)
         if !isnothing(atom)
             index = index + 1
             atom.index = index
