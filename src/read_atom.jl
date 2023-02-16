@@ -2,15 +2,15 @@
 # Function that tries to read a number as an integer given a number
 # or, perhaps, an hexadecimal representation string
 #
-function parse_int(s::String)
-    try
-        i = parse(Int, s)
-        return i
-    catch
-        i = parse(Int, s, base = 16)
-        return i
+function parse_int(s)
+    i = tryparse(Int, s)
+    if isnothing(i)
+        i = tryparse(Int, s, base = 16)
     end
-    error("Could not read integer from string: \"$s\"")
+    if isnothing(i)
+        error("Could not read integer from string: \"$s\"")
+    end
+    return i
 end
 
 #
@@ -21,73 +21,110 @@ function read_atom(
     mmCIF::Bool = false,
     mmCIF_fields::Indexes_mmCIF_fields = Indexes_mmCIF_fields(),
 )
+    atom = if mmCIF
+        read_atom_mmCIF(record, mmCIF_fields)
+    else
+        read_atom_PDB(record)
+    end
+    return atom
+end
+
+function parse_number(::Type{T}, string, range) where {T}
+    if length(string) < lastindex(range)
+        return zero(T)
+    end
+    # check last character because the first may be '-'
+    last_char = findlast(>(' '), @view(string[range]))
+    if isnothing(last_char) 
+        return zero(T)
+    end
+    last_char = first(range) + last_char - 1
+    if !isdigit(string[last_char])
+        return zero(T)
+    end
+    first_char = first(range) + findfirst(>(' '), @view(string[range])) - 1
+    s = @view(string[first_char:last_char])
+    if T <: Integer
+        return parse_int(s)
+    else
+        return parse(T, s)
+    end
+end
+
+function parse_string(string, range)
+    first_char = findfirst(>(' '), @view(string[range]))
+    if isnothing(first_char)
+        return @view(string[first(range):first(range)]) 
+    end
+    first_char = first(range) + first_char - 1
+    last_char = first(range) + findlast(>(' '), @view(string[range])) - 1
+    return @view(string[first_char:last_char])
+end
+
+# read atom from PDB file
+function read_atom_PDB(record::String)
+    N = length(record)
+    if N < 6
+        return nothing
+    end
+    if !(parse_string(record,1:4) == "ATOM" || parse_string(record,1:6) == "HETATM")
+        return nothing
+    end
+    atom = Atom()
+    atom.name = parse_string(record,13:16)
+    atom.resname = parse_string(record,17:21)
+    atom.chain = parse_string(record,22:22)
+    if isempty(atom.chain)
+        atom.chain ="0"
+    end
+    atom.index = 1
+    atom.index_pdb = parse_number(Int, record, 7:11)
+    atom.resnum = parse_number(Int,record, 23:26)
+    atom.x = parse_number(Float64, record, 31:38)
+    atom.y = parse_number(Float64, record, 39:46)
+    atom.z = parse_number(Float64, record, 47:54)
+    atom.beta = parse_number(Float64, record, 61:66)
+    atom.occup = parse_number(Float64, record, 56:60)
+    atom.model = 1
+    if N < 76
+        atom.segname = "-"
+    else
+        atom.segname = parse_string(record,73:76)
+    end
+    return atom
+end
+
+# read atom from mmCIF file
+function read_atom_mmCIF(record::String, mmCIF_fields::Indexes_mmCIF_fields = Indexes_mmCIF_fields())
     if length(record) < 6 || !(record[1:4] == "ATOM" || record[1:6] == "HETATM")
         return nothing
     end
     atom = Atom()
-    if !mmCIF
-        atom.name = strip(record[13:16])
-        atom.resname = strip(record[17:21])
-        atom.chain = strip(record[22:22])
-        if atom.chain == " "
-            atom.chain = "0"
-        end
-        atom.index = 1
-        try
-            atom.index_pdb = parse_int(record[7:11])
-        catch
-            atom.index_pdb = 0
-        end
-        atom.resnum = parse_int(record[23:26])
-        atom.x = parse(Float64, record[31:38])
-        atom.y = parse(Float64, record[39:46])
-        atom.z = parse(Float64, record[47:54])
-        try
-            atom.beta = parse(Float64, record[61:66])
-        catch
-            atom.beta = 0.0
-        end
-        try
-            atom.occup = parse(Float64, record[56:60])
-        catch
-            atom.occup = 0.0
-        end
-        atom.model = 1
-        try
-            atom.segname = strip(record[73:76])
-            if length(atom.segname) == 0
-                atom.segname = "-"
-            end
-        catch
-            atom.segname = "-"
-        end
-    else # if mmCIF
-        mmcif_data = split(record)
-        atom.index = 1
-        try
-            atom.index_pdb = parse(Int, mmcif_data[mmCIF_fields.index])
-        catch
-            atom.index_pdb = 0
-        end
-        atom.name = mmcif_data[mmCIF_fields.name]
-        atom.resname = mmcif_data[mmCIF_fields.resname]
-        atom.chain = mmcif_data[mmCIF_fields.chain]
-        try
-            atom.resnum = parse(Int, mmcif_data[mmCIF_fields.resnum])
-        catch
-            atom.resnum = 0
-        end
-        try
-            atom.segname = mmcif_data[mmCIF_fields.segname]
-        catch
-            atom.segname = ""
-        end
-        atom.x = parse(Float64, mmcif_data[mmCIF_fields.x])
-        atom.y = parse(Float64, mmcif_data[mmCIF_fields.y])
-        atom.z = parse(Float64, mmcif_data[mmCIF_fields.z])
-        atom.beta = parse(Float64, mmcif_data[mmCIF_fields.beta])
-        atom.occup = parse(Float64, mmcif_data[mmCIF_fields.occup])
-        atom.model = 1
+    mmcif_data = split(record)
+    atom.index = 1
+    try
+        atom.index_pdb = parse(Int, mmcif_data[mmCIF_fields.index])
+    catch
+        atom.index_pdb = 0
     end
+    atom.name = mmcif_data[mmCIF_fields.name]
+    atom.resname = mmcif_data[mmCIF_fields.resname]
+    atom.chain = mmcif_data[mmCIF_fields.chain]
+    try
+        atom.resnum = parse(Int, mmcif_data[mmCIF_fields.resnum])
+    catch
+        atom.resnum = 0
+    end
+    try
+        atom.segname = mmcif_data[mmCIF_fields.segname]
+    catch
+        atom.segname = ""
+    end
+    atom.x = parse(Float64, mmcif_data[mmCIF_fields.x])
+    atom.y = parse(Float64, mmcif_data[mmCIF_fields.y])
+    atom.z = parse(Float64, mmcif_data[mmCIF_fields.z])
+    atom.beta = parse(Float64, mmcif_data[mmCIF_fields.beta])
+    atom.occup = parse(Float64, mmcif_data[mmCIF_fields.occup])
+    atom.model = 1
     return atom
 end
