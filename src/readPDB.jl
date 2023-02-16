@@ -36,10 +36,7 @@ function readPDB(file::String, selection::String)
 end
 
 function readPDB(file::String; only = all)
-
-    # Check if structure is in mmCIF format
     mmCIF, mmCIF_fields = check_mmCIF(file)
-
     # Read file
     pdbfile = open(file, "r")
     natoms = 0
