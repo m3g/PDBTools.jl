@@ -33,7 +33,7 @@ end
 
 function maxmin(atoms::AbstractVector{Atom}; only=all)
     xmin = [+Inf, +Inf, +Inf]
-    xmax = zeros(3)
+    xmax = [-Inf, -Inf, -Inf]
     for at in atoms
         if only(at)
             xmin .= (min(at.x, xmin[1]), min(at.y, xmin[2]), min(at.z, xmin[3]))
