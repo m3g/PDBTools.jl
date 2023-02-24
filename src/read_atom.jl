@@ -40,13 +40,10 @@ end
 
 # read atom from PDB file
 function read_atom_PDB(record::String)
+    if !startswith(record, r"ATOM|HETATM")
+        return nothing
+    end
     N = length(record)
-    if N < 6
-        return nothing
-    end
-    if !(parse_string(record, 1:4) == "ATOM" || parse_string(record, 1:6) == "HETATM")
-        return nothing
-    end
     atom = Atom()
     atom.name = parse_string(record, 13:16)
     atom.resname = parse_string(record, 17:21)
@@ -73,7 +70,7 @@ end
 
 # read atom from mmCIF file
 function read_atom_mmCIF(record::String, mmCIF_fields::Indexes_mmCIF_fields=Indexes_mmCIF_fields())
-    if length(record) < 6 || !(record[1:4] == "ATOM" || record[1:6] == "HETATM")
+    if !startswith(record, r"ATOM|HETATM")
         return nothing
     end
     atom = Atom()
