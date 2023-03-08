@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "0.13.10"
+version = "0.13.11-DEV"
 
 [deps]
 Formatting = "59287772-0a20-5a39-b81b-1366585eb4c0"
