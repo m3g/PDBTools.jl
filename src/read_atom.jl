@@ -14,8 +14,12 @@ function read_atom(
     return atom
 end
 
-function parse_number(::Type{T}, string, range) where {T<:AbstractFloat}
-    parse(T, @view(string[range]))
+function parse_number(::Type{T}, string, range; accept_empty = false) where {T<:AbstractFloat}
+    x = tryparse(T, @view(string[range]))
+    if isnothing(x)
+        return 0.0
+    end
+    return x
 end
 
 function parse_number(::Type{T}, string, range) where {T<:Integer}
@@ -57,8 +61,8 @@ function read_atom_PDB(record::String)
     atom.x = parse_number(Float64, record, 31:38)
     atom.y = parse_number(Float64, record, 39:46)
     atom.z = parse_number(Float64, record, 47:54)
-    atom.beta = parse_number(Float64, record, 61:66)
-    atom.occup = parse_number(Float64, record, 56:60)
+    atom.beta = parse_number(Float64, record, 61:66; accept_empty = true)
+    atom.occup = parse_number(Float64, record, 56:60; accept_empty = true)
     atom.model = 1
     if N < 76
         atom.segname = "-"
