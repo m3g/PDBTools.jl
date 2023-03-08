@@ -8,12 +8,10 @@ The documentation can be found at: [https://m3g.github.io/PDBTools.jl/stable/](h
 
 ## Installing:
 
-```julia-repl
-julia> ] add PDBTools
-
-julia> using PDBTools
-
+```julia
+julia> import Pkg; Pkg.add("PDBTools")
 ```
+
 ### Features:
 
 Simple data structure: 
