@@ -87,8 +87,8 @@ const atom_title = @sprintf(
     "x",
     "y",
     "z",
-    "beta",
     "occup",
+    "beta",
     "model",
     "segname",
     "index_pdb"
@@ -104,8 +104,8 @@ atom_line(atom::Atom) = @sprintf(
     atom.x,
     atom.y,
     atom.z,
-    atom.beta,
     atom.occup,
+    atom.beta,
     atom.model,
     atom.segname,
     atom.index_pdb
