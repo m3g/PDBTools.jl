@@ -17,7 +17,7 @@ Formatting = "0.4"
 Parameters = "0.12"
 StaticArrays = "1"
 TestItems = "0.1"
-TestItemRunner = "1"
+TestItemRunner = "0.2"
 julia = "1.6"
 
 [extras]
