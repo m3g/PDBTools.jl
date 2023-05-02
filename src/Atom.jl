@@ -20,6 +20,8 @@ mutable struct Atom
   occup::Float64 # occupancy
   model::Int # model number
   segname::String # Segment name (cols 73:76)
+  element::String # Element symbol (cols 77:78)
+  charge::String # Charge (cols: 79:80)
 end
 ```
 
@@ -43,8 +45,10 @@ julia> element(pdb[1])
 
 julia> mass(pdb[1])
 14.0067
-
 ```
+
+The `element` and `charge` fields, which are frequently left empty in PDB files, are not printed. They
+can be retrieved with the `pdb_element` and `pdb_charge` getter functions. 
 
 """
 Base.@kwdef mutable struct Atom
@@ -62,6 +66,8 @@ Base.@kwdef mutable struct Atom
     occup::Float64 = 0.0
     model::Int = 0
     segname::String = "XXXX" # Segment name (cols 73:76)
+    element::String = "X"
+    charge::Union{Nothing,String} = nothing
 end
 
 index(atom::Atom) = atom.index
@@ -75,6 +81,8 @@ beta(atom::Atom) = atom.beta
 occup(atom::Atom) = atom.occup
 model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
+pdb_element(atom::Atom) = atom.element
+pdb_charge(atom::Atom) = atom.charge
 
 const atom_title = @sprintf(
     "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",

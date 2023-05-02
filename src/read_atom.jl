@@ -15,7 +15,7 @@ function read_atom(
 end
 
 function parse_number(::Type{T}, string, range) where {T<:AbstractFloat}
-    range = range[begin]:min(range[end],length(string))
+    range = range[begin]:min(range[end], length(string))
     x = tryparse(T, @view(string[range]))
     if isnothing(x)
         return 0.0
@@ -23,19 +23,23 @@ function parse_number(::Type{T}, string, range) where {T<:AbstractFloat}
     return x
 end
 
-function parse_number(::Type{T}, string, range) where {T<:Integer}
-    range = range[begin]:min(range[end],length(string))
+function parse_number(::Type{T}, string, range; alt=nothing) where {T<:Integer}
+    range = range[begin]:min(range[end], length(string))
     s = @view(string[range])
     i = tryparse(Int, s)
     !isnothing(i) && return i
     # try to parse as hexadecimal number
     i = tryparse(Int, s, base=16)
     !isnothing(i) && return i
-    error("Could not read integer from string: \"$s\"")
+    if isnothing(alt)
+        error("Could not read integer from string: \"$s\"")
+    else
+        return alt
+    end
 end
 
-function parse_string(string, range; alt = " ")
-    range = range[begin]:min(range[end],length(string))
+function parse_string(string, range; alt=" ")
+    range = range[begin]:min(range[end], length(string))
     length(range) > 0 || return alt
     first_char = findfirst(>(' '), @view(string[range]))
     isnothing(first_char) && return alt
@@ -50,11 +54,11 @@ function read_atom_PDB(record::String)
         return nothing
     end
     atom = Atom()
-    atom.name = parse_string(record, 13:16; alt = "X")
-    atom.resname = parse_string(record, 17:21; alt = "XXX")
-    atom.chain = parse_string(record, 22:22; alt = "X")
+    atom.name = parse_string(record, 13:16; alt="X")
+    atom.resname = parse_string(record, 17:21; alt="XXX")
+    atom.chain = parse_string(record, 22:22; alt="X")
     atom.index = 1
-    atom.index_pdb = parse_number(Int, record, 7:11)
+    atom.index_pdb = parse_number(Int, record, 7:11; alt=-1)
     atom.resnum = parse_number(Int, record, 23:26)
     atom.x = parse_number(Float64, record, 31:38)
     atom.y = parse_number(Float64, record, 39:46)
@@ -62,7 +66,9 @@ function read_atom_PDB(record::String)
     atom.occup = parse_number(Float64, record, 56:60)
     atom.beta = parse_number(Float64, record, 61:66)
     atom.model = 1
-    atom.segname = parse_string(record, 73:76; alt = "-")
+    atom.segname = parse_string(record, 73:76; alt="-")
+    atom.element = parse_string(record, 77:78, alt="X")
+    atom.charge = parse_string(record, 79:80, alt=nothing)
     return atom
 end
 
@@ -115,8 +121,10 @@ end
     @test a.model == 1
     @test a.segname == "-"
     @test a.index_pdb == 1
+    @test a.element == "X"
+    @test isnothing(a.charge)
 
-    line ="HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            "
+    line = "HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            1+  "
     a = PDBTools.read_atom(line)
     @test a.index == 1
     @test a.name == "O1"
@@ -129,4 +137,22 @@ end
     @test a.model == 1
     @test a.segname == "-"
     @test a.index_pdb == 1
+    @test a.element == "X"
+    @test a.charge == "1+"
+
+    line = "ATOM  *****  H2  GLYCD4301      11.014  36.823  40.115  1.00  0.00      GLYC H"
+    a = PDBTools.read_atom(line)
+    @test a.index == 1
+    @test a.name == "H2"
+    @test a.resname == "GLYC"
+    @test a.chain == "D"
+    @test a.resnum == 4301
+    @test a.residue == 0
+    @test (a.x, a.y, a.z) == (11.014, 36.823, 40.115)
+    @test (a.occup, a.beta) == (1.0, 0.0)
+    @test a.model == 1
+    @test a.segname == "GLYC"
+    @test a.index_pdb == -1
+    @test a.element == "H"
+    @test isnothing(a.charge)
 end
