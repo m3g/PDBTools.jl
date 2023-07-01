@@ -12,10 +12,14 @@ end
 
 function writePDB(atoms::AbstractVector{Atom}, filename; only=all)
     file = open(filename, "w")
+    curr_date = Dates.format(Dates.today(), "dd-u-yy")
+    header = "PDBTools.jl - $(length(atoms)) atoms"
+    println(file, @sprintf "%-10s%-40s%9s" "HEADER" header curr_date)
     for atom in atoms
         if only(atom)
             println(file, write_atom(atom))
         end
     end
+    println(file, "END")
     close(file)
 end
