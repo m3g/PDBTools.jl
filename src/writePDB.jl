@@ -1,25 +1,37 @@
 """
-    writePDB(atoms::Vector{Atom}, filename, selection)
+    writePDB(atoms::Vector{Atom}, filename, selection; header=:auto, footer=:auto)
 
-Function that writes a PDB file given the vector of atoms, with
-optional definition of a selection to be print.
+Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string
+that can be used to select a subset of the atoms in `atoms`. For example, `writePDB(atoms, "test.pdb", "name CA")`.
+
+The `header` and `footer` arguments can be used to add a header and footer to the PDB file. If `header` is `:auto`,
+then a header will be added with the number of atoms in `atoms`. If `footer` is `:auto`, then a footer will be added
+with the "END" keyword. Either can be set to `nothing` if no header or footer is desired.
 
 """
-function writePDB(atoms::AbstractVector{Atom}, filename, selection)
+function writePDB(atoms::AbstractVector{Atom}, filename, selection; header=:auto, footer=:auto)
     query = parse_query(selection)
     writePDB(atoms, filename, only=atom -> apply_query(query, atom))
 end
 
-function writePDB(atoms::AbstractVector{Atom}, filename; only=all)
+function writePDB(atoms::AbstractVector{Atom}, filename; only=all, header=:auto, footer=:auto)
     file = open(filename, "w")
-    curr_date = Dates.format(Dates.today(), "dd-u-yy")
-    header = "PDBTools.jl - $(length(atoms)) atoms"
-    println(file, @sprintf "%-10s%-40s%9s" "HEADER" header curr_date)
+    if header == :auto
+        curr_date = Dates.format(Dates.today(), "dd-u-yy")
+        header = "PDBTools.jl - $(length(atoms)) atoms"
+        println(file, @sprintf "%-10s%-40s%9s" "HEADER" header curr_date)
+    elseif header !== nothing
+        println(file, header)
+    end
     for atom in atoms
         if only(atom)
             println(file, write_atom(atom))
         end
     end
-    println(file, "END")
+    if footer == :auto
+        println(file, "END")
+    elseif footer !== nothing
+        println(file, footer)
+    end
     close(file)
 end
