@@ -4,6 +4,7 @@ authors = ["Leandro Martinez <lmartine@unicamp.br>"]
 version = "0.13.13-DEV"
 
 [deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Formatting = "59287772-0a20-5a39-b81b-1366585eb4c0"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -16,14 +17,14 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 Formatting = "0.4"
 Parameters = "0.12"
 StaticArrays = "1"
-TestItems = "0.1"
 TestItemRunner = "0.2"
+TestItems = "0.1"
 julia = "1.6"
 
 [extras]
-TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
 test = ["Test", "TestItemRunner", "StaticArrays"]
