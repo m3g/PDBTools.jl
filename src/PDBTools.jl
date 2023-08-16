@@ -12,6 +12,7 @@ import Dates
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
 export Atom, printatom, index, index_pdb, name, beta, occup
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
+export residue_ticks
 export coor, maxmin, distance, closest
 export atomic_number, element, mass, element_name
 export formula, stoichiometry

@@ -279,3 +279,41 @@ end
     wat = select(pdb, "water")
     @test iswater(wat[1])
 end
+
+"""
+    residue_ticks(atoms::AbstractVector{<:Atom}; first=nothing, last=nothing, stride=1)
+
+Returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
+
+# Examples
+
+```julia-repl
+julia> using PDBTools
+
+julia> pdb = wget("1UBQ", "protein");
+
+julia> atoms = wget("1UBQ", "protein");
+
+julia> residue_ticks(atoms; stride=10)
+([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+```
+
+The resulting tuple of residue numbers and labels can be used as `xticks` in `Plots.plot`, for example.
+
+"""
+function residue_ticks(
+    atoms::AbstractVector{<:Atom};
+    first=nothing, last=nothing, stride=1
+)
+    resnames = oneletter.(resname.(eachresidue(atoms)))
+    resnums = resnum.(eachresidue(atoms))
+    ticklabels = resnames .* string.(resnums)
+    residues = collect(eachresidue(atoms))
+    if isnothing(first)
+        i_begin = firstindex(residues)
+    end
+    if isnothing(last)
+        i_end = lastindex(residues)
+    end
+    return ( resnums[i_begin:stride:i_end], ticklabels[i_begin:stride:i_end] )
+end
