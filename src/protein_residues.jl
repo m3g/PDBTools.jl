@@ -112,7 +112,7 @@ function oneletter(residue::Union{String,Char})
     if haskey(protein_residues, code)
         return protein_residues[code].one_letter_code
     else
-        return nothing
+        return "X"
     end
 end
 
