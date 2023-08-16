@@ -123,7 +123,7 @@ end
     @test oneletter("Alanine") == "A"
     @test oneletter("GLUP") == "E"
     @test oneletter("HSP") == "H"
-    @test isnothing(oneletter("XXX"))
+    @test oneletter("XXX") == "X"
 end
 
 
