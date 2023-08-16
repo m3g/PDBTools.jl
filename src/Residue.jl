@@ -290,8 +290,6 @@ Returns a tuple with residue numbers and residue names for the given atoms, to b
 ```julia-repl
 julia> using PDBTools
 
-julia> pdb = wget("1UBQ", "protein");
-
 julia> atoms = wget("1UBQ", "protein");
 
 julia> residue_ticks(atoms; stride=10)
