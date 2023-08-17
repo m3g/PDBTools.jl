@@ -136,6 +136,56 @@ julia> m = maxmin(atoms,"chain A")
 `m` is a structure containing the three vectors with minimum and maximum
 coordinates, and lengths.
 
+## Residue tick labels for plots
+
+The `residue_ticks` function provides a practical way to define tick labels in plots associated to an amino-acid sequence:
+
+```julia
+residue_ticks(
+    atoms::AbstractVector{<:Atom}; 
+    first=nothing, last=nothing, stride=1, oneletter=true
+)
+```
+
+The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
+
+`first` and `last` optional keyword parameters are integers that refer to the residue numbers to be included. 
+The `stride` option can be used to skip residues and declutter the tick labels.
+
+If `oneletter` is `false`, three-letter residue codes are returned. Residues with unknown names will be 
+named `X` or `XXX`. 
+
+### Example
+
+Here we illustrate how to plot the average temperature factor of each residue of a crystallographic model as function of the residues.
+
+```julia-repl
+julia> using PDBTools, Plots
+
+julia> atoms = wget("1UBQ", "protein");
+
+julia> residue_ticks(atoms; stride=10) # example of output
+([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+
+julia> plot(
+           resnum.(eachresidue(atoms)), # x-axis: residue numbers
+           [ mean(beta.(res)) for res in eachresidue(atoms) ], # y-axis: average b-factor per residue
+           xlabel="Residue", 
+           xticks=residue_ticks(atoms; stride=10), # here we define the x-tick labels
+           ylabel="b-factor", 
+           xrotation=60,
+           label=nothing, framestyle=:box,
+      )
+```
+
+Produces the following plot:
+
+![./assets/residue_ticks.png](./assets/residue_ticks.png)
+
+
+
+
+
 
 
 
