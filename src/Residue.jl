@@ -281,9 +281,15 @@ end
 end
 
 """
-    residue_ticks(atoms::AbstractVector{<:Atom}; first=nothing, last=nothing, stride=1)
+    residue_ticks(atoms::AbstractVector{<:Atom}; first=nothing, last=nothing, stride=1, oneletter=true)
 
 Returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
+
+`first` and `last` optional keyword parameters are integers that refer to the residue numbers to be included. 
+The `stride` option can be used to skip residues and declutter the tick labels.
+
+If `oneletter` is `false`, three-letter residue codes are returned. Residues with unknown names will be 
+named `X` or `XXX`. 
 
 # Examples
 
@@ -301,17 +307,35 @@ The resulting tuple of residue numbers and labels can be used as `xticks` in `Pl
 """
 function residue_ticks(
     atoms::AbstractVector{<:Atom};
-    first=nothing, last=nothing, stride=1
+    first=nothing, last=nothing, stride=1,
+    oneletter::Bool = true,
 )
-    resnames = oneletter.(resname.(eachresidue(atoms)))
+    resnames = resname.(eachresidue(atoms))
+    if oneletter
+        resnames = PDBTools.oneletter.(resnames)
+    end
     resnums = resnum.(eachresidue(atoms))
     ticklabels = resnames .* string.(resnums)
     residues = collect(eachresidue(atoms))
-    if isnothing(first)
-        i_begin = firstindex(residues)
-    end
-    if isnothing(last)
-        i_end = lastindex(residues)
-    end
-    return ( resnums[i_begin:stride:i_end], ticklabels[i_begin:stride:i_end] )
+    first = isnothing(first) ?  firstindex(residues) : findfirst(==(first), resnums)
+    last = isnothing(last) ? lastindex(residues) : findlast(==(last), resnums)
+    return ( resnums[first:stride:last], ticklabels[first:stride:last] )
+end
+
+@testitem "residue_ticks" begin
+    # residue indexes start with 1
+    atoms = wget("1UBQ")
+    @test residue_ticks(atoms, stride=20) == ([1, 21, 41, 61, 81, 101, 121], ["M1", "D21", "Q41", "I61", "X81", "X101", "X121"])
+    atoms = select(atoms, "protein")
+    @test residue_ticks(atoms; stride=20) == ([1, 21, 41, 61], ["M1", "D21", "Q41", "I61"])
+    @test residue_ticks(atoms; stride = 20, first = 2) == ([2, 22, 42, 62], ["Q2", "T22", "R42", "Q62"])
+    @test residue_ticks(atoms; stride = 20, last = 42) == ([1, 21, 41], ["M1", "D21", "Q41"])
+    @test residue_ticks(atoms; stride = 20, last = 42, first = 2) == ([2, 22, 42], ["Q2", "T22", "R42"])
+    # residue indexes do not start with 1
+    atoms = wget("1LBD", "protein")
+    @test residue_ticks(atoms, stride=38) == ([225, 263, 301, 339, 377, 415, 453], ["S225", "D263", "L301", "S339", "N377", "F415", "E453"])
+    @test residue_ticks(atoms; stride=1, first = 227, last = 231) == ([227, 228, 229, 230, 231], ["N227", "E228", "D229", "M230", "P231"])
+    @test residue_ticks(atoms; stride=2, first = 227, last = 231) == ([227, 229, 231], ["N227", "D229", "P231"])
+    # three-letter return codes
+    @test residue_ticks(atoms; stride=2, first = 227, last = 231, oneletter = false) == ([227, 229, 231], ["ASN227", "ASP229", "PRO231"])
 end
