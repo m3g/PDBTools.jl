@@ -20,7 +20,7 @@ mutable struct Atom
   occup::Float64 # occupancy
   model::Int # model number
   segname::String # Segment name (cols 73:76)
-  element::String # Element symbol (cols 77:78)
+  element::String # Element symbol string (cols 77:78)
   charge::String # Charge (cols: 79:80)
 end
 ```
@@ -83,6 +83,13 @@ model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
 pdb_element(atom::Atom) = atom.element
 pdb_charge(atom::Atom) = atom.charge
+
+#
+# Compatibility with AtomsBase interface
+#
+atomic_symbol(atom::Atom) = element_symbol(atom.name)
+atomic_mass(atom::Atom) = mass(atom)
+position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
 const atom_title = @sprintf(
     "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
@@ -279,3 +286,13 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
     atoms = readPDB(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
 end
+
+@testitem "AtomsBase interface" begin
+    using StaticArrays
+    at = Atom(name="NT3")
+    @test atomic_number(at) == 7
+    @test atomic_symbol(at) == :N
+    @test atomic_mass(at) ≈ 14.0067
+    @test position(at) ≈ SVector(0.0, 0.0, 0.0)
+end
+

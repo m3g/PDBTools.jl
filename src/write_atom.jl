@@ -21,7 +21,7 @@ function write_atom(atom::Atom)
     #47 - 54        Real(8.3)     z            Orthogonal coordinates for Z in Angstroms.
     #55 - 60        Real(6.2)     occupancy    Occupancy.
     #61 - 66        Real(6.2)     tempFactor   Temperature  factor.
-    #77 - 78        LString(2)    element      Element symbol, right-justified.
+    #77 - 78        LString(2)    element      Element symbol string, right-justified.
     #79 - 80        LString(2)    charge       Charge  on the atom.
 
     name = strip(atom.name)
