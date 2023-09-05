@@ -21,7 +21,6 @@ julia> element(atoms[1])
 
 julia> element_name(atoms[1])
 "Nitrogen"
-
 ```
 
 The formula or stoichiometry of a selection can also be retrieved:
@@ -36,3 +35,18 @@ julia> stoichiometry(select(atoms,"water"))
 H₂O₁
 
 ```
+
+## AtomsBase compatibility
+
+!!! compat
+    This interface requires at least PDBTools version 0.14.3.
+
+The following functions are supported as part of the API, to conform the `AtomsBase` interface:
+
+| Function   |  Example              |  Output |
+|:-----------|:----------------------|:-------:|
+|`atomic_number(::PDBTools.Atom)` | `atomic_number(Atom(name="NE2"))` |  `7` |
+|`atomic_symbol(::PDBTools.Atom)` |  `atomic_symbol(Atom(name="NE2"))` |  `:N` |
+|`atomic_mass(::PDBTools.Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
+|`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
+
