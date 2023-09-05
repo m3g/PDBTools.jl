@@ -1,3 +1,7 @@
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://m3g.github.io/PDBTools.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://m3g.github.io/PDBTools.jl/dev)
+[![Tests](https://img.shields.io/badge/build-passing-green)](https://github.com/m3g/PDBTools.jl/actions)
+
 # PDBTools
 
 Simple structures and functions to read and write PDB files
