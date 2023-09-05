@@ -39,7 +39,7 @@ H₂O₁
 ## AtomsBase compatibility
 
 !!! compat
-    This interface requires at least PDBTools version 0.14.3.
+    This interface requires at least PDBTools version 0.14.2.
 
 The following functions are supported as part of the API, to conform the `AtomsBase` interface:
 
