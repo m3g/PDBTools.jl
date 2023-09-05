@@ -138,6 +138,9 @@ coordinates, and lengths.
 
 ## Residue tick labels for plots
 
+!!! compat
+    The `residue_ticks` function requires at least PDBTools version 0.14.1.
+
 The `residue_ticks` function provides a practical way to define tick labels in plots associated to an amino-acid sequence:
 
 ```julia
