@@ -1,9 +1,15 @@
 """
-    readPDB(filename; selection)
+    readPDB(pdbfile::String, selection::String)
+    readPDB(pdbfile::String; only::Function = all)
 
-Reads a PDB file and stores the data in a vector of type `Atom`.
+Reads a PDB file and stores the data in a vector of type `Atom`. 
 
-### Example
+If a selection is provided, only the atoms matching the selection will be read. 
+For example, `resname ALA` will select all the atoms in the residue ALA.
+
+If the `only` function keyword is provided, only the atoms for which `only(atom)` is true will be read.
+
+### Examples
 
 ```julia-repl
 julia> protein = readPDB("../test/structure.pdb")
@@ -11,20 +17,25 @@ julia> protein = readPDB("../test/structure.pdb")
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
                                                        ⋮ 
-   62024  OH2    TIP3     C     9339    19638   13.485   -4.534  -34.438  0.00  1.00     1    WAT2     62024
    62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
    62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
 
-julia> protein = readPDB("../test/structure.pdb","resname = ALA")
+julia> ALA = readPDB("../test/structure.pdb","resname ALA")
    Array{Atoms,1} with 72 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
                                                        ⋮ 
-    1338  HB3     ALA     A       95       95   11.464   -3.278   -4.953  0.00  1.00     1    PROT      1338
+    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
+    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
+
+julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "ALA")
+   Array{Atoms,1} with 72 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+                                                       ⋮ 
     1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
     1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
 ```
