@@ -6,8 +6,10 @@
 using Parameters
 export select, selindex
 
-# Main function: receives the atoms vector and a julia function to select
+# Function that returns true for all atoms: the default selection
+all(atoms) = true
 
+# Main function: receives the atoms vector and a julia function to select
 function select(set::AbstractVector{T}; by=all) where {T}
     selected = similar(set, 0)
     for el in set
@@ -19,7 +21,6 @@ function select(set::AbstractVector{T}; by=all) where {T}
 end
 
 # Given a selection string
-
 function select(set::AbstractVector{T}, selection::String) where {T}
     query = parse_query(selection)
     return select(set, by=el -> apply_query(query, el))
@@ -76,7 +77,7 @@ function (key::Keyword)(s::AbstractVector{<:AbstractString})
     return el -> isequal(getfield(el, field), parse_to_type(key, s[i+1]))
 end
 
-"""
+#=
     FunctionalKeyword{T}
 
 This is a structure that will store a keyword that depends on an external function
@@ -94,7 +95,7 @@ element_keyword = FunctionalKeyword(String,
 will define a keyword "element" to be used as `element C`, which will return
 `true` if there is an `element` function such that `element(atom) == C`.
 
-"""
+=#
 struct FunctionalKeyword{FunctionType}
     ValueType::Type
     name::String
@@ -117,7 +118,6 @@ end
 #
 # Macro keywords (functions without parameters)
 #
-
 struct MacroKeyword{FunctionType}
     name::String
     by::FunctionType
@@ -127,12 +127,12 @@ function (key::MacroKeyword)(s::AbstractVector{<:AbstractString})
     return key.by
 end
 
-"""
+#=
     parse_to_type(key::Keyword, val::String)
 
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
-"""
+=#
 function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
     if key.ValueType == String
         return val
@@ -189,7 +189,7 @@ functional_keywords = [FunctionalKeyword(String, "element", element, operators)]
 # CameronBieganek in https://discourse.julialang.org/t/parsing-selection-syntax/43632/9
 # while explaining to me how to creat a syntex interpreter
 #
-"""
+#=
     has_key(key::String, s::AbstractVector{<:AbstractString})
 
 Returns the first index of the vector `s` in which where `key` is found, or 0. 
@@ -206,7 +206,7 @@ julia> PDBTools.has_key("and",["name","CA","or","index","1"])
 
 ```
 
-"""
+=#
 function has_key(key::String, s::AbstractVector{<:AbstractString})
     i = findfirst(isequal(key), s)
     if i == nothing
@@ -216,18 +216,19 @@ function has_key(key::String, s::AbstractVector{<:AbstractString})
     end
 end
 
-"""
+#=
     parse_query(selection:String)
 
 Calls `parse_query_vector` after splitting the selection string.
 
-"""
+=#
 parse_query(selection::String) = parse_query_vector(split(selection))
 
-"""
+#=
+
     parse_query_vector(s::AbstractVector{<:AbstractString})
 
-"""
+=#
 function parse_query_vector(s)
     if (i = has_key("or", s)) > 0
         deleteat!(s, i)
@@ -275,7 +276,6 @@ end
 #
 # Simple error message (https://discourse.julialang.org/t/a-julia-equivalent-to-rs-stop/36568/13)
 #
-
 struct NoBackTraceException
     exc::Exception
 end
@@ -285,7 +285,6 @@ function Base.showerror(io::IO, ex::NoBackTraceException, bt; backtrace=true)
         showerror(io, ex.exc)
     end
 end
-
 parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
 

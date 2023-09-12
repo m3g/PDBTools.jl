@@ -36,10 +36,12 @@ include("./Residue.jl")
 
 include("./Indexes_mmCIF_fields.jl")
 
+# Selection functions
+include("./select.jl")
+
 #
 # Input and output functions
 #
-include("./all.jl")
 include("./formula.jl")
 include("./check_mmCIF.jl")
 include("./read_atom.jl")
@@ -52,8 +54,5 @@ include("./coor.jl")
 include("./distance.jl")
 include("./maxmin.jl")
 include("./wget.jl")
-
-# For selections
-include("./select.jl")
 
 end
