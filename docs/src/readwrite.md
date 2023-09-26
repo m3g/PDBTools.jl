@@ -22,21 +22,24 @@ julia> printatom(atoms[1])
 
 The data in the `Atom` structure is organized as follows:
 ```julia
-struct Atom
-  index :: Int64 # The sequential index of the atoms in the file
-  index_pdb :: Int64 # The index as written in the PDB file (might be anything)
-  name :: String
-  resname :: String
-  chain :: String
-  resnum :: Int64 # Number of residue as written in PDB file
-  residue :: Int64 # Sequential residue (molecule) number in file
-  x :: Float64
-  y :: Float64
-  z :: Float64
-  beta :: Float64
-  occup :: Float64
-  model :: Int64
-  segname :: String # Segment name (cols 73:76)
+mutable struct Atom
+    index::Int = 0 # The sequential index of the atoms in the file
+    index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
+    name::String = "X"
+    resname::String = "XXX"
+    chain::String = "X"
+    resnum::Int = 0 # Number of residue as written in PDB file
+    residue::Int = 0 # Sequential residue (molecule) number in file
+    x::Float64 = 0.0
+    y::Float64 = 0.0
+    z::Float64 = 0.0
+    beta::Float64 = 0.0
+    occup::Float64 = 0.0
+    model::Int = 0
+    segname::String = "XXXX" # Segment name (cols 73:76)
+    element::String = "X"
+    charge::Union{Nothing,String} = nothing
+    custom::Dict{Symbol, Any} = Dict{Symbol,Any}()
 end
 ```
 

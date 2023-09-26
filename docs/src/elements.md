@@ -50,3 +50,43 @@ The following functions are supported as part of the API, to conform the `AtomsB
 |`atomic_mass(::PDBTools.Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
 |`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
 
+
+## Custom Atom fields
+
+!!! compat
+    Custom field support was introduced on PDBTools version 0.14.3.
+
+Custom atom fields can be added to an `Atom` object by defining the `custom` dictionary.
+The fields can be accessed by the standard dot syntax if the field name does not clash 
+with an existing `Atom` field, or by the `custom_field` getter function. 
+
+For example:
+
+```julia-repl
+julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1))
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0    XXXX         0
+
+julia> atom.c
+"c"
+
+julia> atom.index
+0
+
+julia> custom_field(atom, :index)
+1
+```
+
+Setting new custom fields follow the standard Julia dictionary syntax:
+
+```julia-repl
+julia> atom.custom[:new] = "NEW"
+"NEW"
+
+julia> atom.new
+"NEW"
+
+julia> custom_field(atom, :new)
+"NEW"
+```
+
+

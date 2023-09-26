@@ -4,26 +4,25 @@
 Structure that contains the atom properties. It is mutable, so it can be edited. 
 Fields:
 
-```julia
-mutable struct Atom
-  index::Int # The sequential index of the atoms in the file
-  index_pdb::Int # The index as written in the PDB file (might be anything)
-  name::String # Atom name
-  resname::String # Residue name
-  chain::String # Chain identifier
-  resnum::Int # Number of residue as written in PDB file
-  residue::Int # Sequential residue (molecule) number in file
-  x::Float64 # x coordinate
-  y::Float64 # y coordinate
-  z::Float64 # z coordinate
-  beta::Float64 # temperature factor
-  occup::Float64 # occupancy
-  model::Int # model number
-  segname::String # Segment name (cols 73:76)
-  element::String # Element symbol string (cols 77:78)
-  charge::String # Charge (cols: 79:80)
-end
-```
+    mutable struct Atom
+        index::Int # The sequential index of the atoms in the file
+        index_pdb::Int # The index as written in the PDB file (might be anything)
+        name::String # Atom name
+        resname::String # Residue name
+        chain::String # Chain identifier
+        resnum::Int # Number of residue as written in PDB file
+        residue::Int # Sequential residue (molecule) number in file
+        x::Float64 # x coordinate
+        y::Float64 # y coordinate
+        z::Float64 # z coordinate
+        beta::Float64 # temperature factor
+        occup::Float64 # occupancy
+        model::Int # model number
+        segname::String # Segment name (cols 73:76)
+        element::String # Element symbol string (cols 77:78)
+        charge::String # Charge (cols: 79:80)
+        custom::Dict{Symbol, Any} # Custom fields
+    end
 
 ### Example
 
@@ -50,6 +49,26 @@ julia> mass(pdb[1])
 The `element` and `charge` fields, which are frequently left empty in PDB files, are not printed. They
 can be retrieved with the `pdb_element` and `pdb_charge` getter functions. 
 
+Custom fields can be set on `Atom` construction with the `custom` keyword argument, which receives a 
+`Dict{Symbol,Any}` as parameter. They can be retrieved with the `custom_field` function or, if the custom 
+field names does not overlap with an existing field, with the dot syntax. Requires PDBTools > 0.14.3.
+
+### Example
+
+```julia-repl
+julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1))
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0    XXXX         0
+
+julia> atom.c
+"c"
+
+julia> atom.index
+0
+
+julia> custom_field(atom, :index)
+1
+```
+
 """
 Base.@kwdef mutable struct Atom
     index::Int = 0 # The sequential index of the atoms in the file
@@ -68,6 +87,7 @@ Base.@kwdef mutable struct Atom
     segname::String = "XXXX" # Segment name (cols 73:76)
     element::String = "X"
     charge::Union{Nothing,String} = nothing
+    custom::Dict{Symbol,Any} = Dict{Symbol,Any}()
 end
 
 index(atom::Atom) = atom.index
@@ -83,6 +103,28 @@ model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
 pdb_element(atom::Atom) = atom.element
 pdb_charge(atom::Atom) = atom.charge
+custom_field(atom::Atom, field::Symbol) = atom.custom[field]
+
+import Base: getproperty
+function getproperty(atom::Atom, field::Symbol)
+    if field in fieldnames(Atom)
+        getfield(atom, field)
+    else
+        atom.custom[field]
+    end
+end
+
+@testitem "Atom custom fields" begin
+    atom = Atom()
+    @test length(atom.custom) == 0
+    atom = Atom(; custom=Dict(:a => 1, :b => "b", :index => 1))
+    @test atom.index == 0
+    @test atom.a == 1
+    @test atom.b == "b" 
+    @test custom_field(atom, :a) == 1
+    @test custom_field(atom, :b) == "b"
+    @test custom_field(atom, :index) == 1
+end
 
 #
 # Compatibility with AtomsBase interface
