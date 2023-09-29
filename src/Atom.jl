@@ -298,6 +298,9 @@ element_name(atom::Atom) = element_name(atom.name)
 
 Returns the mass of an atom given its name, or `Atom` structure, or the total mass of a vector of `Atom`s. 
 
+If a mass is defined as a custom field in the the `Atom` structure, it is returned. Otherwise, the mass is retrieved from the
+element mass as inferred from the atom name.
+
 ### Example
 
 ```julia-repl
@@ -315,7 +318,13 @@ julia> mass(atoms)
 ```
 
 """
-mass(atom::Atom) = mass(atom.name)
+function mass(atom::Atom) 
+    if haskey(atom.custom, :mass)
+        return atom.custom[:mass]
+    else
+        return mass(atom.name)
+    end
+end
 mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
 
 @testitem "fetch atomic element properties" begin
@@ -327,6 +336,8 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
     @test mass([at, at]) == 28.0134
     atoms = readPDB(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
+    at.custom[:mass] = 1.0
+    @test mass(at) == 1.0
 end
 
 @testitem "AtomsBase interface" begin

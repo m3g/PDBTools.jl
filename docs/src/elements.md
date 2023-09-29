@@ -89,4 +89,17 @@ julia> custom_field(atom, :new)
 "NEW"
 ```
 
+!!! compat 
+    The following feature was introduced in PDBTools version 0.14.4.
 
+If a custom field with the `:mass` key is added to the atom, the `mass` function returns the mass
+set at that field: 
+```julia-repl
+julia> atom = Atom();
+
+julia> atom.custom[:mass] = 10.0
+10.0
+
+julia> mass(atom)
+10.0
+```

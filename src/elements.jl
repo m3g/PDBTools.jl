@@ -123,7 +123,7 @@ function match_element(name::String)
     lmatch = searchsortedlast(element_names, name[i0:i0]; by=x -> x[1])
     for iel in imatch:lmatch
         el = element_names[iel]
-        if el == name[i0:i0+length(el)-1]
+        if lastindex(name) >= i0+length(el)-1 && el == name[i0:i0+length(el)-1]
             return el
         end
     end
