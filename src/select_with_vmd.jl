@@ -1,9 +1,9 @@
 """ 
-    VMDselect(inputfile::String, selection::String; vmd="vmd", srcload=nothing)
+    select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing)
 
 Select atoms using vmd selection syntax, with vmd in background
 
-Returns the list of index (one-based) and atom names
+Returns a tuple with list of index (one-based) and atom names of the selection.
 
 Function to return the selection from a input file (topology, coordinates, etc), 
 by calling VMD in the background.
@@ -12,7 +12,7 @@ The `srcload` argument can be used to load a list of scripts before loading the 
 for example with macros to define custom selection keywords.
 
 """
-function VMDselect(inputfile::String, selection::String; vmd = "vmd", srcload = nothing)
+function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcload = nothing)
 
     if !isfile(inputfile)
         error("Could not find file: $inputfile")
@@ -88,10 +88,10 @@ function VMDselect(inputfile::String, selection::String; vmd = "vmd", srcload = 
     return selection_indexes, selection_names
 end
 
-@testitem "VMDSelect" begin
+@testitem "select_with_vmd" begin
     pdbfile = PDBTools.TESTPDB 
     if !isnothing(Sys.which("vmd"))
-        @test VMDselect(pdbfile, "protein and residue 1") == (
+        @test select_with_vmd(pdbfile, "protein and residue 1") == (
             [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
             ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],
         )

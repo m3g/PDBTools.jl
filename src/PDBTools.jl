@@ -21,7 +21,7 @@ export coor, maxmin, distance, closest
 export element, mass, element_name
 export formula, stoichiometry
 export Sequence
-export VMDselect
+export select_with_vmd
 
 const TESTPDB = "$(@__DIR__)/../test/structure.pdb"
 
@@ -39,7 +39,7 @@ include("./Indexes_mmCIF_fields.jl")
 
 # Selection functions
 include("./select.jl")
-include("./VMDselect.jl")
+include("./select_with_vmd.jl")
 
 #
 # Input and output functions
