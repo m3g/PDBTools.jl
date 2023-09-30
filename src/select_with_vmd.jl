@@ -46,11 +46,11 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
     readnext = false
     for line in split(vmd_output, "\n")
         if occursin("cannot parse selection text", line)
-            error("ERROR: cannot parse selection: \"$selection\"")
+            error("cannot parse selection: \"$selection\".")
         end
         if readnext
             if line == "ENDINDEXLIST"
-                error("ERROR: Selection '$selection' does not contain any atom")
+                error("selection \"$selection\" is empty.")
             end
             index_list = line
             break
