@@ -166,8 +166,45 @@ Which, in this simple example, results in the same as:
 ```julia
 julia> sum( mass(atom) for atom in protein if atom.resname == "ALA" )
 1452.8601999999983
-
 ```
+
+## Using VMD
+
+[VMD](https://www.ks.uiuc.edu/Research/vmd/) is a very popular and
+powerful package for visualization of simulations. It contains a very
+versatile library to read topologies and trajectory files, and a
+powerful selection syntax. We provide here a wrapper to VMD which allows
+using its capabilities.  
+
+For example, the solute can be defined with: 
+```julia
+indexes, names = VMDselect("./system.gro","protein",vmd="/usr/bin/vmd")
+solute = Selection(indexes,names,nmols=1)
+```
+The main advantage here is that all the file types that VMD supports are
+supported. But VMD needs to be installed and is run in background, and
+it takes a few seconds.     
+
+The `VMDSelect` function also accepts an optional keyword parameter `srcload`,
+which can be used to load custom scripts within `vmd` before running setting
+the selection. This allows the definition of `tcl` scripts with custom selection
+macros, for instance. The usage would be: 
+```julia
+sel = VMSelect("file.pdb", "resname MYRES"; srcload = [ "mymacros1.tcl", "mymacros2.tcl" ])
+```
+Which corresponds to `source`ing each of the macro files in VMD before defining the 
+selection with the custom `MYRES` name.
+
+!!! compat
+    The `VMDselect` function was introduced in PDBTools version 0.14.5.
+
+!!! warning
+    VMD uses 0-based indexing and `VMDselect` adjusts that. However, if
+    a selection is performed by index, as with `index 1`, VMD will
+    select the second atom, and the output will be `[2]`. Selections by
+    type, name, segment, residue name, etc, won't be a problem.
+
+
 
 
 
