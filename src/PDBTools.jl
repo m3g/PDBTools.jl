@@ -35,8 +35,6 @@ include("./protein_residues.jl")
 include("./Atom.jl")
 include("./Residue.jl")
 
-include("./Indexes_mmCIF_fields.jl")
-
 # Selection functions
 include("./select.jl")
 include("./select_with_vmd.jl")

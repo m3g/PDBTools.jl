@@ -1,32 +1,46 @@
 #
+# Structure to read mmCIF field data indexes
+#
+Base.@kwdef mutable struct Indexes_mmCIF_fields
+    index::Int = 0
+    name::Int = 0
+    resname::Int = 0
+    chain::Int = 0
+    resnum::Int = 0
+    x::Int = 0
+    y::Int = 0
+    z::Int = 0
+    beta::Int = 0
+    occup::Int = 0
+end
+
+#
 # Check if structure is in mmCIF format and returns the list of 
 # desired fields if that is the case
 #
-function check_mmCIF(file)
+function check_mmCIF(file::String) 
+    data = open(file, "r")
+    mmCIF, mmCIF_fields = _check_mmCIF(data)
+    close(data)
+    return mmCIF, mmCIF_fields
+end
+check_mmCIF(data::IOBuffer) = _check_mmCIF(data)
 
+function _check_mmCIF(data::Union{IOStream, IOBuffer})
     local ifield, mmCIF, line
-
     mmCIF_fields = Indexes_mmCIF_fields()
-
-    pdbfile = open(file, "r")
-
     mmCIF = false
-
-    while !eof(pdbfile)
-        try
-            line = strip(readline(pdbfile))
-            if length(line) < 5
-                continue
-            end
-        catch
-            break
+    for line_string in eachline(data)
+        line = strip(line_string)
+        if length(line) < 5
+            continue
         end
         if line[1:5] == "loop_"
             mmCIF = true
             ifield = 0
-            while !eof(pdbfile)
+            while !eof(data)
                 try
-                    line = strip(readline(pdbfile))
+                    line = strip(readline(data))
                 catch
                     break
                 end
@@ -75,8 +89,6 @@ function check_mmCIF(file)
             end
         end
     end
-    close(pdbfile)
-
     if mmCIF
         if mmCIF_fields.name == 0 ||
            mmCIF_fields.resname == 0 ||
@@ -88,7 +100,12 @@ function check_mmCIF(file)
             error(" ERROR: Could not find all necessary fields in mmCIF file. ")
         end
     end
-
     return mmCIF, mmCIF_fields
+end
 
+@testitem "check_mmCIF" begin
+    pdbfile = "$(@__DIR__)/../test/structure.pdb"
+    @test PDBTools.check_mmCIF(pdbfile)[1] == false
+    pdb_data = read(pdbfile, String)
+    @test PDBTools.check_mmCIF(IOBuffer(pdb_data))[1] == false
 end
