@@ -2,6 +2,9 @@
     readPDB(pdbfile::String, selection::String)
     readPDB(pdbfile::String; only::Function = all)
 
+    readPDB(pdbdata::IOBuffer, selection::String)
+    readPDB(pdbdata::IOBuffer; only::Function = all)
+
 Reads a PDB file and stores the data in a vector of type `Atom`. 
 
 If a selection is provided, only the atoms matching the selection will be read. 
@@ -41,6 +44,8 @@ julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "AL
 ```
 
 """
+function readPDB end
+
 function readPDB(file::String, selection::String)
     query = parse_query(selection)
     return readPDB(file, only=atom -> apply_query(query, atom))
@@ -48,15 +53,35 @@ end
 
 function readPDB(file::String; only=all)
     mmCIF, mmCIF_fields = check_mmCIF(file)
-    # Read file
     pdbfile = open(file, "r")
+    atoms = _parse_pdb(pdbfile, only, mmCIF, mmCIF_fields)
+    close(pdbfile)
+    return atoms
+end
+
+function readPDB(pdbdata::IOBuffer, selection::String)
+    query = parse_query(selection)
+    return readPDB(pdbdata; only=atom -> apply_query(query, atom))
+end
+
+function readPDB(pdbdata::IOBuffer; only::Function=all)
+    mmCIF, mmCIF_fields = check_mmCIF(pdbdata)
+    return _parse_pdb(pdbdata, only, mmCIF, mmCIF_fields)
+end
+
+function _parse_pdb(
+    pdbdata::Union{IOStream, IOBuffer}, 
+    only::Function, 
+    mmCIF::Bool,
+    mmCIF_fields::Indexes_mmCIF_fields
+)
     natoms = 0
     index = 0
     imodel = 1
     iresidue = 1
     atoms = Atom[]
     local lastatom
-    for line in eachline(pdbfile)
+    for line in eachline(pdbdata)
         if occursin("END", line)
             imodel = imodel + 1
         end
@@ -78,14 +103,22 @@ function readPDB(file::String; only=all)
             lastatom = atom
         end
     end
-    close(pdbfile)
     if natoms == 0
         error(" Could not find any atom in PDB file matching the selection. ")
     end
-
     return atoms
 end
 
 function Base.show(io::IO, atoms::AbstractVector{Atom})
     println(io, " Structure file with ", length(atoms), " atoms. ")
 end
+
+@testitem "readPDB" begin
+    pdb_file = "$(@__DIR__)/../test/structure.pdb"
+    atoms = readPDB(pdb_file, "protein and name CA")
+    @test length(atoms) == 104
+    pdbdata = read(pdb_file, String)
+    atoms = readPDB(IOBuffer(pdbdata), "protein and name CA")
+    @test length(atoms) == 104
+end
+
