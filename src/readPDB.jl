@@ -103,6 +103,7 @@ function _parse_pdb(
             lastatom = atom
         end
     end
+    seekstart(pdbdata)
     if natoms == 0
         error(" Could not find any atom in PDB file matching the selection. ")
     end

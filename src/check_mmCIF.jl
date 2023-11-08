@@ -89,6 +89,7 @@ function _check_mmCIF(data::Union{IOStream, IOBuffer})
             end
         end
     end
+    seekstart(data)
     if mmCIF
         if mmCIF_fields.name == 0 ||
            mmCIF_fields.resname == 0 ||
