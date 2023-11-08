@@ -139,3 +139,29 @@ returns the data in a `Atom` structure.
 `PDBTools.write_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
 a string formatted in the PDB format, to be written to a file. 
 
+# Read from string buffer
+
+In some cases a PDB file data may be available as a string and not a regular file. For example,
+when reading the output of a zipped file. In these cases, it is possible to obtain the array
+of atoms by reading directly the string buffer with, for example:
+
+```julia-repl
+julia> pdbdata = read(pdb_file, String); # returns a string with the PDB data, to exemplify
+
+julia> atoms = readPDB(IOBuffer(pdbdata), "protein and name CA")
+   Array{Atoms,1} with 104 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00  0.00     1    PROT        26
+                                                       ⋮ 
+    1425   CA     GLU     A      102      102    4.414   -4.302   -7.734  1.00  0.00     1    PROT      1425
+    1440   CA     CYS     A      103      103    4.134   -7.811   -6.344  1.00  0.00     1    PROT      1440
+    1454   CA     THR     A      104      104    3.244  -10.715   -8.603  1.00  0.00     1    PROT      1454
+```
+
+!!! compat
+    Reading directly from `IOBuffer` requires `PDBTools` version `0.15.1` or greater.
+
+
+
