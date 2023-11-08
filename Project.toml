@@ -16,8 +16,12 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [compat]
 AtomsBase = "0.3.4"
+Dates = "1.6"
 Formatting = "0.4"
+InteractiveUtils = "1.6"
+LinearAlgebra = "1.6"
 Parameters = "0.12"
+Printf = "1.6"
 StaticArrays = "1"
 TestItemRunner = "0.2"
 TestItems = "0.1"
