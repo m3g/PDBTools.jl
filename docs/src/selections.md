@@ -83,22 +83,40 @@ indexes = selindex(atoms,"protein and name CA")
 !!! note
     All indexing is 1-based. Thus, the first atom of the structure is atom 1.
 
-## Use Julia anonymous functions directly
+## Use Julia functions directly
 
-Selections can be done using Julia anonymous functions directly, providing a greater
+Selections can be done using Julia functions directly, providing a greater
 control over the selection and, possibly, the use of user defined selection 
 functions. For example:
 
 ```julia
-atoms = select(atoms, by = atom -> atom.x < 10.)
-
+myselection(atom) = (atom.x < 10.0 && atom.resname == "GLY") || (atom.name == "CA") 
+atoms = select(atoms, by = myselection)
 ```
-With that, selections can become really complex, as:
+or, for example, using Julia anonymous functions
 ```julia
-sel = atom -> (atom.x < 10. && atom.resname == "GLY") || (atom.name == "CA") 
-atoms = select(atoms, by = sel )
-
+select(atoms, by = at -> isprotein(at) && name(at) == "O" && atom.x < 10.0)
 ```
+
+The only requirement is that the function defining the selection receives an `PDBTools.Atom` as
+input, and returns `true` or `false` depending on the conditions required for the atom.
+
+!!! note
+    The macro-keywords described in the previous section can be used within 
+    the Julia function syntax, but the function names start with `is`. For example:
+    ```julia
+    select(atoms, at -> isprotein(at) && resnum(at) in [ 1, 5, 7 ])
+    ```
+    Thus, the macro selection functions are:
+    `iswater`, 
+    `isprotein`,     `isbackbone`,    `issidechain`,
+    `isacidic`,      `isbasic`,                  
+    `isaliphatic`,   `isaromatic`,               
+    `ischarged`,     `isneutral`,                
+    `ispolar`,       `isnonpolar`,               
+    and `ishydrophobic`.                          
+    
+
 
 ## Iterate over residues (or molecules)
 
