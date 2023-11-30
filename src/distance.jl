@@ -1,4 +1,38 @@
 """
+    distance(x,y)
+
+Computes the minimum distance between two sets of atoms, between an atom and a set of atoms, or simply 
+the distance between two atoms. The input may be a vector of `Atom`s, or the 
+coordinates that are output of the `coor` function. 
+
+### Examples
+
+```julia-repl
+julia> model = wget("1BSX");
+
+julia> protein = select(model,"protein");
+
+julia> ligand = select(model,"resname T3");
+
+julia> distance(protein,ligand)
+2.7775834820937417
+
+julia> distance(protein[1],ligand[3])
+36.453551075306784
+
+julia> distance(coor(ligand),protein)
+2.7775834820937417
+
+```
+
+"""
+distance(x::SVector, y::SVector) = norm(x - y)
+distance(x::Atom, y::Atom) = norm(coor(x) - coor(y))
+distance(x::Atom, y::SVector) = norm(coor(x) - y)
+distance(x::SVector, y::Atom) = norm(x - coor(y))
+distance(x, y) = closest(x, y)[3]
+
+"""
     closest(x,y)
 
 Computes the minimum distance between two sets of atoms and returns the indexes of the atoms 
@@ -52,49 +86,19 @@ function closest(x::AbstractVector{T1}, y::AbstractVector{T2}) where {T1,T2<:Uni
     end
     return imin, jmin, dmin
 end
-closest(x::Atom, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector(x), y)
-closest(x::AbstractVector{<:Union{SVector,Atom}}, y::Atom) = closest(x, SVector(y))
-closest(x::AbstractVector{<:Union{SVector,Atom}}, y::SVector{3,<:Real}) = closest(x, SVector{1,typeof(y)}(y))
-closest(x::SVector{3,<:Real}, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1,typeof(x)}(x), y)
-closest(x::Atom, y::Atom) = closest(SVector(x), SVector(y))
-closest(x::SVector{3,<:Real}, y::SVector{3,<:Real}) = closest(SVector{1,typeof(x)}(x), SVector{1,typeof(y)}(y))
-closest(x::Atom, y::SVector{3,<:Real}) = closest(SVector(x), SVector{1,typeof(y)}(y))
-closest(x::SVector{3,<:Real}, y::Atom) = closest(SVector{1,typeof(x)}(x), SVector(y))
+
+# Wrap individual atoms in a SVector to dispatch to the above function
+closest(x::Atom, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1}(x), y)
+closest(x::AbstractVector{<:Union{SVector,Atom}}, y::Atom) = closest(x, SVector{1}(y))
+closest(x::AbstractVector{<:Union{SVector,Atom}}, y::SVector{3,<:Real}) = closest(x, SVector{1}(y))
+closest(x::SVector{3,<:Real}, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1}(x), y)
+
+# These are identical to distance calls
+closest(x::Atom, y::Atom) = distance(x,y)
+closest(x::Atom, y::SVector{3,<:Real}) = distance(x,y)
+closest(x::SVector{3,<:Real}, y::Atom) = distance(x,y)
+
 closest(x::Residue, y::Residue) = closest(x.atoms[x.range], y.atoms[y.range])
-
-"""
-    distance(x,y)
-
-Computes the minimum distance between two sets of atoms, between an atom and a set of atoms, or simply 
-the distance between two atoms. The input may be a vector of `Atom`s, or the 
-coordinates that are output of the `coor` function. 
-
-### Examples
-
-```julia-repl
-julia> model = wget("1BSX");
-
-julia> protein = select(model,"protein");
-
-julia> ligand = select(model,"resname T3");
-
-julia> distance(protein,ligand)
-2.7775834820937417
-
-julia> distance(protein[1],ligand[3])
-36.453551075306784
-
-julia> distance(coor(ligand),protein)
-2.7775834820937417
-
-```
-
-"""
-distance(x::SVector, y::SVector) = norm(x - y)
-distance(x::Atom, y::Atom) = norm(coor(x) - coor(y))
-distance(x::Atom, y::SVector) = norm(coor(x) - y)
-distance(x::SVector, y::Atom) = norm(x - coor(y))
-distance(x, y) = closest(x, y)[3]
 
 @testitem "distance/closest" begin
     atoms = readPDB(PDBTools.TESTPDB)
@@ -122,6 +126,10 @@ distance(x, y) = closest(x, y)[3]
     @test all(closest(coor(r1[1]), coor(r2)) .≈ (1, 2, 5.121218702613667))
     @test all(closest(coor(r1[1]), r2) .≈ (1, 2, 5.121218702613667))
     @test all(closest(coor(r1[1]), coor(r2[2])) .≈ (1, 1, 5.121218702613667))
+    @test closest(atoms[1], atoms[2]) ≈ 0.9994303377424563
+    @test closest(atoms[1], coor(atoms[2])) ≈ 0.9994303377424563
+    @test closest(coor(atoms[1]), atoms[2]) ≈ 0.9994303377424563
+    @test closest(coor(atoms[1]), coor(atoms[2])) ≈ 0.9994303377424563
 
     @test all(closest(r1[1], coor(r2[2])) .≈ (1, 1, 5.121218702613667))
     @test all(closest(coor(r1[1]), r2[2]) .≈ (1, 1, 5.121218702613667))
