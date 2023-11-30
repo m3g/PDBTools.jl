@@ -92,15 +92,11 @@ closest(x::Atom, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1}(
 closest(x::AbstractVector{<:Union{SVector,Atom}}, y::Atom) = closest(x, SVector{1}(y))
 closest(x::AbstractVector{<:Union{SVector,Atom}}, y::SVector{3,<:Real}) = closest(x, SVector{1}(y))
 closest(x::SVector{3,<:Real}, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1}(x), y)
-
-# These are identical to distance calls
-closest(x::Atom, y::Atom) = distance(x,y)
-closest(x::Atom, y::SVector{3,<:Real}) = distance(x,y)
-closest(x::SVector{3,<:Real}, y::Atom) = distance(x,y)
-
+closest(x::Union{Atom,SVector{3,<:Real}}, y::Union{Atom,SVector{3,<:Real}}) = closest(SVector{1}(x),SVector{1}(y))
 closest(x::Residue, y::Residue) = closest(x.atoms[x.range], y.atoms[y.range])
 
 @testitem "distance/closest" begin
+    using PDBTools
     atoms = readPDB(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
     s2 = select(atoms, "residue = 5")
@@ -126,10 +122,10 @@ closest(x::Residue, y::Residue) = closest(x.atoms[x.range], y.atoms[y.range])
     @test all(closest(coor(r1[1]), coor(r2)) .≈ (1, 2, 5.121218702613667))
     @test all(closest(coor(r1[1]), r2) .≈ (1, 2, 5.121218702613667))
     @test all(closest(coor(r1[1]), coor(r2[2])) .≈ (1, 1, 5.121218702613667))
-    @test closest(atoms[1], atoms[2]) ≈ 0.9994303377424563
-    @test closest(atoms[1], coor(atoms[2])) ≈ 0.9994303377424563
-    @test closest(coor(atoms[1]), atoms[2]) ≈ 0.9994303377424563
-    @test closest(coor(atoms[1]), coor(atoms[2])) ≈ 0.9994303377424563
+    @test all(closest(atoms[1], atoms[2]) .≈ (1, 1, 0.9994303377424563))
+    @test all(closest(atoms[1], coor(atoms[2])) .≈ (1, 1, 0.9994303377424563))
+    @test all(closest(coor(atoms[1]), atoms[2]) .≈ (1, 1, 0.9994303377424563))
+    @test all(closest(coor(atoms[1]), coor(atoms[2])) .≈ (1, 1, 0.9994303377424563))
 
     @test all(closest(r1[1], coor(r2[2])) .≈ (1, 1, 5.121218702613667))
     @test all(closest(coor(r1[1]), r2[2]) .≈ (1, 1, 5.121218702613667))
