@@ -104,4 +104,8 @@ coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], s
     @test coor(s) == coor(r)
     residues = collect(eachresidue(atoms))
     @test coor(select(atoms, "residue = 3")) == coor(residues[3])
+    @test coor(atoms, "residue = 3") == coor(s)
+    @test coor(residues[1]) == coor(select(atoms, "residue = 1"))
+    @test coor(residues[1]; only = at -> name(at) == "N") == SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
+    @test coor(residues[1], "name N") == SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
 end
