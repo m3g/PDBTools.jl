@@ -139,6 +139,7 @@ end
     @test model(atom) == 1
     @test segname(atom) == "PROT"
     @test index_pdb(atom) == 13
+    @test charge(atom) === nothing
 end
 
 @testitem "Atom custom fields" begin
@@ -194,6 +195,13 @@ atom_line(atom::Atom) = @sprintf(
     atom.segname,
     atom.index_pdb
 )
+
+@testitem "atom_line" begin
+    using PDBTools
+    atoms = readPDB(PDBTools.SMALLPDB, "protein and index 1")
+    @test PDBTools.atom_line(atoms[1]) == 
+        "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1       -         1"
+end
 
 """
     printatom(atom::Atom)

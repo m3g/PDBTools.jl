@@ -15,7 +15,7 @@ import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
-export Atom, printatom, index, index_pdb, name, beta, occup, custom_field
+export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
 export coor, maxmin, distance, closest
