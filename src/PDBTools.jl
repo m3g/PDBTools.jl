@@ -1,13 +1,14 @@
 module PDBTools
 
-using Parameters
-using Printf
-using InteractiveUtils
-using Formatting
-using StaticArrays
-using LinearAlgebra: norm
-using TestItems
 import Dates
+import Downloads
+import InteractiveUtils
+using Formatting: format
+using LinearAlgebra: norm
+using Parameters: @unpack
+using Printf: @printf, @sprintf
+using StaticArrays: SVector
+using TestItems: @testitem
 
 # AtomsBase interface compatibility
 import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
