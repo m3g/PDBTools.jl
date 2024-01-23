@@ -18,7 +18,7 @@ export Atom, printatom, index, index_pdb, name, beta, occup, custom_field
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
 export coor, maxmin, distance, closest
-export element, mass, element_name
+export element, mass, element_name, element_symbol
 export formula, stoichiometry
 export Sequence
 export select_with_vmd

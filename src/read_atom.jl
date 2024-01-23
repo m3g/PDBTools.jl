@@ -67,7 +67,7 @@ function read_atom_PDB(record::String)
     atom.beta = parse_number(Float64, record, 61:66)
     atom.model = 1
     atom.segname = parse_string(record, 73:76; alt="-")
-    atom.element = parse_string(record, 77:78, alt="X")
+    atom.pdb_element = parse_string(record, 77:78, alt="X")
     atom.charge = parse_string(record, 79:80, alt=nothing)
     return atom
 end
@@ -121,7 +121,7 @@ end
     @test a.model == 1
     @test a.segname == "-"
     @test a.index_pdb == 1
-    @test a.element == "X"
+    @test a.pdb_element == "X"
     @test isnothing(a.charge)
 
     line = "HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            1+  "
@@ -137,7 +137,7 @@ end
     @test a.model == 1
     @test a.segname == "-"
     @test a.index_pdb == 1
-    @test a.element == "X"
+    @test a.pdb_element == "X"
     @test a.charge == "1+"
 
     line = "ATOM  *****  H2  GLYCD4301      11.014  36.823  40.115  1.00  0.00      GLYC H"
@@ -153,6 +153,6 @@ end
     @test a.model == 1
     @test a.segname == "GLYC"
     @test a.index_pdb == -1
-    @test a.element == "H"
+    @test a.pdb_element == "H"
     @test isnothing(a.charge)
 end
