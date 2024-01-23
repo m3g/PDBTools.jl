@@ -483,6 +483,7 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
     @test mass(atoms) ≈ 11079.704440000156
     at.custom[:mass] = 1.0
     @test mass(at) == 1.0
+    @test mass(Atom(name="X")) === nothing
 end
 
 @testitem "AtomsBase interface" begin
