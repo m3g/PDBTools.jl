@@ -29,25 +29,30 @@ Fields:
 ```jldoctest
 julia> using PDBTools
 
-julia> pdb = readPDB(PDBTools.TESTPDB); # testing PDB file
-
-julia> printatom(pdb[1])
+julia> atoms = readPDB(PDBTools.SMALLPDB)
+   Array{Atoms,1} with 35 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1       -         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1       -         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1       -         3
+                                                       ⋮ 
+      33  OD2     ASP     A        3        3   -6.974  -11.289   -9.300  1.00  0.00     1       -        33
+      34    C     ASP     A        3        3   -2.626  -10.480   -7.749  1.00  0.00     1       -        34
+      35    O     ASP     A        3        3   -1.940  -10.014   -8.658  1.00  0.00     1       -        35
 
-julia> resname(pdb[1])
+julia> resname(atoms[1])
 "ALA"
 
-julia> chain(pdb[1])
+julia> chain(atoms[1])
 "A"
 
-julia> element(pdb[1])
+julia> element(atoms[1])
 "N"
 
-julia> mass(pdb[1])
+julia> mass(atoms[1])
 14.0067
 
-julia> position(pdb[1])
+julia> position(atoms[1])
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
   -9.229
  -14.861
