@@ -9,12 +9,12 @@ then a header will be added with the number of atoms in `atoms`. If `footer` is 
 with the "END" keyword. Either can be set to `nothing` if no header or footer is desired.
 
 """
-function writePDB(atoms::AbstractVector{Atom}, filename, selection; header=:auto, footer=:auto)
+function writePDB(atoms::AbstractVector{Atom}, filename::String, selection::String; header=:auto, footer=:auto)
     query = parse_query(selection)
     writePDB(atoms, filename, only=atom -> apply_query(query, atom))
 end
 
-function writePDB(atoms::AbstractVector{Atom}, filename; only=all, header=:auto, footer=:auto)
+function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=all, header=:auto, footer=:auto)
     file = open(filename, "w")
     if header == :auto
         curr_date = Dates.format(Dates.today(), "dd-u-yy")
