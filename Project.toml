@@ -15,6 +15,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [compat]
+Aqua = "0.8"
 AtomsBase = "0.3.4"
 Dates = "1.6"
 Formatting = "0.4"
@@ -23,14 +24,16 @@ LinearAlgebra = "1.6"
 Parameters = "0.12"
 Printf = "1.6"
 StaticArrays = "1"
+Test = "1.6"
 TestItemRunner = "0.2"
 TestItems = "0.1"
 julia = "1.6"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Test", "TestItemRunner", "StaticArrays"]
+test = ["Test", "TestItemRunner", "StaticArrays", "Aqua"]
