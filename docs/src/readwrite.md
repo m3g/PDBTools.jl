@@ -6,7 +6,6 @@ To read a PDB file and return a vector of atoms of
 type `Atom`, do:
 ```julia
 atoms = readPDB("file.pdb")
-
 ```
 
 `Atom` is the structure of data containing the atom index, name,
@@ -17,7 +16,6 @@ bellow), a list of atoms with the following structure will be generated:
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-
 ```
 
 The data in the `Atom` structure is organized as follows:
@@ -37,7 +35,7 @@ mutable struct Atom
     occup::Float64 = 0.0
     model::Int = 0
     segname::String = "XXXX" # Segment name (cols 73:76)
-    element::String = "X"
+    pdb_element::String = "X"
     charge::Union{Nothing,String} = nothing
     custom::Dict{Symbol, Any} = Dict{Symbol,Any}()
 end
@@ -49,18 +47,15 @@ end
     in the [Selection](@ref selections) section. For example:
     ```julia
     protein = readPDB("file.pdb","protein")
-
     ```
     or
     ```julia
     arginines = readPDB("file.pdb","resname ARG")
-
     ```
     The only difference is that, if using Julia anonymous functions, the
     keyword is `only`:
     ```julia
-    arginines = readPDB("file.pdb",only = atom -> atom.resname == "ARG")
-
+    arginines = readPDB("file.pdb", only = atom -> atom.resname == "ARG")
     ```
     The same is valid for the `write` function, below. 
       
@@ -79,7 +74,6 @@ julia> atoms = wget("1LBD","name CA")
     1847   CA     GLN     A      460      236  -22.650   79.082   50.023 71.46  1.00     1       -      1847
     1856   CA     MET     A      461      237  -25.561   77.191   51.710 78.41  1.00     1       -      1856
     1864   CA     THR     A      462      238  -26.915   73.645   51.198 82.96  1.00     1       -      1864
-
 ```
 
 ## Edit a PDB file
@@ -100,7 +94,6 @@ julia> atoms[1].segname = "ABCD"
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    ABCD         1
-
 ```
 
 Additionally, With the `edit!` function, you can directly edit or view the data in a
@@ -108,7 +101,6 @@ vector of `Atoms` in your preferred text editor.
 
 ```julia-repl
 julia> edit!(atoms)
-
 ```
 
 This will open a text editor. Here, we modified the data in the `resname` field of the first atom
@@ -118,7 +110,6 @@ to `ABC`. Saving and closing the file will update the `atoms` array:
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ABC     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-
 ```
 
 ## Write a PDB file
@@ -127,7 +118,6 @@ To write a PDB file use the `writePDB` function, as:
 
 ```julia
 writePDB(atoms,"file.pdb")
-
 ```
 where `atoms` contain a list of atoms with the `Atom` structures.
 

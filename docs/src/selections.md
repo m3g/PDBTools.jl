@@ -122,51 +122,47 @@ input, and returns `true` or `false` depending on the conditions required for th
 
 The `eachresidue` iterator allows iteration over the resiudes of a structure (in PDB files distinct molecules are associated to different residues, thus this iterates similarly over the molecules of a structure). For example:
 
-```julia
-julia> protein = wget("1LBD")
-   Array{Atoms,1} with 1870 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
-       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
-       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
-                                                       ⋮ 
-    1868  OG1     THR     A      462      238  -27.462   74.325   48.885 79.98  1.00     1       -      1868
-    1869  CG2     THR     A      462      238  -27.063   71.965   49.222 78.62  1.00     1       -      1869
-    1870  OXT     THR     A      462      238  -25.379   71.816   51.613 84.35  1.00     1       -      1870
+```jldoctest
+julia> using PDBTools
 
-julia> nALA = 0
-       for residue in eachresidue(protein)
-         if name(residue) == "ALA"
-           nALA += 1
-         end
-       end
-       nALA
-22
+julia> protein = readPDB(PDBTools.SMALLPDB);
 
+julia> count(atom -> resname(atom) == "ALA", protein)
+12
+
+julia> count(res -> resname(res) == "ALA", eachresidue(protein))
+1
 ```
 
 The result of the iterator can also be collected, with:
-```julia
-julia> residues = collect(eachresidue(protein))
-   Array{Residue,1} with 238 residues.
+```jldoctest
+julia> using PDBTools
 
+julia> protein = readPDB(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(protein))
+   Array{Residue,1} with 3 residues.
 
 julia> residues[1]
- Residue of name SER with 6 atoms.
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
-       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
-       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
-       4    O     SER     A      225        1   45.823   80.796   69.974 64.85  1.00     1       -         4
-       5   CB     SER     A      225        1   47.147   82.980   71.413 70.79  1.00     1       -         5
-       6   OG     SER     A      225        1   46.541   82.639   72.662 73.55  1.00     1       -         6
-
+ Residue of name ALA with 12 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1       -         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1       -         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1       -         3
+                                                       ⋮ 
+      10  HB3     ALA     A        1        1   -9.164  -15.063   -8.765  1.00  0.00     1       -        10
+      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1       -        11
+      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1       -        12
 ```
 
 These residue vector *do not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
 
 It is possible also to iterate over the atoms of one or more residue:
-```julia
+```julia-repl
+julia> using PDBTools
+
+julia> protein = readPDB(PDBTools.SMALLPDB);
+
 julia> m_ALA = 0.
        for residue in eachresidue(protein)
          if name(residue) == "ALA"
@@ -176,14 +172,20 @@ julia> m_ALA = 0.
          end
        end
        m_ALA
-1452.8601999999983
-
+73.09488999999999
 ```
 Which, in this simple example, results in the same as:
 
-```julia
-julia> sum( mass(atom) for atom in protein if atom.resname == "ALA" )
-1452.8601999999983
+```julia-repl
+julia> sum(mass(at) for at in protein if resname(at) == "ALA" )
+73.09488999999999
+```
+
+or
+
+```julia-repl
+julia> sum(mass(res) for res in eachresidue(protein) if resname(res) == "ALA" )
+73.09488999999999
 ```
 
 ## Using VMD
