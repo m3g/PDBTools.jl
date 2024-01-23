@@ -19,35 +19,43 @@ Fields:
         occup::Float64 # occupancy
         model::Int # model number
         segname::String # Segment name (cols 73:76)
-        element::String # Element symbol string (cols 77:78)
+        pdb_element::String # Element symbol string (cols 77:78)
         charge::String # Charge (cols: 79:80)
         custom::Dict{Symbol, Any} # Custom fields
     end
 
 ### Example
 
-```julia-repl
-julia> pdb = wget("1LBD");
+```jldoctest
+julia> using PDBTools
+
+julia> pdb = readPDB(PDBTools.TESTPDB); # testing PDB file
 
 julia> printatom(pdb[1])
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     P        1        1    2.062  -13.995   21.747  0.00  1.00     1    PROT         1
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
 
-julia> pdb[1].resname
+julia> resname(pdb[1])
 "ALA"
 
-julia> pdb[1].chain
-"P"
+julia> chain(pdb[1])
+"A"
 
 julia> element(pdb[1])
 "N"
 
 julia> mass(pdb[1])
 14.0067
+
+julia> position(pdb[1])
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+  -9.229
+ -14.861
+  -5.481
 ```
 
-The `element` and `charge` fields, which are frequently left empty in PDB files, are not printed. They
-can be retrieved with the `pdb_element` and `pdb_charge` getter functions. 
+The `pdb_element` and `charge` fields, which are frequently left empty in PDB files, are not printed. 
+The direct access to the fields is considered part of the interface.
 
 Custom fields can be set on `Atom` construction with the `custom` keyword argument, which receives a 
 `Dict{Symbol,Any}` as parameter. They can be retrieved with the `custom_field` function or, if the custom 
@@ -55,9 +63,10 @@ field names does not overlap with an existing field, with the dot syntax. Requir
 
 ### Example
 
-```julia-repl
-julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1))
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0    XXXX         0
+```jldoctest
+julia> using PDBTools
+
+julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1));
 
 julia> atom.c
 "c"
@@ -85,7 +94,7 @@ Base.@kwdef mutable struct Atom
     occup::Float64 = 0.0
     model::Int = 0
     segname::String = "XXXX" # Segment name (cols 73:76)
-    element::String = "X"
+    pdb_element::String = "X"
     charge::Union{Nothing,String} = nothing
     custom::Dict{Symbol,Any} = Dict{Symbol,Any}()
 end
@@ -101,8 +110,8 @@ beta(atom::Atom) = atom.beta
 occup(atom::Atom) = atom.occup
 model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
-pdb_element(atom::Atom) = atom.element
-pdb_charge(atom::Atom) = atom.charge
+pdb_element(atom::Atom) = atom.pdb_element
+charge(atom::Atom) = atom.charge
 custom_field(atom::Atom, field::Symbol) = atom.custom[field]
 
 import Base: getproperty
@@ -129,7 +138,7 @@ end
 #
 # Compatibility with AtomsBase interface
 #
-atomic_symbol(atom::Atom) = element_symbol(atom.name)
+atomic_symbol(atom::Atom) = element_symbol(atom)
 atomic_mass(atom::Atom) = mass(atom)
 position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
@@ -243,86 +252,150 @@ end
     @test !same_residue(pdb[1], pdb[50])
 end
 
-
 #
 # Atom elemental properties
 #
 """
-    atomic_number(name::String or atom::Atom)
+    element(atom::Atom)
 
-Returns the atomic number of an atom given its name, or `Atom` structure.
+Returns the element symbol, as a string, of an atom given its name, or `Atom` structure.
+If the `pdb_element` field is not empty, the matching element. Otherwise, the element is inferred from the atom name.
 
 ### Example
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
+julia> at = Atom(name="NT3");
+
+julia> element(at)
+"N"
+```
+
+"""
+function element(atom::Atom)
+    if atom.pdb_element != "X"
+        element_name = pdb_element(atom)
+    else
+        element_name = name(atom)
+    end
+    # if there is match, just return the name
+    iel = searchsortedfirst(element_names, element_name)
+    if iel <= length(element_names) && element_name == element_names[iel]
+        return element_name
+    end
+    # Check if the first character is number
+    i0 = 1 + isdigit(first(element_name))
+    imatch = searchsortedfirst(element_names, element_name[i0:i0]; by=x -> x[1])
+    lmatch = searchsortedlast(element_names, element_name[i0:i0]; by=x -> x[1])
+    for iel in imatch:lmatch
+        el = element_names[iel]
+        if lastindex(element_name) >= i0+length(el)-1 && el == element_name[i0:i0+length(el)-1]
+            return el
+        end
+    end
+    return nothing
+end
+
+#
+# Auxiliary function to retrive another property for matching elements
+#
+function get_element_property(at::Atom, property::Symbol)
+    el = element(at)
+    if isnothing(el)
+        return nothing
+    else
+        return getproperty(elements[el], property)
+    end
+end
+
+"""
+    atomic_number(atom::Atom)
+
+Returns the atomic number of an atom from its `Atom` structure.
+
+### Example
+
+```jldoctest
+julia> using PDBTools
+
 julia> at = Atom(name="NT3");
 
 julia> atomic_number(at)
 7
-
-julia> atomic_number("CA")
-6
-
 ```
 
 """
-atomic_number(atom::Atom) = atomic_number(atom.name)
+atomic_number(at::Atom) = get_element_property(at, :atomic_number)
 
 """
-    element_name(name::String or atom::Atom)
+    element_name(atom::Atom)
 
 Returns the element name of an atom given its name, or `Atom` structure.
 
 ### Example
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
 julia> at = Atom(name="NT3");
 
 julia> element_name(at)
 "Nitrogen"
-
-julia> element_name("NT3")
-"Nitrogen"
-
-julia> element_name("CA")
-"Carbon"
-
 ```
 
 """
-element(atom::Atom) = element(atom.name)
-element_name(atom::Atom) = element_name(atom.name)
+element_name(at::Atom) = get_element_property(at, :name)
+
 
 """
-    mass(name::String or atom::Atom or Vector{Atom})
+    element_symbol(atom::Atom)
+
+Returns a symbol for element name of an atom given its name, or `Atom` structure.
+
+### Example
+
+```jldoctest
+julia> using PDBTools 
+
+julia> at = Atom(name="NT3");
+
+julia> element_symbol(at)
+:N
+```
+
+"""
+element_symbol(at::Atom) = get_element_property(at, :symbol)
+
+"""
+    mass(atom::Atom)
+    mass(atoms::AbstractVector{<:Atoms})
 
 Returns the mass of an atom given its name, or `Atom` structure, or the total mass of a vector of `Atom`s. 
 
 If a mass is defined as a custom field in the the `Atom` structure, it is returned. Otherwise, the mass is retrieved from the
 element mass as inferred from the atom name.
 
-### Example
+## Example
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
 julia> atoms = [ Atom(name="NT3"), Atom(name="CA") ];
 
 julia> mass(atoms[1])
 14.0067
 
-julia> mass("CA")
-12.011
-
 julia> mass(atoms)
 26.017699999999998
-
 ```
 
 """
-function mass(atom::Atom) 
-    if haskey(atom.custom, :mass)
-        return atom.custom[:mass]
+function mass(at::Atom) 
+    if haskey(at.custom, :mass)
+        return at.custom[:mass]
     else
-        return mass(atom.name)
+        return get_element_property(at, :mass)
     end
 end
 mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)

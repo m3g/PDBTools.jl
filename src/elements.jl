@@ -108,36 +108,8 @@ const elements = Dict{String,Element}([
 ])
 #! format: on
 
-# Function that tries to match an atom name, PDB style, with one of the
-# element names
+# Sort element_names by name for faster searching
 const element_names = sort(collect(keys(elements)))
-function match_element(name::String)
-    # if there is match, just return the name
-    iel = searchsortedfirst(element_names, name)
-    if iel <= length(element_names) && name == element_names[iel]
-        return name
-    end
-    # Check if the first character is number
-    i0 = 1 + isdigit(first(name))
-    imatch = searchsortedfirst(element_names, name[i0:i0]; by=x -> x[1])
-    lmatch = searchsortedlast(element_names, name[i0:i0]; by=x -> x[1])
-    for iel in imatch:lmatch
-        el = element_names[iel]
-        if lastindex(name) >= i0+length(el)-1 && el == name[i0:i0+length(el)-1]
-            return el
-        end
-    end
-    return nothing
-end
-
-#
-# Retrive index of element in elements list from name. 
-#
-atomic_number(name::String) = isnothing(match_element(name)) ? nothing : elements[match_element(name)].atomic_number
-mass(name::String) = isnothing(match_element(name)) ? nothing : elements[match_element(name)].mass
-element(name::String) = isnothing(match_element(name)) ? nothing : elements[match_element(name)].symbol_string
-element_name(name::String) = isnothing(match_element(name)) ? nothing : elements[match_element(name)].name
-element_symbol(name::String) = isnothing(match_element(name)) ? nothing : elements[match_element(name)].symbol
 
 @testitem "elements" begin
     atoms = readPDB(PDBTools.TESTPDB, "protein")
