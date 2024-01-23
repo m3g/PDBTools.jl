@@ -5,3 +5,8 @@ using TestItemRunner
     import Aqua
     Aqua.test_all(PDBTools)
 end
+
+@testitem "Doctests" begin
+    using Documenter: doctest
+    doctest(PDBTools)
+end
