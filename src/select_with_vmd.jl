@@ -1,7 +1,8 @@
 """ 
     select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing)
+    select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
 
-Select atoms using vmd selection syntax, with vmd in background
+Select atoms using vmd selection syntax, with vmd in background. The input can be a file or a list of atoms.
 
 Returns a tuple with list of index (one-based) and atom names of the selection.
 
@@ -91,10 +92,21 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
     return selection_indices, selection_names
 end
 
+function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd = "vmd", srcload = nothing)
+    tmp_file = tempname()
+    writePDB(atoms, tmp_file)
+    return select_with_vmd(tmp_file, selection; vmd = vmd, srcload = srcload)
+end
+
 @testitem "select_with_vmd" begin
     pdbfile = PDBTools.TESTPDB 
     if !isnothing(Sys.which("vmd"))
         @test select_with_vmd(pdbfile, "protein and residue 1") == (
+            [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+            ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],
+        )
+        atoms = readPDB(pdbfile)
+        @test select_with_vmd(atoms, "protein and residue 1") == (
             [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
             ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],
         )
