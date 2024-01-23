@@ -25,6 +25,7 @@ export Sequence
 export select_with_vmd
 
 const TESTPDB = "$(@__DIR__)/../test/structure.pdb"
+const SMALLPDB = "$(@__DIR__)/../test/small.pdb"
 
 # Basic chemistry
 include("./elements.jl")
