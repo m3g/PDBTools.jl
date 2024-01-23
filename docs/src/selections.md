@@ -70,13 +70,13 @@ Available keywords:
     with these selections, as they might retrieve non-protein atoms.
 
 
-### Retrieving indexes only 
+### Retrieving indices only 
 
-If only the indexes of the atoms are of interest, a specific function
+If only the indices of the atoms are of interest, a specific function
 will directly return them:
 
 ```julia
-indexes = selindex(atoms,"protein and name CA")
+indices = selindex(atoms,"protein and name CA")
 
 ```
 
@@ -196,8 +196,8 @@ using its capabilities.
 
 For example, the solute can be defined with: 
 ```julia
-indexes, names = select_with_vmd("./system.gro","protein",vmd="/usr/bin/vmd")
-solute = Selection(indexes,names,nmols=1)
+indices, names = select_with_vmd("./system.gro","protein",vmd="/usr/bin/vmd")
+solute = Selection(indices,names,nmols=1)
 ```
 The main advantage here is that all the file types that VMD supports are
 supported. But VMD needs to be installed and is run in background, and

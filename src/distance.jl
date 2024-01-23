@@ -35,7 +35,7 @@ distance(x, y) = closest(x, y)[3]
 """
     closest(x,y)
 
-Computes the minimum distance between two sets of atoms and returns the indexes of the atoms 
+Computes the minimum distance between two sets of atoms and returns the indices of the atoms 
 and their distance. Both vector of atoms or vectors of coordinates can be used as input.
 
 ### Examples

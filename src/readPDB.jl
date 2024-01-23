@@ -73,7 +73,7 @@ function _parse_pdb(
     pdbdata::Union{IOStream, IOBuffer}, 
     only::Function, 
     mmCIF::Bool,
-    mmCIF_fields::Indexes_mmCIF_fields
+    mmCIF_fields::indices_mmCIF_fields
 )
     natoms = 0
     index = 0

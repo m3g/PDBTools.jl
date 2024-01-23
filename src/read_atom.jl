@@ -4,7 +4,7 @@
 function read_atom(
     record::String;
     mmCIF::Bool=false,
-    mmCIF_fields::Indexes_mmCIF_fields=Indexes_mmCIF_fields()
+    mmCIF_fields::indices_mmCIF_fields=indices_mmCIF_fields()
 )
     atom = if mmCIF
         read_atom_mmCIF(record, mmCIF_fields)
@@ -73,7 +73,7 @@ function read_atom_PDB(record::String)
 end
 
 # read atom from mmCIF file
-function read_atom_mmCIF(record::String, mmCIF_fields::Indexes_mmCIF_fields=Indexes_mmCIF_fields())
+function read_atom_mmCIF(record::String, mmCIF_fields::indices_mmCIF_fields=indices_mmCIF_fields())
     if !startswith(record, r"ATOM|HETATM")
         return nothing
     end

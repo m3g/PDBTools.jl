@@ -31,7 +31,7 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
     Base.write(vmd_input, "mol new \"$inputfile\" \n")
     Base.write(vmd_input, "set sel [ atomselect top \"$selection\" ] \n")
     Base.write(vmd_input, "puts \"INDEXLIST\" \n")
-    Base.write(vmd_input, "set indexes [ \$sel get index ] \n")
+    Base.write(vmd_input, "set indices [ \$sel get index ] \n")
     Base.write(vmd_input, "puts \"ENDINDEXLIST\" \n")
     Base.write(vmd_input, "puts \"NAMELIST\" \n")
     Base.write(vmd_input, "set names [ \$sel get name ] \n")
@@ -41,7 +41,7 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
 
     vmd_output = Base.read(`$vmd -dispdev text -e $vmdinput_file`, String)
 
-    # Read indexes
+    # Read indices
     local index_list::String
     readnext = false
     for line in split(vmd_output, "\n")
@@ -61,9 +61,9 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
     end
     index_split = split(index_list)
     nsel = length(index_split)
-    selection_indexes = Vector{Int}(undef, nsel)
+    selection_indices = Vector{Int}(undef, nsel)
     for i = 1:nsel
-        selection_indexes[i] = parse(Int, index_split[i]) + 1
+        selection_indices[i] = parse(Int, index_split[i]) + 1
     end
 
     # Read atom names
@@ -88,7 +88,7 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
         selection_names[i] = strip(name_split[i])
     end
 
-    return selection_indexes, selection_names
+    return selection_indices, selection_names
 end
 
 @testitem "select_with_vmd" begin

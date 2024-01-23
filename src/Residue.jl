@@ -323,7 +323,7 @@ function residue_ticks(
 end
 
 @testitem "residue_ticks" begin
-    # residue indexes start with 1
+    # residue indices start with 1
     atoms = wget("1UBQ")
     @test residue_ticks(atoms, stride=20) == ([1, 21, 41, 61, 81, 101, 121], ["M1", "D21", "Q41", "I61", "X81", "X101", "X121"])
     atoms = select(atoms, "protein")
@@ -331,7 +331,7 @@ end
     @test residue_ticks(atoms; stride = 20, first = 2) == ([2, 22, 42, 62], ["Q2", "T22", "R42", "Q62"])
     @test residue_ticks(atoms; stride = 20, last = 42) == ([1, 21, 41], ["M1", "D21", "Q41"])
     @test residue_ticks(atoms; stride = 20, last = 42, first = 2) == ([2, 22, 42], ["Q2", "T22", "R42"])
-    # residue indexes do not start with 1
+    # residue indices do not start with 1
     atoms = wget("1LBD", "protein")
     @test residue_ticks(atoms, stride=38) == ([225, 263, 301, 339, 377, 415, 453], ["S225", "D263", "L301", "S339", "N377", "F415", "E453"])
     @test residue_ticks(atoms; stride=1, first = 227, last = 231) == ([227, 228, 229, 230, 231], ["N227", "E228", "D229", "M230", "P231"])

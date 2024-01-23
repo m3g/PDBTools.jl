@@ -27,16 +27,16 @@ function select(set::AbstractVector{T}, selection::String) where {T}
 end
 
 #
-# Return indexes only
+# Return indices only
 #
 function selindex(set::AbstractVector{T}; by=all) where {T}
-    indexes = Vector{Int}(undef, 0)
+    indices = Vector{Int}(undef, 0)
     for i in eachindex(set)
         if by(set[i])
-            push!(indexes, i)
+            push!(indices, i)
         end
     end
-    return indexes
+    return indices
 end
 
 function selindex(set::AbstractVector{T}, selection::String) where {T}

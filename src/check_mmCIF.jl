@@ -1,7 +1,7 @@
 #
-# Structure to read mmCIF field data indexes
+# Structure to read mmCIF field data indices
 #
-Base.@kwdef mutable struct Indexes_mmCIF_fields
+Base.@kwdef mutable struct indices_mmCIF_fields
     index::Int = 0
     name::Int = 0
     resname::Int = 0
@@ -28,7 +28,7 @@ check_mmCIF(data::IOBuffer) = _check_mmCIF(data)
 
 function _check_mmCIF(data::Union{IOStream, IOBuffer})
     local ifield, mmCIF, line
-    mmCIF_fields = Indexes_mmCIF_fields()
+    mmCIF_fields = indices_mmCIF_fields()
     mmCIF = false
     for line_string in eachline(data)
         line = strip(line_string)
