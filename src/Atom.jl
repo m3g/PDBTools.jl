@@ -195,6 +195,33 @@ atom_line(atom::Atom) = @sprintf(
     atom.index_pdb
 )
 
+"""
+    printatom(atom::Atom)
+
+Prints an `Atom` structure in a human-readable format.
+
+### Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+   Array{Atoms,1} with 11 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
+      14   HN     CYS     A        2        2   -6.473  -15.272   -5.125  0.00  0.00     1    PROT        14
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+                                                       ⋮ 
+      21  HG1     CYS     A        2        2   -3.403  -16.785   -4.019  0.00  0.00     1    PROT        21
+      22    C     CYS     A        2        2   -4.610  -13.207   -6.811  1.00  0.00     1    PROT        22
+      23    O     CYS     A        2        2   -4.443  -13.972   -7.759  1.00  0.00     1    PROT        23
+
+julia> printatom(atoms[1])
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
+```
+
+"""
 function printatom(atom::Atom)
     println(atom_title)
     println(atom_line(atom))
@@ -277,7 +304,8 @@ end
     element(atom::Atom)
 
 Returns the element symbol, as a string, of an atom given its name, or `Atom` structure.
-If the `pdb_element` field is not empty, the matching element. Otherwise, the element is inferred from the atom name.
+If the `pdb_element` is empty or "X", the element is inferred from the atom name. 
+Othwerwise, the `pdb_element` is returned.
 
 ### Example
 
@@ -292,10 +320,15 @@ julia> element(at)
 
 """
 function element(atom::Atom)
-    if atom.pdb_element != "X"
-        element_name = pdb_element(atom)
-    else
-        element_name = name(atom)
+    # First, check if it was defined in pdb_element
+    element_name = pdb_element(atom)
+    if !isempty(element_name) && element_name != "X"
+        return element_name
+    end
+    # Now try to inferr from the atom name
+    element_name = name(atom)
+    if isempty(element_name) || element_name == "X"
+        return nothing
     end
     # if there is match, just return the name
     iel = searchsortedfirst(element_names, element_name)
@@ -309,10 +342,23 @@ function element(atom::Atom)
     for iel in imatch:lmatch
         el = element_names[iel]
         if lastindex(element_name) >= i0+length(el)-1 && el == element_name[i0:i0+length(el)-1]
-            return el
+            return el == "X" ? nothing : el
         end
     end
     return nothing
+end
+
+@testitem "get element" begin
+    using PDBTools
+    atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+    @test element(atoms[1]) == "N"
+    @test element(Atom()) === nothing
+    @test element(Atom(pdb_element="")) === nothing
+    @test element(Atom(pdb_element="N")) == "N"
+    @test element(Atom(name = "N", pdb_element="X")) == "N"
+    @test element(Atom(name = "X", pdb_element="A")) == "A" 
+    @test element(Atom(name = "N", pdb_element="A")) == "A" 
+    @test element(Atom(name = "A")) === nothing
 end
 
 #
