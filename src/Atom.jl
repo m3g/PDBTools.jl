@@ -206,26 +206,20 @@ end
 """
     printatom(atom::Atom)
 
-Prints an `Atom` structure in a human-readable format.
+Prints an `Atom` structure in a human-readable format, with a title line.
 
 ### Example
 
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
-   Array{Atoms,1} with 11 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-      13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
-      14   HN     CYS     A        2        2   -6.473  -15.272   -5.125  0.00  0.00     1    PROT        14
-      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
-                                                       ⋮ 
-      21  HG1     CYS     A        2        2   -3.403  -16.785   -4.019  0.00  0.00     1    PROT        21
-      22    C     CYS     A        2        2   -4.610  -13.207   -6.811  1.00  0.00     1    PROT        22
-      23    O     CYS     A        2        2   -4.443  -13.972   -7.759  1.00  0.00     1    PROT        23
+julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2");
 
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
+
+julia> atoms[1] # default show method
       13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
 ```
 
