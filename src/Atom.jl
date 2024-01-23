@@ -71,7 +71,7 @@ julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1));
 julia> atom.c
 "c"
 
-julia> atom.index
+julia> index(atom)
 0
 
 julia> custom_field(atom, :index)
@@ -121,6 +121,24 @@ function getproperty(atom::Atom, field::Symbol)
     else
         atom.custom[field]
     end
+end
+
+@testitem "Atom default fields" begin
+    using PDBTools
+    atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+    atom = atoms[1]
+    @test index(atom) == 13
+    @test name(atom) == "N"
+    @test resname(atom) == "CYS"
+    @test chain(atom) == "A"
+    @test resnum(atom) == 2
+    @test residue(atom) == 2
+    @test all((atom.x, atom.y, atom.z) .≈ (-6.351, -14.461, -5.695))
+    @test occup(atom) == 1.0
+    @test beta(atom) == 0.0
+    @test model(atom) == 1
+    @test segname(atom) == "PROT"
+    @test index_pdb(atom) == 13
 end
 
 @testitem "Atom custom fields" begin
