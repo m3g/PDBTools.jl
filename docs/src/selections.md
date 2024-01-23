@@ -194,14 +194,33 @@ versatile library to read topologies and trajectory files, and a
 powerful selection syntax. We provide here a wrapper to VMD which allows
 using its capabilities.  
 
+!!! compat
+    The `select_with_vmd` with all the described cababilities is available
+    in PDBTools v1.0.0 or greater.
+
 For example, the solute can be defined with: 
 ```julia
 indices, names = select_with_vmd("./system.gro","protein",vmd="/usr/bin/vmd")
-solute = Selection(indices,names,nmols=1)
 ```
-The main advantage here is that all the file types that VMD supports are
-supported. But VMD needs to be installed and is run in background, and
-it takes a few seconds.     
+The output will contain two lists, one of atom indices (one-based) and atom names.
+The indices correspond to sequential indices in the input, *not* the indices
+written in the PDB file, for example.
+
+The input may also be a vector of atoms of type `PDBTools.Atom`:
+
+```julia
+atoms = readPDB("mypdbfile.pdb")
+indices, names = select_with_vmd(atoms,"protein",vmd="/usr/bin/vmd")
+```
+
+!!! tip
+    If `vmd` is available in your path, there is no need to pass it as a keyword parameter.
+
+The main advantage here is that all the file types and the complete selection syntax 
+that VMD supports are supported. But VMD needs to be installed and is run in background, and
+it takes a few seconds to run.
+
+###  Loading vmd scripts
 
 The `select_with_vmd` function also accepts an optional keyword parameter `srcload`,
 which can be used to load custom scripts within `vmd` before running setting
@@ -212,9 +231,6 @@ sel = select_with_vmd("file.pdb", "resname MYRES"; srcload = [ "mymacros1.tcl", 
 ```
 Which corresponds to `source`ing each of the macro files in VMD before defining the 
 selection with the custom `MYRES` name.
-
-!!! compat
-    The `select_with_vmd` function was introduced in PDBTools version 0.15.0.
 
 !!! warning
     VMD uses 0-based indexing and `select_with_vmd` adjusts that. However, if
