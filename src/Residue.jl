@@ -181,11 +181,11 @@ function Base.show(io::IO, residue::Residue)
 end
 
 function Base.show(io::IO, residues::EachResidue)
-    println(io, " Iterator with $(length(residues)) residues.")
+    print(io, " Iterator with $(length(residues)) residues.")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
-    println(io, "   Array{Residue,1} with $(length(residues)) residues.")
+    print(io, "   Array{Residue,1} with $(length(residues)) residues.")
 end
 
 #
