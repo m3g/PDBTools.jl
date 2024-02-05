@@ -32,7 +32,7 @@ julia> residues[8].range
 ```
 
 """
-struct Residue{T<:AbstractVector{Atom}} <: AbstractVector{T}
+struct Residue{T} <: Vector{T}
     atoms::T
     range::UnitRange{Int}
     name::String
