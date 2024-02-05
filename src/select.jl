@@ -26,9 +26,8 @@ function select(set::AbstractVector{T}, selection::String) where {T}
     return select(set, by=el -> apply_query(query, el))
 end
 
-#
-# Return indices only
-#
+
+# selindex functions will be deprecated, as they are equivalent to `findall`
 function selindex(set::AbstractVector{T}; by=all) where {T}
     indices = Vector{Int}(undef, 0)
     for i in eachindex(set)
@@ -38,7 +37,6 @@ function selindex(set::AbstractVector{T}; by=all) where {T}
     end
     return indices
 end
-
 function selindex(set::AbstractVector{T}, selection::String) where {T}
     query = parse_query(selection)
     return selindex(set, by=el -> apply_query(query, el))
@@ -209,7 +207,7 @@ julia> PDBTools.has_key("and",["name","CA","or","index","1"])
 =#
 function has_key(key::String, s::AbstractVector{<:AbstractString})
     i = findfirst(isequal(key), s)
-    if i == nothing
+    if isnothing(i)
         0
     else
         i
