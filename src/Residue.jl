@@ -32,8 +32,8 @@ julia> residues[8].range
 ```
 
 """
-struct Residue{T} <: Vector{T}
-    atoms::T
+struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
+    atoms::Vec
     range::UnitRange{Int}
     name::String
     resname::String
@@ -75,9 +75,9 @@ end
 Residue(atoms::AbstractVector{Atom}) = Residue(atoms, 1:length(atoms))
 
 function Base.getindex(residue::Residue, i::Int)
-    @assert i > 0 "Index must be in 1:$(length(residue))"
-    @assert (i <= length(residue)) "Residue has $(length(residue)) atoms."
-    i = residue.range[begin] + i - 1
+    i > 0 || throw(ArgumentError("Index must be in 1:$(length(residue))"))
+    (i <= length(residue)) || throw(ArgumentError("Residue has $(length(residue)) atoms, tried to fetch index $i."))
+    i = first(residue.range) + i - 1
     residue.atoms[i]
 end
 
@@ -127,6 +127,15 @@ eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
 
 # Collect residues default constructor
 Base.collect(r::EachResidue) = collect(Residue, r)
+Base.length(residues::EachResidue) = sum(1 for residue in residues)
+Base.firstindex(residues::EachResidue) = 1
+Base.lastindex(residues::EachResidue) = length(residues)
+function Base.getindex(::EachResidue, ::Int)
+    throw(ArgumentError("""\n
+        The eachresidue iterator does not support indexing. 
+        Use collect(eachresidue(atoms)) to get an indexable list of residues.
+    """))
+end
 
 # Array interface
 Base.size(residue::Residue) = (length(residue.range),)
@@ -134,54 +143,56 @@ Base.length(residue::Residue) = length(residue.range)
 Base.eltype(::Residue) = Atom
 
 #
-# Iterate over the resiudes
+# Iterate over residues of a structure
 #
-function Base.iterate(residues::EachResidue, state=1)
-    r0 = state
-    r0 > length(residues.atoms) && return nothing
-    residue0 = residues.atoms[r0].residue
-    r1 = r0
-    while r1 <= length(residues.atoms)
-        if residues.atoms[r1].residue != residue0
-            return (Residue(residues.atoms, r0:r1-1), r1)
-        end
-        r1 += 1
+function Base.iterate(residues::EachResidue, current_atom=nothing)
+    if isnothing(current_atom)
+        current_atom = 1
+    elseif current_atom > length(residues.atoms)
+        return nothing
     end
-    return (Residue(residues.atoms, r0:r1-1), r1)
+    next_atom = current_atom + 1
+    while next_atom <= length(residues.atoms) && 
+          same_residue(residues.atoms[current_atom], residues.atoms[next_atom]) 
+        next_atom += 1
+    end
+    return (Residue(residues.atoms, current_atom:next_atom-1), next_atom)
 end
 
 #
 # Iterate over atoms of one residue
 #
-function Base.iterate(residue::Residue, state=1)
-    i1 = first(residue.range) + state - 1
-    if i1 <= last(residue.range)
-        return (residue[i1], state + 1)
-    else
+function Base.iterate(residue::Residue, current_atom=nothing)
+    first_atom = index(first(residue))
+    last_atom = index(last(residue))
+    if isnothing(current_atom)
+        current_atom = first_atom
+    elseif current_atom > last_atom
         return nothing
     end
+    return (residue[current_atom - first_atom + 1], current_atom + 1)
 end
+
 
 @testitem "Residue iterator" begin
     atoms = readPDB(PDBTools.TESTPDB, "protein")
-    residues = collect(eachresidue(atoms))
+    residues = eachresidue(atoms)
     @test length(residues) == 104
     @test name(Residue(atoms, 1:12)) == "ALA"
     @test Residue(atoms, 1:12).range == 1:12
+    @test firstindex(residues) == 1
+    @test lastindex(residues) == 104
+    @test_throws ArgumentError residues[1]
+    residues = collect(eachresidue(atoms))
+    @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
+    @test findall(at -> name(at) in ("N", "HG1"), residues[2]) == [1, 9]
 end
-
-#
-# Length of the Residue struct and eachresidue iterator (number of residues)
-#
-Base.length(residues::EachResidue) = sum(1 for residue in residues)
-Base.length(residue::Residue) = length(residue.range)
 
 #
 # io show functions
 #
-function Base.show(io::IO, residue::Residue)
-    natoms = residue.range[end] - residue.range[begin] + 1
-    println(io, " Residue of name $(name(residue)) with $natoms atoms.")
+function Base.show(io::IO, ::MIME"text/plain", residue::Residue)
+    println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
     print_short_atom_list(io, @view residue.atoms[residue.range])
 end
 
@@ -196,11 +207,11 @@ end
 #
 # Properties of residues
 #
-isprotein(residue::Residue) = haskey(protein_residues, residue.resname)
+isprotein(residue::Residue) = haskey(protein_residues, resname(residue))
 
 export isprotein
-export isacidic, isaliphatic, isaromatic, isbasic, ischarged,
-    ishydrophobic, isneutral, isnonpolar, ispolar
+export isacidic, isaliphatic, isaromatic, isbasic, ischarged
+export ishydrophobic, isneutral, isnonpolar, ispolar
 export iswater
 
 isacidic(r::Residue) = isprotein(r) && protein_residues[r.resname].type == "Acidic"
@@ -315,13 +326,13 @@ function residue_ticks(
     first=nothing, last=nothing, stride=1,
     oneletter::Bool = true,
 )
-    resnames = resname.(eachresidue(atoms))
+    residues = eachresidue(atoms)
+    resnames = resname.(residues)
     if oneletter
         resnames = PDBTools.oneletter.(resnames)
     end
-    resnums = resnum.(eachresidue(atoms))
+    resnums = resnum.(residues)
     ticklabels = resnames .* string.(resnums)
-    residues = collect(eachresidue(atoms))
     first = isnothing(first) ?  firstindex(residues) : findfirst(==(first), resnums)
     last = isnothing(last) ? lastindex(residues) : findlast(==(last), resnums)
     return ( resnums[first:stride:last], ticklabels[first:stride:last] )
