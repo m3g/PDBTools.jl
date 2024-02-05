@@ -70,18 +70,54 @@ Available keywords:
     with these selections, as they might retrieve non-protein atoms.
 
 
-### Retrieving indices only 
+### Retrieving indices, filtering, etc
 
-If only the indices of the atoms are of interest, a specific function
-will directly return them:
+!!! compat
+    The `Select` object was implemented in PDBTools v1.1.0.
 
-```julia
-indices = selindex(atoms,"protein and name CA")
+If only the indices of the atoms are of interest, the Julia `findall`
+function can be used, by passing a `Select` object, or a regular 
+function, to select the atoms:
 
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue <= 3");
+
+julia> findall(Select("name CA"), atoms)
+3-element Vector{Int64}:
+  5
+ 15
+ 26
+
+julia> findall(at -> name(at) == "CA", atoms)
+3-element Vector{Int64}:
+  5
+ 15
+ 26
 ```
 
 !!! note
     All indexing is 1-based. Thus, the first atom of the structure is atom 1.
+
+The `Select` constructor can be used to feed simple selection syntax entries to 
+other Julia functions, such as `findfirst`, `findlast`, or `filter`:
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue <= 3");
+
+julia> filter(Select("name CA"), atoms)
+   Array{Atoms,1} with 3 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00  0.00     1    PROT        26
+
+julia> findfirst(Select("beta = 0.00"), atoms)
+1
+```
 
 ## Use Julia functions directly
 
