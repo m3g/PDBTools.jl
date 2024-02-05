@@ -32,7 +32,7 @@ julia> residues[8].range
 ```
 
 """
-struct Residue{T<:AbstractVector{Atom}}
+struct Residue{T<:AbstractVector{Atom}} <: AbstractVector{T}
     atoms::T
     range::UnitRange{Int}
     name::String
@@ -74,9 +74,9 @@ function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
 end
 Residue(atoms::AbstractVector{Atom}) = Residue(atoms, 1:length(atoms))
 
-function Base.getindex(residue::Residue, i)
-    @assert i > 0 "Index must be in 1:$(residue.range[end]-residue.range[begin])"
-    @assert (i <= length(residue.range)) "Residue has $(residue.range[end]-residue.range[begin]+1) atoms."
+function Base.getindex(residue::Residue, i::Int)
+    @assert i > 0 "Index must be in 1:$(length(residue))"
+    @assert (i <= length(residue)) "Residue has $(length(residue)) atoms."
     i = residue.range[begin] + i - 1
     residue.atoms[i]
 end
@@ -128,6 +128,11 @@ eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
 # Collect residues default constructor
 Base.collect(r::EachResidue) = collect(Residue, r)
 
+# Array interface
+Base.size(residue::Residue) = (length(residue.range),)
+Base.length(residue::Residue) = length(residue.range)
+Base.eltype(::Residue) = Atom
+
 #
 # Iterate over the resiudes
 #
@@ -149,9 +154,9 @@ end
 # Iterate over atoms of one residue
 #
 function Base.iterate(residue::Residue, state=1)
-    i1 = residue.range[begin] + state - 1
-    if i1 <= residue.range[end]
-        return (residue.atoms[i1], state + 1)
+    i1 = first(residue.range) + state - 1
+    if i1 <= last(residue.range)
+        return (residue[i1], state + 1)
     else
         return nothing
     end
