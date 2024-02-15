@@ -3,7 +3,7 @@ module PDBTools
 import Dates
 import Downloads
 import InteractiveUtils
-using Formatting: format
+using Format: format
 using LinearAlgebra: norm
 using Parameters: @unpack
 using Printf: @printf, @sprintf
