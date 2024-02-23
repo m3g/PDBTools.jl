@@ -493,36 +493,3 @@ end
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ SVector(0.0, 0.0, 0.0)
 end
-
-"""
-    Select
-
-This structure acts a function when used within typical julia filtering functions, 
-by converting a string selection into a call to query call. 
-
-# Example
-
-```jldoctest
-julia> using PDBTools
-
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein");
-
-julia> findfirst(Select("name CA"), atoms)
-5
-
-julia> filter(Select("name CA and residue 1"), atoms)
-   Array{Atoms,1} with 1 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
-
-```
-"""
-struct Select <: Function
-    sel::String
-end
-(s::Select)(at) = apply_query(parse_query(s.sel), at)
-export Select
-
-
-
-

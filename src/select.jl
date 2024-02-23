@@ -5,42 +5,47 @@
 
 using Parameters
 export select, selindex
+export Select, @sel_str
 
+"""
+    Select
+
+This structure acts a function when used within typical julia filtering functions, 
+by converting a string selection into a call to query call. 
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = readPDB(PDBTools.TESTPDB, "protein");
+
+julia> findfirst(Select("name CA"), atoms)
+5
+
+julia> filter(Select("name CA and residue 1"), atoms)
+   Array{Atoms,1} with 1 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
+
+```
+"""
+struct Select <: Function
+    sel::String
+end
+(s::Select)(at) = apply_query(parse_query(s.sel), at)
+
+macro sel_str(str)
+    Select(str)
+end
 # Function that returns true for all atoms: the default selection
 all(atoms) = true
 
 # Main function: receives the atoms vector and a julia function to select
-function select(set::AbstractVector{T}; by=all) where {T}
-    selected = similar(set, 0)
-    for el in set
-        if by(el)
-            push!(selected, el)
-        end
-    end
-    return selected
-end
-
-# Given a selection string
-function select(set::AbstractVector{T}, selection::String) where {T}
-    query = parse_query(selection)
-    return select(set, by=el -> apply_query(query, el))
-end
-
-
-# selindex functions will be deprecated, as they are equivalent to `findall`
-function selindex(set::AbstractVector{T}; by=all) where {T}
-    indices = Vector{Int}(undef, 0)
-    for i in eachindex(set)
-        if by(set[i])
-            push!(indices, i)
-        end
-    end
-    return indices
-end
-function selindex(set::AbstractVector{T}, selection::String) where {T}
-    query = parse_query(selection)
-    return selindex(set, by=el -> apply_query(query, el))
-end
+select(set::AbstractVector; by=all) = filter(by, set)
+select(set::AbstractVector, selection::String) = filter(Select(selection), set)
+selindex(set::AbstractVector; by=all) = findall(by, set)
+selindex(set::AbstractVector, selection::String) = findall(Select(selection), set)
 
 # Comparison operators
 
