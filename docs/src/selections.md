@@ -70,10 +70,11 @@ Available keywords:
     with these selections, as they might retrieve non-protein atoms.
 
 
-### Retrieving indices, filtering, etc
+## Retrieving indices, filtering, etc
 
 !!! compat
-    The `Select` object was implemented in PDBTools v1.1.0.
+    The `Select` object was implemented in PDBTools v1.1.0. The 
+    `sel""` string macro was implemented in PDBTools v1.2.0.
 
 If only the indices of the atoms are of interest, the Julia `findall`
 function can be used, by passing a `Select` object, or a regular 
@@ -118,6 +119,23 @@ julia> filter(Select("name CA"), atoms)
 julia> findfirst(Select("beta = 0.00"), atoms)
 1
 ```
+
+!!! tip
+    The `sel""` literal string macro is a shortcut for `Select`. Thus, these syntaxes are valid:
+    ```jldoctest
+    julia> using PDBTools
+
+    julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue <= 3");
+
+    julia> name.(filter(sel"name CA", atoms))
+    3-element Vector{String}:
+     "CA"
+     "CA"
+     "CA"
+
+    julia> findfirst(sel"name CA", atoms)
+    5
+    ```
 
 ## Use Julia functions directly
 
