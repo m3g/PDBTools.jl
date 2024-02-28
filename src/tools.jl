@@ -19,7 +19,7 @@ Add hydrogens to a PDB file using Open Babel.
 
 # Example
 
-```jldoctest
+```julia-repl
 julia> using PDBTools
 
 julia> atoms = readPDB(PDBTools.TESTPDB, "protein and not element H");
@@ -63,8 +63,21 @@ function add_hydrogens!(
             
         """)
     end
-    atoms = readPDB(tmpfile_out)
-    sort!(atoms; by=at -> resnum(at))
-    setfield!.(atoms, :index, eachindex(atoms))
+    atoms_read = readPDB(tmpfile_out)
+    sort!(atoms_read; by=at -> resnum(at))
+    setfield!.(atoms_read, :index, eachindex(atoms_read))
+    atoms .= atoms_read[1:length(atoms)] 
+    append!(atoms, atoms_read[length(atoms)+1:end])
     return atoms
+end
+
+@testitem "add_hydrogens!" begin
+    using PDBTools
+    atoms = readPDB(PDBTools.TESTPDB, "protein and not element H");
+    @test length(atoms) == 781
+    if !isnothing(Sys.which("obabel"))
+        add_hydrogens!(atoms)
+        @test length(atoms) == 1459
+        @test count(sel"element H", atoms) == 678
+    end
 end
