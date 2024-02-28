@@ -39,13 +39,23 @@ julia> add_hydrogens!(atoms)
 """
 function add_hydrogens!(
     atoms::AbstractVector{Atom};
-    pH=7.0,
+    pH::Real=7.0,
     obabel="obabel",
     debug=false,
 )
     tmpfile = tempname() * ".pdb"
     tmpfile_out = tempname() * ".pdb"
     writePDB(atoms, tmpfile)
+    if isnothing(Sys.which(obabel))
+        throw(ArgumentError("""
+
+            "$obabel" executable not found.
+            
+            Is it installed? Provide the path to the executable with the `obabel` keyword.
+
+            Run with debug=true to see the error message from obabel.
+        """))
+    end
     try
         if debug
             readchomp(pipeline(`$obabel $tmpfile -O $tmpfile_out -p $pH`))
@@ -53,31 +63,28 @@ function add_hydrogens!(
             readchomp(pipeline(`$obabel $tmpfile -O $tmpfile_out -p $pH`; stderr=devnull))
         end
     catch
-        error("""
-
+        throw(ArgumentError("""
             Error running obabel. 
-            
-            Is it installed? Provide the path to the executable with the `obabel` keyword.
-
-            Run with debug = true to see the error message from obabel.
-            
-        """)
+            Run with debug=true to see the error message from obabel.
+        """))
     end
     atoms_read = readPDB(tmpfile_out)
     sort!(atoms_read; by=at -> resnum(at))
     setfield!.(atoms_read, :index, eachindex(atoms_read))
-    atoms .= atoms_read[1:length(atoms)] 
+    atoms .= atoms_read[1:length(atoms)]
     append!(atoms, atoms_read[length(atoms)+1:end])
     return atoms
 end
 
 @testitem "add_hydrogens!" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB, "protein and not element H");
+    atoms = readPDB(PDBTools.TESTPDB, "protein and not element H")
     @test length(atoms) == 781
     if !isnothing(Sys.which("obabel"))
         add_hydrogens!(atoms)
         @test length(atoms) == 1459
         @test count(sel"element H", atoms) == 678
     end
+    @test_throws TypeError add_hydrogens!(atoms; pH="A")
+    @test_throws ArgumentError add_hydrogens!(atoms; obabel="nonexistent")
 end
