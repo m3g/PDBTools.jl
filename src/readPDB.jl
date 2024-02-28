@@ -52,6 +52,7 @@ function readPDB(file::String, selection::String)
 end
 
 function readPDB(file::String; only=all)
+    file = expanduser(file)
     mmCIF, mmCIF_fields = check_mmCIF(file)
     pdbfile = open(file, "r")
     atoms = _parse_pdb(pdbfile, only, mmCIF, mmCIF_fields)
