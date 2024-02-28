@@ -12,10 +12,9 @@ Add hydrogens to a PDB file using Open Babel.
 - `obabel`: path to the obabel executable. Default is "obabel".
 - `debug`: if true, print the output message from obabel. Default is false.
 
-!!! warning
-    This function requires Open Babel to be installed, and maybe deprecated at any 
-    moment. Use it for localized tasks only, and do not consider it a stable API 
-    for package development.
+!!! note
+    This function requires the installation of [OpenBabel](http://openbabel.org/).
+    Please cite the corresponding reference if using it.
 
 # Example
 
