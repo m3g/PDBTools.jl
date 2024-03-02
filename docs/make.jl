@@ -14,6 +14,7 @@ makedocs(
         "Element properties" => "elements.md",
         "Auxiliary functions" => "auxiliary.md",
         "Examples" => "examples.md",
+        "Tools" => "tools.md",
         "Help entries" => "help.md",
     ],
 )

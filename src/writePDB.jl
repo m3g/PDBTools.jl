@@ -15,7 +15,7 @@ function writePDB(atoms::AbstractVector{Atom}, filename::String, selection::Stri
 end
 
 function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=all, header=:auto, footer=:auto)
-    file = open(filename, "w")
+    file = open(expanduser(filename), "w")
     if header == :auto
         curr_date = Dates.format(Dates.today(), "dd-u-yy")
         header = "PDBTools.jl - $(length(atoms)) atoms"

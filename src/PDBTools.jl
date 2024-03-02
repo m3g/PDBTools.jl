@@ -56,5 +56,6 @@ include("./coor.jl")
 include("./distance.jl")
 include("./maxmin.jl")
 include("./wget.jl")
+include("./tools.jl")
 
 end
