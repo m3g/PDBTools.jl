@@ -287,6 +287,7 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=protein_residu
         Residue `sX` will be interpreted as bridged Cysteine.
 
     """ _file=nothing _line=nothing
+#! format: off
     protein_residues["sA"] = ProteinResidue("Alanine",       "ALA", "A", "Aliphatic",  false, false,  71.037114,  71.0779,  0)
     protein_residues["sR"] = ProteinResidue("Arginine",      "ARG", "R", "Basic",      true,  false, 156.101111, 156.1857,  1)
     protein_residues["sN"] = ProteinResidue("Asparagine",    "ASN", "N", "Amide",      true,  false, 114.042927, 114.1026,  0)
@@ -308,6 +309,7 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=protein_residu
     protein_residues["sY"] = ProteinResidue("Tyrosine",      "TYR", "Y", "Aromatic",   true,  false, 163.063320, 163.1733,  0)
     protein_residues["sV"] = ProteinResidue("Valine",        "VAL", "V", "Aliphatic",  false, true,   99.068414,  99.1311,  0)
     protein_residues["sX"] = ProteinResidue("Cysteine - bridged",     "CYS", "C", "Sulfuric",   false, false, 103.009185, 103.1429,  0)
+#! format: on
     return nothing
 end
 
