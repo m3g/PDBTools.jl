@@ -70,18 +70,26 @@ julia> threeletter("HSD")
 function threeletter(residue::Union{String,Char})
     # Convert to String if Char
     code = "$residue"
-    if _case_insensitve_check(code, protein_residues)
-        return protein_residues[code].three_letter_code
+    key = _case_insensitve_check(code, protein_residues)
+    if !isnothing(key)
+        return key
     end
     if length(code) == 1
         return findfirst(r -> r.one_letter_code == code, protein_residues)
     else
         return findfirst(r -> uppercase(r.name) == uppercase(code), protein_residues)
     end
+    return nothing
 end
 
-_case_insensitve_check(code, protein_residues) = 
-    code in keys(protein_residues) || uppercase(code) in keys(protein_residues)
+function _case_insensitve_check(code, protein_residues)  
+    if code in keys(protein_residues) 
+        return code
+    elseif uppercase(code) in keys(protein_residues)
+        return uppercase(code)
+    end
+    return nothing
+end
 
 @testitem "threeletter" begin
     @test threeletter("ALA") == "ALA"
@@ -112,8 +120,9 @@ julia> oneletter("Glutamic acid")
 """
 function oneletter(residue::Union{String,Char})
     code = resname("$residue")
-    if haskey(protein_residues, code)
-        return protein_residues[code].one_letter_code
+    key = _case_insensitve_check(code, protein_residues)
+    if !isnothing(key)
+        return protein_residues[key].one_letter_code
     else
         return "X"
     end
@@ -148,8 +157,9 @@ julia> resname("GLUP")
 """
 function resname(residue::Union{String,Char})
     code = "$residue"
-    if _case_insensitve_check(code, protein_residues)
-        return code
+    key = _case_insensitve_check(code, protein_residues)
+    if !isnothing(key)
+        return key
     else
         return threeletter(code)
     end
@@ -184,8 +194,9 @@ julia> residuename("Glu")
 """
 function residuename(residue::Union{String,Char})
     code = resname(residue)
-    if haskey(protein_residues, code)
-        return protein_residues[code].name
+    key = _case_insensitve_check(code, protein_residues)
+    if !isnothing(key)
+        return protein_residues[key].name
     else
         return nothing
     end
