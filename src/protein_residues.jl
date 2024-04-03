@@ -72,12 +72,9 @@ function threeletter(residue::Union{String,Char})
     code = "$residue"
     key = _case_insensitve_check(code, protein_residues)
     if !isnothing(key)
-        return key
-    end
-    if length(code) == 1
+        return protein_residues[key].three_letter_code
+    elseif length(code) == 1
         return findfirst(r -> r.one_letter_code == code, protein_residues)
-    else
-        return findfirst(r -> uppercase(r.name) == uppercase(code), protein_residues)
     end
     return nothing
 end
