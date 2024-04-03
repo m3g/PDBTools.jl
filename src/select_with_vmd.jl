@@ -15,12 +15,17 @@ for example with macros to define custom selection keywords.
 """
 function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcload = nothing, index_warning = true)
 
-    if occursin("index", string)
-        @warn """\n
-        
-        Warning that VMD has 0-based indexing. 
-        
-        """ 
+    if index_warning 
+        if occursin("index", selection)
+            @warn """\n
+            
+            Warning: VMD has 0-based indexing. 
+            Selecting by index may not return atoms corresponding to the indices in the input file.
+
+            To suppress this warning use `index_warning=false` in the function call.
+            
+            """ 
+        end
     end
 
     if !isfile(inputfile)
