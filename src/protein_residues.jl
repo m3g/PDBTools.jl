@@ -83,6 +83,7 @@ function threeletter(residue::Union{String,Char})
 end
 
 function _case_insensitve_check(code, protein_residues)  
+    isnothing(code) && return code
     if code in keys(protein_residues) 
         return code
     elseif uppercase(code) in keys(protein_residues)
