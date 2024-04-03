@@ -13,7 +13,15 @@ The `srcload` argument can be used to load a list of scripts before loading the 
 for example with macros to define custom selection keywords.
 
 """
-function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcload = nothing)
+function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcload = nothing, index_warning = true)
+
+    if occursin("index", string)
+        @warn """\n
+        
+        Warning that VMD has 0-based indexing. 
+        
+        """ 
+    end
 
     if !isfile(inputfile)
         error("Could not find file: $inputfile")
