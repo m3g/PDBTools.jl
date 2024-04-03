@@ -3,6 +3,21 @@
 #
 # requires Printf
 
+function _align_name(name)
+    name = strip(name)
+    length(name) == 1 && return " $(name)  "
+    length(name) == 2 && return " $(name) "
+    length(name) == 3 && return " $(name)"
+    return name
+end
+function _align_resname(resname)
+    resname = strip(resname)
+    length(resname) == 1 && return "  $(resname) "
+    length(resname) == 2 && return " $(resname)  "
+    length(resname) == 3 && return " $(resname) "
+    return resname
+end
+
 function write_atom(atom::Atom)
 
     #ATOM      2  CA  GLY A   1      -1.774   6.778  32.054  1.00  0.08           C
@@ -21,6 +36,7 @@ function write_atom(atom::Atom)
     #47 - 54        Real(8.3)     z            Orthogonal coordinates for Z in Angstroms.
     #55 - 60        Real(6.2)     occupancy    Occupancy.
     #61 - 66        Real(6.2)     tempFactor   Temperature  factor.
+    #73 - 76        String        segname      Segment identifier, left-justified (not default of PDB)
     #77 - 78        LString(2)    element      Element symbol string, right-justified.
     #79 - 80        LString(2)    charge       Charge  on the atom.
 
@@ -35,29 +51,6 @@ function write_atom(atom::Atom)
     else
         name = atom.name
     end
-    if isprotein(atom)
-        resname = strip(atom.resname)
-        l = length(resname)
-        if l == 3
-            resname = " $(atom.resname) "
-        elseif l == 4
-            resname = "$(atom.resname) "
-        end
-    else
-        resname = strip(atom.resname)
-        l = length(resname)
-        if l == 1
-            resname = " $(atom.resname)   "
-        elseif l == 2
-            resname = " $(atom.resname)  "
-        elseif l == 3
-            resname = " $(atom.resname) "
-        elseif l == 4
-            resname = " $(atom.resname)"
-        else
-            resname = atom.resname
-        end
-    end
 
     if abs(atom.x) > 999.999 || abs(atom.y) > 999.999 || abs(atom.y) > 999.999
         println(
@@ -67,14 +60,12 @@ function write_atom(atom::Atom)
         )
     end
 
-    if atom.index <= 99999 && atom.resnum <= 9999
-        line = @sprintf(
-            "%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%12s",
+    atom_data = (
             "ATOM",
             atom.index,
             " ",
-            name,
-            resname,
+            _align_name(name),
+            _align_resname(atom.resname),
             atom.chain,
             atom.resnum,
             "    ",
@@ -83,59 +74,30 @@ function write_atom(atom::Atom)
             atom.z,
             atom.occup,
             atom.beta,
-            element(atom)
+            "      ",
+            segname(atom),
+            element(atom) === nothing ? "  " : element(atom),
+    )
+
+    if atom.index <= 99999 && atom.resnum <= 9999
+        line = @sprintf(
+            "%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
+            atom_data...
         )
     elseif atom.index > 99999 && atom.resnum <= 9999 # Prints index in hexadecimal code for atom index
         line = @sprintf(
-            "%-6s%5x%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%12s",
-            "ATOM",
-            atom.index,
-            " ",
-            name,
-            resname,
-            atom.chain,
-            atom.resnum,
-            "    ",
-            atom.x,
-            atom.y,
-            atom.z,
-            atom.occup,
-            atom.beta,
-            element(atom)
+            "%-6s%5x%1s%-4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
+            atom_data...
         )
     elseif atom.index <= 99999 && atom.resnum > 9999 # Prints resnum in hexadecimal code for atom index
         line = @sprintf(
-            "%-6s%5i%1s%4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
-            "ATOM",
-            atom.index,
-            " ",
-            name,
-            resname,
-            atom.chain,
-            atom.resnum,
-            "    ",
-            atom.x,
-            atom.y,
-            atom.z,
-            atom.occup,
-            atom.beta
+            "%-6s%5i%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
+            atom_data...
         )
     elseif atom.index > 99999 && atom.resnum > 9999 # Prints both in hexadecimal code for atom index
         line = @sprintf(
-            "%-6s%5x%1s%4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f",
-            "ATOM",
-            atom.index,
-            " ",
-            name,
-            resname,
-            atom.chain,
-            atom.resnum,
-            "    ",
-            atom.x,
-            atom.y,
-            atom.z,
-            atom.occup,
-            atom.beta
+            "%-6s%5x%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
+            atom_data...
         )
     end
 
