@@ -274,3 +274,44 @@ end
     @test mass(Sequence(['A', 'E', 'G'])) == 257.2432
     @test mass(Sequence(["Alanine", "Glutamic acid", "Glycine"])) == 257.2432
 end
+
+
+
+#
+# Custom protein residues that should not be loaded by default
+#
+
+# Sirah force field protein residues
+
+struct SIRAH end
+function custom_protein_residues!(::Type{SIRAH}; protein_residues=protein_residues)
+    @warn """\n
+        Residue `sX` will be interpreted as bridged Cysteine.
+
+    """ _file=nothing _line=nothing
+    protein_residues["sA"] = ProteinResidue("Alanine",       "ALA", "A", "Aliphatic",  false, false,  71.037114,  71.0779,  0)
+    protein_residues["sR"] = ProteinResidue("Arginine",      "ARG", "R", "Basic",      true,  false, 156.101111, 156.1857,  1)
+    protein_residues["sN"] = ProteinResidue("Asparagine",    "ASN", "N", "Amide",      true,  false, 114.042927, 114.1026,  0)
+    protein_residues["sD"] = ProteinResidue("Aspartic acid", "ASP", "D", "Acidic",     true,  false, 115.026943, 115.0874, -1)
+    protein_residues["sC"] = ProteinResidue("Cysteine",      "CYS", "C", "Sulfuric",   false, false, 103.009185, 103.1429,  0)
+    protein_residues["sQ"] = ProteinResidue("Glutamine",     "GLN", "Q", "Amide",      true,  false, 128.058578, 128.1292,  0)
+    protein_residues["sE"] = ProteinResidue("Glutamic acid", "GLU", "E", "Acidic",     true,  false, 129.042593, 129.1140, -1)
+    protein_residues["sG"] = ProteinResidue("Glycine",       "GLY", "G", "Aliphatic",  false, false,  57.021464,  57.0513,  0)
+    protein_residues["sHE"] = ProteinResidue("Histidine",     "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  0)
+    protein_residues["sI"] = ProteinResidue("Isoleucine",    "ILE", "I", "Aliphatic",  false, true,  113.084064, 113.1576,  0)
+    protein_residues["sL"] = ProteinResidue("Leucine",       "LEU", "L", "Aliphatic",  false, true,  113.084064, 113.1576,  0)
+    protein_residues["sK"] = ProteinResidue("Lysine",        "LYS", "K", "Basic",      true,  false, 128.094963, 128.1723,  1)
+    protein_residues["sM"] = ProteinResidue("Methionine",    "MET", "M", "Sulfuric",   false, false, 131.040485, 131.1961,  0)
+    protein_residues["sF"] = ProteinResidue("Phenylalanine", "PHE", "F", "Aromatic",   false, true,  147.068414, 147.1739,  0)
+    protein_residues["sP"] = ProteinResidue("Proline",       "PRO", "P", "Cyclic",     false, false,  97.052764,  97.1152,  0)
+    protein_residues["sS"] = ProteinResidue("Serine",        "SER", "S", "Hydroxylic", true,  false,  87.032028, 87.07730,  0)
+    protein_residues["sT"] = ProteinResidue("Threonine",     "THR", "T", "Hydroxylic", true,  false, 101.047679, 101.1039,  0)
+    protein_residues["sW"] = ProteinResidue("Tryptophan",    "TRP", "W", "Aromatic",   false, true,  186.079313, 186.2099,  0)
+    protein_residues["sY"] = ProteinResidue("Tyrosine",      "TYR", "Y", "Aromatic",   true,  false, 163.063320, 163.1733,  0)
+    protein_residues["sV"] = ProteinResidue("Valine",        "VAL", "V", "Aliphatic",  false, true,   99.068414,  99.1311,  0)
+    protein_residues["sX"] = ProteinResidue("Cysteine - bridged",     "CYS", "C", "Sulfuric",   false, false, 103.009185, 103.1429,  0)
+    return nothing
+end
+
+
+
