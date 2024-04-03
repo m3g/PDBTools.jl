@@ -13,18 +13,18 @@ The `srcload` argument can be used to load a list of scripts before loading the 
 for example with macros to define custom selection keywords.
 
 """
-function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcload = nothing, index_warning = true)
+function select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing, index_warning=true)
 
-    if index_warning 
+    if index_warning
         if occursin("index", selection)
             @warn """\n
-            
+
             Warning: VMD has 0-based indexing. 
             Selecting by index may not return atoms corresponding to the indices in the input file.
 
             To suppress this warning use `index_warning=false` in the function call.
-            
-            """ 
+
+            """
         end
     end
 
@@ -105,14 +105,14 @@ function select_with_vmd(inputfile::String, selection::String; vmd = "vmd", srcl
     return selection_indices, selection_names
 end
 
-function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd = "vmd", srcload = nothing)
+function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
     tmp_file = tempname()
     writePDB(atoms, tmp_file)
-    return select_with_vmd(tmp_file, selection; vmd = vmd, srcload = srcload)
+    return select_with_vmd(tmp_file, selection; vmd=vmd, srcload=srcload)
 end
 
 @testitem "select_with_vmd" begin
-    pdbfile = PDBTools.TESTPDB 
+    pdbfile = PDBTools.TESTPDB
     if !isnothing(Sys.which("vmd"))
         @test select_with_vmd(pdbfile, "protein and residue 1") == (
             [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
