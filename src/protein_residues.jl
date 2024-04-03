@@ -313,5 +313,10 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=protein_residu
     return nothing
 end
 
+@testitem "SIRAH" begin
+    using PDBTools
+    custom_protein_residues!(SIRAH)
+end
+
 
 
