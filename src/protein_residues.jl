@@ -69,16 +69,19 @@ julia> threeletter("HSD")
 """
 function threeletter(residue::Union{String,Char})
     # Convert to String if Char
-    code = uppercase("$residue")
-    if code in keys(protein_residues)
+    code = "$residue"
+    if _case_insensitve_check(code, protein_residues)
         return protein_residues[code].three_letter_code
     end
     if length(code) == 1
         return findfirst(r -> r.one_letter_code == code, protein_residues)
     else
-        return findfirst(r -> uppercase(r.name) == code, protein_residues)
+        return findfirst(r -> uppercase(r.name) == uppercase(code), protein_residues)
     end
 end
+
+_case_insensitve_check(code, protein_residues) = 
+    code in keys(protein_residues) || uppercase(code) in keys(protein_residues)
 
 @testitem "threeletter" begin
     @test threeletter("ALA") == "ALA"
@@ -144,8 +147,8 @@ julia> resname("GLUP")
 ```
 """
 function resname(residue::Union{String,Char})
-    code = uppercase("$residue")
-    if code in keys(protein_residues)
+    code = "$residue"
+    if _case_insensitve_check(code, protein_residues)
         return code
     else
         return threeletter(code)
