@@ -329,6 +329,8 @@ Function to remove all custom protein residues from the list of protein residues
 ```jldoctest
 julia> using PDBTools
 
+julia> remove_custom_protein_residues!(); # clean up
+
 julia> add_protein_residue!("sA", PDBTools.protein_residues["ALA"])
 PDBTools.ProteinResidue("sA", "ALA", "A", "Aliphatic", false, false, 71.037114, 71.0779, 0, true)
 
