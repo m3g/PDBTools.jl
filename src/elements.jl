@@ -219,6 +219,7 @@ end
     @test atomic_number.(select(atoms, "residue = 1")) == [7, 1, 1, 1, 6, 1, 6, 1, 1, 1, 6, 8]
 
     # Custom elements
+    remove_custom_elements!()
     e_ref = deepcopy(PDBTools.elements)
     add_element!("GN", PDBTools.elements["N"])
     for prop in fieldnames(PDBTools.Element)
@@ -231,4 +232,5 @@ end
     @test e_ref == PDBTools.elements
     @test length(PDBTools.element_names) == 267
     @test mass(Atom(name="GN")) === nothing
+    remove_custom_elements!()
 end
