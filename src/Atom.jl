@@ -205,7 +205,8 @@ atom_line(atom::Atom) = @sprintf(
     using PDBTools
     atoms = readPDB(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
-        "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1       -         1"
+        "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
+
 end
 
 """
@@ -360,13 +361,14 @@ end
     using PDBTools
     atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
     @test element(atoms[1]) == "N"
-    @test element(Atom()) === nothing
-    @test element(Atom(pdb_element="")) === nothing
+    @test element(Atom()) === "X"
+    @test element(Atom(pdb_element="")) === "X"
     @test element(Atom(pdb_element="N")) == "N"
     @test element(Atom(name = "N", pdb_element="X")) == "N"
     @test element(Atom(name = "X", pdb_element="A")) == "A" 
     @test element(Atom(name = "N", pdb_element="A")) == "A" 
     @test element(Atom(name = "A")) === nothing
+    @test element(Atom(name = " ")) === nothing
 end
 
 #
@@ -486,6 +488,7 @@ function mass(at::Atom)
     if haskey(at.custom, :mass)
         return at.custom[:mass]
     else
+        element(at) == "X" && return nothing
         return get_element_property(at, :mass)
     end
 end
@@ -503,6 +506,8 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
     at.custom[:mass] = 1.0
     @test mass(at) == 1.0
     @test mass(Atom(name="X")) === nothing
+    @test mass(Atom(name=" ")) === nothing
+    @test mass(Atom(name="A")) === nothing
 end
 
 @testitem "AtomsBase interface" begin
