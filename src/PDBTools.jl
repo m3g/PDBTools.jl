@@ -15,18 +15,20 @@ import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
-export custom_protein_residues!, SIRAH
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
+export SIRAH, custom_protein_residues!, custom_elements!, add_element!
 export residue_ticks
 export coor, maxmin, distance, closest
-export element, mass, element_name, element_symbol
+export element, mass, element_name, element_symbol, element_symbol_string
 export formula, stoichiometry
 export Sequence
 export select_with_vmd
 
+# Test files
 const TESTPDB = "$(@__DIR__)/../test/structure.pdb"
 const SMALLPDB = "$(@__DIR__)/../test/small.pdb"
+const SIRAHPDB = "$(@__DIR__)/../test/sirah.pdb"
 
 # Basic chemistry
 include("./elements.jl")
@@ -58,5 +60,9 @@ include("./distance.jl")
 include("./maxmin.jl")
 include("./wget.jl")
 include("./tools.jl")
+
+# Custom element and residue definitions
+include("./custom_types.jl")
+
 
 end
