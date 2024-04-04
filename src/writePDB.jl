@@ -38,11 +38,12 @@ end
 
 @testitem "writePDB" begin
     using PDBTools
+    using DelimitedFiles
     pdb = readPDB(PDBTools.SMALLPDB)
     tmpfile = tempname()*".pdb"
     writePDB(pdb, tmpfile)
     @test isfile(tmpfile)
     f1 = readdlm(PDBTools.SMALLPDB, '\n')
-    f5 = readdlm(tmpfile, '\n')
+    f2 = readdlm(tmpfile, '\n')
     @test f1 == f2
 end
