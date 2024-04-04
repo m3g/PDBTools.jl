@@ -35,3 +35,14 @@ function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=
     end
     close(file)
 end
+
+@testitem "writePDB" begin
+    using PDBTools
+    pdb = readPDB(PDBTools.SMALLPDB)
+    tmpfile = tempname()*".pdb"
+    writePDB(pdb, tmpfile)
+    @test isfile(tmpfile)
+    f1 = readdlm(PDBTools.SMALLPDB, '\n')
+    f5 = readdlm(tmpfile, '\n')
+    @test f1 == f2
+end
