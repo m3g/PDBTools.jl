@@ -80,6 +80,8 @@ end
 @testitem "SIRAH" begin
     using PDBTools
     pdb_file = PDBTools.SIRAHPDB
+    remove_custom_protein_residues!()
+    remove_custom_elements!()
     custom_protein_residues!(SIRAH)
     custom_elements!(SIRAH)
     pdb = readPDB(pdb_file)
@@ -87,4 +89,6 @@ end
     @test element(pdb[1]) == "N"
     @test element(pdb[2]) == "C"
     @test element(pdb[3]) == "C"
+    remove_custom_protein_residues!()
+    remove_custom_elements!()
 end
