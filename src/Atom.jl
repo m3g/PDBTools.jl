@@ -310,7 +310,7 @@ end
 """
     element(atom::Atom)
 
-Returns the element symbol, as a string, of an atom given its name, or `Atom` structure.
+Returns the element symbol, as a string, of an atom given the `Atom` structure.
 If the `pdb_element` is empty or "X", the element is inferred from the atom name. 
 Othwerwise, the `pdb_element` is returned.
 
@@ -332,15 +332,16 @@ function element(atom::Atom)
     if !isempty(element_name) && element_name != "X"
         return element_name
     end
+    # if there is match, just return the name
+    element_name = name(atom)
+    iel = searchsortedfirst(element_names, element_name)
+    if iel <= length(element_names) && element_name == element_names[iel]
+        return elements[element_name].symbol_string 
+    end
     # Now try to inferr from the atom name
     element_name = name(atom)
     if isempty(element_name) || element_name == "X"
         return nothing
-    end
-    # if there is match, just return the name
-    iel = searchsortedfirst(element_names, element_name)
-    if iel <= length(element_names) && element_name == element_names[iel]
-        return element_name
     end
     # Check if the first character is number
     i0 = 1 + isdigit(first(element_name))
@@ -437,6 +438,25 @@ julia> element_symbol(at)
 
 """
 element_symbol(at::Atom) = get_element_property(at, :symbol)
+
+"""
+    element_symbol_string(atom::Atom)
+
+Returns a string with the symbol the element, given the `Atom` structure.
+
+### Example
+
+```jldoctest
+julia> using PDBTools 
+
+julia> at = Atom(name="NT3");
+
+julia> element_symbol_string(at)
+"N"
+```
+
+"""
+element_symbol_string(at::Atom) = get_element_property(at, :symbol_string)
 
 """
     mass(atom::Atom)
