@@ -8,8 +8,10 @@ struct Element
     atomic_number::Int
     mass::Float64
 end
+
 import Base.Broadcast.broadcastable
 broadcastable(element::Element) = Ref(element)
+
 #! format: off
 const elements = Dict{String,Element}([
     ["X" , "NotFound" ]              .=> Element(:X  ,"X" , "NotFound", 0,  0.00000);
@@ -111,6 +113,19 @@ const elements = Dict{String,Element}([
 # Sort element_names by name for faster searching
 const element_names = sort(collect(keys(elements)))
 
+function add_element!(symbol::String, reference_element::Element; elements=elements)
+    if symbol in keys(elements)
+        @warn """\n
+            Element $symbol already exists. Overwriting.
+
+        """ _file=nothing _line=nothing
+    end
+    elements[symbol] = reference_element
+    push!(element_names, symbol)
+    sort!(element_names)
+    return elements[symbol]
+end
+
 @testitem "elements" begin
     atoms = readPDB(PDBTools.TESTPDB, "protein")
     @test element.(select(atoms, "residue = 1")) == ["N", "H", "H", "H", "C", "H", "C", "H", "H", "H", "C", "O"]
@@ -129,4 +144,6 @@ const element_names = sort(collect(keys(elements)))
         "Oxygen",
     ]
     @test atomic_number.(select(atoms, "residue = 1")) == [7, 1, 1, 1, 6, 1, 6, 1, 1, 1, 6, 8]
+    add_element!("GN", PDBTools.elements["N"])
+    @test PDBTools.elements["GN"] == PDBTools.elements["N"]
 end
