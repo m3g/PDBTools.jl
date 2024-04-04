@@ -53,8 +53,10 @@ to the list of residues and elements. This is illustrated in the
 types of the [`SIRAH`](http://www.sirahff.com/) force field for Coarse-Grained protein simulations.
 
 With those definitions, adding all SIRAH protein residue types and element names can be done with:
-```julia-repl
+```jldoctest
 julia> using PDBTools 
+
+julia> remove_custom_protein_residues!();
 
 julia> custom_protein_residues!(SIRAH)
 ┌ Warning: 

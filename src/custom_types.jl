@@ -13,26 +13,26 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
 
     """ _file = nothing _line = nothing
 #! format: off
-    add_protein_residue!("sA",PDBTools.protein_residues("ALA"))
-    add_protein_residue!("sR",PDBTools.protein_residues("ARG"))
-    add_protein_residue!("sN",PDBTools.protein_residues("ASN"))
-    add_protein_residue!("sD",PDBTools.protein_residues("ASP"))
-    add_protein_residue!("sC",PDBTools.protein_residues("CYS"))
-    add_protein_residue!("sQ",PDBTools.protein_residues("GLN"))
-    add_protein_residue!("sE",PDBTools.protein_residues("GLU"))
-    add_protein_residue!("sG",PDBTools.protein_residues("GLY"))
-    add_protein_residue!("sHE",PDBTools.protein_residues("HIS"))
-    add_protein_residue!("sI",PDBTools.protein_residues("ILE"))
-    add_protein_residue!("sL",PDBTools.protein_residues("LEU"))
-    add_protein_residue!("sK",PDBTools.protein_residues("LYS"))
-    add_protein_residue!("sM",PDBTools.protein_residues("MET"))
-    add_protein_residue!("sF",PDBTools.protein_residues("PHE"))
-    add_protein_residue!("sP",PDBTools.protein_residues("PRO"))
-    add_protein_residue!("sS",PDBTools.protein_residues("SER"))
-    add_protein_residue!("sT",PDBTools.protein_residues("THR"))
-    add_protein_residue!("sW",PDBTools.protein_residues("TRP"))
-    add_protein_residue!("sY",PDBTools.protein_residues("TYR"))
-    add_protein_residue!("sV",PDBTools.protein_residues("VAL"))
+    add_protein_residue!("sA",PDBTools.protein_residues["ALA"])
+    add_protein_residue!("sR",PDBTools.protein_residues["ARG"])
+    add_protein_residue!("sN",PDBTools.protein_residues["ASN"])
+    add_protein_residue!("sD",PDBTools.protein_residues["ASP"])
+    add_protein_residue!("sC",PDBTools.protein_residues["CYS"])
+    add_protein_residue!("sQ",PDBTools.protein_residues["GLN"])
+    add_protein_residue!("sE",PDBTools.protein_residues["GLU"])
+    add_protein_residue!("sG",PDBTools.protein_residues["GLY"])
+    add_protein_residue!("sHE",PDBTools.protein_residues["HIS"])
+    add_protein_residue!("sI",PDBTools.protein_residues["ILE"])
+    add_protein_residue!("sL",PDBTools.protein_residues["LEU"])
+    add_protein_residue!("sK",PDBTools.protein_residues["LYS"])
+    add_protein_residue!("sM",PDBTools.protein_residues["MET"])
+    add_protein_residue!("sF",PDBTools.protein_residues["PHE"])
+    add_protein_residue!("sP",PDBTools.protein_residues["PRO"])
+    add_protein_residue!("sS",PDBTools.protein_residues["SER"])
+    add_protein_residue!("sT",PDBTools.protein_residues["THR"])
+    add_protein_residue!("sW",PDBTools.protein_residues["TRP"])
+    add_protein_residue!("sY",PDBTools.protein_residues["TYR"])
+    add_protein_residue!("sV",PDBTools.protein_residues["VAL"])
     add_protein_residue!("sX",
         PDBTools.ProteinResidue(
             name = "Cysteine - bridged",     
@@ -45,7 +45,8 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
             mass = 103.1429,  
             charge = 0, 
             custom = true
-        ))
+        )
+    )
 #! format: on
     return nothing
 end
