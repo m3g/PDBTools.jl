@@ -200,13 +200,13 @@ julia> residues = collect(eachresidue(protein))
 julia> residues[1]
  Residue of name ALA with 12 atoms.
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1       -         1
-       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1       -         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1       -         3
-                                                       ⋮ 
-      10  HB3     ALA     A        1        1   -9.164  -15.063   -8.765  1.00  0.00     1       -        10
-      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1       -        11
-      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1       -        12
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮
+      10  HB3     ALA     A        1        1   -9.164  -15.063   -8.765  1.00  0.00     1    PROT        10
+      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
+      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
 ```
 
 These residue vector *do not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  

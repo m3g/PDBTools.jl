@@ -32,13 +32,13 @@ julia> using PDBTools
 julia> atoms = readPDB(PDBTools.SMALLPDB)
    Array{Atoms,1} with 35 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1       -         1
-       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1       -         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1       -         3
-                                                       ⋮ 
-      33  OD2     ASP     A        3        3   -6.974  -11.289   -9.300  1.00  0.00     1       -        33
-      34    C     ASP     A        3        3   -2.626  -10.480   -7.749  1.00  0.00     1       -        34
-      35    O     ASP     A        3        3   -1.940  -10.014   -8.658  1.00  0.00     1       -        35
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮
+      33  OD2     ASP     A        3        3   -6.974  -11.289   -9.300  1.00  0.00     1    PROT        33
+      34    C     ASP     A        3        3   -2.626  -10.480   -7.749  1.00  0.00     1    PROT        34
+      35    O     ASP     A        3        3   -1.940  -10.014   -8.658  1.00  0.00     1    PROT        35
 
 julia> resname(atoms[1])
 "ALA"
