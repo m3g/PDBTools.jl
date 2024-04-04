@@ -194,7 +194,6 @@ julia> remove_custom_elements!();
 
 julia> element(Atom(name="GN")) # returns `nothing`
 
-julia>
 ```
 
 Here we repeteadly call `remove_custom_elements!()` to guarantee the proper execution of the
