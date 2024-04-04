@@ -144,6 +144,8 @@ julia> element(atoms[2])
 
 julia> mass(atoms)
 26.017699999999998
+
+julia> remove_custom_elements!(); 
 ```
 
 """
@@ -187,7 +189,7 @@ julia> remove_custom_elements!();
 
 julia> element(Atom(name="GN")) # returns `nothing`
 
-julia> 
+julia> remove_custom_elements!(); # clean up  
 ```
 
 """

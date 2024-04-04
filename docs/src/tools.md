@@ -56,7 +56,7 @@ With those definitions, adding all SIRAH protein residue types and element names
 ```jldoctest
 julia> using PDBTools 
 
-julia> remove_custom_protein_residues!();
+julia> remove_custom_protein_residues!(); remove_custom_elements!();
 
 julia> custom_protein_residues!(SIRAH)
 ┌ Warning: 
@@ -88,7 +88,7 @@ julia> getseq(sirah_pdb)
 julia> all(isprotein.(sirah_pdb))
 true
 
-julia> remove_custom_protein_residues!();
+julia> remove_custom_protein_residues!(); remove_custom_elements!();
 ```
 
 Note that the residue names of the SIRAH force-field are non-standard (`sI`, `sR`, etc.), but the sequence
