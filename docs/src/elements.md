@@ -94,7 +94,10 @@ julia> custom_field(atom, :new)
 
 If a custom field with the `:mass` key is added to the atom, the `mass` function returns the mass
 set at that field: 
-```julia-repl
+
+```jldoctest
+julia> using PDBTools
+
 julia> atom = Atom();
 
 julia> atom.custom[:mass] = 10.0
@@ -103,3 +106,21 @@ julia> atom.custom[:mass] = 10.0
 julia> mass(atom)
 10.0
 ```
+
+# Elements for custom atom types
+
+!!! compat
+    The `add_element!` function was introduced in version 1.4.0.
+
+The types of atoms that `PDBTools` recognizes is defined in the `PDBTools.elements` dictionary. 
+If new atom types are defined, it is possible to add these types to the dictionary, such that
+other functions work for the new types. The function to be used is `add_element!`.
+
+```@docs
+add_element!
+remove_custom_elements!
+```
+
+
+
+
