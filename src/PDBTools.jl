@@ -17,13 +17,17 @@ export atomic_number, atomic_symbol, atomic_mass, position
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
-export SIRAH, custom_protein_residues!, custom_elements!, add_element!, remove_custom_elements!
 export residue_ticks
 export coor, maxmin, distance, closest
 export element, mass, element_name, element_symbol, element_symbol_string
 export formula, stoichiometry
 export Sequence
 export select_with_vmd
+
+# Custom residue and element definitions
+export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
+export custom_elements!, add_element!, remove_custom_elements!
+export SIRAH 
 
 # Test files
 const TESTPDB = "$(@__DIR__)/../test/structure.pdb"
