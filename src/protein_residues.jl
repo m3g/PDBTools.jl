@@ -298,6 +298,12 @@ true
 
 """
 function add_protein_residue!(resname::String, reference_residue::PDBTools.ProteinResidue)
+    if haskey(PDBTools.protein_residues, resname)
+        @warn """\n
+            Residue $resname already exists in the list of protein residues. Overwriting.
+
+        """ _file=nothing _line=nothing
+    end
     PDBTools.protein_residues[resname] = PDBTools.ProteinResidue(
         resname,
         reference_residue.three_letter_code,
