@@ -40,6 +40,9 @@ true
 julia> remove_custom_protein_residues!();
 ```
 
+Here we repeteadly call `remove_custom_residues!()` to guarantee the proper execution of the
+test codes, without any custom residues in the list of protein residues.
+
 ```@docs
 add_protein_residue!
 remove_custom_protein_residues!
@@ -94,6 +97,9 @@ julia> remove_custom_protein_residues!(); remove_custom_elements!();
 Note that the residue names of the SIRAH force-field are non-standard (`sI`, `sR`, etc.), but the sequence
 is properly retrieved with standard one-letter codes, and all the atoms of the structure are recognized 
 as being "protein" atoms.
+
+Here we repeteadly call `remove_custom_residues!()` and `remove_custom_elements!()` to guarantee the proper execution of the
+test codes.
 
 
 

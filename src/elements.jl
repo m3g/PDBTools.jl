@@ -148,6 +148,9 @@ julia> mass(atoms)
 julia> remove_custom_elements!(); 
 ```
 
+Here we repeteadly call `remove_custom_elements!()` to guarantee the proper execution of the
+test codes, without any custom elements predefined.
+
 """
 function add_element!(symbol::String, reference_element::Element; elements=elements)
     if symbol in keys(elements)
@@ -179,6 +182,8 @@ Remove all custom elements from the elements dictionary.
 ```jldoctest
 julia> using PDBTools
 
+julia> remove_custom_elements!();
+
 julia> add_element!("GN", PDBTools.elements["N"])
 PDBTools.Element(:N, "N", "Nitrogen", 7, 14.0067, true)
 
@@ -189,8 +194,11 @@ julia> remove_custom_elements!();
 
 julia> element(Atom(name="GN")) # returns `nothing`
 
-julia> remove_custom_elements!(); # clean up  
+julia>
 ```
+
+Here we repeteadly call `remove_custom_elements!()` to guarantee the proper execution of the
+test codes, without any custom elements predefined.
 
 """
 function remove_custom_elements!(elements=PDBTools.elements)

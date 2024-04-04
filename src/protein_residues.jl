@@ -294,7 +294,12 @@ PDBTools.ProteinResidue("sA", "ALA", "A", "Aliphatic", false, false, 71.037114, 
 
 julia> isprotein(Atom(resname="sA"))
 true
+
+julia> remove_custom_protein_residues!(); # clean up
 ```
+
+Here we repeteadly call `remove_custom_residues!()` to guarantee the proper execution of the
+test codes, without any custom residues in the list of protein residues.
 
 """
 function add_protein_residue!(resname::String, reference_residue::PDBTools.ProteinResidue)
@@ -342,6 +347,9 @@ julia> remove_custom_protein_residues!();
 julia> isprotein(Atom(resname="sA"))
 false
 ```
+
+Here we repeteadly call `remove_custom_residues!()` to guarantee the proper execution of the
+test codes, without any custom residues in the list of protein residues.
 
 """
 remove_custom_protein_residues!() = filter!(r -> !last(r).custom, protein_residues)
