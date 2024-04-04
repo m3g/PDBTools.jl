@@ -76,7 +76,7 @@ function write_atom(atom::Atom)
             atom.beta,
             "      ",
             segname(atom),
-            element(atom) === nothing ? "  " : element(atom),
+            element(atom) === nothing ? "  " : element_symbol_string(atom),
     )
 
     if atom.index <= 99999 && atom.resnum <= 9999
@@ -102,4 +102,11 @@ function write_atom(atom::Atom)
     end
 
     return line
+end
+
+@testitem "writeatom" begin
+    using PDBTools
+    pdb = readPDB(PDBTools.SMALLPDB)
+    @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
 end
