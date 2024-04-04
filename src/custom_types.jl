@@ -21,7 +21,7 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
     add_protein_residue!("sQ",PDBTools.protein_residues["GLN"])
     add_protein_residue!("sE",PDBTools.protein_residues["GLU"])
     add_protein_residue!("sG",PDBTools.protein_residues["GLY"])
-    add_protein_residue!("sHE",PDBTools.protein_residues["HIS"])
+    add_protein_residue!("sHe",PDBTools.protein_residues["HIS"])
     add_protein_residue!("sI",PDBTools.protein_residues["ILE"])
     add_protein_residue!("sL",PDBTools.protein_residues["LEU"])
     add_protein_residue!("sK",PDBTools.protein_residues["LYS"])
