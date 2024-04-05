@@ -485,12 +485,14 @@ julia> mass(atoms)
 
 """
 function mass(at::Atom) 
-    if haskey(at.custom, :mass)
-        return at.custom[:mass]
-    else
-        element(at) == "X" && return nothing
-        return get_element_property(at, :mass)
-    end
+   mass = if haskey(at.custom, :mass)
+       at.custom[:mass]::Float64
+   elseif element(at) == "X"
+        nothing
+   else
+       get_element_property(at, :mass)
+   end
+   return mass
 end
 mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
 
