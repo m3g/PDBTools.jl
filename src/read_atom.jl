@@ -155,4 +155,10 @@ end
     @test a.index_pdb == -1
     @test a.pdb_element == "H"
     @test isnothing(a.charge)
+
+    line = "ATOM  3ce2c  LP2 WLS Cffff     376.512 638.670  16.990  0.00  0.00         C"
+    a = PDBTools.read_atom(line)
+    @test a.index == 1
+    @test a.index_pdb == 249388
+    @test a.resnum == 65535
 end
