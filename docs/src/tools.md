@@ -101,5 +101,15 @@ as being "protein" atoms.
 Here we repeteadly call `remove_custom_residues!()` and `remove_custom_elements!()` to guarantee the proper execution of the
 test codes.
 
+## Move atoms and center of mass
+
+The `center_of_mass` function can be used to compute the center of mass of set of atoms, and the 
+`moveto!` function can be used to move the center of mass of the atoms to the origin (by default) 
+or to a specified position:
+
+```@docs
+center_of_mass
+moveto!
+```
 
 

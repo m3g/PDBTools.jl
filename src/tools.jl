@@ -89,7 +89,7 @@ end
 end
 
 """
-    center_of_mass(atoms::AbstractVector{Atom})
+    center_of_mass(atoms::AbstractVector{<:Atom})
 
 Calculate the center of mass of the atoms.
 
@@ -105,7 +105,6 @@ julia> center_of_mass(atoms)
   -5.584422752942997
  -13.110413157869903
   -7.139970815730879
-
 ```
 
 """
@@ -132,7 +131,7 @@ end
 end
 
 """
-    moveto!(atoms::AbstractVector{Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
+    moveto!(atoms::AbstractVector{<:Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
 
 Move the center of mass of the atoms to the specified `center` position, which defaults to the origin.
 
