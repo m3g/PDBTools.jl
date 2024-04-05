@@ -52,6 +52,10 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
 end
 
 function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
+    @warn """\n
+        The element masses are not the coarse-grained ones. This must be fixed in the future.
+
+    """ _file = nothing _line = nothing
     add_element!("GN", elements["N"])
     add_element!("GC", elements["C"])
     add_element!("BCG", elements["C"])
@@ -74,6 +78,29 @@ function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
     add_element!("BNE", elements["N"])
     add_element!("BPE", elements["H"])
     add_element!("BCE", elements["C"])
+    add_element!("LN", elements["N"])
+    add_element!("LN1", elements["N"])
+    add_element!("BC12", elements["C"])
+    add_element!("BC13", elements["C"])
+    add_element!("BC14", elements["C"])
+    add_element!("BC15", elements["C"])
+    add_element!("BCT1", elements["C"])
+    add_element!("BC21", elements["C"])
+    add_element!("BC22", elements["C"])
+    add_element!("BC23", elements["C"])
+    add_element!("BC24", elements["C"])
+    add_element!("BCT2", elements["C"])
+    add_element!("BFO1", elements["O"])
+    add_element!("BFO2", elements["O"])
+    add_element!("WN1", elements["N"])
+    add_element!("WN2", elements["N"])
+    add_element!("WP1", elements["H"])
+    add_element!("WP2", elements["H"])
+    add_element!("NaW", elements["Na"])
+    add_element!("ClW", elements["Cl"])
+    add_element!("LN2", elements["N"])
+    add_element!("LP1", elements["H"])
+    add_element!("LP2", elements["H"])
     nothing
 end
 
