@@ -30,7 +30,7 @@ distance(x::SVector, y::SVector) = norm(x - y)
 distance(x::Atom, y::Atom) = norm(coor(x) - coor(y))
 distance(x::Atom, y::SVector) = norm(coor(x) - y)
 distance(x::SVector, y::Atom) = norm(x - coor(y))
-distance(x, y) = closest(x, y)[3]
+distance(x, y) = last(closest(x, y))
 
 """
     closest(x,y)
@@ -70,7 +70,10 @@ julia> closest(ligand,x)
 ```
 
 """
-function closest(x::AbstractVector{T1}, y::AbstractVector{T2}) where {T1,T2<:Union{SVector,Atom}}
+function _closest(
+    x::AbstractVector, 
+    y::AbstractVector
+) 
     imin = -1
     jmin = -1
     dmin = +Inf
@@ -87,16 +90,33 @@ function closest(x::AbstractVector{T1}, y::AbstractVector{T2}) where {T1,T2<:Uni
     return imin, jmin, dmin
 end
 
-# Wrap individual atoms in a SVector to dispatch to the above function
-closest(x::Atom, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1}(x), y)
-closest(x::AbstractVector{<:Union{SVector,Atom}}, y::Atom) = closest(x, SVector{1}(y))
-closest(x::AbstractVector{<:Union{SVector,Atom}}, y::SVector{3,<:Real}) = closest(x, SVector{1}(y))
-closest(x::SVector{3,<:Real}, y::AbstractVector{<:Union{SVector,Atom}}) = closest(SVector{1}(x), y)
-closest(x::Union{Atom,SVector{3,<:Real}}, y::Union{Atom,SVector{3,<:Real}}) = closest(SVector{1}(x),SVector{1}(y))
-closest(x::Residue, y::Residue) = closest(x.atoms[x.range], y.atoms[y.range])
-closest(x::Atom, y::AbstractVector) = closest(x, SVector{3}(y))
-closest(x::Residue, y::AbstractVector) = closest(x.atoms[x.range], SVector{3}(y))
-closest(x::AbstractVector, y::Residue) = closest(SVector{3}(x), y.atoms[y.range])
+# Wrap individual atoms or coordinates in a SVector to dispatch to the above function
+closest(x::Atom, y::Atom) = _closest(SVector{1}(x), SVector{1}(y))
+closest(x::Atom, y::AbstractVector{<:Atom}) = _closest(SVector{1}(x), y)
+closest(x::AbstractVector{<:Atom}, y::Atom) = _closest(x, SVector{1}(y))
+closest(x::Atom, y::Residue) = _closest(SVector{1}(x), y.atoms[y.range])
+closest(x::Residue, y::Atom) = _closest(x.atoms[x.range], SVector{1}(y))
+closest(x::Atom, y::AbstractVector{<:Real}) = _closest(SVector{1}(x), SVector{1}(SVector{3}(y)))
+closest(x::AbstractVector{<:Real}, y::Atom) = _closest(SVector{1}(SVector{3}(x)), SVector{1}(y))
+closest(x::Atom, y::AbstractVector{<:SVector}) = _closest(SVector{1}(x), y)
+closest(x::AbstractVector{<:SVector}, y::Atom) = _closest(x, SVector{1}(y))
+closest(x::AbstractVector{<:Real}, y::AbstractVector{<:Atom}) = _closest(SVector{1}(x), y)
+closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:Real}) = _closest(x, SVector{1}(y))
+closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:Atom}) = _closest(x, y)
+closest(x::AbstractVector{<:SVector}, y::AbstractVector{<:SVector}) = _closest(x, y)
+closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:SVector}) = _closest(x, y)
+closest(x::AbstractVector{<:SVector}, y::AbstractVector{<:Atom}) = _closest(x, y)
+closest(x::AbstractVector{<:SVector}, y::AbstractVector{<:Real}) = _closest(x, SVector{1}(y))
+closest(x::AbstractVector{<:Real}, y::AbstractVector{<:SVector}) = _closest(SVector{1}(x), y)
+closest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}) = _closest(SVector{1}(x), SVector{1}(y))
+
+closest(x::Residue, y::Residue) = _closest(x.atoms[x.range], y.atoms[y.range])
+closest(x::Residue, y::Atom) = _closest(x.atoms[x.range], SVector{1}(y))
+closest(x::Atom, y::Residue) = _closest(SVector{1}(x), y.atoms[y.range])
+closest(x::Residue, y::AbstractVector{<:Real}) = _closest(x.atoms[x.range], SVector{1}(SVector{3}(y)))
+closest(x::AbstractVector{<:Real}, y::Residue) = _closest(SVector{1}(SVector{3}(x)), y.atoms[y.range])
+closest(x::Residue, y::AbstractVector{<:SVector}) = _closest(x.atoms[x.range], y)
+closest(x::AbstractVector{<:SVector}, y::Residue) = _closest(x, y.atoms[y.range])
 
 @testitem "distance/closest" begin
     using PDBTools
