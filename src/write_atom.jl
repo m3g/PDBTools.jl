@@ -62,12 +62,12 @@ function write_atom(atom::Atom)
 
     atom_data = (
             "ATOM",
-            atom.index,
+            mod(atom.index,1048576),
             " ",
             _align_name(name),
             _align_resname(atom.resname),
             atom.chain,
-            atom.resnum,
+            mod(atom.resnum, 65535), 
             "    ",
             atom.x,
             atom.y,
@@ -79,26 +79,14 @@ function write_atom(atom::Atom)
             element(atom) === nothing ? "  " : element_symbol_string(atom),
     )
 
-    if atom.index <= 99999 && atom.resnum <= 9999
-        line = @sprintf(
-            "%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
-            atom_data...
-        )
-    elseif atom.index > 99999 && atom.resnum <= 9999 # Prints index in hexadecimal code for atom index
-        line = @sprintf(
-            "%-6s%5x%1s%-4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
-            atom_data...
-        )
-    elseif atom.index <= 99999 && atom.resnum > 9999 # Prints resnum in hexadecimal code for atom index
-        line = @sprintf(
-            "%-6s%5i%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
-            atom_data...
-        )
-    elseif atom.index > 99999 && atom.resnum > 9999 # Prints both in hexadecimal code for atom index
-        line = @sprintf(
-            "%-6s%5x%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s",
-            atom_data...
-        )
+    line = if atom.index <= 99999 && atom.resnum <= 9999 # standard integer printing
+        @sprintf("%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+    elseif atom.index > 99999 && atom.resnum <= 9999 # Prints index in hexadecimal
+        @sprintf("%-6s%5x%1s%-4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+    elseif atom.index <= 99999 && atom.resnum > 9999 # Prints resnum in hexadecimal code
+        @sprintf("%-6s%5i%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+    elseif atom.index > 99999 && atom.resnum > 9999 # Both hexadecimal
+        @sprintf("%-6s%5x%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
     end
 
     return line
@@ -109,4 +97,11 @@ end
     pdb = readPDB(PDBTools.SMALLPDB)
     @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     @test PDBTools.write_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
+    pdb[1].index = 1000000
+    @test PDBTools.write_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    pdb[1].index = 1
+    pdb[1].resnum = 1000000
+    @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    pdb[1].index = 1000000
+    @test PDBTools.write_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
 end
