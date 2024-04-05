@@ -69,6 +69,11 @@ julia> custom_protein_residues!(SIRAH)
 └ @ PDBTools
 
 julia> custom_elements!(SIRAH)
+┌ Warning:
+│
+│     The element masses are not the coarse-grained ones. This must be fixed in the future.
+│
+└ @ PDBTools
 
 julia> sirah_pdb = readPDB(PDBTools.SIRAHPDB);
 
