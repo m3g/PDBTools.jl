@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tools · PDBTools.jl</title><meta name="title" content="Tools · PDBTools.jl"/><meta property="og:title" content="Tools · PDBTools.jl"/><meta property="twitter:title" content="Tools · PDBTools.jl"/><meta name="description" content="Documentation for PDBTools.jl."/><meta property="og:description" content="Documentation for PDBTools.jl."/><meta property="twitter:description" content="Documentation for PDBTools.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="PDBTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">PDBTools.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../readwrite/">Read and Write</a></li><li><a class="tocitem" href="../selections/">Selections</a></li><li><a class="tocitem" href="../elements/">Element properties</a></li><li><a class="tocitem" href="../auxiliary/">Auxiliary functions</a></li><li><a class="tocitem" href="../examples/">Examples</a></li><li class="is-active"><a class="tocitem" href>Tools</a><ul class="internal"><li><a class="tocitem" href="#Add-hydrogens-with-OpenBabel"><span>Add hydrogens with OpenBabel</span></a></li><li><a class="tocitem" href="#Custom-protein-residue-types"><span>Custom protein residue types</span></a></li><li><a class="tocitem" href="#Move-atoms-and-center-of-mass"><span>Move atoms and center of mass</span></a></li></ul></li><li><a class="tocitem" href="../help/">Help entries</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Tools</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tools</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl/blob/main/docs/src/tools.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Tools"><a class="docs-heading-anchor" href="#Tools">Tools</a><a id="Tools-1"></a><a class="docs-heading-anchor-permalink" href="#Tools" title="Permalink"></a></h1><p>These tools may call external programs to perform each task. Please verify the installation of  the necessary tool for each case. </p><h2 id="Add-hydrogens-with-OpenBabel"><a class="docs-heading-anchor" href="#Add-hydrogens-with-OpenBabel">Add hydrogens with OpenBabel</a><a id="Add-hydrogens-with-OpenBabel-1"></a><a class="docs-heading-anchor-permalink" href="#Add-hydrogens-with-OpenBabel" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.add_hydrogens!" href="#PDBTools.add_hydrogens!"><code>PDBTools.add_hydrogens!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">add_hydrogens!(atoms::AbstractVector{Atom}; pH=7.0, obabel=&quot;obabel&quot;, debug=false)</code></pre><p>Add hydrogens to a PDB file using Open Babel. </p><p><strong>Arguments</strong></p><ul><li><code>atoms::AbstractVector{Atom}</code>: structure (usually PDB file of a protein) to add hydrogens to.</li><li><code>pH</code>: the pH of the solution. Default is 7.0.</li><li><code>obabel</code>: path to the obabel executable. Default is &quot;obabel&quot;.</li><li><code>debug</code>: if true, print the output message from obabel. Default is false.</li></ul><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>This function requires the installation of <a href="http://openbabel.org/">OpenBabel</a>. Please cite the corresponding reference if using it.</p></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.TESTPDB, &quot;protein and not element H&quot;);
+
+julia&gt; add_hydrogens!(atoms)
+   Array{Atoms,1} with 1459 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  1.00  0.00     1       -         1
+       2   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1       -         2
+       3   CB     ALA     A        1        1   -9.383  -14.465   -7.880  1.00  0.00     1       -         3
+                                                       ⋮ 
+    1457    H     THR     A      104      208    5.886  -10.722   -7.797  1.00  0.00     1       -      1457
+    1458    H     THR     A      104      208    5.871  -10.612   -9.541  1.00  0.00     1       -      1458
+    1459    H     THR     A      104      208    6.423  -12.076   -8.762  1.00  0.00     1       -      1459</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/15c804f7e5e7a6739254ab70402dd6465e853268/src/tools.jl#L3-L38">source</a></section></article><h2 id="Custom-protein-residue-types"><a class="docs-heading-anchor" href="#Custom-protein-residue-types">Custom protein residue types</a><a id="Custom-protein-residue-types-1"></a><a class="docs-heading-anchor-permalink" href="#Custom-protein-residue-types" title="Permalink"></a></h2><div class="admonition is-compat"><header class="admonition-header">Compat</header><div class="admonition-body"><p>These functions were added in version 1.4.0.</p></div></div><p>It is possible to add to the list of protein residues, custom residue types.  This can be done by simply adding to the <code>PDBTools.protein_residues</code> dictionary of residues a new <code>PDBTools.ProteinResidue</code> entry. For example, here we create a new resiude type <code>NEW</code> with the same properties of an <code>ALA</code> residue. To  remove all custom protein residues, use <code>remove_custom_protein_residues!()</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; remove_custom_protein_residues!();
+
+julia&gt; add_protein_residue!(&quot;NEW&quot;, PDBTools.protein_residues[&quot;ALA&quot;])
+PDBTools.ProteinResidue(&quot;NEW&quot;, &quot;ALA&quot;, &quot;A&quot;, &quot;Aliphatic&quot;, false, false, 71.037114, 71.0779, 0, true)
+
+julia&gt; atom = Atom(resname=&quot;NEW&quot;);
+
+julia&gt; isprotein(atom)
+true
+
+julia&gt; remove_custom_protein_residues!();</code></pre><p>Here we repeteadly call <code>remove_custom_residues!()</code> to guarantee the proper execution of the test codes, without any custom residues in the list of protein residues.</p><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.add_protein_residue!" href="#PDBTools.add_protein_residue!"><code>PDBTools.add_protein_residue!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">add_protein_residue!(resname::String, reference_residue::PDBTools.ProteinResidue)</code></pre><p>Function to add a custom protein residue to the list of protein residues. The function will return the <code>ProteinResidue</code> object that was added. To remove all custom protein residues use <code>remove_custom_protein_residues!()</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; remove_custom_protein_residues!();
+
+julia&gt; add_protein_residue!(&quot;sA&quot;, PDBTools.protein_residues[&quot;ALA&quot;])
+PDBTools.ProteinResidue(&quot;sA&quot;, &quot;ALA&quot;, &quot;A&quot;, &quot;Aliphatic&quot;, false, false, 71.037114, 71.0779, 0, true)
+
+julia&gt; isprotein(Atom(resname=&quot;sA&quot;))
+true
+
+julia&gt; remove_custom_protein_residues!(); # clean up</code></pre><p>Here we repeteadly call <code>remove_custom_residues!()</code> to guarantee the proper execution of the test codes, without any custom residues in the list of protein residues.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/15c804f7e5e7a6739254ab70402dd6465e853268/src/protein_residues.jl#L278-L304">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.remove_custom_protein_residues!" href="#PDBTools.remove_custom_protein_residues!"><code>PDBTools.remove_custom_protein_residues!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">remove_custom_protein_residues!()</code></pre><p>Function to remove all custom protein residues from the list of protein residues.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; remove_custom_protein_residues!(); # clean up
+
+julia&gt; add_protein_residue!(&quot;sA&quot;, PDBTools.protein_residues[&quot;ALA&quot;])
+PDBTools.ProteinResidue(&quot;sA&quot;, &quot;ALA&quot;, &quot;A&quot;, &quot;Aliphatic&quot;, false, false, 71.037114, 71.0779, 0, true)
+
+julia&gt; isprotein(Atom(resname=&quot;sA&quot;))
+true
+
+julia&gt; remove_custom_protein_residues!();
+
+julia&gt; isprotein(Atom(resname=&quot;sA&quot;))
+false</code></pre><p>Here we repeteadly call <code>remove_custom_residues!()</code> to guarantee the proper execution of the test codes, without any custom residues in the list of protein residues.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/15c804f7e5e7a6739254ab70402dd6465e853268/src/protein_residues.jl#L327-L354">source</a></section></article><h3 id="The-SIRAH-force-field-residues-and-element-types"><a class="docs-heading-anchor" href="#The-SIRAH-force-field-residues-and-element-types">The SIRAH force-field residues and element types</a><a id="The-SIRAH-force-field-residues-and-element-types-1"></a><a class="docs-heading-anchor-permalink" href="#The-SIRAH-force-field-residues-and-element-types" title="Permalink"></a></h3><p>Conveniencie functions can be created to add sets of new types of residues and atom types to the list of residues and elements. This is illustrated in the  <a href="https://github.com/m3g/PDBTools.jl/blob/main/src/custom_types.jl"><code>custom_types.jl</code></a> file of the source code, in this case for the residues and atom types of the <a href="http://www.sirahff.com/"><code>SIRAH</code></a> force field for Coarse-Grained protein simulations.</p><p>With those definitions, adding all SIRAH protein residue types and element names can be done with:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools 
+
+julia&gt; remove_custom_protein_residues!(); remove_custom_elements!();
+
+julia&gt; custom_protein_residues!(SIRAH)
+┌ Warning: 
+│ 
+│     Residue `sX` will be interpreted as bridged Cysteine.
+│ 
+└ @ PDBTools
+
+julia&gt; custom_elements!(SIRAH)
+┌ Warning:
+│
+│     The element masses are not the coarse-grained ones. This must be fixed in the future.
+│
+└ @ PDBTools
+
+julia&gt; sirah_pdb = readPDB(PDBTools.SIRAHPDB);
+
+julia&gt; resname.(eachresidue(sirah_pdb))
+5-element Vector{String}:
+ &quot;sI&quot;
+ &quot;sR&quot;
+ &quot;sX&quot;
+ &quot;sI&quot;
+ &quot;sG&quot;
+
+julia&gt; getseq(sirah_pdb)
+5-element Vector{String}:
+ &quot;I&quot;
+ &quot;R&quot;
+ &quot;C&quot;
+ &quot;I&quot;
+ &quot;G&quot;
+
+julia&gt; all(isprotein.(sirah_pdb))
+true
+
+julia&gt; remove_custom_protein_residues!(); remove_custom_elements!();</code></pre><p>Note that the residue names of the SIRAH force-field are non-standard (<code>sI</code>, <code>sR</code>, etc.), but the sequence is properly retrieved with standard one-letter codes, and all the atoms of the structure are recognized  as being &quot;protein&quot; atoms.</p><p>Here we repeteadly call <code>remove_custom_residues!()</code> and <code>remove_custom_elements!()</code> to guarantee the proper execution of the test codes.</p><h2 id="Move-atoms-and-center-of-mass"><a class="docs-heading-anchor" href="#Move-atoms-and-center-of-mass">Move atoms and center of mass</a><a id="Move-atoms-and-center-of-mass-1"></a><a class="docs-heading-anchor-permalink" href="#Move-atoms-and-center-of-mass" title="Permalink"></a></h2><p>The <code>center_of_mass</code> function can be used to compute the center of mass of set of atoms, and the  <code>moveto!</code> function can be used to move the center of mass of the atoms to the origin (by default)  or to a specified position:</p><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.center_of_mass" href="#PDBTools.center_of_mass"><code>PDBTools.center_of_mass</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">center_of_mass(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Calculate the center of mass of the atoms.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+  -5.584422752942997
+ -13.110413157869903
+  -7.139970815730879</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/15c804f7e5e7a6739254ab70402dd6465e853268/src/tools.jl#L91-L110">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.moveto!" href="#PDBTools.moveto!"><code>PDBTools.moveto!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">moveto!(atoms::AbstractVector{&lt;:Atom}; center::AbstractVector{&lt;:Real}=SVector(0.0, 0.0, 0.0))</code></pre><p>Move the center of mass of the atoms to the specified <code>center</code> position, which defaults to the origin.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+  -5.584422752942997
+ -13.110413157869903
+  -7.139970815730879
+
+julia&gt; moveto!(atoms; center = [1.0, 2.0, 3.0]);
+
+julia&gt; center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+ 1.0
+ 2.0000000000000036
+ 3.0000000000000018</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/15c804f7e5e7a6739254ab70402dd6465e853268/src/tools.jl#L133-L159">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples/">« Examples</a><a class="docs-footer-nextpage" href="../help/">Help entries »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.3.0 on <span class="colophon-date" title="Friday 5 April 2024 16:47">Friday 5 April 2024</span>. Using Julia version 1.10.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
