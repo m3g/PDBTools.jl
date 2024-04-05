@@ -494,7 +494,16 @@ function mass(at::Atom)
    end
    return mass
 end
-mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
+function mass(atoms::AbstractVector{<:Atom}) 
+    totmass = 0.0
+    for at in atoms
+        if isnothing(mass(at))
+            throw(ArgumentError("Atom $(name(at)) does not have a mass defined"))
+        end
+        totmass += mass(at)
+    end
+    return totmass
+end
 
 @testitem "fetch atomic element properties" begin
     at = Atom(name="NT3")
@@ -510,6 +519,7 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
     @test mass(Atom(name="X")) === nothing
     @test mass(Atom(name=" ")) === nothing
     @test mass(Atom(name="A")) === nothing
+    @test_throws ArgumentError mass([Atom(name="X")])
 end
 
 @testitem "AtomsBase interface" begin
