@@ -87,3 +87,87 @@ end
     @test_throws TypeError add_hydrogens!(atoms; pH="A")
     @test_throws ArgumentError add_hydrogens!(atoms; obabel="nonexistent")
 end
+
+"""
+    center_of_mass(atoms::AbstractVector{Atom})
+
+Calculate the center of mass of the atoms.
+
+# Example
+
+```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
+julia> using PDBTools
+
+julia> atoms = readPDB(PDBTools.SMALLPDB);
+
+julia> center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+ -0.15955493579837132
+ -0.37458323308199726
+ -0.20399916616373942
+```
+
+"""
+function center_of_mass(atoms::AbstractVector{Atom})
+    totmass = mass(atoms)
+    center = SVector(
+        sum(at.x*mass(at) for at in atoms), 
+        sum(at.y*mass(at) for at in atoms), 
+        sum(at.z*mass(at) for at in atoms)
+    ) ./ totmass
+    return center
+end
+
+@testitem "center_of_mass" begin
+    using PDBTools
+    using StaticArrays
+    atoms = [ Atom(name="C", x=-1.0, y=-1.0, z=-1.0), Atom(name="C", x=1.0, y=1.0, z=1.0) ]
+    @test center_of_mass(atoms) ≈ SVector(0.0, 0.0, 0.0) atol = 1e-10
+    atoms = [ Atom(name="C", x=-1.0, y=-1.0, z=-1.0), Atom(name="C", x=1.0, y=1.0, z=1.0) ]
+    atoms = [ Atom(name="C", x=0.0, y=0.0, z=0.0), Atom(name="C", x=3.0, y=3.0, z=3.0, custom=Dict(:mass=>24.022)) ]
+    @test center_of_mass(atoms) ≈ SVector(2.0, 2.0, 2.0) atol = 1e-10
+end
+
+"""
+    moveto!(atoms::AbstractVector{Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
+
+Move the center of mass of the atoms to the specified `center` position, which defaults to the origin.
+
+# Example
+
+```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
+julia> using PDBTools
+
+julia> atoms = readPDB(PDBTools.SMALLPDB);
+
+julia> center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+  -5.584422752942997
+ -13.110413157869903
+  -7.139970815730879
+
+julia> moveto!(atoms; center = [1.0, 2.0, 3.0]);
+
+julia> center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+ 1.0
+ 2.0000000000000036
+ 3.0000000000000018
+```
+"""
+function moveto!(atoms::AbstractVector{Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
+    cm = center_of_mass(atoms)
+    for at in atoms
+        at.x += center[1] - cm[1]
+        at.y += center[2] - cm[2]
+        at.z += center[3] - cm[3]
+    end
+    return atoms
+end
+
+@testitem "moveto!" begin
+    using PDBTools
+    atoms = readPDB(PDBTools.SMALLPDB)
+    @test center_of_mass(moveto!(atoms)) ≈ [0.0, 0.0, 0.0] atol = 1e-10
+    @test center_of_mass(moveto!(atoms; center=[1.0, 2.0, 3.0])) ≈ [1.0, 2.0, 3.0]
+end
