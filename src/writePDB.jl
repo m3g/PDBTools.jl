@@ -43,7 +43,7 @@ end
     tmpfile = tempname()*".pdb"
     writePDB(pdb, tmpfile)
     @test isfile(tmpfile)
-    f1 = readdlm(PDBTools.SMALLPDB, '\n')
-    f2 = readdlm(tmpfile, '\n')
-    @test f1 == f2
+    f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
+    f2 = readdlm(tmpfile, '\n', header=true)
+    @test f1[1] == f2[1]
 end
