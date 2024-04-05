@@ -83,22 +83,22 @@ coor(residue::Residue; only=all) = coor(residue.atoms[residue.range], only=only)
 coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], selection)
 
 @testitem "coor" begin
-    using StaticArrays
+    import StaticArrays
     atoms = readPDB(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
     @test coor(s) ≈ [
-        SVector{3,Float64}(-4.383, -11.903, -6.849),
-        SVector{3,Float64}(-4.51, -11.263, -6.096),
-        SVector{3,Float64}(-3.903, -11.262, -8.062),
-        SVector{3,Float64}(-3.731, -12.076, -8.767),
-        SVector{3,Float64}(-4.938, -10.279, -8.612),
-        SVector{3,Float64}(-4.417, -9.552, -9.06),
-        SVector{3,Float64}(-5.543, -9.911, -7.784),
-        SVector{3,Float64}(-5.867, -10.85, -9.684),
-        SVector{3,Float64}(-5.451, -10.837, -10.863),
-        SVector{3,Float64}(-6.974, -11.289, -9.3),
-        SVector{3,Float64}(-2.626, -10.48, -7.749),
-        SVector{3,Float64}(-1.94, -10.014, -8.658)
+        StaticArrays.SVector{3,Float64}(-4.383, -11.903, -6.849),
+        StaticArrays.SVector{3,Float64}(-4.51, -11.263, -6.096),
+        StaticArrays.SVector{3,Float64}(-3.903, -11.262, -8.062),
+        StaticArrays.SVector{3,Float64}(-3.731, -12.076, -8.767),
+        StaticArrays.SVector{3,Float64}(-4.938, -10.279, -8.612),
+        StaticArrays.SVector{3,Float64}(-4.417, -9.552, -9.06),
+        StaticArrays.SVector{3,Float64}(-5.543, -9.911, -7.784),
+        StaticArrays.SVector{3,Float64}(-5.867, -10.85, -9.684),
+        StaticArrays.SVector{3,Float64}(-5.451, -10.837, -10.863),
+        StaticArrays.SVector{3,Float64}(-6.974, -11.289, -9.3),
+        StaticArrays.SVector{3,Float64}(-2.626, -10.48, -7.749),
+        StaticArrays.SVector{3,Float64}(-1.94, -10.014, -8.658)
     ]
     r = Residue(select(atoms, "residue = 3"))
     @test coor(s) == coor(r)
@@ -106,6 +106,6 @@ coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], s
     @test coor(select(atoms, "residue = 3")) == coor(residues[3])
     @test coor(atoms, "residue = 3") == coor(s)
     @test coor(residues[1]) == coor(select(atoms, "residue = 1"))
-    @test coor(residues[1]; only = at -> name(at) == "N") == SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
-    @test coor(residues[1], "name N") == SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
+    @test coor(residues[1]; only = at -> name(at) == "N") == StaticArrays.SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
+    @test coor(residues[1], "name N") == StaticArrays.SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
 end

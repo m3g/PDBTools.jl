@@ -513,10 +513,10 @@ mass(atoms::AbstractVector{Atom}) = sum(mass, atoms)
 end
 
 @testitem "AtomsBase interface" begin
-    using StaticArrays
+    import StaticArrays
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
     @test atomic_symbol(at) == :N
     @test atomic_mass(at) ≈ 14.0067
-    @test position(at) ≈ SVector(0.0, 0.0, 0.0)
+    @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end

@@ -102,13 +102,14 @@ julia> atoms = readPDB(PDBTools.SMALLPDB);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
- -0.15955493579837132
- -0.37458323308199726
- -0.20399916616373942
+  -5.584422752942997
+ -13.110413157869903
+  -7.139970815730879
+
 ```
 
 """
-function center_of_mass(atoms::AbstractVector{Atom})
+function center_of_mass(atoms::AbstractVector{<:Atom})
     totmass = mass(atoms)
     center = SVector(
         sum(at.x*mass(at) for at in atoms), 
@@ -120,12 +121,14 @@ end
 
 @testitem "center_of_mass" begin
     using PDBTools
-    using StaticArrays
+    import StaticArrays
     atoms = [ Atom(name="C", x=-1.0, y=-1.0, z=-1.0), Atom(name="C", x=1.0, y=1.0, z=1.0) ]
-    @test center_of_mass(atoms) ≈ SVector(0.0, 0.0, 0.0) atol = 1e-10
+    @test center_of_mass(atoms) ≈ StaticArrays.SVector(0.0, 0.0, 0.0) atol = 1e-10
     atoms = [ Atom(name="C", x=-1.0, y=-1.0, z=-1.0), Atom(name="C", x=1.0, y=1.0, z=1.0) ]
     atoms = [ Atom(name="C", x=0.0, y=0.0, z=0.0), Atom(name="C", x=3.0, y=3.0, z=3.0, custom=Dict(:mass=>24.022)) ]
-    @test center_of_mass(atoms) ≈ SVector(2.0, 2.0, 2.0) atol = 1e-10
+    @test center_of_mass(atoms) ≈ StaticArrays.SVector(2.0, 2.0, 2.0) atol = 1e-10
+    atoms = readPDB(PDBTools.SMALLPDB)
+    @test center_of_mass(atoms) ≈ StaticArrays.SVector(-5.584422752942997, -13.110413157869903, -7.139970815730879) atol = 1e-10
 end
 
 """
@@ -155,7 +158,7 @@ julia> center_of_mass(atoms)
  3.0000000000000018
 ```
 """
-function moveto!(atoms::AbstractVector{Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
+function moveto!(atoms::AbstractVector{<:Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
     cm = center_of_mass(atoms)
     for at in atoms
         at.x += center[1] - cm[1]
