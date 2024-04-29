@@ -376,7 +376,13 @@ end
 #
 function get_element_property(at::Atom, property::Symbol)
     el = element(at)
-    if isnothing(el)
+    # If the element is defined in the pdb_element field, it may not
+    # correspond to any element in the elements list, but still that
+    # is what the user wants
+    if property in (:element, :symbol_string)
+        return el
+    end
+    if isnothing(el) || !haskey(elements, el)
         return nothing
     else
         return getproperty(elements[el], property)
@@ -444,7 +450,7 @@ element_symbol(at::Atom) = get_element_property(at, :symbol)
 """
     element_symbol_string(atom::Atom)
 
-Returns a string with the symbol the element, given the `Atom` structure.
+Returns a string with the symbol of the element, given the `Atom` structure.
 
 ### Example
 
@@ -520,6 +526,10 @@ end
     @test mass(Atom(name=" ")) === nothing
     @test mass(Atom(name="A")) === nothing
     @test_throws ArgumentError mass([Atom(name="X")])
+    @test element(Atom(name="CAL")) == "Ca"
+    @test atomic_number(Atom(name="CAL")) == 20
+    @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
+    @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
 end
 
 @testitem "AtomsBase interface" begin
