@@ -11,7 +11,7 @@ with the "END" keyword. Either can be set to `nothing` if no header or footer is
 """
 function writePDB(atoms::AbstractVector{Atom}, filename::String, selection::String; header=:auto, footer=:auto)
     query = parse_query(selection)
-    writePDB(atoms, filename, only=atom -> apply_query(query, atom))
+    writePDB(atoms, filename, only=atom -> apply_query(query, atom); header, footer)
 end
 
 function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=all, header=:auto, footer=:auto)
