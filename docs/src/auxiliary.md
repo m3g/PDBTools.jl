@@ -173,16 +173,18 @@ coordinates, and lengths.
 ## Residue tick labels for plots
 
 !!! compat
-    The `residue_ticks` function requires at least PDBTools version 0.14.1.
+    The functionality of the `residue_ticks` as described requires PDBTools version 1.6.0 or greater. 
 
 The `residue_ticks` function provides a practical way to define tick labels in plots associated to an amino-acid sequence:
 
 ```julia
 residue_ticks(
-    atoms::AbstractVector{<:Atom}; 
+    atoms (or) residues (or) residue iterator; 
     first=nothing, last=nothing, stride=1, oneletter=true
 )
 ```
+
+The input structure can be provided as a vector of atoms (type `Vector{Atom}`) a residue iterator (obtained by `eachresidue(atoms)`) or a vector of residues (obtained by `collect(eachresidue(atoms))`). 
 
 The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
 
@@ -219,11 +221,13 @@ Produces the following plot:
 
 ![./assets/residue_ticks.png](./assets/residue_ticks.png)
 
+Alternatively (and sometimes conveniently), the residue ticks can be obtained by providing, 
+instead of the `atoms` array, the residue iterator or the residue vector, as:
 
+```julia-repl
+julia> residue_ticks(eachresidue(atoms); stride=10)
+([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
 
-
-
-
-
-
-
+julia> residue_ticks(collect(eachresidue(atoms)); stride=10)
+([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+```

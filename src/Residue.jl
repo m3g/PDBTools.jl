@@ -297,9 +297,14 @@ end
 end
 
 """
-    residue_ticks(atoms::AbstractVector{<:Atom}; first=nothing, last=nothing, stride=1, oneletter=true)
+    residue_ticks(
+        atoms (or) residues (or) residue iterator; 
+        first=nothing, last=nothing, stride=1, oneletter=true
+    )
 
 Returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
+
+The structure data can be provided a vector of `Atom`s, a vector of `Residue`s or an `EachResidue` iterator. 
 
 `first` and `last` optional keyword parameters are integers that refer to the residue numbers to be included. 
 The `stride` option can be used to skip residues and declutter the tick labels.
@@ -309,24 +314,28 @@ named `X` or `XXX`.
 
 # Examples
 
-```julia-repl
+```jldoctest
 julia> using PDBTools
 
 julia> atoms = wget("1UBQ", "protein");
 
-julia> residue_ticks(atoms; stride=10)
+julia> residue_ticks(atoms; stride=10) # Vector{Atom} as input
+([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+
+julia> residue_ticks(eachresidue(atoms); stride=10) # residue iterator as input
+([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+
+julia> residue_ticks(collect(eachresidue(atoms)); stride=10) # Vector{Residue} as input
 ([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
 ```
 
 The resulting tuple of residue numbers and labels can be used as `xticks` in `Plots.plot`, for example.
 
 """
-function residue_ticks(
-    atoms::AbstractVector{<:Atom};
+function residue_ticks(residues::Union{AbstractVector{Residue},EachResidue};
     first=nothing, last=nothing, stride=1,
     oneletter::Bool = true,
 )
-    residues = eachresidue(atoms)
     resnames = resname.(residues)
     if oneletter
         resnames = PDBTools.oneletter.(resnames)
@@ -337,10 +346,20 @@ function residue_ticks(
     last = isnothing(last) ? lastindex(residues) : findlast(==(last), resnums)
     return ( resnums[first:stride:last], ticklabels[first:stride:last] )
 end
+function residue_ticks(
+    atoms::AbstractVector{<:Atom};
+    first=nothing, last=nothing, stride=1,
+    oneletter::Bool = true,
+)
+    residues = eachresidue(atoms)
+    return residue_ticks(residues; first, last, stride, oneletter)
+end
 
 @testitem "residue_ticks" begin
     # residue indices start with 1
     atoms = wget("1UBQ")
+    @test residue_ticks(eachresidue(atoms), stride=20) == ([1, 21, 41, 61, 81, 101, 121], ["M1", "D21", "Q41", "I61", "X81", "X101", "X121"])
+    @test residue_ticks(collect(eachresidue(atoms)), stride=20) == ([1, 21, 41, 61, 81, 101, 121], ["M1", "D21", "Q41", "I61", "X81", "X101", "X121"])
     @test residue_ticks(atoms, stride=20) == ([1, 21, 41, 61, 81, 101, 121], ["M1", "D21", "Q41", "I61", "X81", "X101", "X121"])
     atoms = select(atoms, "protein")
     @test residue_ticks(atoms; stride=20) == ([1, 21, 41, 61], ["M1", "D21", "Q41", "I61"])
