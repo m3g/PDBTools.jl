@@ -15,6 +15,8 @@ by converting a string selection into a call to query call.
 
 # Example
 
+Using a string to select the CA atoms of the first residue:
+
 ```jldoctest
 julia> using PDBTools
 
@@ -29,12 +31,12 @@ julia> filter(Select("name CA and residue 1"), atoms)
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
 
 ```
+
 """
-struct Select{T<:Union{String,Function}} <: Function
-    sel::T
+struct Select <: Function
+    sel::String
 end
-(s::Select{<:String})(at) = apply_query(parse_query(s.sel), at)
-(s::Select{<:Function})(at) = apply_query(s.sel, at)
+(s::Select)(at) = apply_query(parse_query(s.sel), at)
 
 macro sel_str(str)
     Select(str)
@@ -43,13 +45,34 @@ end
 all(atoms) = true
 
 # Main function: receives the atoms vector and a julia function to select
-select(set::AbstractVector, by::F) where {F<:Function} = filter(by, set)
-select(set::AbstractVector, selection::String) = filter(Select(selection), set)
-selindex(set::AbstractVector, by::F) where {F<:Function} = findall(by, set)
-selindex(set::AbstractVector, selection::String) = findall(Select(selection), set)
+select(set::AbstractVector{<:Atom}, by::String) = filter(Select(by), set)
+select(set::AbstractVector{<:Atom}, by::Function) = filter(by, set)
+
+# Select indices of atoms (this is identical to findall)
+selindex(set::AbstractVector{<:Atom}, by::String) = findall(Select(by), set)
+selindex(set::AbstractVector{<:Atom}, by::Function) = findall(by, set)
+
 # These two methods probably will be deprecated
-select(set::AbstractVector; by=all) = filter(by, set)
-selindex(set::AbstractVector; by=all) = findall(by, set)
+function select(set::AbstractVector; by=all) 
+    @warn begin 
+        """\n
+        The `select` function with the keyword argument `by` will be deprecated. 
+        Use `select(atoms, function)` instead. Or simply `filter(function, atoms)`.
+
+        """
+    end _file=nothing _line=nothing
+    filter(by, set)
+end
+function selindex(set::AbstractVector; by=all) 
+    @warn begin
+    """\n
+    The `selindex` function with the keyword argument `by` will be deprecated. 
+    Use `findall(function, atoms)` instead."
+        
+    """
+    end _file=nothing _line=nothing
+    findall(by, set)
+end
 
 # Comparison operators
 

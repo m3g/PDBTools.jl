@@ -1,12 +1,23 @@
 # [Selection functions](@id selections)
 
-A simple selection syntax is provided. Use it with, for example: 
+The `select` function can be used to select subsets of atoms from a vector
+of atoms. A simple selection syntax can be used, for example: 
 
 ```julia
-atoms = select(atoms,"protein and resnum < 30")
+atoms = select(atoms, "protein and resnum < 30")
 ```
 
-## General selections 
+or standard Julia function can be provided as the second argument:
+
+```julia
+atoms = select(atoms, at -> isprotein(at) && resnum(at) < 30)
+```
+
+!!! compat
+    Support for the second argument of `select` as a function
+    was introduced in v1.7.0.
+
+## General selection syntax 
 
 Accepted Boolean operators: `and`, `or`, and `not`. 
 
@@ -145,11 +156,11 @@ functions. For example:
 
 ```julia
 myselection(atom) = (atom.x < 10.0 && atom.resname == "GLY") || (atom.name == "CA") 
-atoms = select(atoms, by = myselection)
+atoms = select(atoms, myselection)
 ```
 or, for example, using Julia anonymous functions
 ```julia
-select(atoms, by = at -> isprotein(at) && name(at) == "O" && atom.x < 10.0)
+select(atoms, at -> isprotein(at) && name(at) == "O" && atom.x < 10.0)
 ```
 
 The only requirement is that the function defining the selection receives an `PDBTools.Atom` as
