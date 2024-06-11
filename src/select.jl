@@ -30,10 +30,11 @@ julia> filter(Select("name CA and residue 1"), atoms)
 
 ```
 """
-struct Select <: Function
-    sel::String
+struct Select{T<:Union{String,Function}} <: Function
+    sel::T
 end
-(s::Select)(at) = apply_query(parse_query(s.sel), at)
+(s::Select{<:String})(at) = apply_query(parse_query(s.sel), at)
+(s::Select{<:Function})(at) = apply_query(s.sel, at)
 
 macro sel_str(str)
     Select(str)
@@ -42,10 +43,13 @@ end
 all(atoms) = true
 
 # Main function: receives the atoms vector and a julia function to select
-select(set::AbstractVector; by=all) = filter(by, set)
+select(set::AbstractVector, by::F) where {F<:Function} = filter(by, set)
 select(set::AbstractVector, selection::String) = filter(Select(selection), set)
-selindex(set::AbstractVector; by=all) = findall(by, set)
+selindex(set::AbstractVector, by::F) where {F<:Function} = findall(by, set)
 selindex(set::AbstractVector, selection::String) = findall(Select(selection), set)
+# These two methods probably will be deprecated
+select(set::AbstractVector; by=all) = filter(by, set)
+selindex(set::AbstractVector; by=all) = findall(by, set)
 
 # Comparison operators
 
@@ -302,12 +306,16 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
     @test sel[1].index_pdb == 13
 
     @test length(select(atoms, "index > 1 and index < 13")) == 11
+    @test length(select(atoms, at -> at.index > 1 && at.index < 13)) == 11
 
     @test length(select(atoms, "protein")) == 1463
+    @test length(select(atoms, isprotein)) == 1463
 
     @test length(select(atoms, "water")) == 58014
+    @test length(select(atoms, iswater)) == 58014
 
     @test length(select(atoms, "resname GLY")) == 84
+    @test length(select(atoms, at -> resname(at) == "GLY")) == 84
 
     @test length(select(atoms, "segname PROT")) == 1463
 
