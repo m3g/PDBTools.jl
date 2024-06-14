@@ -9,6 +9,7 @@ using Parameters: @unpack
 using Printf: @printf, @sprintf
 using StaticArrays: SVector
 using TestItems: @testitem
+using OrderedCollections: OrderedDict
 
 # AtomsBase interface compatibility
 import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
