@@ -1,6 +1,14 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # Some auxiliary functions to quickly retrieve some data 
 
 ## Get the protein sequence
+
+```@docs
+getseq
+```
 
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
 ```jldoctest
@@ -70,6 +78,10 @@ julia> getseq(atoms, "residue > 1")
 
 ## Distance between sets of atoms
 
+```@docs
+distance
+```
+
 The distance between atoms, or sets of atoms, can be computed with the `distance` function. This
 function returns the *minimum distance* between the atoms of the sets involved. For example:
 
@@ -115,6 +127,10 @@ julia> distance(ligand[43],protein[3684])
 
 ## Obtain arrays with coordinates
 
+```@docs
+coor
+```
+
 Use the `coor` function:
 
 ```jldoctest
@@ -154,6 +170,10 @@ The coordinates are output as arrays of static arrays (more specifically, as a `
 
 ## Maximum and minimum coordinates of the atoms
 
+```@docs
+maxmin
+```
+
 Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
 
 ```julia-repl
@@ -172,15 +192,16 @@ coordinates, and lengths.
 
 ## Residue tick labels for plots
 
-!!! compat
-    The functionality of the `residue_ticks` as described requires PDBTools version 1.6.0 or greater. 
+```@docs
+residue_ticks
+```
 
 The `residue_ticks` function provides a practical way to define tick labels in plots associated to an amino-acid sequence:
 
 ```julia
 residue_ticks(
     atoms (or) residues (or) residue iterator; 
-    first=nothing, last=nothing, stride=1, oneletter=true
+    first=nothing, last=nothing, stride=1, oneletter=true, serial=false,
 )
 ```
 
@@ -189,10 +210,17 @@ The input structure can be provided as a vector of atoms (type `Vector{Atom}`) a
 The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
 
 `first` and `last` optional keyword parameters are integers that refer to the residue numbers to be included. 
-The `stride` option can be used to skip residues and declutter the tick labels.
+The `stride` option can be used to skip residues and deccluter the tick labels.
 
 If `oneletter` is `false`, three-letter residue codes are returned. Residues with unknown names will be 
 named `X` or `XXX`. 
+
+if `serial=true` the positions of the ticks will be returned as a the serial residue index (i. e. `1:strie:last-first+1`) instead of the residue number
+
+!!! compat
+    The functionality of the `residue_ticks` as described requires PDBTools version 1.6.0 or greater. 
+
+    The `serial` option was introduced in v1.8.0
 
 ### Example
 

@@ -1,3 +1,6 @@
+```@meta
+CollapsedDocStrings = true
+```
 # Help entries
 
 These entries can be accessed from the Julia REPL by typing `?`, for example,
