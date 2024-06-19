@@ -15,7 +15,7 @@
 end
 
 #! format: off
-protein_residues = Dict{String,ProteinResidue}(
+protein_residues = OrderedDict{String,ProteinResidue}(
     "ALA" => ProteinResidue("Alanine",       "ALA", "A", "Aliphatic",  false, false,  71.037114,  71.0779,  0, false),
     "ARG" => ProteinResidue("Arginine",      "ARG", "R", "Basic",      true,  false, 156.101111, 156.1857,  1, false),
     "ASN" => ProteinResidue("Asparagine",    "ASN", "N", "Amide",      true,  false, 114.042927, 114.1026,  0, false),
@@ -69,29 +69,22 @@ julia> threeletter("HSD")
 
 """
 function threeletter(residue::Union{String,Char})
-    # Convert to String if Char
-    code = "$residue"
-    key = _case_insensitve_check(code, protein_residues)
-    if !isnothing(key)
-        return protein_residues[key].three_letter_code
-    elseif length(code) == 1
-        return findfirst(r -> r.one_letter_code == code, protein_residues)
+    code = string(residue)
+    three_letter_code = if length(code) == 1
+        findfirst(r -> r.one_letter_code == code, protein_residues)
+    elseif haskey(protein_residues, code)
+        protein_residues[code].three_letter_code
     else
-        return findfirst(r -> r.name == code, protein_residues)
+        findfirst(r -> r.name == code, protein_residues)
     end
-end
-
-function _case_insensitve_check(code, protein_residues)  
-    isnothing(code) && return code
-    if code in keys(protein_residues) 
-        return code
-    elseif uppercase(code) in keys(protein_residues)
-        return uppercase(code)
-    end
-    return nothing
+    return three_letter_code
 end
 
 @testitem "threeletter" begin
+    @test threeletter("HIS") == "HIS"
+    @test threeletter("H") == "HIS"
+    @test threeletter("E") == "GLU"
+    @test threeletter("Histidine") == "HIS"
     @test threeletter("ALA") == "ALA"
     @test threeletter("A") == "ALA"
     @test threeletter('A') == "ALA"
@@ -119,13 +112,25 @@ julia> oneletter("Glutamic acid")
 
 """
 function oneletter(residue::Union{String,Char})
-    code = resname("$residue")
-    key = _case_insensitve_check(code, protein_residues)
-    if !isnothing(key)
-        return protein_residues[key].one_letter_code
+    code = string(residue)
+    one_letter_code = if length(code) == 1
+        r = findfirst(r -> r.one_letter_code == code, protein_residues)
+        if !isnothing(r)
+            protein_residues[r].one_letter_code
+        else
+            "X"
+        end
+    elseif haskey(protein_residues, code)
+        protein_residues[code].one_letter_code
     else
-        return "X"
+        r = findfirst(r -> r.name == code, protein_residues)
+        if !isnothing(r)
+            protein_residues[r].one_letter_code
+        else
+            "X"
+        end
     end
+    return one_letter_code 
 end
 
 @testitem "oneletter" begin
@@ -156,10 +161,9 @@ julia> resname("GLUP")
 ```
 """
 function resname(residue::Union{String,Char})
-    code = "$residue"
-    key = _case_insensitve_check(code, protein_residues)
-    if !isnothing(key)
-        return key
+    code = string(residue)
+    if haskey(protein_residues, code)
+        return code
     else
         return threeletter(code)
     end
@@ -193,10 +197,9 @@ julia> residuename("Glu")
 
 """
 function residuename(residue::Union{String,Char})
-    code = resname(residue)
-    key = _case_insensitve_check(code, protein_residues)
-    if !isnothing(key)
-        return protein_residues[key].name
+    code = resname(uppercase(residue))
+    if haskey(protein_residues, code)
+        return protein_residues[code].name
     else
         return nothing
     end
