@@ -349,15 +349,14 @@ function residue_ticks(residues::Union{AbstractVector{Residue},EachResidue};
     end
     resnums = resnum.(residues)
     ticklabels = resnames .* string.(resnums)
-    first = isnothing(first) ?  firstindex(residues) : findfirst(==(first), resnums)
-    last = isnothing(last) ? lastindex(residues) : findlast(==(last), resnums)
-    tick_positions = if serial
-        shift = findfirst(==(first), resnums) - 1
-        resnums[first:stride:last] .- shift 
-    else 
-        resnums[first:stride:last]
+    first = isnothing(first) ? 1 : findfirst(==(first), resnums)
+    last = isnothing(last) ? length(residues) : findfirst(==(last), resnums)
+    ticks = if serial
+        (collect(1:stride:last-first+1), ticklabels[first:stride:last])
+    else
+        (resnums[first:stride:last], ticklabels[first:stride:last])
     end
-    return ( tick_positions, ticklabels[first:stride:last] )
+    return ticks
 end
 function residue_ticks(atoms::AbstractVector{<:Atom}; kargs...)
     residues = eachresidue(atoms)
@@ -375,6 +374,20 @@ end
     @test residue_ticks(atoms; stride = 20, first = 2) == ([2, 22, 42, 62], ["Q2", "T22", "R42", "Q62"])
     @test residue_ticks(atoms; stride = 20, last = 42) == ([1, 21, 41], ["M1", "D21", "Q41"])
     @test residue_ticks(atoms; stride = 20, last = 42, first = 2) == ([2, 22, 42], ["Q2", "T22", "R42"])
+    # serial indexing
+    @test residue_ticks(atoms; first=10, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61], ["G10", "S20", "I30", "Q40", "L50", "N60", "V70"])
+    @test residue_ticks(atoms; first=1, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+    @test residue_ticks(atoms; first=1, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+    @test residue_ticks(atoms; first=10, stride=1, last=15, serial=true) == ([1, 2, 3, 4, 5, 6], ["G10", "K11", "T12", "I13", "T14", "L15"])
+    @test residue_ticks(atoms; first=10, stride=2, last=15, serial=true) == ([1, 3, 5], ["G10", "T12", "T14"])
+    # Shift resnums
+    for at in atoms
+        at.resnum += 10
+    end
+    @test residue_ticks(atoms; stride=20) == ([1, 21, 41, 61], ["M11", "D31", "Q51", "I71"])
+    @test residue_ticks(atoms; stride = 20, first = 2) == ([12, 32, 52, 72], ["Q12", "T32", "R52", "Q72"])
+    @test residue_ticks(atoms; stride = 20, last = 42) == ([11, 31, 51], ["M11", "D31", "Q51"])
+    @test residue_ticks(atoms; stride = 20, last = 42, first = 2) == 
     # serial indexing
     @test residue_ticks(atoms; first=10, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61], ["G10", "S20", "I30", "Q40", "L50", "N60", "V70"])
     @test residue_ticks(atoms; first=1, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
