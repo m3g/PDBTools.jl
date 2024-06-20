@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "1.8.0"
+version = "1.8.1"
 
 [deps]
 AtomsBase = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
