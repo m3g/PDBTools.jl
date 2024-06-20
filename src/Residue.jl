@@ -348,11 +348,13 @@ function residue_ticks(residues::Union{AbstractVector{Residue},EachResidue};
         resnames = PDBTools.oneletter.(resnames)
     end
     resnums = resnum.(residues)
-    ticklabels = resnames .* string.(resnums)
     first = isnothing(first) ? 1 : findfirst(==(first), resnums)
     last = isnothing(last) ? length(residues) : findfirst(==(last), resnums)
+    (isnothing(first) || isnothing(last)) &&
+        throw(ArgumentError("First or last residue index out of residue number range: $(minimum(resnums)) to $(maximum(resnums))."))
+    ticklabels = resnames .* string.(resnums)
     ticks = if serial
-        (collect(1:stride:last-first+1), ticklabels[first:stride:last])
+        (first:stride:last, ticklabels[first:stride:last])
     else
         (resnums[first:stride:last], ticklabels[first:stride:last])
     end
@@ -384,21 +386,25 @@ end
     for at in atoms
         at.resnum += 10
     end
-    @test residue_ticks(atoms; stride=20) == ([1, 21, 41, 61], ["M11", "D31", "Q51", "I71"])
-    @test residue_ticks(atoms; stride = 20, first = 2) == ([12, 32, 52, 72], ["Q12", "T32", "R52", "Q72"])
-    @test residue_ticks(atoms; stride = 20, last = 42) == ([11, 31, 51], ["M11", "D31", "Q51"])
-    @test residue_ticks(atoms; stride = 20, last = 42, first = 2) == 
+    @test residue_ticks(atoms; stride=20) == ([11, 31, 51, 71], ["M11", "D31", "Q51", "I71"])
+    @test_throws ArgumentError residue_ticks(atoms; stride = 20, first = 2)
+    @test residue_ticks(atoms; stride = 20, first = 13) == ([13, 33, 53, 73], ["I13", "I33", "L53", "K73"])
+    @test residue_ticks(atoms; stride = 20, last = 42) == ([11, 31], ["M11", "D31"])
+    @test_throws ArgumentError residue_ticks(atoms; stride = 20, first = 42, last = 90) 
+    @test residue_ticks(atoms; stride = 20, first = 42, last = 85) == ([42, 62, 82], ["D42", "D62", "R82"]) 
     # serial indexing
-    @test residue_ticks(atoms; first=10, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61], ["G10", "S20", "I30", "Q40", "L50", "N60", "V70"])
-    @test residue_ticks(atoms; first=1, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
-    @test residue_ticks(atoms; first=1, stride=10, serial=true) == ([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
-    @test residue_ticks(atoms; first=10, stride=1, last=15, serial=true) == ([1, 2, 3, 4, 5, 6], ["G10", "K11", "T12", "I13", "T14", "L15"])
-    @test residue_ticks(atoms; first=10, stride=2, last=15, serial=true) == ([1, 3, 5], ["G10", "T12", "T14"])
+    @test residue_ticks(atoms; stride=20,serial=true) == (1:20:61, ["M11", "D31", "Q51", "I71"])
+    @test_throws ArgumentError residue_ticks(atoms; stride = 20, first = 0, serial=true)
+    @test residue_ticks(atoms; stride = 20, first = 13, serial=true) == (3:20:63, ["I13", "I33", "L53", "K73"])
+    @test residue_ticks(atoms; stride = 20, last = 42, serial=true) == (1:20:21, ["M11", "D31"])
+    @test_throws ArgumentError residue_ticks(atoms; stride = 20, first = 42, last = 90, serial=true) 
+    @test residue_ticks(atoms; stride = 20, first = 42, last = 85, serial=true) == (32:20:72, ["D42", "D62", "R82"]) 
     # residue indices do not start with 1
     atoms = wget("1LBD", "protein")
     @test residue_ticks(atoms, stride=38) == ([225, 263, 301, 339, 377, 415, 453], ["S225", "D263", "L301", "S339", "N377", "F415", "E453"])
     @test residue_ticks(atoms; stride=1, first = 227, last = 231) == ([227, 228, 229, 230, 231], ["N227", "E228", "D229", "M230", "P231"])
     @test residue_ticks(atoms; stride=2, first = 227, last = 231) == ([227, 229, 231], ["N227", "D229", "P231"])
+    @test residue_ticks(atoms; stride=2, first = 227, last = 231, serial=true) == (3:2:7, ["N227", "D229", "P231"])
     # three-letter return codes
     @test residue_ticks(atoms; stride=2, first = 227, last = 231, oneletter = false) == ([227, 229, 231], ["ASN227", "ASP229", "PRO231"])
 end
