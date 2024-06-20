@@ -320,19 +320,19 @@ of the residue numbers.
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = wget("1UBQ", "protein");
+julia> atoms = wget("1LBD", "protein");
 
-julia> residue_ticks(atoms; stride=10) # Vector{Atom} as input
-([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+julia> residue_ticks(atoms; stride=50) # Vector{Atom} as input
+([225, 275, 325, 375, 425], ["S225", "Q275", "L325", "L375", "L425"])
 
-julia> residue_ticks(atoms; first=10, last=15, serial=true) # first=10 and serial indexing
-([1, 2, 3, 4, 5, 6], ["G10", "K11", "T12", "I13", "T14", "L15"])
+julia> residue_ticks(atoms; first=235, last=240, serial=true) # first=10 and serial indexing
+(11:1:16, ["I235", "L236", "E237", "A238", "E239", "L240"])
 
-julia> residue_ticks(eachresidue(atoms); stride=10) # residue iterator as input
-([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+julia> residue_ticks(eachresidue(atoms); stride=50) # residue iterator as input
+([225, 275, 325, 375, 425], ["S225", "Q275", "L325", "L375", "L425"])
 
-julia> residue_ticks(collect(eachresidue(atoms)); stride=10) # Vector{Residue} as input
-([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+julia> residue_ticks(collect(eachresidue(atoms)); stride=50) # Vector{Residue} as input
+([225, 275, 325, 375, 425], ["S225", "Q275", "L325", "L375", "L425"])
 ```
 
 The resulting tuple of residue numbers and labels can be used as `xticks` in `Plots.plot`, for example.
