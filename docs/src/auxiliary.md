@@ -210,17 +210,19 @@ The input structure can be provided as a vector of atoms (type `Vector{Atom}`) a
 The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
 
 `first` and `last` optional keyword parameters are integers that refer to the residue numbers to be included. 
-The `stride` option can be used to skip residues and deccluter the tick labels.
+The `stride` option can be used to skip residues and declutter the tick labels.
 
 If `oneletter` is `false`, three-letter residue codes are returned. Residues with unknown names will be 
 named `X` or `XXX`. 
 
-if `serial=true` the positions of the ticks will be returned as a the serial residue index (i. e. `1:strie:last-first+1`) instead of the residue number
+if `serial=false` the positions of the ticks will be returned as a the serial residue index in the structure.
+If `serial=true` the positions of the ticks are returned as their residue numbers. This difference is important
+if the residue numbers do not start at `1` and depending on the indexing of the data to be plotted.  
 
 !!! compat
     The functionality of the `residue_ticks` as described requires PDBTools version 1.6.0 or greater. 
 
-    The `serial` option was introduced in v1.8.0
+    The `serial` option was introduced in v1.8.1
 
 ### Example
 
