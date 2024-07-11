@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Auxiliary functions · PDBTools.jl</title><meta name="title" content="Auxiliary functions · PDBTools.jl"/><meta property="og:title" content="Auxiliary functions · PDBTools.jl"/><meta property="twitter:title" content="Auxiliary functions · PDBTools.jl"/><meta name="description" content="Documentation for PDBTools.jl."/><meta property="og:description" content="Documentation for PDBTools.jl."/><meta property="twitter:description" content="Documentation for PDBTools.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="PDBTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">PDBTools.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../readwrite/">Read and Write</a></li><li><a class="tocitem" href="../selections/">Selections</a></li><li><a class="tocitem" href="../elements/">Element properties</a></li><li class="is-active"><a class="tocitem" href>Auxiliary functions</a><ul class="internal"><li><a class="tocitem" href="#Get-the-protein-sequence"><span>Get the protein sequence</span></a></li><li><a class="tocitem" href="#Distance-between-sets-of-atoms"><span>Distance between sets of atoms</span></a></li><li><a class="tocitem" href="#Closest-atoms-and-their-distance"><span>Closest atoms and their distance</span></a></li><li><a class="tocitem" href="#Obtain-arrays-with-coordinates"><span>Obtain arrays with coordinates</span></a></li><li><a class="tocitem" href="#Maximum-and-minimum-coordinates-of-the-atoms"><span>Maximum and minimum coordinates of the atoms</span></a></li><li><a class="tocitem" href="#Residue-tick-labels-for-plots"><span>Residue tick labels for plots</span></a></li></ul></li><li><a class="tocitem" href="../examples/">Examples</a></li><li><a class="tocitem" href="../tools/">Tools</a></li><li><a class="tocitem" href="../help/">Help entries</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Auxiliary functions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Auxiliary functions</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl/blob/main/docs/src/auxiliary.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Some-auxiliary-functions-to-quickly-retrieve-some-data"><a class="docs-heading-anchor" href="#Some-auxiliary-functions-to-quickly-retrieve-some-data">Some auxiliary functions to quickly retrieve some data</a><a id="Some-auxiliary-functions-to-quickly-retrieve-some-data-1"></a><a class="docs-heading-anchor-permalink" href="#Some-auxiliary-functions-to-quickly-retrieve-some-data" title="Permalink"></a></h1><h2 id="Get-the-protein-sequence"><a class="docs-heading-anchor" href="#Get-the-protein-sequence">Get the protein sequence</a><a id="Get-the-protein-sequence-1"></a><a class="docs-heading-anchor-permalink" href="#Get-the-protein-sequence" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.getseq" href="#PDBTools.getseq"><code>PDBTools.getseq</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">getseq(Vector{Atom} or filename; selection, code)</code></pre><p>Returns the sequence of aminoacids from the vector of atoms or file name. Selections may be applied. Code defines if the output will be a one-letter, three-letter or full-residue name array.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; protein = wget(&quot;1LBD&quot;);
+
+julia&gt; getseq(protein,&quot;residue &lt; 3&quot;)
+2-element Vector{String}:
+ &quot;S&quot;
+ &quot;A&quot;
+
+julia&gt; getseq(protein,&quot;residue &lt; 3&quot;, code=2)
+2-element Vector{String}:
+ &quot;SER&quot;
+ &quot;ALA&quot;
+
+julia&gt; getseq(protein,&quot;residue &lt; 3&quot;,code=3)
+2-element Vector{String}:
+ &quot;Serine&quot;
+ &quot;Alanine&quot;
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/20e927912ae265bfce7361de75016266bfdd43dd/src/getseq.jl#L1-L28">source</a></section></article><p>To obtain a list of the residue names of the protein with three- and one-letter codes, use</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; getseq(PDBTools.SMALLPDB)
+3-element Vector{String}:
+ &quot;A&quot;
+ &quot;C&quot;
+ &quot;D&quot;</code></pre><p>Use <code>getseq(atoms,code=2)</code> to get the sequence as three-letter residue codes, or <code>code=3</code> to get  full natural-aminoacid names, like &quot;Alanine&quot;, &quot;Proline&quot;, etc:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; getseq(PDBTools.SMALLPDB, code=2)
+3-element Vector{String}:
+ &quot;ALA&quot;
+ &quot;CYS&quot;
+ &quot;ASP&quot;
+
+julia&gt; getseq(PDBTools.SMALLPDB, code=3)
+3-element Vector{String}:
+ &quot;Alanine&quot;
+ &quot;Cysteine&quot;
+ &quot;Aspartic acid&quot;</code></pre><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>If there is some non-standard protein residue in the sequence, inform the <code>getseq</code> function by adding a selection:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; for at in atoms
+          if resname(at) == &quot;ALA&quot;
+              at.resname = &quot;NEW&quot;
+          end
+       end
+
+julia&gt; getseq(atoms, &quot;protein or resname NEW&quot;; code=2)
+3-element Vector{String}:
+ &quot;NEW&quot;
+ &quot;CYS&quot;
+ &quot;ASP&quot;</code></pre><p>By default the selection will only return the sequence of natural amino acids. </p></div></div><p>The <code>getseq</code> function can of course be used on an <code>Atom</code> list, accepts selections as the last argument, as well as the reading and writing functions:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; getseq(atoms, &quot;residue &gt; 1&quot;)
+2-element Vector{String}:
+ &quot;C&quot;
+ &quot;D&quot;</code></pre><h2 id="Distance-between-sets-of-atoms"><a class="docs-heading-anchor" href="#Distance-between-sets-of-atoms">Distance between sets of atoms</a><a id="Distance-between-sets-of-atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Distance-between-sets-of-atoms" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.distance" href="#PDBTools.distance"><code>PDBTools.distance</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">distance(x,y)</code></pre><p>Computes the minimum distance between two sets of atoms, between an atom and a set of atoms, or simply  the distance between two atoms. The input may be a vector of <code>Atom</code>s, or the  coordinates that are output of the <code>coor</code> function. </p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; distance(protein,ligand)
+2.7775834820937417
+
+julia&gt; distance(protein[1],ligand[3])
+36.453551075306784
+
+julia&gt; distance(coor(ligand),protein)
+2.7775834820937417
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/20e927912ae265bfce7361de75016266bfdd43dd/src/distance.jl#L1-L28">source</a></section></article><p>The distance between atoms, or sets of atoms, can be computed with the <code>distance</code> function. This function returns the <em>minimum distance</em> between the atoms of the sets involved. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; distance(protein,ligand)
+2.7775834820937417</code></pre><h2 id="Closest-atoms-and-their-distance"><a class="docs-heading-anchor" href="#Closest-atoms-and-their-distance">Closest atoms and their distance</a><a id="Closest-atoms-and-their-distance-1"></a><a class="docs-heading-anchor-permalink" href="#Closest-atoms-and-their-distance" title="Permalink"></a></h2><p>A function similar to the one above is <code>closest</code>, which returns the shortest distance between atoms but also the identity of the atom or pair of atoms that satisfy that shortest distance:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; closest(ligand,protein)
+(43, 3684, 2.7775834820937417)
+
+julia&gt; ligand[43]
+    4037   O1      T3     B        2      512  -22.568   81.625    3.159  1.00 36.59     1       -      4041
+
+julia&gt; protein[3684]
+    3684  NE2     HIS     B      435      472  -21.539   82.145    5.686  1.00 44.44     1       -      3686
+
+julia&gt; distance(ligand[43],protein[3684])
+2.7775834820937417</code></pre><h2 id="Obtain-arrays-with-coordinates"><a class="docs-heading-anchor" href="#Obtain-arrays-with-coordinates">Obtain arrays with coordinates</a><a id="Obtain-arrays-with-coordinates-1"></a><a class="docs-heading-anchor-permalink" href="#Obtain-arrays-with-coordinates" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.coor" href="#PDBTools.coor"><code>PDBTools.coor</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">coor(atoms; selection)</code></pre><p>Returns the coordinates of the atoms. The input may be one atom (type <code>Atom</code>), a vector of atoms, or a <code>Residue</code>.  The coordinates are returned as a vector of static vectors (from <code>StaticArrays</code>), more specifically as a <code>Vector{SVector{3,Float64}}</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools, StaticArrays 
+
+julia&gt; protein = wget(&quot;1LBD&quot;);
+
+julia&gt; coor(protein[1])
+3-element SVector{3, Float64} with indices SOneTo(3):
+ 45.228
+ 84.358
+ 70.638
+
+julia&gt; coor(protein[1],as=SVector{3,Float32})
+3-element SVector{3, Float32} with indices SOneTo(3):
+ 45.228
+ 84.358
+ 70.638
+
+julia&gt; coor(protein, &quot;index &lt;= 2&quot;)
+2-element Vector{SVector{3, Float64}}:
+ [45.228, 84.358, 70.638]
+ [46.08, 83.165, 70.327]
+
+julia&gt; coor(protein, only = at -&gt; at.resname == &quot;ALA&quot;)
+110-element Vector{SVector{3, Float64}}:
+ [43.94, 81.982, 70.474]
+ [43.02, 80.825, 70.455]
+ [41.996, 80.878, 69.34]
+ ⋮
+ [-17.866, 84.088, 51.741]
+ [-18.496, 83.942, 52.777]
+ [-15.888, 82.583, 51.706]
+  
+julia&gt; residues = collect(eachresidue(protein));
+
+julia&gt; coor(residues[1])
+6-element Vector{SVector{3, Float64}}:
+ [45.228, 84.358, 70.638]
+ [46.08, 83.165, 70.327]
+ [45.257, 81.872, 70.236]
+ [45.823, 80.796, 69.974]
+ [47.147, 82.98, 71.413]
+ [46.541, 82.639, 72.662]
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/20e927912ae265bfce7361de75016266bfdd43dd/src/coor.jl#L1-L55">source</a></section></article><p>Use the <code>coor</code> function:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; coor(atoms[1])
+3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+  -9.229
+ -14.861
+  -5.481
+
+julia&gt; coor(atoms[1:2])
+2-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]</code></pre><p>The <code>coor</code> function accepts selections:</p><p>C<span>$\alpha$</span> coordinates:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; coor(atoms, &quot;name CA&quot;)
+3-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [-8.483, -14.912, -6.726]
+ [-5.113, -13.737, -5.466]
+ [-3.903, -11.262, -8.062]</code></pre><p>The coordinates are output as arrays of static arrays (more specifically, as a <code>Vector{SVector{3,Float64}}</code>, from <code>StaticArrays</code>). </p><h2 id="Maximum-and-minimum-coordinates-of-the-atoms"><a class="docs-heading-anchor" href="#Maximum-and-minimum-coordinates-of-the-atoms">Maximum and minimum coordinates of the atoms</a><a id="Maximum-and-minimum-coordinates-of-the-atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Maximum-and-minimum-coordinates-of-the-atoms" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.maxmin" href="#PDBTools.maxmin"><code>PDBTools.maxmin</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">maxmin(atoms::Vector{Atom}; selection)</code></pre><p>Returns the maximum and minimum coordinates of an atom vector, and the length (maximum minus minimum) in each direction. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; protein = wget(&quot;1LBD&quot;);
+
+julia&gt; maxmin(protein)
+ 
+ Minimum atom coordinates: xmin = [-29.301, 57.178, 45.668]
+ Maximum atom coordinates: xmax = [47.147, 99.383, 86.886]
+ Length in each direction: xlength = [76.448, 42.205, 41.217999999999996]
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/20e927912ae265bfce7361de75016266bfdd43dd/src/maxmin.jl#L10-L28">source</a></section></article><p>Use <code>maxmin(atoms)</code>, or <code>maxmin(atoms,&quot;resname CA&quot;)</code>, for example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = readPDB(PDBTools.SMALLPDB);
+
+julia&gt; maxmin(atoms, &quot;residue &gt; 1&quot;)
+ Minimum atom coordinates: xmin = [-6.974, -16.785, -10.863]
+ Maximum atom coordinates: xmax = [-1.94, -9.552, -3.844]
+ Length in each direction: xlength = [5.034000000000001, 7.2330000000000005, 7.019]</code></pre><p><code>m</code> is a structure containing the three vectors with minimum and maximum coordinates, and lengths.</p><h2 id="Residue-tick-labels-for-plots"><a class="docs-heading-anchor" href="#Residue-tick-labels-for-plots">Residue tick labels for plots</a><a id="Residue-tick-labels-for-plots-1"></a><a class="docs-heading-anchor-permalink" href="#Residue-tick-labels-for-plots" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.residue_ticks" href="#PDBTools.residue_ticks"><code>PDBTools.residue_ticks</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">residue_ticks(
+    atoms (or) residues (or) residue iterator; 
+    first=nothing, last=nothing, stride=1, oneletter=true, serial=true
+)</code></pre><p>Returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.</p><p>The structure data can be provided a vector of <code>Atom</code>s, a vector of <code>Residue</code>s or an <code>EachResidue</code> iterator. </p><p><code>first</code> and <code>last</code> optional keyword parameters are integers that refer to the residue numbers to be included.  The <code>stride</code> option can be used to skip residues and declutter the tick labels.</p><p>If <code>oneletter</code> is <code>false</code>, three-letter residue codes are returned. Residues with unknown names will be  named <code>X</code> or <code>XXX</code>. </p><p>If <code>serial=true</code> the sequential residue index will be used as the index of the ticks. If instead <code>serial=false</code>, the positions will be set to the residue numbers.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = wget(&quot;1LBD&quot;, &quot;protein&quot;);
+
+julia&gt; residue_ticks(atoms; stride=50) # Vector{Atom} as input
+(1:50:201, [&quot;S225&quot;, &quot;Q275&quot;, &quot;L325&quot;, &quot;L375&quot;, &quot;L425&quot;])
+
+julia&gt; residue_ticks(atoms; first=235, last=240, serial=false) # first=10 and resnum indexing
+([235, 236, 237, 238, 239, 240], [&quot;I235&quot;, &quot;L236&quot;, &quot;E237&quot;, &quot;A238&quot;, &quot;E239&quot;, &quot;L240&quot;])
+
+julia&gt; residue_ticks(eachresidue(atoms); stride=50) # residue iterator as input
+(1:50:201, [&quot;S225&quot;, &quot;Q275&quot;, &quot;L325&quot;, &quot;L375&quot;, &quot;L425&quot;])
+
+julia&gt; residue_ticks(collect(eachresidue(atoms)); stride=50) # Vector{Residue} as input
+(1:50:201, [&quot;S225&quot;, &quot;Q275&quot;, &quot;L325&quot;, &quot;L375&quot;, &quot;L425&quot;])</code></pre><p>The resulting tuple of residue numbers and labels can be used as <code>xticks</code> in <code>Plots.plot</code>, for example.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/20e927912ae265bfce7361de75016266bfdd43dd/src/Residue.jl#L299-L340">source</a></section></article><p>The <code>residue_ticks</code> function provides a practical way to define tick labels in plots associated to an amino-acid sequence:</p><pre><code class="language-julia hljs">residue_ticks(
+    atoms (or) residues (or) residue iterator; 
+    first=nothing, last=nothing, stride=1, oneletter=true, serial=false,
+)</code></pre><p>The input structure can be provided as a vector of atoms (type <code>Vector{Atom}</code>) a residue iterator (obtained by <code>eachresidue(atoms)</code>) or a vector of residues (obtained by <code>collect(eachresidue(atoms))</code>). </p><p>The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.</p><p><code>first</code> and <code>last</code> optional keyword parameters are integers that refer to the residue numbers to be included.  The <code>stride</code> option can be used to skip residues and declutter the tick labels.</p><p>If <code>oneletter</code> is <code>false</code>, three-letter residue codes are returned. Residues with unknown names will be  named <code>X</code> or <code>XXX</code>. </p><p>if <code>serial=false</code> the positions of the ticks will be returned as a the serial residue index in the structure. If <code>serial=true</code> the positions of the ticks are returned as their residue numbers. This difference is important if the residue numbers do not start at <code>1</code> and depending on the indexing of the data to be plotted.  </p><div class="admonition is-compat"><header class="admonition-header">Compat</header><div class="admonition-body"><p>The functionality of the <code>residue_ticks</code> as described requires PDBTools version 1.6.0 or greater. </p><p>The <code>serial</code> option was introduced in v1.8.1</p></div></div><h3 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h3><p>Here we illustrate how to plot the average temperature factor of each residue of a crystallographic model as function of the residues.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools, Plots
+
+julia&gt; atoms = wget(&quot;1UBQ&quot;, &quot;protein&quot;);
+
+julia&gt; residue_ticks(atoms; stride=10) # example of output
+([1, 11, 21, 31, 41, 51, 61, 71], [&quot;M1&quot;, &quot;K11&quot;, &quot;D21&quot;, &quot;Q31&quot;, &quot;Q41&quot;, &quot;E51&quot;, &quot;I61&quot;, &quot;L71&quot;])
+
+julia&gt; plot(
+           resnum.(eachresidue(atoms)), # x-axis: residue numbers
+           [ mean(beta.(res)) for res in eachresidue(atoms) ], # y-axis: average b-factor per residue
+           xlabel=&quot;Residue&quot;, 
+           xticks=residue_ticks(atoms; stride=10), # here we define the x-tick labels
+           ylabel=&quot;b-factor&quot;, 
+           xrotation=60,
+           label=nothing, framestyle=:box,
+      )</code></pre><p>Produces the following plot:</p><p><img src="../assets/residue_ticks.png" alt="./assets/residue_ticks.png"/></p><p>Alternatively (and sometimes conveniently), the residue ticks can be obtained by providing,  instead of the <code>atoms</code> array, the residue iterator or the residue vector, as:</p><pre><code class="language-julia-repl hljs">julia&gt; residue_ticks(eachresidue(atoms); stride=10)
+([1, 11, 21, 31, 41, 51, 61, 71], [&quot;M1&quot;, &quot;K11&quot;, &quot;D21&quot;, &quot;Q31&quot;, &quot;Q41&quot;, &quot;E51&quot;, &quot;I61&quot;, &quot;L71&quot;])
+
+julia&gt; residue_ticks(collect(eachresidue(atoms)); stride=10)
+([1, 11, 21, 31, 41, 51, 61, 71], [&quot;M1&quot;, &quot;K11&quot;, &quot;D21&quot;, &quot;Q31&quot;, &quot;Q41&quot;, &quot;E51&quot;, &quot;I61&quot;, &quot;L71&quot;])</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../elements/">« Element properties</a><a class="docs-footer-nextpage" href="../examples/">Examples »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Thursday 11 July 2024 13:37">Thursday 11 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
