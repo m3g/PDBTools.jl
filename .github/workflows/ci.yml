@@ -11,7 +11,7 @@ jobs:
       matrix:
         version:
           - '1.9'
-          - '^1.9'
+          - 'pre'
         os:
           - ubuntu-latest
           - macOS-latest
