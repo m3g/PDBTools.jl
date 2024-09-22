@@ -252,7 +252,7 @@ end
 Calls `parse_query_vector` after splitting the selection string.
 
 =#
-parse_query(selection::String) = parse_query_vector(split(selection))
+parse_query(selection::String) = parse_query_vector(split(selection, r"(\s+|(?=[()])|(?<=[()]))"))
 
 #=
 
@@ -269,8 +269,18 @@ function parse_query_vector(s)
     elseif (i = has_key("not", s)) > 0
         deleteat!(s, i)
         (!, parse_query_vector(s[i:end]))
-
-        # keywords 
+    elseif (i = has_key("(", s)) > 0
+        # Handle parenthesis
+        open_paren = findfirst(isequal("("), s)
+        close_paren = findfirst(isequal(")"), s)
+        if isnothing(open_paren) || isnothing(close_paren)
+            parse_error("Mismatched parenthesis in selection string.")
+        end
+        inner_query = s[open_paren+1:close_paren-1]
+        deleteat!(s, open_paren:close_paren)
+        parsed_inner_query = parse_query_vector(inner_query)
+        insert!(s, open_paren, parsed_inner_query)
+        return parse_query_vector(s)
     else
         for key in keywords
             if (i = has_key(key.name, s)) > 0
@@ -293,6 +303,42 @@ function parse_query_vector(s)
         parse_error("Unable to parse selection string.")
     end
 end
+
+#voltar
+#function parse_query_vector(s)
+#    if (i = has_key("or", s)) > 0
+#        deleteat!(s, i)
+#        (|, parse_query_vector.((s[1:i-1], s[i:end]))...)
+#    elseif (i = has_key("and", s)) > 0
+#        deleteat!(s, i)
+#        (&, parse_query_vector.((s[1:i-1], s[i:end]))...)
+#    elseif (i = has_key("not", s)) > 0
+#        deleteat!(s, i)
+#        (!, parse_query_vector(s[i:end]))
+#
+#        # keywords 
+#    else
+#        for key in keywords
+#            if (i = has_key(key.name, s)) > 0
+#                deleteat!(s, i)
+#                return key(s)
+#            end
+#        end
+#        for key in macro_keywords
+#            if (i = has_key(key.name, s)) > 0
+#                deleteat!(s, i)
+#                return key(s)
+#            end
+#        end
+#        for key in functional_keywords
+#            if (i = has_key(key.name, s)) > 0
+#                deleteat!(s, i)
+#                return key(s)
+#            end
+#        end
+#        parse_error("Unable to parse selection string.")
+#    end
+#end
 
 function apply_query(q, a)
     if !(q isa Tuple)

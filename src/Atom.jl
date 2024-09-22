@@ -387,6 +387,7 @@ function get_element_property(at::Atom, property::Symbol)
     else
         return getproperty(elements[el], property)
     end
+    return nothing
 end
 
 """
