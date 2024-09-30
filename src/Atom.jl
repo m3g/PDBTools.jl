@@ -375,12 +375,6 @@ end
 # Auxiliary function to retrive another property for matching elements
 #
 get_element_property(at::Atom, property::Symbol) = get_element_property(at, Val(property))
-
-get_element_property(at::Atom, ::Val{:element}) = element(at)
-get_element_property(at::Atom, ::Val{:symbol_string}) = element(at)
-get_element_property(at::Atom, ::Val{:mass}) = begin
-    elements[element(at)].mass
-end
 function get_element_property(at::Atom, ::Val{property}) where {property}
     el = element(at)
     if isnothing(el) || !haskey(elements, el)
@@ -493,7 +487,7 @@ julia> mass(atoms)
 ```
 
 """
-function mass(at::Atom)::Float64
+function mass(at::Atom)
    mass = if haskey(at.custom, :mass)
        at.custom[:mass]::Float64
    elseif element(at) == "X"
