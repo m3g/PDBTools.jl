@@ -509,7 +509,7 @@ function mass(atoms::AbstractVector{<:Atom})
 end
 
 @testitem "fetch atomic element properties" begin
-    using BenchmkarkTools
+    using BenchmarkTools
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
     @test element(at) == "N"
