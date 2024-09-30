@@ -126,7 +126,7 @@ julia> for res in eachresidue(atoms)
 eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
 
 # Collect residues default constructor
-Base.collect(r::EachResidue) = collect(Residue, r)
+Base.collect(residues::EachResidue) = collect(Residue, residues)
 Base.length(residues::EachResidue) = sum(1 for residue in residues)
 Base.firstindex(residues::EachResidue) = 1
 Base.lastindex(residues::EachResidue) = length(residues)
@@ -143,14 +143,10 @@ Base.length(residue::Residue) = length(residue.range)
 Base.eltype(::Residue) = Atom
 
 #
-# Iterate over residues of a structure
+# Iterate, lazily, over residues of a structure
 #
-function Base.iterate(residues::EachResidue, current_atom=nothing)
-    if isnothing(current_atom)
-        current_atom = 1
-    elseif current_atom > length(residues.atoms)
-        return nothing
-    end
+function Base.iterate(residues::EachResidue, current_atom=firstindex(residues.atoms))
+    current_atom > length(residues.atoms) && return nothing
     next_atom = current_atom + 1
     while next_atom <= length(residues.atoms) && 
           same_residue(residues.atoms[current_atom], residues.atoms[next_atom]) 
