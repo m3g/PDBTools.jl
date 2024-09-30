@@ -509,6 +509,7 @@ function mass(atoms::AbstractVector{<:Atom})
 end
 
 @testitem "fetch atomic element properties" begin
+    using BenchmkarkTools
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
     @test element(at) == "N"
@@ -527,6 +528,8 @@ end
     @test atomic_number(Atom(name="CAL")) == 20
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
+    a = @ballocated sum($mass, $atoms) evals=1 samples=1
+    @test a == 0
 end
 
 @testitem "AtomsBase interface" begin
