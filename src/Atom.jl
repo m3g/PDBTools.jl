@@ -346,11 +346,11 @@ function element(atom::Atom)
     end
     # Check if the first character is number
     i0 = 1 + isdigit(first(element_name))
-    imatch = searchsortedfirst(element_names, element_name[i0:i0]; by=x -> x[1])
-    lmatch = searchsortedlast(element_names, element_name[i0:i0]; by=x -> x[1])
+    imatch = searchsortedfirst(element_names, @view(element_name[i0:i0]); by=first)
+    lmatch = searchsortedlast(element_names, @view(element_name[i0:i0]); by=first)
     for iel in imatch:lmatch
         el = element_names[iel]
-        if lastindex(element_name) >= i0+length(el)-1 && el == element_name[i0:i0+length(el)-1]
+        if lastindex(element_name) >= i0+length(el)-1 && el == @view(element_name[i0:i0+length(el)-1])
             return el == "X" ? nothing : el
         end
     end
@@ -374,20 +374,23 @@ end
 #
 # Auxiliary function to retrive another property for matching elements
 #
-function get_element_property(at::Atom, property::Symbol)
+get_element_property(at::Atom, property::Symbol) = get_element_property(at, Val(property))
+
+get_element_property(at::Atom, ::Val{:element}) = element(at)
+get_element_property(at::Atom, ::Val{:symbol_string}) = element(at)
+get_element_property(at::Atom, ::Val{:mass}) = begin
+    elements[element(at)].mass
+end
+function get_element_property(at::Atom, ::Val{property}) where {property}
     el = element(at)
-    # If the element is defined in the pdb_element field, it may not
-    # correspond to any element in the elements list, but still that
-    # is what the user wants
-    if property in (:element, :symbol_string)
-        return el
-    end
     if isnothing(el) || !haskey(elements, el)
         return nothing
     else
         return getproperty(elements[el], property)
     end
 end
+
+
 
 """
     atomic_number(atom::Atom)
@@ -490,13 +493,13 @@ julia> mass(atoms)
 ```
 
 """
-function mass(at::Atom) 
+function mass(at::Atom)::Float64
    mass = if haskey(at.custom, :mass)
        at.custom[:mass]::Float64
    elseif element(at) == "X"
         nothing
    else
-       get_element_property(at, :mass)
+       get_element_property(at, Val(:mass))
    end
    return mass
 end
