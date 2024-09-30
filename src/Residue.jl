@@ -162,15 +162,9 @@ end
 #
 # Iterate over atoms of one residue
 #
-function Base.iterate(residue::Residue, current_atom=nothing)
-    first_atom = index(first(residue))
-    last_atom = index(last(residue))
-    if isnothing(current_atom)
-        current_atom = first_atom
-    elseif current_atom > last_atom
-        return nothing
-    end
-    return (residue[current_atom - first_atom + 1], current_atom + 1)
+function Base.iterate(residue::Residue, current_atom=firstindex(residue))
+    current_atom > lastindex(residue) && return nothing
+    return (residue[current_atom], current_atom + 1)
 end
 
 
