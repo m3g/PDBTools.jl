@@ -118,6 +118,13 @@ segname(atom::Atom) = atom.segname
 pdb_element(atom::Atom) = atom.pdb_element
 charge(atom::Atom) = atom.charge
 custom_field(atom::Atom, field::Symbol) = atom.custom[field]
+function Base.copy(atom::Atom) 
+    throw(ArgumentError("""\n
+        The Atom object contains mutable fields. To create an independent copy 
+        of the object, use the `deepcopy` function. 
+    
+    """))
+end
 
 import Base: getproperty
 function getproperty(atom::Atom, field::Symbol)
@@ -145,6 +152,7 @@ end
     @test segname(atom) == "PROT"
     @test index_pdb(atom) == 13
     @test charge(atom) === nothing
+    @test_throws ArgumentError copy(atom)
 end
 
 @testitem "Atom custom fields" begin
