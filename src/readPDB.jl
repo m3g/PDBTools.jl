@@ -46,35 +46,26 @@ julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "AL
 """
 function readPDB end
 
-function readPDB(file::String, selection::String)
+function readPDB(file::Union{String,IOBuffer}, selection::String)
     query = parse_query(selection)
     return readPDB(file, only=atom -> apply_query(query, atom))
 end
 
-function readPDB(file::String; only=all)
-    file = expanduser(file)
-    mmCIF, mmCIF_fields = check_mmCIF(file)
-    pdbfile = open(file, "r")
-    atoms = _parse_pdb(pdbfile, only, mmCIF, mmCIF_fields)
-    close(pdbfile)
+function readPDB(pdbdata::IOBuffer; only::Function=all)
+    atoms = _parse_pdb(pdbdata, only)
     return atoms
 end
 
-function readPDB(pdbdata::IOBuffer, selection::String)
-    query = parse_query(selection)
-    return readPDB(pdbdata; only=atom -> apply_query(query, atom))
-end
-
-function readPDB(pdbdata::IOBuffer; only::Function=all)
-    mmCIF, mmCIF_fields = check_mmCIF(pdbdata)
-    return _parse_pdb(pdbdata, only, mmCIF, mmCIF_fields)
+function readPDB(file::String; only=all)
+    atoms = open(expanduser(file), "r") do f
+        _parse_pdb(f, only)
+    end
+    return atoms
 end
 
 function _parse_pdb(
     pdbdata::Union{IOStream, IOBuffer}, 
     only::Function, 
-    mmCIF::Bool,
-    mmCIF_fields::indices_mmCIF_fields
 )
     natoms = 0
     index = 0
@@ -86,7 +77,7 @@ function _parse_pdb(
         if occursin("END", line)
             imodel = imodel + 1
         end
-        atom = read_atom(line, mmCIF=mmCIF, mmCIF_fields=mmCIF_fields)
+        atom = read_atom_PDB(line)
         if !isnothing(atom)
             index = index + 1
             atom.index = index
@@ -109,10 +100,6 @@ function _parse_pdb(
         error(" Could not find any atom in PDB file matching the selection. ")
     end
     return atoms
-end
-
-function Base.show(io::IO, atoms::AbstractVector{Atom})
-    println(io, " Structure file with ", length(atoms), " atoms. ")
 end
 
 @testitem "readPDB" begin
