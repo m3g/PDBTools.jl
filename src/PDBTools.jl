@@ -58,7 +58,7 @@ include("./select_with_vmd.jl")
 #
 include("./formula.jl")
 include("./check_mmCIF.jl")
-include("./read_atom.jl")
+include("./read_atom_pdb.jl")
 include("./write_atom.jl")
 include("./readPDB.jl")
 include("./edit.jl")
