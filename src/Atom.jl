@@ -508,6 +508,10 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
+function Base.show(io::IO, atoms::AbstractVector{Atom})
+    println(io, " Structure file with ", length(atoms), " atoms. ")
+end
+
 @testitem "fetch atomic element properties" begin
     using BenchmarkTools
     at = Atom(name="NT3")
