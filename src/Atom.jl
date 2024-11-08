@@ -84,7 +84,7 @@ julia> custom_field(atom, :index)
 ```
 
 """
-Base.@kwdef mutable struct Atom
+Base.@kwdef mutable struct Atom{T<:AbstractFloat}
     index::Int = 0 # The sequential index of the atoms in the file
     index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
     name::String = "X"
@@ -92,11 +92,11 @@ Base.@kwdef mutable struct Atom
     chain::String = "X"
     resnum::Int = 0 # Number of residue as written in PDB file
     residue::Int = 0 # Sequential residue (molecule) number in file
-    x::Float64 = 0.0
-    y::Float64 = 0.0
-    z::Float64 = 0.0
-    beta::Float64 = 0.0
-    occup::Float64 = 0.0
+    x::T = 0.0
+    y::T = 0.0
+    z::T = 0.0
+    beta::T = 0.0
+    occup::T = 0.0
     model::Int = 0
     segname::String = "XXXX" # Segment name (cols 73:76)
     pdb_element::String = "X"
@@ -120,13 +120,25 @@ charge(atom::Atom) = atom.charge
 custom_field(atom::Atom, field::Symbol) = atom.custom[field]
 
 import Base: getproperty
-function getproperty(atom::Atom, field::Symbol)
-    if field in fieldnames(Atom)
-        getfield(atom, field)
-    else
-        atom.custom[field]
-    end
-end
+getproperty(atom::Atom, s::Symbol) = getproperty(atom, Val(s))
+getproperty(atom::Atom, ::Val{:index}) = getfield(atom, :index)
+getproperty(atom::Atom, ::Val{:index_pdb}) = getfield(atom, :index_pdb)
+getproperty(atom::Atom, ::Val{:name}) = getfield(atom, :name)
+getproperty(atom::Atom, ::Val{:resname}) = getfield(atom, :resname)
+getproperty(atom::Atom, ::Val{:chain}) = getfield(atom, :chain)
+getproperty(atom::Atom, ::Val{:resnum}) = getfield(atom, :resnum)
+getproperty(atom::Atom, ::Val{:residue}) = getfield(atom, :residue)
+getproperty(atom::Atom, ::Val{:beta}) = getfield(atom, :beta)
+getproperty(atom::Atom, ::Val{:occup}) = getfield(atom, :occup)
+getproperty(atom::Atom, ::Val{:model}) = getfield(atom, :model)
+getproperty(atom::Atom, ::Val{:segname}) = getfield(atom, :segname)
+getproperty(atom::Atom, ::Val{:pdb_element}) = getfield(atom, :pdb_element)
+getproperty(atom::Atom, ::Val{:charge}) = getfield(atom, :charge)
+getproperty(atom::Atom, ::Val{:x}) = getfield(atom, :x)
+getproperty(atom::Atom, ::Val{:y}) = getfield(atom, :y)
+getproperty(atom::Atom, ::Val{:z}) = getfield(atom, :z)
+# Custom fileds (type unstable)
+getproperty(atom::Atom, ::Val{S}) where {S} = atom.custom[field]
 
 @testitem "Atom default fields" begin
     using PDBTools
