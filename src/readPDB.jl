@@ -70,26 +70,24 @@ function _parse_pdb(
     natoms = 0
     index = 0
     imodel = 1
-    iresidue = 1
+    iresidue = 0
     atoms = Atom[]
-    local lastatom
+    lastatom = Atom()
     for line in eachline(pdbdata)
         if occursin("END", line)
             imodel = imodel + 1
         end
         atom = read_atom_PDB(line)
         if !isnothing(atom)
-            index = index + 1
+            index += 1
             atom.index = index
             atom.model = imodel
-            if index > 1
-                if !same_residue(atom, lastatom)
-                    iresidue += 1
-                end
+            if !same_residue(atom, lastatom)
+                iresidue += 1
             end
             atom.residue = iresidue
             if only(atom)
-                natoms = natoms + 1
+                natoms += 1
                 push!(atoms, atom)
             end
             lastatom = atom
@@ -97,7 +95,10 @@ function _parse_pdb(
     end
     seekstart(pdbdata)
     if natoms == 0
-        error(" Could not find any atom in PDB file matching the selection. ")
+        throw(ArgmentError("""\n 
+            Could not find any atom in PDB file matching the selection. 
+
+        """))
     end
     return atoms
 end
