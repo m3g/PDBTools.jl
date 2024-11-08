@@ -16,6 +16,7 @@ import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
+export readCIF
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
@@ -69,6 +70,7 @@ include("./distance.jl")
 include("./maxmin.jl")
 include("./wget.jl")
 include("./tools.jl")
+include("./readCIF.jl")
 
 # Custom element and residue definitions
 include("./custom_types.jl")
