@@ -14,7 +14,7 @@ function read_atom(
     return atom
 end
 
-function parse_number(::Type{T}, string, range=nothing) where {T<:AbstractFloat}
+function _parse(::Type{T}, string, range=nothing) where {T<:AbstractFloat}
     s = if isnothing(range)
         string
     else
@@ -24,7 +24,7 @@ function parse_number(::Type{T}, string, range=nothing) where {T<:AbstractFloat}
     return isnothing(x) ? zero(T) : x
 end
 
-function parse_number(::Type{T}, string, range=nothing; alt=nothing) where {T<:Integer}
+function _parse(::Type{T}, string, range=nothing; alt=nothing) where {T<:Integer}
     s = if isnothing(range)
         string
     else
@@ -42,11 +42,11 @@ function parse_number(::Type{T}, string, range=nothing; alt=nothing) where {T<:I
     end
 end
 
-function parse_string(string, range=nothing; alt=" ")
-    s = if isnothing(range)
-        string
+function _parse(::Type{S}, string, range=nothing; alt=" ") where {S<:AbstractString}
+    s, range = if isnothing(range)
+        string, 1:length(string)
     else
-        @view(string[range[begin]:min(range[end],length(string))])
+        @view(string[range[begin]:min(range[end],length(string))]), range
     end
     length(range) > 0 || return alt
     first_char = findfirst(>(' '), s)
@@ -62,21 +62,21 @@ function read_atom_PDB(record::String)
         return nothing
     end
     atom = Atom()
-    atom.name = parse_string(record, 13:16; alt="X")
-    atom.resname = parse_string(record, 17:21; alt="XXX")
-    atom.chain = parse_string(record, 22:22; alt="X")
+    atom.name = _parse(String, record, 13:16; alt="X")
+    atom.resname = _parse(String, record, 17:21; alt="XXX")
+    atom.chain = _parse(String, record, 22:22; alt="X")
     atom.index = 1
-    atom.index_pdb = parse_number(Int, record, 7:11; alt=-1)
-    atom.resnum = parse_number(Int, record, 23:26)
-    atom.x = parse_number(Float64, record, 31:38)
-    atom.y = parse_number(Float64, record, 39:46)
-    atom.z = parse_number(Float64, record, 47:54)
-    atom.occup = parse_number(Float64, record, 56:60)
-    atom.beta = parse_number(Float64, record, 61:66)
+    atom.index_pdb = _parse(Int, record, 7:11; alt=-1)
+    atom.resnum = _parse(Int, record, 23:26)
+    atom.x = _parse(Float64, record, 31:38)
+    atom.y = _parse(Float64, record, 39:46)
+    atom.z = _parse(Float64, record, 47:54)
+    atom.occup = _parse(Float64, record, 56:60)
+    atom.beta = _parse(Float64, record, 61:66)
     atom.model = 1
-    atom.segname = parse_string(record, 73:76; alt="-")
-    atom.pdb_element = parse_string(record, 77:78, alt="X")
-    atom.charge = parse_string(record, 79:80, alt=nothing)
+    atom.segname = _parse(String, record, 73:76; alt="-")
+    atom.pdb_element = _parse(String, record, 77:78, alt="X")
+    atom.charge = _parse(String, record, 79:80, alt=nothing)
     return atom
 end
 
