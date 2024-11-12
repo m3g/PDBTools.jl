@@ -64,6 +64,7 @@ function readCIF(file::String; only=all, kargs...)
 end
 
 #_parse_mmCIF(args...;kargs...) = _parse_mmCIF_base(args...;kargs...)
+#_parse_mmCIF(args...;kargs...) = _parse_mmCIF_csv(args...;kargs...)
 _parse_mmCIF(args...;kargs...) = _parse_mmCIF_eachsplit(args...;kargs...)
 
 function _parse_mmCIF_base(
@@ -71,15 +72,13 @@ function _parse_mmCIF_base(
     only::Function,
     memory_available::Real = 0.5,
     stop_at=nothing,
-    float_type=Float64,
 )
     _atom_site_field_inds = Dict{String, Int}()
     ifield = 0
     index = 0
     iresidue = 0
-    natoms = 0
-    atoms = Atom{float_type}[]
-    lastatom = Atom{float_type}()
+    atoms = LightAtom[]
+    lastatom = LightAtom()
     for (iline, line) in enumerate(eachline(cifdata))
         # Reading the headers of the _atom_site loop
         if occursin("_atom_site.", line)
@@ -91,7 +90,7 @@ function _parse_mmCIF_base(
             ifield += 1
             _atom_site_field_inds[field] = ifield
         end
-        atom = read_atom_mmCIF_base(line, _atom_site_field_inds; float_type)
+        atom = read_atom_mmCIF_base(line, _atom_site_field_inds)
         if !isnothing(atom)
             index += 1
             atom.index = index
@@ -100,18 +99,17 @@ function _parse_mmCIF_base(
             end
             atom.residue = iresidue
             if only(atom)
-                natoms += 1
                 push!(atoms, atom)
             end
             lastatom = atom
         end
-        if !isnothing(stop_at) && (natoms >= stop_at)
+        if !isnothing(stop_at) && (length(atoms) >= stop_at)
             break
         end
         if mod(iline, 1000) == 0
             if Sys.free_memory() < (1 - memory_available) * Sys.total_memory()
                 @warn """\n
-                    Memory limit reached. $natoms atoms read so far will be returned.
+                    Memory limit reached. $(length(atoms)) atoms read so far will be returned.
                     Size of the atoms array: $(round(Base.summarysize(atoms) / 1024^3; digits=3)) MB
 
                 """ _file = nothing _line = nothing
@@ -120,7 +118,7 @@ function _parse_mmCIF_base(
         end
     end
     seekstart(cifdata)
-    if natoms == 0
+    if length(atoms) == 0
         throw(ArgumentError("""\n 
             Could not find any atom in mmCIF file matching the selection. 
 
@@ -162,32 +160,31 @@ ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL 
 =#
 
 # read atom from mmCIF file
-function read_atom_mmCIF_base(record::String, _atom_site_field_inds; float_type=Float64)
+function read_atom_mmCIF_base(record::String, _atom_site_field_inds)
     if !startswith(record, r"ATOM|HETATM")
         return nothing
     end
-    atom = Atom{float_type}(;index=1, segname="")
+    atom = LightAtom(;index=1, segname="")
     mmcif_data = split(record)
-    atom.index_pdb = _parse(Int, mmcif_data[_atom_site_field_inds["id"]])
+    atom.index_pdb = _parse(Int32, mmcif_data[_atom_site_field_inds["id"]])
     atom.name = mmcif_data[_atom_site_field_inds["label_atom_id"]]
     atom.resname = mmcif_data[_atom_site_field_inds["label_comp_id"]]
     atom.chain = mmcif_data[_atom_site_field_inds["label_asym_id"]]
-    atom.resnum = _parse(Int, mmcif_data[_atom_site_field_inds["label_seq_id"]])
-    atom.segname = ""
-    atom.x = _parse(Float64, mmcif_data[_atom_site_field_inds["Cartn_x"]])
-    atom.y = _parse(Float64, mmcif_data[_atom_site_field_inds["Cartn_y"]])
-    atom.z = _parse(Float64, mmcif_data[_atom_site_field_inds["Cartn_z"]])
+    atom.resnum = _parse(Int32, mmcif_data[_atom_site_field_inds["label_seq_id"]])
+    atom.x = _parse(Float32, mmcif_data[_atom_site_field_inds["Cartn_x"]])
+    atom.y = _parse(Float32, mmcif_data[_atom_site_field_inds["Cartn_y"]])
+    atom.z = _parse(Float32, mmcif_data[_atom_site_field_inds["Cartn_z"]])
     if haskey(_atom_site_field_inds, "B_iso_or_equiv")
-        atom.beta = _parse(Float64, mmcif_data[_atom_site_field_inds["B_iso_or_equiv"]])
+        atom.beta = _parse(Float32, mmcif_data[_atom_site_field_inds["B_iso_or_equiv"]])
     end
     if haskey(_atom_site_field_inds, "occupancy")
-        atom.occup = _parse(Float64, mmcif_data[_atom_site_field_inds["occupancy"]])
+        atom.occup = _parse(Float32, mmcif_data[_atom_site_field_inds["occupancy"]])
     end
     if haskey(_atom_site_field_inds, "pdbx_PDB_model_num")
-        atom.model = _parse(Int, mmcif_data[_atom_site_field_inds["pdbx_PDB_model_num"]])
+        atom.model = _parse(Int32, mmcif_data[_atom_site_field_inds["pdbx_PDB_model_num"]])
     end
     if haskey(_atom_site_field_inds, "pdbx_formal_charge")
-        atom.charge = mmcif_data[_atom_site_field_inds["pdbx_formal_charge"]]
+        atom.charge = _parse(Float32, mmcif_data[_atom_site_field_inds["pdbx_formal_charge"]])
     end
     return atom
 end
@@ -196,6 +193,126 @@ end
 # test with eachsplit
 #
 function _parse_mmCIF_eachsplit(
+    cifdata::Union{IOStream,IOBuffer};
+    only::Function,
+    memory_available::Real=0.5,
+    stop_at=nothing,
+)
+    _atom_symbol_for_cif_field = Dict{String, Tuple{DataType,Symbol}}(
+        "id" => (Int32, :index_pdb),
+        "label_atom_id" => (String7, :name),
+        "label_comp_id" => (String7, :resname),
+        "label_asym_id" => (String3, :chain),
+        "label_seq_id" => (Int32, :resnum),
+        "Cartn_x" => (Float32,:x),
+        "Cartn_y" => (Float32,:y),
+        "Cartn_z" => (Float32,:z),
+        "occupancy" => (Float32,:occup),
+        "B_iso_or_equiv" => (Float32,:beta),
+        "pdbx_formal_charge" => (Float32,:charge),
+        "pdbx_PDB_model_num" => (Int32,:model),
+    )
+    _atom_site_field_inds = Dict{String,Int}()
+    ifield = 0
+    atoms = LightAtom[]
+    lastatom = LightAtom()
+    _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
+    local NCOLS, col_indices, col_types, col_field
+    for line in eachline(cifdata)
+        # Reading the headers of the _atom_site loop
+        if occursin("_atom_site.", line)
+            field_end = findfirst(<=(' '), line) 
+            if isnothing(field_end)
+                field_end = length(line) + 1
+            end
+            field = @view(line[12:field_end-1])
+            ifield += 1
+            _atom_site_field_inds[field] = ifield
+        end
+        # Header ended
+        if startswith(line, r"ATOM|HETATM")
+            for key in keys(_atom_symbol_for_cif_field)
+                if haskey(_atom_site_field_inds, key)
+                    push!(_atom_field_columns, (_atom_site_field_inds[key], _atom_symbol_for_cif_field[key]))
+                end
+            end
+            sort!( _atom_field_columns; by = first)
+            col_indices = NTuple{length(_atom_field_columns),Int}(first(el) for el in _atom_field_columns)
+            col_types = NTuple{length(_atom_field_columns),DataType}(first(last(el)) for el in _atom_field_columns)
+            col_field = NTuple{length(_atom_field_columns),Symbol}(last(last(el)) for el in _atom_field_columns)
+            NCOLS = length(keys(_atom_site_field_inds))
+            break
+        end
+    end
+    seekstart(cifdata)
+    for line in eachline(cifdata)
+        !startswith(line, r"ATOM|HETATM") && continue
+        # Assign the atom fields to each column
+        atom = read_atom_mmCIF_eachsplit(
+            Val(NCOLS), line, col_indices, col_types, col_field;
+            lastatom,
+        )
+        lastatom = atom
+        if only(atom)
+            push!(atoms, atom)
+        end
+        if !isnothing(stop_at) && (length(atoms) >= stop_at)
+            break
+        end
+        if mod(length(atoms), 1000) == 0
+            if Sys.free_memory() < (1 - memory_available) * Sys.total_memory()
+                @warn """\n
+                    Memory limit reached. $(length(atoms)) atoms read so far will be returned.
+                    Size of the atoms array: $(round(Base.summarysize(atoms) / 1024^3; digits=3)) MB
+
+                """ _file = nothing _line = nothing
+                return atoms
+            end
+        end
+    end
+    seekstart(cifdata)
+    if length(atoms) == 0
+        throw(ArgumentError("""\n 
+            Could not find any atom in mmCIF file matching the selection. 
+
+        """))
+    end
+    return atoms
+end
+
+function read_atom_mmCIF_eachsplit(
+    ::Val{NCOLS}, record::String, col_indices, col_types, col_field;
+    lastatom::AbstractAtom,
+) where {NCOLS}
+    fields = NTuple{NCOLS}(eachsplit(record))
+    atom = LightAtom(; index = index(lastatom) + 1, residue = residue(lastatom))
+    for (ifield, field) in enumerate(col_field)
+        if col_types[ifield] == Float32
+            setfield!(atom, field, parse(Float32, fields[col_indices[ifield]]))
+        end
+        if col_types[ifield] == Int32
+            setfield!(atom, field, parse(Int32, fields[col_indices[ifield]]))
+        end
+        if col_types[ifield] == String7
+            setfield!(atom, field, String7(fields[col_indices[ifield]]))
+        end
+        if col_types[ifield] == String3
+            setfield!(atom, field, String3(fields[col_indices[ifield]]))
+        end
+    end
+    #for (ifield, field) in enumerate(col_field)
+    #    setfield!(atom, field, _parse(col_types[ifield], fields[col_indices[ifield]]))
+    #end
+    if !same_residue(atom, lastatom)
+        atom.residue = residue(lastatom) + 1
+    end
+    return atom
+end
+
+#
+# test with CSV.Rows
+#
+function _parse_mmCIF_csv(
     cifdata::Union{IOStream,IOBuffer};
     only::Function,
     memory_available::Real=0.5,
@@ -216,14 +333,11 @@ function _parse_mmCIF_eachsplit(
         "pdbx_formal_charge" => (String,:charge),
         "pdbx_PDB_model_num" => (Int,:model),
     )
-    _atom_site_field_inds = Dict{Int, String}()
+    _atom_site_field_inds = Dict{String,Int}()
     ifield = 0
-    index = 0
-    iresidue = 0
-    natoms = 0
-    atoms = Atom{float_type}[]
-    lastatom = Atom{float_type}()
-    for (iline, line) in enumerate(eachline(cifdata))
+    _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
+    local col_types, col_field
+    for line in eachline(cifdata)
         # Reading the headers of the _atom_site loop
         if occursin("_atom_site.", line)
             field_end = findfirst(<=(' '), line) 
@@ -232,38 +346,28 @@ function _parse_mmCIF_eachsplit(
             end
             field = @view(line[12:field_end-1])
             ifield += 1
-            _atom_site_field_inds[ifield] = field
+            _atom_site_field_inds[field] = ifield
         end
-        atom = read_atom_mmCIF_eachsplit(line, _atom_site_field_inds, _atom_symbol_for_cif_field; float_type)
-        if !isnothing(atom)
-            index += 1
-            atom.index = index
-            #if !same_residue(atom, lastatom)
-            #    iresidue += 1
-            #end
-            atom.residue = iresidue
-            if only(atom)
-                natoms += 1
-                push!(atoms, atom)
+        if startswith(line, r"ATOM|HETATM")
+            for key in keys(_atom_site_field_inds)
+                if haskey(_atom_symbol_for_cif_field, key)
+                    push!(_atom_field_columns, (_atom_site_field_inds[key], _atom_symbol_for_cif_field[key]))
+                else
+                    push!(_atom_field_columns, (_atom_site_field_inds[key], (String, :ignore)))
+                end
             end
-            lastatom = atom
-        end
-        if !isnothing(stop_at) && (natoms >= stop_at)
+            sort!( _atom_field_columns; by = first)
+            # this is used to identify atom lines later
+            _atom_field_columns[1] = (1, (String, :atom))
+            col_types = DataType[first(last(el)) for el in _atom_field_columns]
+            col_field = Symbol[last(last(el)) for el in _atom_field_columns]
             break
         end
-        if mod(iline, 1000) == 0
-            if Sys.free_memory() < (1 - memory_available) * Sys.total_memory()
-                @warn """\n
-                    Memory limit reached. $natoms atoms read so far will be returned.
-                    Size of the atoms array: $(round(Base.summarysize(atoms) / 1024^3; digits=3)) MB
-
-                """ _file = nothing _line = nothing
-                return atoms
-            end
-        end
     end
+    col_types = SVector{length(col_types),DataType}(col_types)
     seekstart(cifdata)
-    if natoms == 0
+    atoms = read_atoms_mmCIF_csv(float_type,cifdata, col_types, col_field, only, memory_available, stop_at)
+    if length(atoms) == 0
         throw(ArgumentError("""\n 
             Could not find any atom in mmCIF file matching the selection. 
 
@@ -272,31 +376,53 @@ function _parse_mmCIF_eachsplit(
     return atoms
 end
 
-function read_atom_mmCIF_eachsplit(record::String, _atom_site_field_inds, _atom_symbol_for_cif_field; float_type=Float64)
-    if !startswith(record, r"ATOM|HETATM")
-        return nothing
-    end
-    NROWS = length(keys(_atom_site_field_inds))
-    _read_atom_mmCIF_eachsplit(Val(NROWS), record::String, _atom_site_field_inds, _atom_symbol_for_cif_field; float_type)
-end
-
-function _read_atom_mmCIF_eachsplit(::Val{NROWS}, record::String, _atom_site_field_inds, _atom_symbol_for_cif_field; float_type=Float64) where {NROWS}
-    if !startswith(record, r"ATOM|HETATM")
-        return nothing
-    end
-    atom = Atom{float_type}(;index=1, segname="")
-    fields = NTuple{NROWS}(eachsplit(record))
-    for (isp, sp) in enumerate(fields)
-        if isp in keys(_atom_site_field_inds) 
-            cif_field = _atom_site_field_inds[isp]
-            if cif_field in keys(_atom_symbol_for_cif_field)
-                data_type = _atom_symbol_for_cif_field[cif_field][1]
-                atom_field = _atom_symbol_for_cif_field[cif_field][2]
-                value = _parse(data_type, sp) 
-                value = value isa AbstractString ? string(value) : value
-                setfield!(atom, atom_field, value)
+function read_atoms_mmCIF_csv(::Type{float_type}, cifdata, col_types, col_field, only, memory_available, stop_at) where {float_type}
+    index = 0
+    iresidue = 0
+    lastatom = Atom{float_type}()
+    atoms = Atom{float_type}[]
+    for row in CSV.Rows(cifdata; 
+        delim=' ', 
+        stripwhitespace=true, 
+        ignorerepeated=true, 
+        header=col_field, 
+        types=(i,name) -> col_types[i], 
+        silencewarnings=true,
+        reusebuffer=true,
+    )
+        if row.atom in ("ATOM","HETATM")
+            atom = Atom{float_type}()
+            index += 1
+            for field in col_field
+                if field in (:atom, :ignore)
+                    continue
+                end
+                setfield!(atom, field, getproperty(row, field))
             end
+            atom.index = index
+            atom.segname = ""
+            if !same_residue(atom, lastatom)
+                iresidue += 1
+            end
+            atom.residue = iresidue
+            if only(atom)
+                push!(atoms, atom)
+            end
+            lastatom = atom
         end
+        if !isnothing(stop_at) && (length(atoms) >= stop_at)
+            break
+        end
+        if mod(length(atoms), 1000) == 0
+            if Sys.free_memory() < (1 - memory_available) * Sys.total_memory()
+                 @warn """\n
+                     Memory limit reached. $(length(atoms)) atoms read so far will be returned.
+                     Size of the atoms array: $(round(Base.summarysize(atoms) / 1024^3; digits=3)) MB
+
+                 """ _file = nothing _line = nothing
+                 return atoms
+             end
+         end
     end
-    return atom
+    return atoms
 end

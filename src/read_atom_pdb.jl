@@ -24,16 +24,16 @@ function _parse(::Type{T}, string, range=nothing) where {T<:AbstractFloat}
     return isnothing(x) ? zero(T) : x
 end
 
-function _parse(::Type{T}, string, range=nothing; alt=nothing) where {T<:Integer}
+function _parse(::Type{T}, string, range=nothing; alt::Union{T,Nothing}=nothing) where {T<:Integer}
     s = if isnothing(range)
         string
     else
         @view(string[range[begin]:min(range[end],length(string))])
     end
-    i = tryparse(Int, s)
+    i = tryparse(T, s)
     !isnothing(i) && return i
     # try to parse as hexadecimal number
-    i = tryparse(Int, s, base=16)
+    i = tryparse(T, s, base=16)
     !isnothing(i) && return i
     if isnothing(alt)
         error("Could not read integer from string: \"$s\"")
@@ -42,18 +42,18 @@ function _parse(::Type{T}, string, range=nothing; alt=nothing) where {T<:Integer
     end
 end
 
-function _parse(::Type{S}, string, range=nothing; alt=" ") where {S<:AbstractString}
+function _parse(::Type{S}, string, range=nothing; alt::Union{S,Nothing}=nothing) where {S<:AbstractString}
     s, range = if isnothing(range)
         string, 1:length(string)
     else
         @view(string[range[begin]:min(range[end],length(string))]), range
     end
-    length(range) > 0 || return alt
+    length(range) > 0 || return isnothing(alt) ? S(" ") : alt
     first_char = findfirst(>(' '), s)
-    isnothing(first_char) && return alt
+    isnothing(first_char) && return isnothing(alt) ? S(" ") : alt
     first_char = first(range) + first_char - 1
     last_char = first(range) + findlast(>(' '), s) - 1
-    return @view(string[first_char:last_char])
+    return S(string[first_char:last_char])
 end
 
 # read atom from PDB file

@@ -10,6 +10,7 @@ using Printf: @printf, @sprintf
 using StaticArrays: SVector
 using TestItems: @testitem
 using OrderedCollections: OrderedDict
+using InlineStrings: String3, String7
 
 # AtomsBase interface compatibility
 import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
@@ -18,6 +19,7 @@ export atomic_number, atomic_symbol, atomic_mass, position
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
 export readCIF
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
+export LightAtom
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
 export coor, maxmin, distance, closest
@@ -48,6 +50,7 @@ include("./protein_residues.jl")
 # Data structures
 #
 include("./Atom.jl")
+include("./LightAtom.jl")
 include("./Residue.jl")
 
 # Selection functions

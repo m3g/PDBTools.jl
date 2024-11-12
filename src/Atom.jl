@@ -1,3 +1,5 @@
+abstract type AbstractAtom end
+
 """
     Atom::DataType
 
@@ -84,7 +86,7 @@ julia> custom_field(atom, :index)
 ```
 
 """
-Base.@kwdef mutable struct Atom{T<:AbstractFloat}
+Base.@kwdef mutable struct Atom <: AbstractAtom
     index::Int = 0 # The sequential index of the atoms in the file
     index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
     name::String = "X"
@@ -92,11 +94,11 @@ Base.@kwdef mutable struct Atom{T<:AbstractFloat}
     chain::String = "X"
     resnum::Int = 0 # Number of residue as written in PDB file
     residue::Int = 0 # Sequential residue (molecule) number in file
-    x::T = 0.0
-    y::T = 0.0
-    z::T = 0.0
-    beta::T = 0.0
-    occup::T = 0.0
+    x::Float64 = 0.0
+    y::Float64 = 0.0
+    z::Float64 = 0.0
+    beta::Float64 = 0.0
+    occup::Float64 = 0.0
     model::Int = 0
     segname::String = "XXXX" # Segment name (cols 73:76)
     pdb_element::String = "X"
@@ -104,41 +106,43 @@ Base.@kwdef mutable struct Atom{T<:AbstractFloat}
     custom::Dict{Symbol,Any} = Dict{Symbol,Any}()
 end
 
-index(atom::Atom) = atom.index
-index_pdb(atom::Atom) = atom.index_pdb
-name(atom::Atom) = atom.name
-resname(atom::Atom) = atom.resname
-chain(atom::Atom) = atom.chain
-resnum(atom::Atom) = atom.resnum
-residue(atom::Atom) = atom.residue
-beta(atom::Atom) = atom.beta
-occup(atom::Atom) = atom.occup
-model(atom::Atom) = atom.model
-segname(atom::Atom) = atom.segname
+index(atom::AbstractAtom) = atom.index
+index_pdb(atom::AbstractAtom) = atom.index_pdb
+name(atom::AbstractAtom) = atom.name
+resname(atom::AbstractAtom) = atom.resname
+chain(atom::AbstractAtom) = atom.chain
+resnum(atom::AbstractAtom) = atom.resnum
+residue(atom::AbstractAtom) = atom.residue
+beta(atom::AbstractAtom) = atom.beta
+occup(atom::AbstractAtom) = atom.occup
+model(atom::AbstractAtom) = atom.model
+segname(atom::AbstractAtom) = atom.segname
+charge(atom::AbstractAtom) = atom.charge
+
 pdb_element(atom::Atom) = atom.pdb_element
-charge(atom::Atom) = atom.charge
 custom_field(atom::Atom, field::Symbol) = atom.custom[field]
 
 import Base: getproperty
-getproperty(atom::Atom, s::Symbol) = getproperty(atom, Val(s))
-getproperty(atom::Atom, ::Val{:index}) = getfield(atom, :index)
-getproperty(atom::Atom, ::Val{:index_pdb}) = getfield(atom, :index_pdb)
-getproperty(atom::Atom, ::Val{:name}) = getfield(atom, :name)
-getproperty(atom::Atom, ::Val{:resname}) = getfield(atom, :resname)
-getproperty(atom::Atom, ::Val{:chain}) = getfield(atom, :chain)
-getproperty(atom::Atom, ::Val{:resnum}) = getfield(atom, :resnum)
-getproperty(atom::Atom, ::Val{:residue}) = getfield(atom, :residue)
-getproperty(atom::Atom, ::Val{:beta}) = getfield(atom, :beta)
-getproperty(atom::Atom, ::Val{:occup}) = getfield(atom, :occup)
-getproperty(atom::Atom, ::Val{:model}) = getfield(atom, :model)
-getproperty(atom::Atom, ::Val{:segname}) = getfield(atom, :segname)
-getproperty(atom::Atom, ::Val{:pdb_element}) = getfield(atom, :pdb_element)
-getproperty(atom::Atom, ::Val{:charge}) = getfield(atom, :charge)
-getproperty(atom::Atom, ::Val{:x}) = getfield(atom, :x)
-getproperty(atom::Atom, ::Val{:y}) = getfield(atom, :y)
-getproperty(atom::Atom, ::Val{:z}) = getfield(atom, :z)
+getproperty(atom::AbstractAtom, s::Symbol) = getproperty(atom, Val(s))
+getproperty(atom::AbstractAtom, ::Val{:index}) = getfield(atom, :index)
+getproperty(atom::AbstractAtom, ::Val{:index_pdb}) = getfield(atom, :index_pdb)
+getproperty(atom::AbstractAtom, ::Val{:name}) = getfield(atom, :name)
+getproperty(atom::AbstractAtom, ::Val{:resname}) = getfield(atom, :resname)
+getproperty(atom::AbstractAtom, ::Val{:chain}) = getfield(atom, :chain)
+getproperty(atom::AbstractAtom, ::Val{:resnum}) = getfield(atom, :resnum)
+getproperty(atom::AbstractAtom, ::Val{:residue}) = getfield(atom, :residue)
+getproperty(atom::AbstractAtom, ::Val{:beta}) = getfield(atom, :beta)
+getproperty(atom::AbstractAtom, ::Val{:occup}) = getfield(atom, :occup)
+getproperty(atom::AbstractAtom, ::Val{:model}) = getfield(atom, :model)
+getproperty(atom::AbstractAtom, ::Val{:segname}) = getfield(atom, :segname)
+getproperty(atom::AbstractAtom, ::Val{:charge}) = getfield(atom, :charge)
+getproperty(atom::AbstractAtom, ::Val{:x}) = getfield(atom, :x)
+getproperty(atom::AbstractAtom, ::Val{:y}) = getfield(atom, :y)
+getproperty(atom::AbstractAtom, ::Val{:z}) = getfield(atom, :z)
+# Not avaiable in ImmutableAtom
+getproperty(atom::AbstractAtom, ::Val{:pdb_element}) = getfield(atom, :pdb_element)
 # Custom fileds (type unstable)
-getproperty(atom::Atom, ::Val{S}) where {S} = atom.custom[field]
+getproperty(atom::AbstractAtom, ::Val{S}) where {S} = atom.custom[field]
 
 @testitem "Atom default fields" begin
     using PDBTools
@@ -174,9 +178,9 @@ end
 #
 # Compatibility with AtomsBase interface
 #
-atomic_symbol(atom::Atom) = element_symbol(atom)
-atomic_mass(atom::Atom) = mass(atom)
-position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
+atomic_symbol(atom::AbstractAtom) = element_symbol(atom)
+atomic_mass(atom::AbstractAtom) = mass(atom)
+position(atom::AbstractAtom) = SVector(atom.x, atom.y, atom.z)
 
 const atom_title = @sprintf(
     "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
@@ -195,7 +199,7 @@ const atom_title = @sprintf(
     "segname",
     "index_pdb"
 )
-atom_line(atom::Atom) = @sprintf(
+atom_line(atom::AbstractAtom) = @sprintf(
     "%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i",
     atom.index,
     atom.name,
@@ -222,7 +226,7 @@ atom_line(atom::Atom) = @sprintf(
 end
 
 """
-    printatom(atom::Atom)
+    printatom(atom::AbstractAtom)
 
 Prints an `Atom` structure in a human-readable format, with a title line.
 
@@ -242,7 +246,7 @@ julia> atoms[1] # default show method
 ```
 
 """
-function printatom(atom::Atom)
+function printatom(atom::AbstractAtom)
     println(atom_title)
     println(atom_line(atom))
 end
@@ -250,7 +254,7 @@ end
 #
 # Print a formatted list of atoms
 #
-function print_short_atom_list(io::IO, atoms::AbstractVector{Atom})
+function print_short_atom_list(io::IO, atoms::AbstractVector{<:AbstractAtom})
     println(io, atom_title)
     for i = 1:min(length(atoms), 3)
         print(io, atom_line(atoms[i]))
@@ -265,11 +269,11 @@ function print_short_atom_list(io::IO, atoms::AbstractVector{Atom})
     end
 end
 
-function Base.show(io::IO, atom::Atom)
+function Base.show(io::IO, atom::AbstractAtom)
     print(io, atom_line(atom))
 end
 
-function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom})
+function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:AbstractAtom})
     println(io, "   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
     print_short_atom_list(io, atoms)
 end
@@ -278,13 +282,13 @@ end
 # atom properties on the structure
 #
 export isprotein, isbackbone, issidechain
-isprotein(atom::Atom) = haskey(protein_residues, atom.resname)
+isprotein(atom::AbstractAtom) = haskey(protein_residues, atom.resname)
 
 const backbone_atoms = ["N", "CA", "C", "O"]
-isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms
+isbackbone(atom::AbstractAtom; backbone_atoms=backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms
 
 const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
-issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
+issidechain(atom::AbstractAtom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
 
 @testitem "atoms in struct" begin
     pdb = readPDB(PDBTools.TESTPDB)
@@ -301,13 +305,11 @@ end
 # Function that checks if two atoms belong to the same residue
 # without, of course, checking the residue counter
 #
-function same_residue(atom1::Atom, atom2::Atom)
-    atom1.resnum != atom2.resnum && return false
-    atom1.model != atom2.model && return false
-    atom1.chain != atom2.chain && return false
-    atom1.resname != atom2.resname && return false
-    atom1.segname != atom2.segname && return false
-    return true
+function same_residue(atom1::AbstractAtom, atom2::AbstractAtom)
+    return (atom1.resnum == atom2.resnum) & 
+           (atom1.model == atom2.model) &
+           (atom1.chain == atom2.chain) &
+           (atom1.resname == atom2.resname)
 end
 
 @testitem "same_residue" begin
@@ -321,7 +323,7 @@ end
 # Atom elemental properties
 #
 """
-    element(atom::Atom)
+    element(atom::AbstractAtom)
 
 Returns the element symbol, as a string, of an atom given the `Atom` structure.
 If the `pdb_element` is empty or "X", the element is inferred from the atom name. 
@@ -339,7 +341,7 @@ julia> element(at)
 ```
 
 """
-function element(atom::Atom)
+function element(atom::AbstractAtom)
     # First, check if it was defined in pdb_element
     element_name = pdb_element(atom)
     if !isempty(element_name) && element_name != "X"
@@ -386,8 +388,8 @@ end
 #
 # Auxiliary function to retrive another property for matching elements
 #
-get_element_property(at::Atom, property::Symbol) = get_element_property(at, Val(property))
-function get_element_property(at::Atom, ::Val{property}) where {property}
+get_element_property(at::AbstractAtom, property::Symbol) = get_element_property(at, Val(property))
+function get_element_property(at::AbstractAtom, ::Val{property}) where {property}
     el = element(at)
     if isnothing(el) || !haskey(elements, el)
         return nothing
@@ -415,10 +417,10 @@ julia> atomic_number(at)
 ```
 
 """
-atomic_number(at::Atom) = get_element_property(at, :atomic_number)
+atomic_number(at::AbstractAtom) = get_element_property(at, :atomic_number)
 
 """
-    element_name(atom::Atom)
+    element_name(atom::AbstractAtom)
 
 Returns the element name of an atom given its name, or `Atom` structure.
 
@@ -434,11 +436,11 @@ julia> element_name(at)
 ```
 
 """
-element_name(at::Atom) = get_element_property(at, :name)
+element_name(at::AbstractAtom) = get_element_property(at, :name)
 
 
 """
-    element_symbol(atom::Atom)
+    element_symbol(atom::AbstractAtom)
 
 Returns a symbol for element name of an atom given its name, or `Atom` structure.
 
@@ -454,7 +456,7 @@ julia> element_symbol(at)
 ```
 
 """
-element_symbol(at::Atom) = get_element_property(at, :symbol)
+element_symbol(at::AbstractAtom) = get_element_property(at, :symbol)
 
 """
     element_symbol_string(atom::Atom)
@@ -473,11 +475,11 @@ julia> element_symbol_string(at)
 ```
 
 """
-element_symbol_string(at::Atom) = get_element_property(at, :symbol_string)
+element_symbol_string(at::AbstractAtom) = get_element_property(at, :symbol_string)
 
 """
-    mass(atom::Atom)
-    mass(atoms::AbstractVector{<:Atoms})
+    mass(atom::AbstractAtom)
+    mass(atoms::AbstractVector{<:AbstractAtoms})
 
 Returns the mass of an atom given its name, or `Atom` structure, or the total mass of a vector of `Atom`s. 
 
@@ -499,7 +501,7 @@ julia> mass(atoms)
 ```
 
 """
-function mass(at::Atom)
+function mass(at::AbstractAtom)
    mass = if haskey(at.custom, :mass)
        at.custom[:mass]::Float64
    elseif element(at) == "X"
@@ -509,7 +511,7 @@ function mass(at::Atom)
    end
    return mass
 end
-function mass(atoms::AbstractVector{<:Atom}) 
+function mass(atoms::AbstractVector{<:AbstractAtom}) 
     totmass = 0.0
     for at in atoms
         if isnothing(mass(at))
@@ -520,7 +522,7 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
-function Base.show(io::IO, atoms::AbstractVector{Atom})
+function Base.show(io::IO, atoms::AbstractVector{AbstractAtom})
     println(io, " Structure file with ", length(atoms), " atoms. ")
 end
 
