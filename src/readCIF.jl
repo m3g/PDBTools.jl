@@ -125,7 +125,7 @@ ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL 
 function _parse_mmCIF(
     cifdata::Union{IOStream,IOBuffer};
     only::Function,
-    memory_available::Real=0.5,
+    memory_available::Real=0.9,
     stop_at=nothing,
 )
     _atom_symbol_for_cif_field = Dict{String, Tuple{DataType,Symbol}}(
