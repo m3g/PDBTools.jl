@@ -86,24 +86,24 @@ julia> custom_field(atom, :index)
 ```
 
 """
-Base.@kwdef mutable struct Atom <: AbstractAtom
-    index::Int = 0 # The sequential index of the atoms in the file
-    index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
-    name::String = "X"
-    resname::String = "XXX"
-    chain::String = "X"
-    resnum::Int = 0 # Number of residue as written in PDB file
-    residue::Int = 0 # Sequential residue (molecule) number in file
-    x::Float64 = 0.0
-    y::Float64 = 0.0
-    z::Float64 = 0.0
-    beta::Float64 = 0.0
-    occup::Float64 = 0.0
-    model::Int = 0
-    segname::String = "XXXX" # Segment name (cols 73:76)
-    pdb_element::String = "X"
-    charge::Union{Nothing,String} = nothing
-    custom::Dict{Symbol,Any} = Dict{Symbol,Any}()
+Base.@kwdef mutable struct Atom{IntType, String7Type, String3Type, FloatType, ChargeType, DictType}  <: AbstractAtom
+    index::IntType = Int32(0) # The sequential index of the atoms in the file
+    index_pdb::IntType = Int32(0) # The index as written in the PDB file (might be anything)
+    name::String7Type = String7("X")
+    resname::String7Type = String7("XXX")
+    chain::String3Type = String3("X")
+    resnum::IntType = Int32(0) # Number of residue as written in PDB file
+    residue::IntType = Int32(0) # Sequential residue (molecule) number in file
+    x::FloatType = 0.0f0
+    y::FloatType = 0.0f0
+    z::FloatType = 0.0f0
+    beta::FloatType = 0.0f0
+    occup::FloatType = 0.0f0
+    model::IntType = Int32(0)
+    segname::String7Type = String7("XXXX") # Segment name (cols 73:76)
+    pdb_element::String3Type = String3("X")
+    charge::ChargeType = nothing
+    custom::DictType = Dict{Symbol,Any}()
 end
 
 index(atom::AbstractAtom) = atom.index
