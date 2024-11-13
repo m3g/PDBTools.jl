@@ -147,7 +147,7 @@ function _parse_mmCIF(
     atoms = LightAtom[]
     lastatom = LightAtom()
     _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
-    local NCOLS, col_indices, col_types, col_field
+    local NCOLS, col_indices, col_field
     for line in eachline(cifdata)
         # Reading the headers of the _atom_site loop
         if occursin("_atom_site.", line)
@@ -168,20 +168,18 @@ function _parse_mmCIF(
             end
             sort!( _atom_field_columns; by = first)
             col_indices = NTuple{length(_atom_field_columns),Int}(first(el) for el in _atom_field_columns)
-            col_types = NTuple{length(_atom_field_columns),DataType}(first(last(el)) for el in _atom_field_columns)
             col_field = NTuple{length(_atom_field_columns),Symbol}(last(last(el)) for el in _atom_field_columns)
             NCOLS = length(keys(_atom_site_field_inds))
             break
         end
     end
-    col_types = Val.(col_types)
-    col_field = Val.(col_field)
+    inds_and_names = ntuple(length(col_indices)) do i 
+        ((col_indices[i], Val(col_field[i]))) 
+    end
     seekstart(cifdata)
     for line in eachline(cifdata)
         if startswith(line, r"ATOM|HETATM")
-            atom = read_atom_mmCIF(
-                Val(NCOLS), line, col_indices, col_types, col_field, lastatom 
-            )
+            atom = read_atom_mmCIF(Val(NCOLS), line, inds_and_names, lastatom)
             only(atom) && push!(atoms, atom)
             _maximum_read(atoms, stop_at, memory_available) && break
             lastatom = atom
@@ -192,31 +190,12 @@ function _parse_mmCIF(
     return atoms
 end
 
-function read_atom_mmCIF(
-    ::Val{NCOLS}, record, col_indices, col_types, col_field,
-    lastatom::AbstractAtom, 
-) where {NCOLS}
-    fields = NTuple{NCOLS}(eachsplit(record))
+function read_atom_mmCIF(::Val{NCOLS}, record, inds_and_names, lastatom::AbstractAtom) where {NCOLS}
+    field_values = NTuple{NCOLS}(eachsplit(record))
     atom = LightAtom(; index = index(lastatom) + 1, residue = residue(lastatom))
-    setfield_recursive!(atom, fields, col_indices, col_types, col_field)
+    setfield_recursive!(atom, field_values, inds_and_names)
     if !same_residue(atom, lastatom)
         atom.residue = residue(lastatom) + 1
     end
     return atom
-end
-
-#
-# Great contribution from Mason Protter
-# https://discourse.julialang.org/t/unroll-setfield/122545/3?u=lmiq 
-#
-unwrap(::Val{T}) where {T} = T
-function setfield_recursive!(
-    atom, fields::FIELDS, col_indices::INDS, col_types::TYPES, col_field::FIELD, 
-) where {FIELDS, INDS, TYPES, FIELD}
-    isempty(col_indices) && return atom
-    i = first(col_indices)
-    field = unwrap(first(col_field))
-    T = unwrap(first(col_types))
-    setfield!(atom, field, _parse(T, fields[i]))
-    setfield_recursive!(atom, fields, Base.tail(col_indices), Base.tail(col_types), Base.tail(col_field))
 end
