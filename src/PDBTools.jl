@@ -50,7 +50,6 @@ include("./protein_residues.jl")
 # Data structures
 #
 include("./Atom.jl")
-include("./LightAtom.jl")
 include("./Residue.jl")
 
 # Selection functions
@@ -60,11 +59,11 @@ include("./select_with_vmd.jl")
 #
 # Input and output functions
 #
+include("./parsers.jl")
 include("./formula.jl")
-include("./check_mmCIF.jl")
-include("./read_atom_pdb.jl")
 include("./write_atom.jl")
 include("./readPDB.jl")
+include("./readCIF.jl")
 include("./edit.jl")
 include("./writePDB.jl")
 include("./getseq.jl")
@@ -73,7 +72,6 @@ include("./distance.jl")
 include("./maxmin.jl")
 include("./wget.jl")
 include("./tools.jl")
-include("./readCIF.jl")
 
 # Custom element and residue definitions
 include("./custom_types.jl")
