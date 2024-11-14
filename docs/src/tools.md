@@ -78,7 +78,7 @@ julia> custom_elements!(SIRAH)
 julia> sirah_pdb = read_pdb(PDBTools.SIRAHPDB);
 
 julia> resname.(eachresidue(sirah_pdb))
-5-element Vector{String}:
+5-element Vector{InlineStrings.String7}:
  "sI"
  "sR"
  "sX"

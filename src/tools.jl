@@ -133,7 +133,7 @@ Move the center of mass of the atoms to the specified `center` position, which d
 
 # Example
 
-```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
+```julia-repl
 julia> using PDBTools
 
 julia> atoms = read_pdb(PDBTools.SMALLPDB);
