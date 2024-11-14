@@ -117,7 +117,9 @@ ATOM   6    C  CG1 . VAL A 1 1   ? 7.009   20.127  5.418   1.00 61.79 ? 1   VAL 
 ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL A CG2 1 
 =#
 function _supported_cif_fields()
-    return Dict{String, Tuple{DataType,Symbol}}(
+    # We need this to be indexable (not a Dict) to keep the order of the fields
+    # when writting the mmCIF file
+    return (
         "id" => (Int32, :index_pdb),
         "label_atom_id" => (String7, :name), # VMD
         "auth_atom_id" => (String7, :name), # Standard mmCIF
@@ -163,9 +165,9 @@ function _parse_mmCIF(
         end
         # Header ended
         if startswith(line, r"ATOM|HETATM")
-            for key in keys(_atom_symbol_for_cif_field)
+            for (key, keyval) in _atom_symbol_for_cif_field
                 if haskey(_atom_site_field_inds, key)
-                    push!(_atom_field_columns, (_atom_site_field_inds[key], _atom_symbol_for_cif_field[key]))
+                    push!(_atom_field_columns, (_atom_site_field_inds[key], keyval))
                 end
             end
             sort!( _atom_field_columns; by = first)
