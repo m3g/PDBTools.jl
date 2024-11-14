@@ -116,19 +116,17 @@ ATOM   5    C  CB  . VAL A 1 1   ? 6.369   19.044  5.810   1.00 72.12 ? 1   VAL 
 ATOM   6    C  CG1 . VAL A 1 1   ? 7.009   20.127  5.418   1.00 61.79 ? 1   VAL A CG1 1
 ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL A CG2 1 
 =#
-
-function _parse_mmCIF(
-    cifdata::Union{IOStream,IOBuffer};
-    only::Function,
-    memory_available::Real=0.9,
-    stop_at=nothing,
-)
-    _atom_symbol_for_cif_field = Dict{String, Tuple{DataType,Symbol}}(
+function _supported_cif_fields()
+    return Dict{String, Tuple{DataType,Symbol}}(
         "id" => (Int32, :index_pdb),
-        "label_atom_id" => (String7, :name),
-        "label_comp_id" => (String7, :resname),
-        "label_asym_id" => (String3, :chain),
-        "label_seq_id" => (Int32, :resnum),
+        "label_atom_id" => (String7, :name), # VMD
+        "auth_atom_id" => (String7, :name), # Standard mmCIF
+        "label_comp_id" => (String7, :resname), # VMD
+        "auth_comp_id" => (String7, :resname), # Standard mmCIF
+        "label_asym_id" => (String3, :chain), # VMD
+        "auth_asym_id" => (String3, :chain), # Standard mmCIF
+        "label_seq_id" => (Int32, :resnum), # VMD
+        "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "Cartn_x" => (Float32,:x),
         "Cartn_y" => (Float32,:y),
         "Cartn_z" => (Float32,:z),
@@ -137,6 +135,15 @@ function _parse_mmCIF(
         "pdbx_formal_charge" => (Float32,:charge),
         "pdbx_PDB_model_num" => (Int32,:model),
     )
+end
+
+function _parse_mmCIF(
+    cifdata::Union{IOStream,IOBuffer};
+    only::Function,
+    memory_available::Real=0.9,
+    stop_at=nothing,
+)
+    _atom_symbol_for_cif_field = _supported_cif_fields()
     _atom_site_field_inds = Dict{String,Int}()
     ifield = 0
     atoms = Atom{Nothing}[]
