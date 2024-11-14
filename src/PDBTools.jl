@@ -77,5 +77,7 @@ include("./tools.jl")
 # Custom element and residue definitions
 include("./custom_types.jl")
 
+# Legacy compatibility
+include("./legacy.jl")
 
 end
