@@ -10,37 +10,32 @@ Reads a mmCIF file and stores the data in a vector of type `Atom`.
 If a selection is provided, only the atoms matching the selection will be read. 
 For example, `resname ALA` will select all the atoms in the residue ALA.
 
-If the `only` function keyword is provided, only the atoms for which `only(atom)` is true will be read.
+If the `only` function keyword is provided, only the atoms for which `only(atom)` is true will be returned.
 
 ### Examples
 
 ```julia-repl
-julia> protein = read_pdb("../test/structure.pdb")
-   Array{Atoms,1} with 62026 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-                                                       ⋮ 
-   62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
-   62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
+julia> ats = read_mmcif(PDBTools.SMALLCIF)
+   Array{Atoms,1} with 7 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
+       2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
+       3    C     VAL     A        1        1    8.504   17.378    4.797  1.00 24.80     1                 3
+       5   CB     VAL     A        1        1    6.369   19.044    5.810  1.00 72.12     1                 5
+       6  CG1     VAL     A        1        1    7.009   20.127    5.418  1.00 61.79     1                 6
+       7  CG2     VAL     A        1        1    5.246   18.533    5.681  1.00 80.12     1                 7
 
-julia> ALA = read_pdb("../test/structure.pdb","resname ALA")
-   Array{Atoms,1} with 72 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-                                                       ⋮ 
-    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
-    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
+julia> ats = read_mmcif(PDBTools.SMALLCIF, "index < 3")
+   Array{Atoms,1} with 2 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
+       2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
 
-julia> ALA = read_pdb("../test/structure.pdb", only = atom -> atom.resname == "ALA")
-   Array{Atoms,1} with 72 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-                                                       ⋮ 
-    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
-    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
+julia> ats = read_mmcif(PDBTools.SMALLCIF; only = at -> name(at) == "CA")
+   Array{Atoms,1} with 1 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
+
 ```
 
 """
