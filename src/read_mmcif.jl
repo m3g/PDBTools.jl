@@ -194,7 +194,7 @@ function _parse_mmCIF(
     return atoms
 end
 
-function read_atom_mmCIF(::Val{NCOLS}, record, inds_and_names, lastatom::AbstractAtom) where {NCOLS}
+function read_atom_mmCIF(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) where {NCOLS}
     field_values = NTuple{NCOLS}(eachsplit(record))
     atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
     _fast_setfield!(atom, field_values, inds_and_names)
