@@ -68,14 +68,19 @@ julia> atom = Atom(custom="TEST");
 julia> atom.custom
 "TEST"
 
-julia> atom = Atom(;name = "CA", resname="ALA") # no custom field
-       0   CA     ALA     X        0        0    0.000    0.000    0.000  0.00  0.00     0                 0
+julia> atom = Atom(;name = "CA", resname="ALA"); # no custom field
 
-julia> new_atom = add_custom_field(atom, Dict(:charge => 2.0))
-       0   CA     ALA     X        0        0    0.000    0.000    0.000  0.00  0.00     0                 0
+julia> atom.resname
+"ALA"
+
+julia> new_atom = add_custom_field(atom, Dict(:charge => 2.0));
+
+julia> new_atom.resname
+"ALA"
 
 julia> new_atom.custom[:charge]
 2.0
+
 ```
 # Elements for custom atom types
 
