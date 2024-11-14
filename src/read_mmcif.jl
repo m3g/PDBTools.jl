@@ -122,13 +122,9 @@ function _supported_cif_fields()
     return (
         "id" => (Int32, :index_pdb),
         "label_atom_id" => (String7, :name), # VMD
-        "auth_atom_id" => (String7, :name), # Standard mmCIF
         "label_comp_id" => (String7, :resname), # VMD
-        "auth_comp_id" => (String7, :resname), # Standard mmCIF
         "label_asym_id" => (String3, :chain), # VMD
-        "auth_asym_id" => (String3, :chain), # Standard mmCIF
         "label_seq_id" => (Int32, :resnum), # VMD
-        "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "Cartn_x" => (Float32,:x),
         "Cartn_y" => (Float32,:y),
         "Cartn_z" => (Float32,:z),
@@ -136,6 +132,10 @@ function _supported_cif_fields()
         "B_iso_or_equiv" => (Float32,:beta),
         "pdbx_formal_charge" => (Float32,:charge),
         "pdbx_PDB_model_num" => (Int32,:model),
+        "auth_atom_id" => (String7, :name), # Standard mmCIF
+        "auth_comp_id" => (String7, :resname), # Standard mmCIF
+        "auth_asym_id" => (String3, :chain), # Standard mmCIF
+        "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
     )
 end
 
