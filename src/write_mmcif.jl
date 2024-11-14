@@ -21,16 +21,16 @@ function write_mmcif(filename::AbstractString, atoms::AbstractVector{AtomType}; 
         for (key, _) in _cif_fields
             println(file, "_atom_site.$key")
         end
+        index = 0
         for atom in atoms
             !only(atom) && continue
+            index += 1
             buff = IOBuffer(;append=true)
-            write(buff, "ATOM")
+            write(buff, "ATOM $(@sprintf("%9i", index))")
             for (_, field) in _cif_fields
                 field_type = first(field)
                 field_name = last(field)
-                if field_name == :index
-                    write(buff, "$(@sprintf("%12i", getfield(atom, field_name)))")
-                elseif field_type <: Integer
+                if !(field_name == :index_pdb) && (field_type <: Integer)
                     write(buff, "$(@sprintf("%7i", getfield(atom, field_name)))")
                 elseif field_type <: AbstractFloat
                     write(buff, "$(@sprintf("%12.5f", getfield(atom, field_name)))")
