@@ -53,7 +53,7 @@ julia> coor(residues[1])
 ```
 
 """
-coor(atom::Atom) = SVector{3,Float64}(atom.x, atom.y, atom.z)
+coor(atom::Atom) = SVector{3,Float32}(atom.x, atom.y, atom.z)
 
 function coor(atoms::AbstractVector{<:Atom}, selection::String)
     query = parse_query(selection)
@@ -61,17 +61,10 @@ function coor(atoms::AbstractVector{<:Atom}, selection::String)
 end
 
 function coor(atoms::AbstractVector{<:Atom}; only=all)
-    n = 0
+    x = SVector{3,Float32}[]
     for atom in atoms
         !only(atom) && continue
-        n = n + 1
-    end
-    x = fill(zero(SVector{3,Float64}), n)
-    i = 0
-    for atom in atoms
-        !only(atom) && continue
-        i += 1
-        x[i] = coor(atom)
+        push!(x, coor(atom))
     end
     return x
 end
