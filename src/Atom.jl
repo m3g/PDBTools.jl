@@ -114,6 +114,9 @@ function Atom(;custom::CustomType=nothing, kargs...) where {CustomType}
     return atom
 end
 
+Atom{CustomType}(;kargs...) where {CustomType <: Nothing} = Atom(;custom=nothing, kargs...)
+
+
 index(atom::AbstractAtom) = atom.index
 index_pdb(atom::AbstractAtom) = atom.index_pdb
 name(atom::AbstractAtom) = atom.name
