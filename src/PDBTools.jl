@@ -41,6 +41,7 @@ export SIRAH
 const TESTPDB = "$(@__DIR__)/../test/structure.pdb"
 const SMALLPDB = "$(@__DIR__)/../test/small.pdb"
 const SIRAHPDB = "$(@__DIR__)/../test/sirah.pdb"
+const SMALLCIF = "$(@__DIR__)/../test/small.cif"
 
 # Basic chemistry
 include("./elements.jl")
