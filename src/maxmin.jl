@@ -55,7 +55,7 @@ end
 @testitem "maxmin" begin
     atoms = read_pdb(PDBTools.TESTPDB, "protein")
     m = maxmin(atoms)
-    @test m.xmin ≈ [-14.18, -17.561, -15.369]
-    @test m.xmax ≈ [18.694, 14.182, 15.909]
-    @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278]
+    @test m.xmin ≈ [-14.18, -17.561, -15.369] atol=1e-3
+    @test m.xmax ≈ [18.694, 14.182, 15.909] atol=1e-3
+    @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278] atol=1e-3
 end

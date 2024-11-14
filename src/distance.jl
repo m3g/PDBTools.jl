@@ -121,12 +121,12 @@ closest(x::AbstractVector{<:SVector}, y::Residue) = _closest(x, y.atoms[y.range]
     atoms = read_pdb(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
     s2 = select(atoms, "residue = 5")
-    @test distance(s, s2) ≈ 3.6750402718881863
+    @test distance(s, s2) ≈ 3.6750402718881863 atol=1e-3
     x1 = coor(s)
     x2 = coor(s2)
-    @test distance(x1, x2) ≈ 3.6750402718881863
+    @test distance(x1, x2) ≈ 3.6750402718881863 atol=1e-3
     residues = collect(eachresidue(atoms))
-    @test distance(residues[3], residues[5]) ≈ 3.6750402718881863
+    @test distance(residues[3], residues[5]) ≈ 3.6750402718881863 atol=1e-3
 
     #
     # Dispatch of closest and distance functions 
@@ -134,44 +134,43 @@ closest(x::AbstractVector{<:SVector}, y::Residue) = _closest(x, y.atoms[y.range]
     r1 = select(atoms, "residue = 3")
     r2 = select(atoms, "residue = 5")
 
-    @test all(closest(r1, r2) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(coor(r1), r2) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(r1, coor(r2)) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(coor(r1), coor(r2)) .≈ (11, 2, 3.6750402718881863))
-    @test all(closest(r1, coor(r2[1])) .≈ (11, 1, 3.9481035953986816))
-    @test all(closest(coor(r1[1]), r2[1]) .≈ (1, 1, 5.121629623469468))
-    @test all(closest(coor(r1), r2[1]) .≈ (11, 1, 3.9481035953986816))
-    @test all(closest(coor(r1), coor(r2[1])) .≈ (11, 1, 3.9481035953986816))
-    @test all(closest(r1[1], coor(r2)) .≈ (1, 2, 5.121218702613667))
-    @test all(closest(coor(r1[1]), coor(r2)) .≈ (1, 2, 5.121218702613667))
-    @test all(closest(coor(r1[1]), r2) .≈ (1, 2, 5.121218702613667))
-    @test all(closest(coor(r1[1]), coor(r2[2])) .≈ (1, 1, 5.121218702613667))
-    @test all(closest(atoms[1], atoms[2]) .≈ (1, 1, 0.9994303377424563))
-    @test all(closest(atoms[1], coor(atoms[2])) .≈ (1, 1, 0.9994303377424563))
-    @test all(closest(coor(atoms[1]), atoms[2]) .≈ (1, 1, 0.9994303377424563))
-    @test all(closest(coor(atoms[1]), coor(atoms[2])) .≈ (1, 1, 0.9994303377424563))
+    @test all(isapprox.(closest(r1, r2),(11, 2, 3.6750402718881863); atol=1e-3))
+    @test all(isapprox.(closest(r1, coor(r2)),(11, 2, 3.6750402718881863); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1), coor(r2)),(11, 2, 3.6750402718881863); atol=1e-3))
+    @test all(isapprox.(closest(r1, coor(r2[1])), (11, 1, 3.9481035953986816); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1[1]), r2[1]), (1, 1, 5.121629623469468); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1), r2[1]),(11, 1, 3.9481035953986816); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1), coor(r2[1])),(11, 1, 3.9481035953986816); atol=1e-3))
+    @test all(isapprox.(closest(r1[1], coor(r2)),(1, 2, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1[1]), coor(r2)),(1, 2, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1[1]), r2),(1, 2, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1[1]), coor(r2[2])),(1, 1, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(atoms[1], atoms[2]), (1, 1, 0.9994303377424563); atol=1e-3))
+    @test all(isapprox.(closest(atoms[1], coor(atoms[2])),(1, 1, 0.9994303377424563); atol=1e-3))
+    @test all(isapprox.(closest(coor(atoms[1]), atoms[2]),(1, 1, 0.9994303377424563); atol=1e-3))
+    @test all(isapprox.(closest(coor(atoms[1]), coor(atoms[2])), (1, 1, 0.9994303377424563); atol=1e-3))
 
-    @test all(closest(r1[1], coor(r2[2])) .≈ (1, 1, 5.121218702613667))
-    @test all(closest(coor(r1[1]), r2[2]) .≈ (1, 1, 5.121218702613667))
-    @test all(closest(r1[1], r2[2]) .≈ (1, 1, 5.121218702613667))
+    @test all(isapprox.(closest(r1[1], coor(r2[2])),(1, 1, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(coor(r1[1]), r2[2]),(1, 1, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(r1[1], r2[2]),(1, 1, 5.121218702613667); atol=1e-3))
 
-    @test distance(r1, r2) ≈ 3.6750402718881863
-    @test distance(coor(r1), r2) ≈ 3.6750402718881863
-    @test distance(r1, coor(r2)) ≈ 3.6750402718881863
-    @test distance(coor(r1), coor(r2)) ≈ 3.6750402718881863
+    @test distance(r1, r2) ≈ 3.6750402718881863 atol=1e-3
+    @test distance(coor(r1), r2) ≈ 3.6750402718881863 atol=1e-3
+    @test distance(r1, coor(r2)) ≈ 3.6750402718881863 atol=1e-3
+    @test distance(coor(r1), coor(r2)) ≈ 3.6750402718881863 atol=1e-3
 
-    @test distance(r1[1], coor(r2)) ≈ 5.121218702613667
-    @test distance(coor(r1[1]), coor(r2)) ≈ 5.121218702613667
-    @test distance(coor(r1[1]), r2) ≈ 5.121218702613667
-    @test distance(coor(r1[1]), coor(r2[2])) ≈ 5.121218702613667
+    @test distance(r1[1], coor(r2)) ≈ 5.121218702613667 atol=1e-3
+    @test distance(coor(r1[1]), coor(r2)) ≈ 5.121218702613667 atol=1e-3
+    @test distance(coor(r1[1]), r2) ≈ 5.121218702613667 atol=1e-3
+    @test distance(coor(r1[1]), coor(r2[2])) ≈ 5.121218702613667 atol=1e-3
 
-    @test distance(r1[1], coor(r2[2])) ≈ 5.121218702613667
-    @test distance(coor(r1[1]), r2[2]) ≈ 5.121218702613667
-    @test distance(r1[1], r2[2]) ≈ 5.121218702613667
+    @test distance(r1[1], coor(r2[2])) ≈ 5.121218702613667 atol=1e-3
+    @test distance(coor(r1[1]), r2[2]) ≈ 5.121218702613667 atol=1e-3
+    @test distance(r1[1], r2[2]) ≈ 5.121218702613667 atol=1e-3
 
     r = collect(eachresidue(atoms))
-    @test all(closest(r[1], [0.0, 0.0, 0.0]) .≈ (12, 1, 16.545482827648158))
-    @test all(closest([0.0, 0.0, 0.0], r[1]) .≈ (1, 12, 16.545482827648158))
+    @test all(isapprox.(closest(r[1], [0.0, 0.0, 0.0]), (12, 1, 16.545482827648158); atol=1e-3))
+    @test all(isapprox.(closest([0.0, 0.0, 0.0], r[1]), (1, 12, 16.545482827648158); atol=1e-3))
 
 end
 

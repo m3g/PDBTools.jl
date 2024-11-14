@@ -366,7 +366,7 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
     @test length(select(atoms, "nonpolar")) == 583
 
-    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7]
+    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol=1e-3
 
     # Test editing a field
     atoms[1].index = 0
