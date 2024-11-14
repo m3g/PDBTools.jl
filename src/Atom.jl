@@ -3,27 +3,28 @@ abstract type AbstractAtom end
 """
     Atom::DataType
 
-Structure that contains the atom properties. It is mutable, so it can be edited. 
+Structure that contains the atom properties. It is mutable, so its fields can be modified.
+
 Fields:
 
-    mutable struct Atom
-        index::Int # The sequential index of the atoms in the file
-        index_pdb::Int # The index as written in the PDB file (might be anything)
-        name::String # Atom name
-        resname::String # Residue name
-        chain::String # Chain identifier
-        resnum::Int # Number of residue as written in PDB file
-        residue::Int # Sequential residue (molecule) number in file
-        x::Float64 # x coordinate
-        y::Float64 # y coordinate
-        z::Float64 # z coordinate
-        beta::Float64 # temperature factor
-        occup::Float64 # occupancy
-        model::Int # model number
-        segname::String # Segment name (cols 73:76)
-        pdb_element::String # Element symbol string (cols 77:78)
-        charge::String # Charge (cols: 79:80)
-        custom::Dict{Symbol, Any} # Custom fields
+    mutable struct Atom{CustomType}
+        index::Int32 # The sequential index of the atoms in the file
+        index_pdb::Int32 # The index as written in the PDB file (might be anything)
+        name::String7 # Atom name
+        resname::String7 # Residue name
+        chain::String3 # Chain identifier
+        resnum::Int32 # Number of residue as written in PDB file
+        residue::Int32 # Sequential residue (molecule) number in file
+        x::Float32 # x coordinate
+        y::Float32 # y coordinate
+        z::Float32 # z coordinate
+        beta::Float32 # temperature factor
+        occup::Float32 # occupancy
+        model::Int32 # model number
+        segname::String7 # Segment name (cols 73:76)
+        pdb_element::String3 # Element symbol string (cols 77:78)
+        charge::Float32 # Charge (cols: 79:80)
+        custom::CustomType # Custom fields
     end
 
 ### Example
@@ -64,9 +65,8 @@ julia> position(atoms[1])
 The `pdb_element` and `charge` fields, which are frequently left empty in PDB files, are not printed. 
 The direct access to the fields is considered part of the interface.
 
-Custom fields can be set on `Atom` construction with the `custom` keyword argument, which receives a 
-`Dict{Symbol,Any}` as parameter. They can be retrieved with the `custom_field` function or, if the custom 
-field names does not overlap with an existing field, with the dot syntax. Requires PDBTools > 0.14.3.
+Custom fields can be set on `Atom` construction with the `custom` keyword argument. The Atom structure
+will then be parameterized with the type of `custom`. 
 
 ### Example
 
@@ -75,13 +75,15 @@ julia> using PDBTools
 
 julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1));
 
-julia> atom.c
-"c"
+julia> typeof(atom)
+Atom{Dict{Symbol, Any}}
 
-julia> index(atom)
-0
+julia> atom.custom
+Dict{Symbol, Any} with 2 entries:
+  :index => 1
+  :c     => "c"
 
-julia> custom_field(atom, :index)
+julia> atom.custom[:c]
 1
 ```
 
@@ -150,31 +152,7 @@ occup(atom::AbstractAtom) = atom.occup
 model(atom::AbstractAtom) = atom.model
 segname(atom::AbstractAtom) = atom.segname
 charge(atom::AbstractAtom) = atom.charge
-
 pdb_element(atom::Atom) = atom.pdb_element
-custom_field(atom::Atom, field::Symbol) = atom.custom[field]
-
-import Base: getproperty
-getproperty(atom::AbstractAtom, s::Symbol) = getproperty(atom, Val(s))
-getproperty(atom::AbstractAtom, ::Val{:index}) = getfield(atom, :index)
-getproperty(atom::AbstractAtom, ::Val{:index_pdb}) = getfield(atom, :index_pdb)
-getproperty(atom::AbstractAtom, ::Val{:name}) = getfield(atom, :name)
-getproperty(atom::AbstractAtom, ::Val{:resname}) = getfield(atom, :resname)
-getproperty(atom::AbstractAtom, ::Val{:chain}) = getfield(atom, :chain)
-getproperty(atom::AbstractAtom, ::Val{:resnum}) = getfield(atom, :resnum)
-getproperty(atom::AbstractAtom, ::Val{:residue}) = getfield(atom, :residue)
-getproperty(atom::AbstractAtom, ::Val{:beta}) = getfield(atom, :beta)
-getproperty(atom::AbstractAtom, ::Val{:occup}) = getfield(atom, :occup)
-getproperty(atom::AbstractAtom, ::Val{:model}) = getfield(atom, :model)
-getproperty(atom::AbstractAtom, ::Val{:segname}) = getfield(atom, :segname)
-getproperty(atom::AbstractAtom, ::Val{:charge}) = getfield(atom, :charge)
-getproperty(atom::AbstractAtom, ::Val{:x}) = getfield(atom, :x)
-getproperty(atom::AbstractAtom, ::Val{:y}) = getfield(atom, :y)
-getproperty(atom::AbstractAtom, ::Val{:z}) = getfield(atom, :z)
-# Not avaiable in ImmutableAtom
-getproperty(atom::AbstractAtom, ::Val{:pdb_element}) = getfield(atom, :pdb_element)
-# Custom fileds (type unstable)
-getproperty(atom::AbstractAtom, ::Val{S}) where {S} = atom.custom[field]
 
 @testitem "Atom default fields" begin
     using PDBTools
