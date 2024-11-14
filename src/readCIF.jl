@@ -144,8 +144,8 @@ function _parse_mmCIF(
     )
     _atom_site_field_inds = Dict{String,Int}()
     ifield = 0
-    atoms = LightAtom[]
-    lastatom = LightAtom()
+    atoms = Atom{Nothing}[]
+    lastatom = Atom{Nothing}()
     _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
     local NCOLS, col_indices, col_field
     for line in eachline(cifdata)
@@ -192,7 +192,7 @@ end
 
 function read_atom_mmCIF(::Val{NCOLS}, record, inds_and_names, lastatom::AbstractAtom) where {NCOLS}
     field_values = NTuple{NCOLS}(eachsplit(record))
-    atom = LightAtom(; index = index(lastatom) + 1, residue = residue(lastatom))
+    atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
     setfield_recursive!(atom, field_values, inds_and_names)
     if !same_residue(atom, lastatom)
         atom.residue = residue(lastatom) + 1
