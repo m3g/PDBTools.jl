@@ -139,13 +139,13 @@ julia> using PDBTools
 julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> coor(atoms[1])
-3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
   -9.229
  -14.861
   -5.481
 
 julia> coor(atoms[1:2])
-2-element Vector{StaticArraysCore.SVector{3, Float64}}:
+2-element Vector{StaticArraysCore.SVector{3, Float32}}:
  [-9.229, -14.861, -5.481]
  [-10.048, -15.427, -5.569]
 ```

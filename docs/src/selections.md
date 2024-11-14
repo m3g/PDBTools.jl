@@ -139,7 +139,7 @@ julia> findfirst(Select("beta = 0.00"), atoms)
     julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
 
     julia> name.(filter(sel"name CA", atoms))
-    3-element Vector{String}:
+    3-element Vector{InlineStrings.String7}:
      "CA"
      "CA"
      "CA"

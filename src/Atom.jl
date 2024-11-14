@@ -54,7 +54,7 @@ julia> mass(atoms[1])
 14.0067
 
 julia> position(atoms[1])
-3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
   -9.229
  -14.861
   -5.481
@@ -82,7 +82,7 @@ Dict{Symbol, Any} with 2 entries:
   :c     => "c"
 
 julia> atom.custom[:c]
-1
+"c"
 ```
 
 """

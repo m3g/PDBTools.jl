@@ -316,7 +316,7 @@ julia> residue_ticks(atoms; stride=50) # Vector{<:Atom} as input
 (1:50:201, ["S225", "Q275", "L325", "L375", "L425"])
 
 julia> residue_ticks(atoms; first=235, last=240, serial=false) # first=10 and resnum indexing
-([235, 236, 237, 238, 239, 240], ["I235", "L236", "E237", "A238", "E239", "L240"])
+(Int32[235, 236, 237, 238, 239, 240], ["I235", "L236", "E237", "A238", "E239", "L240"])
 
 julia> residue_ticks(eachresidue(atoms); stride=50) # residue iterator as input
 (1:50:201, ["S225", "Q275", "L325", "L375", "L425"])

@@ -26,7 +26,7 @@ julia> length(active_site_atoms)
 56
 
 julia> resname.(eachresidue(active_site_atoms))
-6-element Vector{String}:
+6-element Vector{InlineStrings.String7}:
  "PHE"
  "ARG"
  "LEU"
