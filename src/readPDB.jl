@@ -130,7 +130,7 @@ function read_atom_PDB(record::String, atom = Atom(;index=Int32(1), model=Int32(
         length(record) >= 78 ? record[77:78] : record[77:end], # :pdb_element
         length(record) >= 80 ? record[79:80] : record[79:end], # :charge 
     )
-    setfield_recursive!(atom, field_values, inds_and_names)
+    _fast_setfield!(atom, field_values, inds_and_names)
     return atom
 end
 

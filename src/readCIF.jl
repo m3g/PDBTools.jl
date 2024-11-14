@@ -193,7 +193,7 @@ end
 function read_atom_mmCIF(::Val{NCOLS}, record, inds_and_names, lastatom::AbstractAtom) where {NCOLS}
     field_values = NTuple{NCOLS}(eachsplit(record))
     atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
-    setfield_recursive!(atom, field_values, inds_and_names)
+    _fast_setfield!(atom, field_values, inds_and_names)
     if !same_residue(atom, lastatom)
         atom.residue = residue(lastatom) + 1
     end

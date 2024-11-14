@@ -62,6 +62,13 @@ setfield_recursive!(atom, field_values, inds_and_names)
 would set atom.index = 1, atom.occup = 2.0, atom.name = "CA"
 
 =#
+function _fast_setfield!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType, FIELDS, TUPTUP} 
+    setfield_recursive!(atom, field_values, inds_and_names)
+# Alternative with generated function:
+#    N = length(inds_and_names)
+#    setfield_generated!(atom, field_values, inds_and_names, Val(N))
+end
+
 unwrap(::Val{T}) where {T} = T
 function setfield_recursive!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType, FIELDS, TUPTUP}
     isempty(inds_and_names) && return atom
@@ -70,4 +77,18 @@ function setfield_recursive!(atom::AtomType, field_values::FIELDS, inds_and_name
     T = typeof(getfield(atom, field))
     setfield!(atom, field, _parse(T, field_values[i]))
     setfield_recursive!(atom, field_values, Base.tail(inds_and_names))
+end
+
+# Alternative implementation using generated functions (same peformance as far as tested)
+# https://discourse.julialang.org/t/unroll-setfield/122545/22?u=lmiq
+@generated function setfield_generated!(atom, field_values::FIELDS, inds_and_names::TUPTUP, ::Val{N}) where {FIELDS,TUPTUP,N}
+    quote
+        @inline
+        Base.@nexprs $N i -> begin
+            ifield, valfield = inds_and_names[i]
+            field = unwrap(valfield)
+            T = typeof(getfield(atom, field))
+            setfield!(atom, field, _parse(T, field_values[ifield]))
+        end
+    end
 end
