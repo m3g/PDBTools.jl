@@ -75,15 +75,9 @@ function _parse_pdb(
             imodel = imodel + 1
         end
         if startswith(line, r"ATOM|HETATM")
-            atom = read_atom_PDB(line)
-            atom.index = index(lastatom) + 1
+            atom = read_atom_PDB(line, lastatom, imodel)
             atom.model = imodel
-            if !same_residue(atom, lastatom)
-                atom.residue = residue(lastatom) + 1
-            end
-            if only(atom)
-                push!(atoms, atom)
-            end
+            only(atom) && push!(atoms, atom)
             lastatom = atom
         end
     end
@@ -98,8 +92,8 @@ function _parse_pdb(
 end
 
 # read atom from PDB file
-function read_atom_PDB(record::String, atom = Atom(;index=Int32(1), model=Int32(1), custom=nothing))
-    !startswith(record, r"ATOM|HETATM") && return nothing
+function read_atom_PDB(record::String, lastatom::Atom, imodel::Int)
+    atom = Atom{Nothing}(;index=index(lastatom) + 1, residue=residue(lastatom), model=imodel)
     inds_and_names = (
         (1, Val(:name)), 
         (2, Val(:resname)), 
@@ -131,9 +125,11 @@ function read_atom_PDB(record::String, atom = Atom(;index=Int32(1), model=Int32(
         length(record) >= 80 ? record[79:80] : record[79:end], # :charge 
     )
     _fast_setfield!(atom, field_values, inds_and_names)
+    if !same_residue(atom, lastatom)
+        atom.residue = residue(lastatom) + 1
+    end
     return atom
 end
-
 
 @testitem "read_pdb" begin
     pdb_file = "$(@__DIR__)/../test/structure.pdb"
