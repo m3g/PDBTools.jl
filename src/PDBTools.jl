@@ -20,7 +20,7 @@ import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
-export read_mmcif
+export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export LightAtom
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
