@@ -183,7 +183,7 @@ function _parse_mmCIF(
     seekstart(cifdata)
     for line in eachline(cifdata)
         if startswith(line, r"ATOM|HETATM")
-            atom = read_atom_mmCIF(Val(NCOLS), line, inds_and_names, lastatom)
+            atom = read_atom_mmcif(Val(NCOLS), line, inds_and_names, lastatom)
             only(atom) && push!(atoms, atom)
             _maximum_read(atoms, stop_at, memory_available) && break
             lastatom = atom
@@ -194,7 +194,7 @@ function _parse_mmCIF(
     return atoms
 end
 
-function read_atom_mmCIF(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) where {NCOLS}
+function read_atom_mmcif(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) where {NCOLS}
     field_values = NTuple{NCOLS}(eachsplit(record))
     atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
     _fast_setfield!(atom, field_values, inds_and_names)
