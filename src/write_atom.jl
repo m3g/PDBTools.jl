@@ -94,7 +94,7 @@ end
 
 @testitem "writeatom" begin
     using PDBTools
-    pdb = readPDB(PDBTools.SMALLPDB)
+    pdb = read_pdb(PDBTools.SMALLPDB)
     @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     @test PDBTools.write_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
     pdb[1].index = 1000000

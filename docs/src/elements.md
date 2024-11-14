@@ -4,7 +4,7 @@ Some simple atom properties can be retrieved using special functions, which
 operate on atoms of the type `Atom`. For example:
 
 ```julia-repl
-julia> atoms = readPDB("./file.pdb");
+julia> atoms = read_pdb("./file.pdb");
 
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb

@@ -84,7 +84,7 @@ coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], s
 
 @testitem "coor" begin
     import StaticArrays
-    atoms = readPDB(PDBTools.TESTPDB)
+    atoms = read_pdb(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
     @test coor(s) ≈ [
         StaticArrays.SVector{3,Float64}(-4.383, -11.903, -6.849),

@@ -75,7 +75,7 @@ julia> custom_elements!(SIRAH)
 │
 └ @ PDBTools
 
-julia> sirah_pdb = readPDB(PDBTools.SIRAHPDB);
+julia> sirah_pdb = read_pdb(PDBTools.SIRAHPDB);
 
 julia> resname.(eachresidue(sirah_pdb))
 5-element Vector{String}:

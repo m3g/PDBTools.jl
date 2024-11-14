@@ -1,9 +1,9 @@
 """
-    readPDB(pdbfile::String, selection::String)
-    readPDB(pdbfile::String; only::Function = all)
+    read_pdb(pdbfile::String, selection::String)
+    read_pdb(pdbfile::String; only::Function = all)
 
-    readPDB(pdbdata::IOBuffer, selection::String)
-    readPDB(pdbdata::IOBuffer; only::Function = all)
+    read_pdb(pdbdata::IOBuffer, selection::String)
+    read_pdb(pdbdata::IOBuffer; only::Function = all)
 
 Reads a PDB file and stores the data in a vector of type `Atom`. 
 
@@ -15,7 +15,7 @@ If the `only` function keyword is provided, only the atoms for which `only(atom)
 ### Examples
 
 ```julia-repl
-julia> protein = readPDB("../test/structure.pdb")
+julia> protein = read_pdb("../test/structure.pdb")
    Array{Atoms,1} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -24,7 +24,7 @@ julia> protein = readPDB("../test/structure.pdb")
    62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
    62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
 
-julia> ALA = readPDB("../test/structure.pdb","resname ALA")
+julia> ALA = read_pdb("../test/structure.pdb","resname ALA")
    Array{Atoms,1} with 72 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -33,7 +33,7 @@ julia> ALA = readPDB("../test/structure.pdb","resname ALA")
     1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
     1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
 
-julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "ALA")
+julia> ALA = read_pdb("../test/structure.pdb", only = atom -> atom.resname == "ALA")
    Array{Atoms,1} with 72 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -44,19 +44,19 @@ julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "AL
 ```
 
 """
-function readPDB end
+function read_pdb end
 
-function readPDB(file::Union{String,IOBuffer}, selection::String)
+function read_pdb(file::Union{String,IOBuffer}, selection::String)
     query = parse_query(selection)
-    return readPDB(file, only=atom -> apply_query(query, atom))
+    return read_pdb(file, only=atom -> apply_query(query, atom))
 end
 
-function readPDB(pdbdata::IOBuffer; only::Function=all)
+function read_pdb(pdbdata::IOBuffer; only::Function=all)
     atoms = _parse_pdb(pdbdata, only)
     return atoms
 end
 
-function readPDB(file::String; only=all)
+function read_pdb(file::String; only=all)
     atoms = open(expanduser(file), "r") do f
         _parse_pdb(f, only)
     end
@@ -135,12 +135,12 @@ function read_atom_PDB(record::String, atom = Atom(;index=Int32(1), model=Int32(
 end
 
 
-@testitem "readPDB" begin
+@testitem "read_pdb" begin
     pdb_file = "$(@__DIR__)/../test/structure.pdb"
-    atoms = readPDB(pdb_file, "protein and name CA")
+    atoms = read_pdb(pdb_file, "protein and name CA")
     @test length(atoms) == 104
     pdbdata = read(pdb_file, String)
-    atoms = readPDB(IOBuffer(pdbdata), "protein and name CA")
+    atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
     @test length(atoms) == 104
 end
 
@@ -199,6 +199,3 @@ end
     @test a.index_pdb == 249388
     @test a.resnum == 65535
 end
-
-
- 

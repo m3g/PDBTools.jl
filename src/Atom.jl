@@ -31,7 +31,7 @@ Fields:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB)
+julia> atoms = read_pdb(PDBTools.SMALLPDB)
    Array{Atoms,1} with 35 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
@@ -178,7 +178,7 @@ getproperty(atom::AbstractAtom, ::Val{S}) where {S} = atom.custom[field]
 
 @testitem "Atom default fields" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2")
     atom = atoms[1]
     @test index(atom) == 13
     @test name(atom) == "N"
@@ -251,7 +251,7 @@ atom_line(atom::AbstractAtom) = @sprintf(
 
 @testitem "atom_line" begin
     using PDBTools
-    atoms = readPDB(PDBTools.SMALLPDB, "protein and index 1")
+    atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
         "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
 
@@ -267,7 +267,7 @@ Prints an `Atom` structure in a human-readable format, with a title line.
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2");
 
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
@@ -323,7 +323,7 @@ const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2"
 issidechain(atom::AbstractAtom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
 
 @testitem "atoms in struct" begin
-    pdb = readPDB(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB)
     glu = select(pdb, "resname GLU")
     @test isbackbone(glu[1])
     @test !issidechain(glu[1])
@@ -345,7 +345,7 @@ function same_residue(atom1::AbstractAtom, atom2::AbstractAtom)
 end
 
 @testitem "same_residue" begin
-    pdb = readPDB(PDBTools.TESTPDB, "protein")
+    pdb = read_pdb(PDBTools.TESTPDB, "protein")
     import PDBTools: same_residue
     @test same_residue(pdb[1], pdb[2])
     @test !same_residue(pdb[1], pdb[50])
@@ -405,7 +405,7 @@ end
 
 @testitem "get element" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2")
     @test element(atoms[1]) == "N"
     @test element(Atom()) === "X"
     @test element(Atom(pdb_element="")) === "X"
@@ -566,7 +566,7 @@ end
     @test element_name(at) == "Nitrogen"
     @test mass(at) == 14.0067
     @test mass([at, at]) == 28.0134
-    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
     at.custom[:mass] = 1.0
     @test mass(at) == 1.0

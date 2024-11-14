@@ -59,8 +59,8 @@ end
 
 # From the file name
 function getseq(file::String, selection::String; code::Int=1)
-    atoms = readPDB(file)
+    atoms = read_pdb(file)
     return getseq(atoms, selection, code=code)
 end
 
-getseq(file::String; only=all, code::Int=1) = getseq(readPDB(file), only=only, code=code)
+getseq(file::String; only=all, code::Int=1) = getseq(read_pdb(file), only=only, code=code)

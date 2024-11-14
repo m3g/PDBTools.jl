@@ -94,7 +94,7 @@ function, to select the atoms:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue <= 3");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
 
 julia> findall(Select("name CA"), atoms)
 3-element Vector{Int64}:
@@ -118,7 +118,7 @@ other Julia functions, such as `findfirst`, `findlast`, or `filter`:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue <= 3");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
 
 julia> filter(Select("name CA"), atoms)
    Array{Atoms,1} with 3 atoms with fields:
@@ -136,7 +136,7 @@ julia> findfirst(Select("beta = 0.00"), atoms)
     ```jldoctest
     julia> using PDBTools
 
-    julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue <= 3");
+    julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
 
     julia> name.(filter(sel"name CA", atoms))
     3-element Vector{String}:
@@ -190,7 +190,7 @@ The `eachresidue` iterator allows iteration over the resiudes of a structure (in
 ```jldoctest
 julia> using PDBTools
 
-julia> protein = readPDB(PDBTools.SMALLPDB);
+julia> protein = read_pdb(PDBTools.SMALLPDB);
 
 julia> count(atom -> resname(atom) == "ALA", protein)
 12
@@ -203,7 +203,7 @@ The result of the iterator can also be collected, with:
 ```jldoctest
 julia> using PDBTools
 
-julia> protein = readPDB(PDBTools.SMALLPDB);
+julia> protein = read_pdb(PDBTools.SMALLPDB);
 
 julia> residues = collect(eachresidue(protein))
    Array{Residue,1} with 3 residues.
@@ -226,7 +226,7 @@ It is possible also to iterate over the atoms of one or more residue:
 ```julia-repl
 julia> using PDBTools
 
-julia> protein = readPDB(PDBTools.SMALLPDB);
+julia> protein = read_pdb(PDBTools.SMALLPDB);
 
 julia> m_ALA = 0.
        for residue in eachresidue(protein)
@@ -276,7 +276,7 @@ written in the PDB file, for example.
 The input may also be a vector of atoms of type `PDBTools.Atom`:
 
 ```julia
-atoms = readPDB("mypdbfile.pdb")
+atoms = read_pdb("mypdbfile.pdb")
 indices, names = select_with_vmd(atoms,"protein",vmd="/usr/bin/vmd")
 ```
 

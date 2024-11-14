@@ -5,7 +5,7 @@
 To read a PDB file and return a vector of atoms of
 type `Atom`, do:
 ```julia
-atoms = readPDB("file.pdb")
+atoms = read_pdb("file.pdb")
 ```
 
 `Atom` is the structure of data containing the atom index, name,
@@ -46,16 +46,16 @@ end
     to read or write a subset of the atoms, following the selection syntax described 
     in the [Selection](@ref selections) section. For example:
     ```julia
-    protein = readPDB("file.pdb","protein")
+    protein = read_pdb("file.pdb","protein")
     ```
     or
     ```julia
-    arginines = readPDB("file.pdb","resname ARG")
+    arginines = read_pdb("file.pdb","resname ARG")
     ```
     The only difference is that, if using Julia anonymous functions, the
     keyword is `only`:
     ```julia
-    arginines = readPDB("file.pdb", only = atom -> atom.resname == "ARG")
+    arginines = read_pdb("file.pdb", only = atom -> atom.resname == "ARG")
     ```
     The same is valid for the `write` function, below. 
       
@@ -81,7 +81,7 @@ julia> atoms = wget("1LBD","name CA")
 The `Atom` structure is mutable, meaning that the fields can be edited. For example:
 
 ```julia-repl
-julia> atoms = readPDB("file.pdb")
+julia> atoms = read_pdb("file.pdb")
    Array{PDBTools.Atom,1} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -114,10 +114,10 @@ julia> printatom(atoms[1])
 
 ## Write a PDB file
 
-To write a PDB file use the `writePDB` function, as:
+To write a PDB file use the `write_pdb` function, as:
 
 ```julia
-writePDB(atoms,"file.pdb")
+write_pdb(atoms,"file.pdb")
 ```
 where `atoms` contain a list of atoms with the `Atom` structures.
 
@@ -138,7 +138,7 @@ of atoms by reading directly the string buffer with, for example:
 ```julia-repl
 julia> pdbdata = read(pdb_file, String); # returns a string with the PDB data, to exemplify
 
-julia> atoms = readPDB(IOBuffer(pdbdata), "protein and name CA")
+julia> atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
    Array{Atoms,1} with 104 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5

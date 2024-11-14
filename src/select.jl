@@ -20,7 +20,7 @@ Using a string to select the CA atoms of the first residue:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
 
 julia> findfirst(Select("name CA"), atoms)
 5
@@ -320,7 +320,7 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
 @testitem "Selections" begin
 
-    atoms = readPDB(PDBTools.TESTPDB)
+    atoms = read_pdb(PDBTools.TESTPDB)
 
     @test length(select(atoms, "name CA")) == 104
     sel = select(atoms, "index = 13")

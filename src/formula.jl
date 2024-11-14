@@ -29,7 +29,7 @@ Returns the molecular formula of the current selection.
 ```jldoctest
 julia> using PDBTools
 
-julia> pdb  = readPDB(PDBTools.TESTPDB, "residue 1"); # testing PDB file
+julia> pdb  = read_pdb(PDBTools.TESTPDB, "residue 1"); # testing PDB file
 
 julia> resname(pdb[1])
 "ALA"
@@ -74,7 +74,7 @@ Returns the stoichiometry of atom selection in a `Formula` structure.
 ```julia-repl
 julia> using PDBTools
 
-julia> pdb  = readPDB(PDBTools.TESTPDB, "water"); # testing PDB file
+julia> pdb  = read_pdb(PDBTools.TESTPDB, "water"); # testing PDB file
 
 julia> stoichiometry(pdb)
 H₂O₁

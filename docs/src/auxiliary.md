@@ -46,7 +46,7 @@ julia> getseq(PDBTools.SMALLPDB, code=3)
     ```jldoctest
     julia> using PDBTools
 
-    julia> atoms = readPDB(PDBTools.SMALLPDB);
+    julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
     julia> for at in atoms
               if resname(at) == "ALA"
@@ -68,7 +68,7 @@ last argument, as well as the reading and writing functions:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> getseq(atoms, "residue > 1")
 2-element Vector{String}:
@@ -136,7 +136,7 @@ Use the `coor` function:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> coor(atoms[1])
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
@@ -157,7 +157,7 @@ C``\alpha`` coordinates:
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> coor(atoms, "name CA")
 3-element Vector{StaticArraysCore.SVector{3, Float64}}:
@@ -179,7 +179,7 @@ Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> maxmin(atoms, "residue > 1")
  Minimum atom coordinates: xmin = [-6.974, -16.785, -10.863]

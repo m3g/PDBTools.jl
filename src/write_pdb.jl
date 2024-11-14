@@ -1,20 +1,20 @@
 """
-    writePDB(atoms::Vector{Atom}, filename, selection; header=:auto, footer=:auto)
+    write_pdb(atoms::Vector{Atom}, filename, selection; header=:auto, footer=:auto)
 
 Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string
-that can be used to select a subset of the atoms in `atoms`. For example, `writePDB(atoms, "test.pdb", "name CA")`.
+that can be used to select a subset of the atoms in `atoms`. For example, `write_pdb(atoms, "test.pdb", "name CA")`.
 
 The `header` and `footer` arguments can be used to add a header and footer to the PDB file. If `header` is `:auto`,
 then a header will be added with the number of atoms in `atoms`. If `footer` is `:auto`, then a footer will be added
 with the "END" keyword. Either can be set to `nothing` if no header or footer is desired.
 
 """
-function writePDB(atoms::AbstractVector{Atom}, filename::String, selection::String; header=:auto, footer=:auto)
+function write_pdb(atoms::AbstractVector{Atom}, filename::String, selection::String; header=:auto, footer=:auto)
     query = parse_query(selection)
-    writePDB(atoms, filename, only=atom -> apply_query(query, atom); header, footer)
+    write_pdb(atoms, filename, only=atom -> apply_query(query, atom); header, footer)
 end
 
-function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=all, header=:auto, footer=:auto)
+function write_pdb(atoms::AbstractVector{Atom}, filename::String; only::Function=all, header=:auto, footer=:auto)
     file = open(expanduser(filename), "w")
     if header == :auto
         curr_date = Dates.format(Dates.today(), "dd-u-yy")
@@ -36,12 +36,12 @@ function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=
     close(file)
 end
 
-@testitem "writePDB" begin
+@testitem "write_pdb" begin
     using PDBTools
     using DelimitedFiles
-    pdb = readPDB(PDBTools.SMALLPDB)
+    pdb = read_pdb(PDBTools.SMALLPDB)
     tmpfile = tempname()*".pdb"
-    writePDB(pdb, tmpfile)
+    write_pdb(pdb, tmpfile)
     @test isfile(tmpfile)
     f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
     f2 = readdlm(tmpfile, '\n', header=true)

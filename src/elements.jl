@@ -207,7 +207,7 @@ function remove_custom_elements!(elements=PDBTools.elements)
 end
 
 @testitem "elements" begin
-    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
     @test element.(select(atoms, "residue = 1")) == ["N", "H", "H", "H", "C", "H", "C", "H", "H", "H", "C", "O"]
     @test element_name.(select(atoms, "residue = 1")) == [
         "Nitrogen",

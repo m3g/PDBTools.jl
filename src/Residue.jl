@@ -165,7 +165,7 @@ end
 
 
 @testitem "Residue iterator" begin
-    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
     residues = eachresidue(atoms)
     @test length(residues) == 104
     @test name(Residue(atoms, 1:12)) == "ALA"
@@ -229,7 +229,7 @@ iswater(r::Residue; water_residues=water_residues) = r.resname in water_residues
 iswater(atom::Atom; water_residues=water_residues) = atom.resname in water_residues
 
 @testitem "residue of atom" begin
-    pdb = readPDB(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB)
     glu = select(pdb, "resname GLU")
     @test isacidic(glu[1])
     @test !isaliphatic(glu[1])
@@ -257,7 +257,7 @@ iswater(atom::Atom; water_residues=water_residues) = atom.resname in water_resid
 end
 
 @testitem "full residue" begin
-    pdb = readPDB(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB)
     glu_atoms = select(pdb, "resname GLU")
     glu = collect(eachresidue(glu_atoms))
     @test isacidic(glu[1])

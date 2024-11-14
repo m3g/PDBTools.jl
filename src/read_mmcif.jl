@@ -1,9 +1,9 @@
 """
-    readCIF(mmCIF_file::String, selection::String)
-    readCIF(mmCIF_file::String; only::Function = all)
+    read_mmcif(mmCIF_file::String, selection::String)
+    read_mmcif(mmCIF_file::String; only::Function = all)
 
-    readCIF(mmCIF_data::IOBuffer, selection::String)
-    readCIF(mmCIF_data::IOBuffer; only::Function = all)
+    read_mmcif(mmCIF_data::IOBuffer, selection::String)
+    read_mmcif(mmCIF_data::IOBuffer; only::Function = all)
 
 Reads a mmCIF file and stores the data in a vector of type `Atom`. 
 
@@ -15,7 +15,7 @@ If the `only` function keyword is provided, only the atoms for which `only(atom)
 ### Examples
 
 ```julia-repl
-julia> protein = readPDB("../test/structure.pdb")
+julia> protein = read_pdb("../test/structure.pdb")
    Array{Atoms,1} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -24,7 +24,7 @@ julia> protein = readPDB("../test/structure.pdb")
    62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
    62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
 
-julia> ALA = readPDB("../test/structure.pdb","resname ALA")
+julia> ALA = read_pdb("../test/structure.pdb","resname ALA")
    Array{Atoms,1} with 72 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -33,7 +33,7 @@ julia> ALA = readPDB("../test/structure.pdb","resname ALA")
     1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
     1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
 
-julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "ALA")
+julia> ALA = read_pdb("../test/structure.pdb", only = atom -> atom.resname == "ALA")
    Array{Atoms,1} with 72 atoms with fields:
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
@@ -44,19 +44,19 @@ julia> ALA = readPDB("../test/structure.pdb", only = atom -> atom.resname == "AL
 ```
 
 """
-function readCIF end
+function read_mmcif end
 
-function readCIF(file::Union{String,IOBuffer}, selection::String; kargs...)
+function read_mmcif(file::Union{String,IOBuffer}, selection::String; kargs...)
     query = parse_query(selection)
-    return readCIF(file, only=atom -> apply_query(query, atom); kargs...)
+    return read_mmcif(file, only=atom -> apply_query(query, atom); kargs...)
 end
 
-function readCIF(cifdata::IOBuffer; only::Function=all, kargs...)
+function read_mmcif(cifdata::IOBuffer; only::Function=all, kargs...)
     atoms = _parse_mmCIF(cifdata; only, kargs...)
     return atoms
 end
 
-function readCIF(file::String; only=all, kargs...)
+function read_mmcif(file::String; only=all, kargs...)
     atoms = open(expanduser(file), "r") do f
         _parse_mmCIF(f; only, kargs...)
     end

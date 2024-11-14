@@ -16,8 +16,8 @@ using InlineStrings: String3, String7
 import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
-export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
-export readCIF
+export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
+export read_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export LightAtom
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
@@ -63,10 +63,10 @@ include("./select_with_vmd.jl")
 include("./parsers.jl")
 include("./formula.jl")
 include("./write_atom.jl")
-include("./readPDB.jl")
-include("./readCIF.jl")
+include("./read_pdb.jl")
+include("./read_mmcif.jl")
 include("./edit.jl")
-include("./writePDB.jl")
+include("./write_pdb.jl")
 include("./getseq.jl")
 include("./coor.jl")
 include("./distance.jl")

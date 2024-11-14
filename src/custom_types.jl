@@ -111,7 +111,7 @@ end
     remove_custom_elements!()
     custom_protein_residues!(SIRAH)
     custom_elements!(SIRAH)
-    pdb = readPDB(pdb_file)
+    pdb = read_pdb(pdb_file)
     @test length(isprotein.(pdb)) == 22
     @test element(pdb[1]) == "N"
     @test element(pdb[2]) == "C"

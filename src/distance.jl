@@ -118,7 +118,7 @@ closest(x::AbstractVector{<:SVector}, y::Residue) = _closest(x, y.atoms[y.range]
 
 @testitem "distance/closest" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB)
+    atoms = read_pdb(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
     s2 = select(atoms, "residue = 5")
     @test distance(s, s2) ≈ 3.6750402718881863
