@@ -21,8 +21,8 @@ export atomic_number, atomic_symbol, atomic_mass, position
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
 export read_mmcif, write_mmcif
-export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
-export LightAtom
+export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
+export add_custom_field
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
 export coor, maxmin, distance, closest
