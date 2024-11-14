@@ -6,7 +6,7 @@ Opens a temporary PDB file in which the fields of the vector of atoms can be edi
 """
 function edit!(atoms::AbstractVector{Atom})
     tmp_file_name = tempname()
-    write_pdb(atoms, tmp_file_name)
+    write_pdb(tmp_file_name, atoms)
     InteractiveUtils.edit(tmp_file_name)
     read_again = read_pdb(tmp_file_name)
     resize!(atoms, length(read_again))

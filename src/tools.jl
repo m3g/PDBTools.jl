@@ -44,7 +44,7 @@ function add_hydrogens!(
 )
     tmpfile = tempname() * ".pdb"
     tmpfile_out = tempname() * ".pdb"
-    write_pdb(atoms, tmpfile)
+    write_pdb(tmp_file, atoms)
     if isnothing(Sys.which(obabel))
         throw(ArgumentError("""
 

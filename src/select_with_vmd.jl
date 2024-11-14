@@ -107,7 +107,7 @@ end
 
 function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
     tmp_file = tempname()
-    write_pdb(atoms, tmp_file)
+    write_pdb(tmp_file, atoms)
     return select_with_vmd(tmp_file, selection; vmd=vmd, srcload=srcload)
 end
 

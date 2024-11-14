@@ -117,7 +117,7 @@ julia> printatom(atoms[1])
 To write a PDB file use the `write_pdb` function, as:
 
 ```julia
-write_pdb(atoms,"file.pdb")
+write_pdb("file.pdb", atoms)
 ```
 where `atoms` contain a list of atoms with the `Atom` structures.
 

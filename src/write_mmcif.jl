@@ -45,12 +45,10 @@ end
 
 @testitem "write_mmcif" begin
     using PDBTools
-    using DelimitedFiles
-    pdb = read_pdb(PDBTools.SMALLPDB)
-    tmpfile = tempname()*".pdb"
-    write_pdb(pdb, tmpfile)
+    ats = read_pdb(PDBTools.SMALLPDB)
+    tmpfile = tempname()*".cif"
+    write_mmcif(tmpfile, ats)
     @test isfile(tmpfile)
-    f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
-    f2 = readdlm(tmpfile, '\n', header=true)
-    @test f1[1] == f2[1]
+    ats_cif = read_mmcif(tmpfile)
+    @test all(position(at1) ≈ position(at2) for (at1, at2) in zip(ats, ats_cif))
 end
