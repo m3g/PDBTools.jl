@@ -69,7 +69,7 @@ function _parse_pdb(
 )
     imodel = 1
     atoms = Atom{Nothing}[]
-    lastatom = Atom(; index=Int32(0), residue=Int32(0))
+    lastatom = Atom{Nothing}()
     for line in eachline(pdbdata)
         if occursin("END", line)
             imodel = imodel + 1
