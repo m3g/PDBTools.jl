@@ -123,7 +123,7 @@ where `atoms` contain a list of atoms with the `Atom` structures.
 
 # Read and write single-atom lines 
 
-`PDBTools.read_atom(pdb_line)`: Given a line of a PDB file containing atom data,
+`PDBTools.read_atom_pdb(pdb_line)`: Given a line of a PDB file containing atom data,
 returns the data in a `Atom` structure. 
 
 `PDBTools.write_pdb_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
