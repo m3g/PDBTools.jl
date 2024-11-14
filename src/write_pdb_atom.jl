@@ -18,7 +18,7 @@ function _align_resname(resname)
     return resname
 end
 
-function write_atom(atom::Atom)
+function write_pdb_atom(atom::Atom)
 
     #ATOM      2  CA  GLY A   1      -1.774   6.778  32.054  1.00  0.08           C
     #COLUMNS        DATA  TYPE    FIELD        DEFINITION
@@ -95,13 +95,13 @@ end
 @testitem "writeatom" begin
     using PDBTools
     pdb = read_pdb(PDBTools.SMALLPDB)
-    @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
-    @test PDBTools.write_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
     pdb[1].index = 1000000
-    @test PDBTools.write_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     pdb[1].index = 1
     pdb[1].resnum = 1000000
-    @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     pdb[1].index = 1000000
-    @test PDBTools.write_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
 end

@@ -12,6 +12,9 @@ using TestItems: @testitem
 using OrderedCollections: OrderedDict
 using InlineStrings: String3, String7
 
+# Version
+const VERSION = pkgversion(@__MODULE__)
+
 # AtomsBase interface compatibility
 import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
@@ -62,7 +65,7 @@ include("./select_with_vmd.jl")
 #
 include("./parsers.jl")
 include("./formula.jl")
-include("./write_atom.jl")
+include("./write_pdb_atom.jl")
 include("./read_pdb.jl")
 include("./read_mmcif.jl")
 include("./edit.jl")

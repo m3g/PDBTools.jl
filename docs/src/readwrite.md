@@ -126,7 +126,7 @@ where `atoms` contain a list of atoms with the `Atom` structures.
 `PDBTools.read_atom(pdb_line)`: Given a line of a PDB file containing atom data,
 returns the data in a `Atom` structure. 
 
-`PDBTools.write_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
+`PDBTools.write_pdb_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
 a string formatted in the PDB format, to be written to a file. 
 
 # Read from string buffer

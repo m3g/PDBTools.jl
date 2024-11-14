@@ -25,7 +25,7 @@ function write_pdb(atoms::AbstractVector{Atom}, filename::String; only::Function
     end
     for atom in atoms
         if only(atom)
-            println(file, write_atom(atom))
+            println(file, write_pdb_atom(atom))
         end
     end
     if footer == :auto
