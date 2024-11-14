@@ -68,14 +68,14 @@ function _parse_pdb(
     only::Function, 
 )
     imodel = 1
-    atoms = Atom[]
+    atoms = Atom{Nothing}[]
     lastatom = Atom(; index=Int32(0), residue=Int32(0))
     for line in eachline(pdbdata)
         if occursin("END", line)
             imodel = imodel + 1
         end
-        atom = read_atom_PDB(line)
-        if !isnothing(atom)
+        if startswith(line, r"ATOM|HETATM")
+            atom = read_atom_PDB(line)
             atom.index = index(lastatom) + 1
             atom.model = imodel
             if !same_residue(atom, lastatom)
@@ -89,7 +89,7 @@ function _parse_pdb(
     end
     seekstart(pdbdata)
     if length(atoms) == 0
-        throw(ArgmentError("""\n 
+        throw(ArgumentError("""\n 
             Could not find any atom in PDB file matching the selection. 
 
         """))
@@ -201,3 +201,4 @@ end
 end
 
 
+ 
