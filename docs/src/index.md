@@ -1,11 +1,16 @@
 # PDBTools
 
 PDBTools is a simple package to read and write Protein Data Bank files,
-select atoms, and work with their coordinates.  
+select atoms, and work with their coordinates. It is aimed to provide support
+for the typical uses of structure files in the context of molecular dynamics
+simulations.
+
+As of version 2.0, PDBTools is able to read and write the atomic data 
+from PDB and mmCIF structure files.
 
 ## Features:
 
- Simple data structure: 
+Simple data structure: 
 ```julia-repl
 julia> printatom(atoms[1])
   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
@@ -21,12 +26,12 @@ Allows use of Julia (possibly user-defined) functions for selection:
 ```julia
 atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
 ```
-
 ### Not indicated for:
 
-We do not aim to provide the fastest PDB parsing methods. If
-speed in reading files, returning subsets of the structures, etc., is
-critical to you, probably you will do better with some packages of 
+PDBTools is not very strict in following the PDB or mmCIF formats. In particular,
+it does not read any of the meta-data of these files, only `ATOM` and `HETATM` fields
+are of interest. If more comprehensive support for these files is necessary,
+use the packages of 
 [BioJulia](https://github.com/BioJulia), 
 [BioStructures](https://github.com/BioJulia/BioStructures.jl) in
 particular.

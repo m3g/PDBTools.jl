@@ -3,7 +3,7 @@ CollapsedDocStrings = true
 ```
 # Help entries
 
-These entries can be accessed from the Julia REPL by typing `?`, for example,
+The help entries for each function can be accessed from the Julia REPL by typing `?`, for example,
 ```julia-repl
 julia> ? mass
 search: mass mapslices MathConstants makedocs set_zero_subnormals get_zero_subnormals mutable struct
@@ -28,6 +28,3 @@ search: mass mapslices MathConstants makedocs set_zero_subnormals get_zero_subno
 
 ```
 
-```@autodocs
-Modules=[PDBTools]
-```

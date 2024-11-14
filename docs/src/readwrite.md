@@ -1,4 +1,15 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # Read and write files
+
+PDBTools can read and write `PDB` and `mmCIF` files. The relevant functions are:
+
+```@docs
+read_pdb
+read_mmcif
+```
 
 ## Read a PDB file
 
@@ -18,31 +29,14 @@ julia> printatom(atoms[1])
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 ```
 
-The data in the `Atom` structure is organized as follows:
-```julia
-mutable struct Atom
-    index::Int = 0 # The sequential index of the atoms in the file
-    index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
-    name::String = "X"
-    resname::String = "XXX"
-    chain::String = "X"
-    resnum::Int = 0 # Number of residue as written in PDB file
-    residue::Int = 0 # Sequential residue (molecule) number in file
-    x::Float64 = 0.0
-    y::Float64 = 0.0
-    z::Float64 = 0.0
-    beta::Float64 = 0.0
-    occup::Float64 = 0.0
-    model::Int = 0
-    segname::String = "XXXX" # Segment name (cols 73:76)
-    pdb_element::String = "X"
-    charge::Union{Nothing,String} = nothing
-    custom::Dict{Symbol, Any} = Dict{Symbol,Any}()
-end
+The data in the `Atom` structure is organized as indicated in the following documentation:
+
+```@docs
+Atom
 ```
 
 !!! tip
-    For all these reading and writting functions, a final argument can be provided
+    For all these reading and writing functions, a final argument can be provided
     to read or write a subset of the atoms, following the selection syntax described 
     in the [Selection](@ref selections) section. For example:
     ```julia
@@ -59,7 +53,7 @@ end
     ```
     The same is valid for the `write` function, below. 
       
-## Retrive from Protein Data Bank
+## Retrieve from Protein Data Bank
 
 Use the `wget` function to retrieve the atom data directly from the PDB database,
 optionally filtering the atoms with a selection:
@@ -74,6 +68,10 @@ julia> atoms = wget("1LBD","name CA")
     1847   CA     GLN     A      460      236  -22.650   79.082   50.023 71.46  1.00     1       -      1847
     1856   CA     MET     A      461      237  -25.561   77.191   51.710 78.41  1.00     1       -      1856
     1864   CA     THR     A      462      238  -26.915   73.645   51.198 82.96  1.00     1       -      1864
+```
+
+```@docs
+wget
 ```
 
 ## Edit a PDB file
@@ -112,6 +110,10 @@ julia> printatom(atoms[1])
        1    N     ABC     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
 ```
 
+```@docs
+edit!
+```
+
 ## Write a PDB file
 
 To write a PDB file use the `write_pdb` function, as:
@@ -121,13 +123,10 @@ write_pdb("file.pdb", atoms)
 ```
 where `atoms` contain a list of atoms with the `Atom` structures.
 
-# Read and write single-atom lines 
-
-`PDBTools.read_atom_pdb(pdb_line)`: Given a line of a PDB file containing atom data,
-returns the data in a `Atom` structure. 
-
-`PDBTools.write_pdb_atom(atom::Atom)`: Given an atom in the `Atom` structure, returns
-a string formatted in the PDB format, to be written to a file. 
+```@docs
+write_pdb
+write_mmcif
+```
 
 # Read from string buffer
 
@@ -149,9 +148,6 @@ julia> atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
     1440   CA     CYS     A      103      103    4.134   -7.811   -6.344  1.00  0.00     1    PROT      1440
     1454   CA     THR     A      104      104    3.244  -10.715   -8.603  1.00  0.00     1    PROT      1454
 ```
-
-!!! compat
-    Reading directly from `IOBuffer` requires `PDBTools` version `0.15.1` or greater.
 
 
 

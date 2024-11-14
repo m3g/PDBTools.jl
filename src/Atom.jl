@@ -171,6 +171,13 @@ pdb_element(atom::Atom) = atom.pdb_element
     @test charge(atom) == 0.0f0
 end
 
+"""
+    add_custom_field(atom::Atom, value)
+
+Adds a custom field to an `Atom` structure, returning a new `Atom` structure with the custom field added.
+The returning Atom structure is parameterized with the type of `value`.
+
+"""
 function add_custom_field(atom::Atom, value)
     new_atom = Atom(;custom=value)
     for field in fieldnames(Atom)
@@ -195,8 +202,28 @@ end
 #
 # Compatibility with AtomsBase interface
 #
+"""
+    atomic_symbol(atom::Atom)
+
+Returns the atomic symbol of an atom given the `Atom` structure.
+
+"""
 atomic_symbol(atom::Atom) = element_symbol(atom)
+
+"""
+    atomic_mass(atom::Atom)
+
+Returns the atomic mass of an atom given the `Atom` structure.
+
+"""
 atomic_mass(atom::Atom) = mass(atom)
+
+"""
+    position(atom::Atom)
+
+Returns the position of an atom given the `Atom` structure.
+
+"""
 position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
 const atom_title = @sprintf(

@@ -70,25 +70,7 @@ julia> closest(ligand,x)
 ```
 
 """
-function _closest(
-    x::AbstractVector, 
-    y::AbstractVector
-) 
-    imin = -1
-    jmin = -1
-    dmin = +Inf
-    for (i, xatom) in pairs(x)
-        for (j, yatom) in pairs(y)
-            d = distance(xatom, yatom)
-            if d < dmin
-                imin = i
-                jmin = j
-                dmin = d
-            end
-        end
-    end
-    return imin, jmin, dmin
-end
+function closest end
 
 # Wrap individual atoms or coordinates in a SVector to dispatch to the above function
 closest(x::Atom, y::Atom) = _closest(SVector{1}(x), SVector{1}(y))
@@ -115,6 +97,26 @@ closest(x::Residue, y::AbstractVector{<:Real}) = _closest(x.atoms[x.range], SVec
 closest(x::AbstractVector{<:Real}, y::Residue) = _closest(SVector{1}(SVector{3}(x)), y.atoms[y.range])
 closest(x::Residue, y::AbstractVector{<:SVector}) = _closest(x.atoms[x.range], y)
 closest(x::AbstractVector{<:SVector}, y::Residue) = _closest(x, y.atoms[y.range])
+
+function _closest(
+    x::AbstractVector, 
+    y::AbstractVector
+) 
+    imin = -1
+    jmin = -1
+    dmin = +Inf
+    for (i, xatom) in pairs(x)
+        for (j, yatom) in pairs(y)
+            d = distance(xatom, yatom)
+            if d < dmin
+                imin = i
+                jmin = j
+                dmin = d
+            end
+        end
+    end
+    return imin, jmin, dmin
+end
 
 @testitem "distance/closest" begin
     using PDBTools

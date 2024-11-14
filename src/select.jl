@@ -44,6 +44,14 @@ end
 # Function that returns true for all atoms: the default selection
 all(atoms) = true
 
+"""
+    select(atoms::AbstractVector{<:Atom}, by::String)
+
+Selects atoms from a vector of atoms using a string query, or a function.
+
+"""
+function select end
+
 # Main function: receives the atoms vector and a julia function to select
 select(set::AbstractVector{<:Atom}, by::String) = filter(Select(by), set)
 select(set::AbstractVector{<:Atom}, by::Function) = filter(by, set)

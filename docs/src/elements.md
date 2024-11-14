@@ -1,3 +1,7 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # Atomic and molecular properties
 
 Some simple atom properties can be retrieved using special functions, which
@@ -36,10 +40,18 @@ H₂O₁
 
 ```
 
-## AtomsBase compatibility
+```@docs
+mass
+element
+element_name
+element_symbol
+element_symbol_string
+formula
+stoichiometry
+printatom
+```
 
-!!! compat
-    This interface requires at least PDBTools version 0.14.2.
+## AtomsBase compatibility
 
 The following functions are supported as part of the API, to conform the `AtomsBase` interface:
 
@@ -50,6 +62,13 @@ The following functions are supported as part of the API, to conform the `AtomsB
 |`atomic_mass(::PDBTools.Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
 |`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
 
+
+```@docs
+atomic_number
+atomic_symbol
+atomic_mass
+position
+```
 
 ## Custom Atom fields
 
@@ -82,10 +101,12 @@ julia> new_atom.custom[:charge]
 2.0
 
 ```
-# Elements for custom atom types
 
-!!! compat
-    The `add_element!` function was introduced in version 1.4.0.
+```@docs
+add_custom_field
+```
+
+# Elements for custom atom types
 
 The types of atoms that `PDBTools` recognizes is defined in the `PDBTools.elements` dictionary. 
 If new atom types are defined, it is possible to add these types to the dictionary, such that

@@ -1,3 +1,7 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # [Selection functions](@id selections)
 
 The `select` function can be used to select subsets of atoms from a vector
@@ -12,10 +16,6 @@ or standard Julia function can be provided as the second argument:
 ```julia
 atoms = select(atoms, at -> isprotein(at) && resnum(at) < 30)
 ```
-
-!!! compat
-    Support for the second argument of `select` as a function
-    was introduced in v1.7.0.
 
 ## General selection syntax 
 
@@ -80,12 +80,12 @@ Available keywords:
     to every non-protein residue. Thus, be careful with the use of `not`
     with these selections, as they might retrieve non-protein atoms.
 
+```@docs
+select
+Select
+```
 
 ## Retrieving indices, filtering, etc
-
-!!! compat
-    The `Select` object was implemented in PDBTools v1.1.0. The 
-    `sel""` string macro was implemented in PDBTools v1.2.0.
 
 If only the indices of the atoms are of interest, the Julia `findall`
 function can be used, by passing a `Select` object, or a regular 
@@ -253,6 +253,13 @@ julia> sum(mass(res) for res in eachresidue(protein) if resname(res) == "ALA" )
 73.09488999999999
 ```
 
+```@docs
+Residue
+eachresidue
+resname
+residuename
+```
+
 ## Using VMD
 
 [VMD](https://www.ks.uiuc.edu/Research/vmd/) is a very popular and
@@ -260,10 +267,6 @@ powerful package for visualization of simulations. It contains a very
 versatile library to read topologies and trajectory files, and a
 powerful selection syntax. We provide here a wrapper to VMD which allows
 using its capabilities.  
-
-!!! compat
-    The `select_with_vmd` with all the described cababilities is available
-    in PDBTools v1.0.0 or greater.
 
 For example, the solute can be defined with: 
 ```julia
@@ -286,6 +289,10 @@ indices, names = select_with_vmd(atoms,"protein",vmd="/usr/bin/vmd")
 The main advantage here is that all the file types and the complete selection syntax 
 that VMD supports are supported. But VMD needs to be installed and is run in background, and
 it takes a few seconds to run.
+
+```@docs
+select_with_vmd
+```
 
 ###  Loading vmd scripts
 
