@@ -205,7 +205,7 @@ residue_ticks(
 )
 ```
 
-The input structure can be provided as a vector of atoms (type `Vector{Atom}`) a residue iterator (obtained by `eachresidue(atoms)`) or a vector of residues (obtained by `collect(eachresidue(atoms))`). 
+The input structure can be provided as a vector of atoms (type `Vector{<:Atom}`) a residue iterator (obtained by `eachresidue(atoms)`) or a vector of residues (obtained by `collect(eachresidue(atoms))`). 
 
 The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
 

@@ -20,7 +20,7 @@ const sub_int = (
 )
 
 """
-    formula(atoms::AbstractVector{Atom})
+    formula(atoms::AbstractVector{<:Atom})
 
 Returns the molecular formula of the current selection. 
 
@@ -39,7 +39,7 @@ H₇C₃N₁O₁
 ```
 
 """
-function formula(atoms::AbstractVector{Atom})
+function formula(atoms::AbstractVector{<:Atom})
     f = Formula(Tuple{Atom,Int}[])
     for at in atoms
         i = findfirst(el -> pdb_element(first(el)) == element(at), f.formula)
@@ -65,7 +65,7 @@ function Base.show(io::IO, f::Formula)
 end
 
 """
-    stoichiometry(atoms::AbstractVector{Atom})
+    stoichiometry(atoms::AbstractVector{<:Atom})
 
 Returns the stoichiometry of atom selection in a `Formula` structure. 
 
@@ -81,7 +81,7 @@ H₂O₁
 ```
 
 """
-function stoichiometry(atoms::AbstractVector{Atom})
+function stoichiometry(atoms::AbstractVector{<:Atom})
     f = formula(atoms)
     d = gcd((x[2] for x in f.formula)...)
     for (i, p) in pairs(f.formula)

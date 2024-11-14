@@ -1,13 +1,13 @@
 export add_hydrogens!
 
 """
-    add_hydrogens!(atoms::AbstractVector{Atom}; pH=7.0, obabel="obabel", debug=false)
+    add_hydrogens!(atoms::AbstractVector{<:Atom}; pH=7.0, obabel="obabel", debug=false)
 
 Add hydrogens to a PDB file using Open Babel. 
 
 # Arguments
 
-- `atoms::AbstractVector{Atom}`: structure (usually PDB file of a protein) to add hydrogens to.
+- `atoms::AbstractVector{<:Atom}`: structure (usually PDB file of a protein) to add hydrogens to.
 - `pH`: the pH of the solution. Default is 7.0.
 - `obabel`: path to the obabel executable. Default is "obabel".
 - `debug`: if true, print the output message from obabel. Default is false.
@@ -37,7 +37,7 @@ julia> add_hydrogens!(atoms)
 
 """
 function add_hydrogens!(
-    atoms::AbstractVector{Atom};
+    atoms::AbstractVector{<:Atom};
     pH::Real=7.0,
     obabel="obabel",
     debug=false,

@@ -1,5 +1,5 @@
 """
-    Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
+    Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
 
 Residue data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
@@ -52,7 +52,7 @@ model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
-function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
+function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
     i = range[begin]
     # Check if the range effectivelly corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
@@ -72,7 +72,7 @@ function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
         atoms[i].segname,
     )
 end
-Residue(atoms::AbstractVector{Atom}) = Residue(atoms, 1:length(atoms))
+Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
 function Base.getindex(residue::Residue, i::Int)
     i > 0 || throw(ArgumentError("Index must be in 1:$(length(residue))"))
@@ -84,12 +84,12 @@ end
 #
 # Structure and function to define the eachresidue iterator
 #
-struct EachResidue{T<:AbstractVector{Atom}}
+struct EachResidue{T<:AbstractVector{<:Atom}}
     atoms::T
 end
 
 """
-    eachresidue(atoms::AbstractVector{Atom})
+    eachresidue(atoms::AbstractVector{<:Atom})
 
 Iterator for the residues (or molecules) of a selection. 
 
@@ -123,7 +123,7 @@ julia> for res in eachresidue(atoms)
 ```
 
 """
-eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
+eachresidue(atoms::AbstractVector{<:Atom}) = EachResidue(atoms)
 
 # Collect residues default constructor
 Base.collect(residues::EachResidue) = collect(Residue, residues)
@@ -312,7 +312,7 @@ julia> using PDBTools
 
 julia> atoms = wget("1LBD", "protein");
 
-julia> residue_ticks(atoms; stride=50) # Vector{Atom} as input
+julia> residue_ticks(atoms; stride=50) # Vector{<:Atom} as input
 (1:50:201, ["S225", "Q275", "L325", "L375", "L425"])
 
 julia> residue_ticks(atoms; first=235, last=240, serial=false) # first=10 and resnum indexing

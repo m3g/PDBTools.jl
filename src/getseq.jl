@@ -1,5 +1,5 @@
 """
-    getseq(Vector{Atom} or filename; selection, code)
+    getseq(AbstractVector{<:Atom} or filename; selection, code)
 
 Returns the sequence of aminoacids from the vector of atoms or file name. Selections may be applied. Code defines if the output will be a one-letter, three-letter or full-residue name array.
 
@@ -26,12 +26,12 @@ julia> getseq(protein,"residue < 3",code=3)
 ```
 
 """
-function getseq(atoms::AbstractVector{Atom}, selection::String; code::Int=1)
+function getseq(atoms::AbstractVector{<:Atom}, selection::String; code::Int=1)
     query = parse_query(selection)
     return getseq(atoms, only=atom -> apply_query(query, atom), code=code)
 end
 
-function getseq(atoms::AbstractVector{Atom}; only=isprotein, code::Int=1)
+function getseq(atoms::AbstractVector{<:Atom}; only=isprotein, code::Int=1)
     seq = String[]
     for residue in eachresidue(atoms)
         # If any atom of this residue is in the selection, add it

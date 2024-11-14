@@ -1,16 +1,16 @@
 """
-    write_mmcif(filename, atoms::Vector{Atom}, [selection])
+    write_mmcif(filename, atoms::AbstractVector{<:Atom}, [selection])
 
 Write a mmCIF file with the atoms in `atoms` to `filename`. The optional `selection` argument is a string
 that can be used to select a subset of the atoms in `atoms`. For example, `write_mmcif(atoms, "test.cif", "name CA")`.
 
 """
-function write_mmcif(filename::AbstractString, atoms::AbstractVector{AtomType}, selection::String) where {AtomType}
+function write_mmcif(filename::AbstractString, atoms::AbstractVector{<:Atom}, selection::String)
     query = parse_query(selection)
     write_mmcif(filename, atoms; only=atom -> apply_query(query, atom))
 end
 
-function write_mmcif(filename::AbstractString, atoms::AbstractVector{AtomType}; only::Function=all) where {AtomType}
+function write_mmcif(filename::AbstractString, atoms::AbstractVector{<:Atom}; only::Function=all)
     _cif_fields = _supported_cif_fields()
     open(expanduser(filename), "w") do file
         # Header

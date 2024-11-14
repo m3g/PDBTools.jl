@@ -55,12 +55,12 @@ julia> coor(residues[1])
 """
 coor(atom::Atom) = SVector{3,Float64}(atom.x, atom.y, atom.z)
 
-function coor(atoms::AbstractVector{Atom}, selection::String)
+function coor(atoms::AbstractVector{<:Atom}, selection::String)
     query = parse_query(selection)
     return coor(atoms, only=atom -> apply_query(query, atom))
 end
 
-function coor(atoms::AbstractVector{Atom}; only=all)
+function coor(atoms::AbstractVector{<:Atom}; only=all)
     n = 0
     for atom in atoms
         !only(atom) && continue

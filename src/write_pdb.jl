@@ -1,5 +1,5 @@
 """
-    write_pdb(filename::String, atoms::Vector{Atom}, selection; header=:auto, footer=:auto)
+    write_pdb(filename::String, atoms::AbstractVector{<:Atom}, selection; header=:auto, footer=:auto)
 
 Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string
 that can be used to select a subset of the atoms in `atoms`. For example, `write_pdb("test.pdb", atoms, "name CA")`.
@@ -9,12 +9,12 @@ then a header will be added with the number of atoms in `atoms`. If `footer` is 
 with the "END" keyword. Either can be set to `nothing` if no header or footer is desired.
 
 """
-function write_pdb(filename::String, atoms::AbstractVector{Atom}, selection::String; header=:auto, footer=:auto)
+function write_pdb(filename::String, atoms::AbstractVector{<:Atom}, selection::String; header=:auto, footer=:auto)
     query = parse_query(selection)
     write_pdb(filename, atoms, only=atom -> apply_query(query, atom); header, footer)
 end
 
-function write_pdb(filename::String, atoms::AbstractVector{Atom}; only::Function=all, header=:auto, footer=:auto)
+function write_pdb(filename::String, atoms::AbstractVector{<:Atom}; only::Function=all, header=:auto, footer=:auto)
     file = open(expanduser(filename), "w")
     if header == :auto
         curr_date = Dates.format(Dates.today(), "dd-u-yy")
