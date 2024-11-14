@@ -83,29 +83,19 @@ coor(residue::Residue; only=all) = coor(residue.atoms[residue.range], only=only)
 coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], selection)
 
 @testitem "coor" begin
-    import StaticArrays
     atoms = read_pdb(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
-    @test coor(s) ≈ [
-        StaticArrays.SVector{3,Float64}(-4.383, -11.903, -6.849),
-        StaticArrays.SVector{3,Float64}(-4.51, -11.263, -6.096),
-        StaticArrays.SVector{3,Float64}(-3.903, -11.262, -8.062),
-        StaticArrays.SVector{3,Float64}(-3.731, -12.076, -8.767),
-        StaticArrays.SVector{3,Float64}(-4.938, -10.279, -8.612),
-        StaticArrays.SVector{3,Float64}(-4.417, -9.552, -9.06),
-        StaticArrays.SVector{3,Float64}(-5.543, -9.911, -7.784),
-        StaticArrays.SVector{3,Float64}(-5.867, -10.85, -9.684),
-        StaticArrays.SVector{3,Float64}(-5.451, -10.837, -10.863),
-        StaticArrays.SVector{3,Float64}(-6.974, -11.289, -9.3),
-        StaticArrays.SVector{3,Float64}(-2.626, -10.48, -7.749),
-        StaticArrays.SVector{3,Float64}(-1.94, -10.014, -8.658)
-    ]
+    @test all(isapprox.(stack(coor(s)),[
+        -4.383   -4.51    -3.903   -3.731   -4.938  -4.417  -5.543   -5.867   -5.451   -6.974   -2.626   -1.94
+        -11.903  -11.263  -11.262  -12.076  -10.279  -9.552  -9.911  -10.85   -10.837  -11.289  -10.48   -10.014
+         -6.849   -6.096   -8.062   -8.767   -8.612  -9.06   -7.784   -9.684  -10.863   -9.3     -7.749   -8.658
+    ]; atol=1e-3))
     r = Residue(select(atoms, "residue = 3"))
     @test coor(s) == coor(r)
     residues = collect(eachresidue(atoms))
     @test coor(select(atoms, "residue = 3")) == coor(residues[3])
     @test coor(atoms, "residue = 3") == coor(s)
     @test coor(residues[1]) == coor(select(atoms, "residue = 1"))
-    @test coor(residues[1]; only = at -> name(at) == "N") == StaticArrays.SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
-    @test coor(residues[1], "name N") == StaticArrays.SVector{3, Float64}[[-9.229, -14.861, -5.481]] 
+    @test all(isapprox.(coor(residues[1]; only = at -> name(at) == "N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
+    @test all(isapprox.(coor(residues[1], "name N")[1],[-9.229, -14.861, -5.481]; atol=1e-3)) 
 end

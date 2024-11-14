@@ -68,7 +68,7 @@ julia> threeletter("HSD")
 ```
 
 """
-function threeletter(residue::Union{String,Char})
+function threeletter(residue::Union{AbstractString,Char})
     code = string(residue)
     three_letter_code = if length(code) == 1
         findfirst(r -> r.one_letter_code == code, protein_residues)
@@ -95,7 +95,7 @@ end
 end
 
 """
-    oneletter(residue::Union{String,Char})
+    oneletter(residue::Union{AbstractString,Char})
 
 Function to return a one-letter residue code from the three letter code or residue name. The function is case-insensitive.
 
@@ -111,7 +111,7 @@ julia> oneletter("Glutamic acid")
 ```
 
 """
-function oneletter(residue::Union{String,Char})
+function oneletter(residue::Union{AbstractString,Char})
     code = string(residue)
     one_letter_code = if length(code) == 1
         r = findfirst(r -> r.one_letter_code == code, protein_residues)
@@ -145,7 +145,7 @@ end
 
 
 """
-    resname(residue::Union{String,Char})
+    resname(residue::Union{AbstractString,Char})
 
 Returns the residue name, given the one-letter code or residue name. Differently from
 `threeletter`, this function will return the force-field name if available in the list
@@ -160,7 +160,7 @@ julia> resname("GLUP")
 "GLUP"
 ```
 """
-function resname(residue::Union{String,Char})
+function resname(residue::Union{AbstractString,Char})
     code = string(residue)
     if haskey(protein_residues, code)
         return code
@@ -180,7 +180,7 @@ end
 end
 
 """
-    residuename(residue::Union{String,Char})
+    residuename(residue::Union{AbstractString,Char})
 
 Function to return the long residue name from other residue codes. The function is case-insensitive.
 
@@ -196,7 +196,7 @@ julia> residuename("Glu")
 ```
 
 """
-function residuename(residue::Union{String,Char})
+function residuename(residue::Union{AbstractString,Char})
     code = resname(uppercase(residue))
     if haskey(protein_residues, code)
         return protein_residues[code].name

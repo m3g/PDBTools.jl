@@ -35,13 +35,13 @@ julia> residues[8].range
 struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
     atoms::Vec
     range::UnitRange{Int}
-    name::String
-    resname::String
-    residue::Int
-    resnum::Int
-    chain::String
-    model::Int
-    segname::String
+    name::String7
+    resname::String7
+    residue::Int32
+    resnum::Int32
+    chain::String3
+    model::Int32
+    segname::String7
 end
 name(residue::Residue) = residue.name
 resname(residue::Residue) = residue.resname
