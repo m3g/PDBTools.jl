@@ -95,16 +95,16 @@ Calculate the center of mass of the atoms.
 
 # Example
 
-```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
+```jldoctest
 julia> using PDBTools
 
 julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
-  -5.584422752942997
- -13.110413157869903
-  -7.139970815730879
+  -5.584422772707132
+ -13.110413081059928
+  -7.139970851058855
 ```
 
 """
@@ -133,24 +133,24 @@ Move the center of mass of the atoms to the specified `center` position, which d
 
 # Example
 
-```julia-repl
+```jldoctest
 julia> using PDBTools
 
 julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
-  -5.584422752942997
- -13.110413157869903
-  -7.139970815730879
+  -5.584422772707132
+ -13.110413081059928
+  -7.139970851058855
 
 julia> moveto!(atoms; center = [1.0, 2.0, 3.0]);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
- 1.0
- 2.0000000000000036
- 3.0000000000000018
+ 1.0000000263619948
+ 1.9999999934852166
+ 2.9999999509668918
 ```
 """
 function moveto!(atoms::AbstractVector{<:Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
