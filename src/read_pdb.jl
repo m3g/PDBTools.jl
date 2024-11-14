@@ -75,7 +75,7 @@ function _parse_pdb(
             imodel = imodel + 1
         end
         if startswith(line, r"ATOM|HETATM")
-            atom = read_atom_PDB(line, lastatom, imodel)
+            atom = read_atom_pdb(line, lastatom, imodel)
             atom.model = imodel
             only(atom) && push!(atoms, atom)
             lastatom = atom
@@ -91,8 +91,10 @@ function _parse_pdb(
     return atoms
 end
 
+
+
 # read atom from PDB file
-function read_atom_PDB(record::String, lastatom::Atom, imodel::Int)
+function read_atom_pdb(record::String, lastatom::Atom=Atom{Nothing}(), imodel::Int=1)
     atom = Atom{Nothing}(;index=index(lastatom) + 1, residue=residue(lastatom), model=imodel)
     inds_and_names = (
         (1, Val(:name)), 
@@ -122,7 +124,7 @@ function read_atom_PDB(record::String, lastatom::Atom, imodel::Int)
         length(record) >= 66 ? record[61:66] : record[61:end], # :beta
         length(record) >= 76 ? record[73:76] : record[73:end], # :segname
         length(record) >= 78 ? record[77:78] : record[77:end], # :pdb_element
-        length(record) >= 80 ? record[79:80] : record[79:end], # :charge 
+        length(record) >= 80 ? _parse_charge(record[79:80]) : _parse_charge(record[79:end]), # :charge 
     )
     _fast_setfield!(atom, field_values, inds_and_names)
     if !same_residue(atom, lastatom)
@@ -132,7 +134,7 @@ function read_atom_PDB(record::String, lastatom::Atom, imodel::Int)
 end
 
 @testitem "read_pdb" begin
-    pdb_file = "$(@__DIR__)/../test/structure.pdb"
+    pdb_file = PDBTools.TESTPDB
     atoms = read_pdb(pdb_file, "protein and name CA")
     @test length(atoms) == 104
     pdbdata = read(pdb_file, String)
@@ -142,55 +144,67 @@ end
 
 @testitem "read_atom_pdb" begin
     line = "HETATM    1  O1  BGL    1       0.665   1.214  -0.259  1.00  0.00"
-    a = PDBTools.read_atom(line)
+    a = PDBTools.read_atom_pdb(line)
     @test a.index == 1
     @test a.name == "O1"
     @test a.resname == "BGL"
     @test a.chain == "X"
     @test a.resnum == 1
-    @test a.residue == 0
-    @test (a.x, a.y, a.z) == (0.665, 1.214, -0.259)
+    @test a.residue == 1
+    @test (a.x, a.y, a.z) == (0.665f0, 1.214f0, -0.259f0)
     @test (a.occup, a.beta) == (1.0, 0.0)
     @test a.model == 1
-    @test a.segname == "-"
+    @test a.segname == "X"
     @test a.index_pdb == 1
     @test a.pdb_element == "X"
-    @test isnothing(a.charge)
+    @test a.charge == 0.0f0
 
     line = "HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            1+  "
-    a = PDBTools.read_atom(line)
+    a = PDBTools.read_atom_pdb(line)
     @test a.index == 1
     @test a.name == "O1"
     @test a.resname == "AGL"
     @test a.chain == "X"
     @test a.resnum == 1
-    @test a.residue == 0
-    @test (a.x, a.y, a.z) == (0.803, 1.186, -0.211)
+    @test a.residue == 1
+    @test (a.x, a.y, a.z) == (0.803f0, 1.186f0, -0.211f0)
     @test (a.occup, a.beta) == (1.0, 0.0)
     @test a.model == 1
-    @test a.segname == "-"
+    @test a.segname == "X"
     @test a.index_pdb == 1
     @test a.pdb_element == "X"
-    @test a.charge == "1+"
+    @test a.charge == 1.0f0
+
+    line = "HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            +1  "
+    a = PDBTools.read_atom_pdb(line)
+    @test a.charge == 1.0f0
+
+    line = "HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            -1  "
+    a = PDBTools.read_atom_pdb(line)
+    @test a.charge == -1.0f0
+
+    line = "HETATM    1  O1  AGL     1       0.803   1.186  -0.211  1.00  0.00            1-  "
+    a = PDBTools.read_atom_pdb(line)
+    @test a.charge == -1.0f0
 
     line = "ATOM  *****  H2  GLYCD4301      11.014  36.823  40.115  1.00  0.00      GLYC H"
-    a = PDBTools.read_atom(line)
+    a = PDBTools.read_atom_pdb(line)
     @test a.index == 1
     @test a.name == "H2"
     @test a.resname == "GLYC"
     @test a.chain == "D"
     @test a.resnum == 4301
-    @test a.residue == 0
-    @test (a.x, a.y, a.z) == (11.014, 36.823, 40.115)
+    @test a.residue == 1
+    @test (a.x, a.y, a.z) == (11.014f0, 36.823f0, 40.115f0)
     @test (a.occup, a.beta) == (1.0, 0.0)
     @test a.model == 1
     @test a.segname == "GLYC"
-    @test a.index_pdb == -1
+    @test a.index_pdb == 0
     @test a.pdb_element == "H"
-    @test isnothing(a.charge)
+    @test a.charge == 0
 
     line = "ATOM  3ce2c  LP2 WLS Cffff     376.512 638.670  16.990  0.00  0.00         C"
-    a = PDBTools.read_atom(line)
+    a = PDBTools.read_atom_pdb(line)
     @test a.index == 1
     @test a.index_pdb == 249388
     @test a.resnum == 65535
