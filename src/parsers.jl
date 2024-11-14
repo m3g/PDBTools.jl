@@ -1,11 +1,11 @@
-function _parse(::Type{T}, string, range=nothing) where {T<:AbstractFloat}
+function _parse(::Type{T}, string, range=nothing; alt=zero(T)) where {T<:AbstractFloat}
     s = if isnothing(range)
         string
     else
         @view(string[range[begin]:min(range[end],length(string))])
     end
     x = tryparse(T, s)
-    return isnothing(x) ? zero(T) : x
+    return isnothing(x) ? alt : x
 end
 
 function _parse(::Type{T}, string, range=nothing; alt::Union{T,Nothing}=nothing) where {T<:Integer}
@@ -40,7 +40,7 @@ function _parse(::Type{S}, string, range=nothing; alt::Union{S,Nothing}=nothing)
     return S(string[first_char:last_char])
 end
 
-function _parse(::Type{T}, string, range=1:1) where {T<:Nothing}
+function _parse(::Type{T}, string, range=1:1; alt=nothing) where {T<:Nothing}
     return nothing
 end
 
@@ -69,13 +69,17 @@ function _fast_setfield!(atom::AtomType, field_values::FIELDS, inds_and_names::T
 #    setfield_generated!(atom, field_values, inds_and_names, Val(N))
 end
 
+# Alternate values for fields that might be empty
+_alt(::Type{S}) where {S<:AbstractString} = S(" ")
+_alt(::Type{T}) where {T} = zero(T)
+# Unwrap Val-wrapped values
 unwrap(::Val{T}) where {T} = T
 function setfield_recursive!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType, FIELDS, TUPTUP}
     isempty(inds_and_names) && return atom
     i, valfield = first(inds_and_names)
     field = unwrap(valfield)
     T = typeof(getfield(atom, field))
-    setfield!(atom, field, _parse(T, field_values[i]))
+    setfield!(atom, field, _parse(T, field_values[i]; alt=_alt(T)))
     setfield_recursive!(atom, field_values, Base.tail(inds_and_names))
 end
 
@@ -88,7 +92,7 @@ end
             ifield, valfield = inds_and_names[i]
             field = unwrap(valfield)
             T = typeof(getfield(atom, field))
-            setfield!(atom, field, _parse(T, field_values[ifield]))
+            setfield!(atom, field, _parse(T, field_values[ifield]; alt=_alt(T)))
         end
     end
 end
