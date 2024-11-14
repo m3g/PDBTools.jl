@@ -53,60 +53,30 @@ The following functions are supported as part of the API, to conform the `AtomsB
 
 ## Custom Atom fields
 
-!!! compat
-    Custom field support was introduced on PDBTools version 0.14.3.
-
-Custom atom fields can be added to an `Atom` object by defining the `custom` dictionary.
-The fields can be accessed by the standard dot syntax if the field name does not clash 
-with an existing `Atom` field, or by the `custom_field` getter function. 
+Custom atom fields can be created in `Atom` objects by defining the `custom` keyword.
+By default, `custom == nothing`. The custom fields can be added on construction, or 
+with the `add_custom_field` function, which creates a new instance of an `Atom` 
+with the added value in the custom field:
 
 For example:
-
-```julia-repl
-julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1))
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0    XXXX         0
-
-julia> atom.c
-"c"
-
-julia> atom.index
-0
-
-julia> custom_field(atom, :index)
-1
-```
-
-Setting new custom fields follow the standard Julia dictionary syntax:
-
-```julia-repl
-julia> atom.custom[:new] = "NEW"
-"NEW"
-
-julia> atom.new
-"NEW"
-
-julia> custom_field(atom, :new)
-"NEW"
-```
-
-!!! compat 
-    The following feature was introduced in PDBTools version 0.14.4.
-
-If a custom field with the `:mass` key is added to the atom, the `mass` function returns the mass
-set at that field: 
 
 ```jldoctest
 julia> using PDBTools
 
-julia> atom = Atom();
+julia> atom = Atom(custom="TEST");
 
-julia> atom.custom[:mass] = 10.0
-10.0
+julia> atom.custom
+"TEST"
 
-julia> mass(atom)
-10.0
+julia> atom = Atom(;name = "CA", resname="ALA") # no custom field
+       0   CA     ALA     X        0        0    0.000    0.000    0.000  0.00  0.00     0                 0
+
+julia> new_atom = add_custom_field(atom, Dict(:charge => 2.0))
+       0   CA     ALA     X        0        0    0.000    0.000    0.000  0.00  0.00     0                 0
+
+julia> new_atom.custom[:charge]
+2.0
 ```
-
 # Elements for custom atom types
 
 !!! compat

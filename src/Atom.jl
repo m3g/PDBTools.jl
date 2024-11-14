@@ -171,8 +171,22 @@ pdb_element(atom::Atom) = atom.pdb_element
     @test charge(atom) == 0.0f0
 end
 
+function add_custom_field(atom::Atom, value)
+    new_atom = Atom(;custom=value)
+    for field in fieldnames(Atom)
+        field == :custom && continue
+        setproperty!(new_atom, field, getproperty(atom, field))
+    end
+    return new_atom
+end
+
 @testitem "Atom custom fields" begin
     atom = Atom(; custom=Dict(:a => 1, :b => "b", :index => 1))
+    @test atom.index == 0
+    @test atom.custom[:a] == 1
+    @test atom.custom[:b] == "b" 
+    at = Atom()
+    at2 = add_custom_field(at, Dict(:a => 1, :b => "b", :index => 1))
     @test atom.index == 0
     @test atom.custom[:a] == 1
     @test atom.custom[:b] == "b" 
