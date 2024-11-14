@@ -32,12 +32,26 @@ function _parse(::Type{S}, string, range=nothing; alt::Union{S,Nothing}=nothing)
     else
         @view(string[range[begin]:min(range[end],length(string))]), range
     end
-    length(range) > 0 || return isnothing(alt) ? S(" ") : alt
+    length(range) > 0 || return isnothing(alt) ? S("X") : alt
     first_char = findfirst(>(' '), s)
-    isnothing(first_char) && return isnothing(alt) ? S(" ") : alt
+    isnothing(first_char) && return isnothing(alt) ? S("X") : alt
     first_char = first(range) + first_char - 1
     last_char = first(range) + findlast(>(' '), s) - 1
     return S(string[first_char:last_char])
+end
+
+#
+# In PDB, the charge sometimes appears as "+1" or "-1" and sometimes as "1+" or "1-"
+#
+function _parse_charge(charge::AbstractString)
+    charge = if occursin('+', charge) 
+        replace(charge, "+" => "")
+    elseif occursin('-', charge)
+        "-$(replace(charge, "-" => ""))"
+    else
+        charge
+    end
+    return charge
 end
 
 function _parse(::Type{T}, string, range=1:1; alt=nothing) where {T<:Nothing}
@@ -70,7 +84,7 @@ function _fast_setfield!(atom::AtomType, field_values::FIELDS, inds_and_names::T
 end
 
 # Alternate values for fields that might be empty
-_alt(::Type{S}) where {S<:AbstractString} = S(" ")
+_alt(::Type{S}) where {S<:AbstractString} = S("X")
 _alt(::Type{T}) where {T} = zero(T)
 # Unwrap Val-wrapped values
 unwrap(::Val{T}) where {T} = T
