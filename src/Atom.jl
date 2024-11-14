@@ -168,19 +168,14 @@ pdb_element(atom::Atom) = atom.pdb_element
     @test model(atom) == 1
     @test segname(atom) == "PROT"
     @test index_pdb(atom) == 13
-    @test charge(atom) === nothing
+    @test charge(atom) == 0.0f0
 end
 
 @testitem "Atom custom fields" begin
-    atom = Atom()
-    @test length(atom.custom) == 0
     atom = Atom(; custom=Dict(:a => 1, :b => "b", :index => 1))
     @test atom.index == 0
-    @test atom.a == 1
-    @test atom.b == "b" 
-    @test custom_field(atom, :a) == 1
-    @test custom_field(atom, :b) == "b"
-    @test custom_field(atom, :index) == 1
+    @test atom.custom[:a] == 1
+    @test atom.custom[:b] == "b" 
 end
 
 #
@@ -230,7 +225,6 @@ atom_line(atom::Atom) = @sprintf(
     atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
         "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
-
 end
 
 """
@@ -510,9 +504,7 @@ julia> mass(atoms)
 
 """
 function mass(at::Atom)
-   mass = if haskey(at.custom, :mass)
-       at.custom[:mass]::Float64
-   elseif element(at) == "X"
+   mass = if element(at) == "X"
         nothing
    else
        get_element_property(at, Val(:mass))
@@ -544,8 +536,6 @@ end
     @test mass([at, at]) == 28.0134
     atoms = read_pdb(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
-    at.custom[:mass] = 1.0
-    @test mass(at) == 1.0
     @test mass(Atom(name="X")) === nothing
     @test mass(Atom(name=" ")) === nothing
     @test mass(Atom(name="A")) === nothing
