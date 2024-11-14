@@ -108,13 +108,18 @@ end
 
 function Atom(;custom::CustomType=nothing, kargs...) where {CustomType}
     atom = Atom{CustomType}(0,0,"X","XXX","X",0,0,0.0f0,0.0f0,0.0f0,0.0f0,0.0f0,0,"","X",0.0f0,custom)
-    for (f, v) in pairs(kargs)
+    kargs_values = values(kargs)
+    kargs_keys = keys(kargs_values)
+    ntuple(length(kargs_values)) do i 
+        @inline 
+        f = kargs_keys[i]
+        v = kargs_values[f]
         setfield!(atom, f, fieldtype(typeof(atom), f)(v))
     end
     return atom
 end
 
-Atom{CustomType}(;kargs...) where {CustomType <: Nothing} = Atom(;custom=nothing, kargs...)
+Atom{Nothing}(;kargs...) = Atom(;custom=nothing, kargs...)
 
 
 index(atom::AbstractAtom) = atom.index
