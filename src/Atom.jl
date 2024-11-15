@@ -130,12 +130,13 @@ Atom{Nothing}(;kargs...) = Atom(;custom=nothing, kargs...)
 @testitem "Atom constructors" begin
     atref = Atom{Nothing}(0,0,"X","XXX","X",0,0,0.0f0,0.0f0,0.0f0,0.0f0,0.0f0,0,"","X",0.0f0,nothing)
     at = Atom()
+    @test Base.summarisize(at) == 80
     @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
     at1 = Atom{Nothing}(;index=1, name="CA")
     at2 = Atom(;custom=nothing, index=1, name="CA")
     @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
-    @test (@allocations at = Atom()) == 1 
-    @test (@allocations at = Atom(; index=1, residue=1, name="CA")) == 1
+    @test (@allocations at = Atom()) <= 1 
+    @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
 end
 
 index(atom::Atom) = atom.index
