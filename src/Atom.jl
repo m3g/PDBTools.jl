@@ -588,7 +588,7 @@ end
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
     a = @benchmark sum($mass, $atoms) samples=1 evals=1
-    @test a == 0
+    @test a.allocs == 0
 end
 
 @testitem "AtomsBase interface" begin
