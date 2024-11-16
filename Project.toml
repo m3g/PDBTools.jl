@@ -5,6 +5,7 @@ version = "2.0.0-DEV"
 
 [deps]
 AtomsBase = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 Format = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
@@ -20,7 +21,6 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 [compat]
 Aqua = "0.8"
 AtomsBase = "0.3.4, 0.4"
-BenchmarkTools = "1.5"
 Dates = "1.9"
 DelimitedFiles = "1.9"
 Documenter = "1.3"
