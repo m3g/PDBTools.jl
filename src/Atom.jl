@@ -569,6 +569,7 @@ function Base.show(io::IO, atoms::AbstractVector{Atom})
 end
 
 @testitem "fetch atomic element properties" begin
+    using PDBTools
     using BenchmarkTools
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
@@ -586,7 +587,7 @@ end
     @test atomic_number(Atom(name="CAL")) == 20
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
-    a = @ballocated sum($mass, $atoms) evals=1 samples=1
+    a = @benchmark sum($mass, $atoms) samples=1 evals=1
     @test a == 0
 end
 
