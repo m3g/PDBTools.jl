@@ -203,3 +203,20 @@ function read_atom_mmcif(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) w
     end
     return atom
 end
+
+@testitem "read_mmcif" begin
+    using PDBTools
+    using BenchmarkTools
+    b = @benchmark read_mmcif($(PDBTools.SMALLCIF)) samples=1 evals=1
+    @test b.allocs < 200
+    ats = read_mmcif(PDBTools.TESTCIF)
+    @test count(at -> resname(at) == "HOH", ats) == 445
+    @test count(at -> isprotein(at), ats) == 2966
+    @test length(eachresidue(select(ats, "protein"))) == 354
+    tmpfile = tempname()*".cif"
+    write_mmcif(tmpfile, ats, "protein")
+    prot = read_mmcif(tmpfile)
+    @test length(prot) == 2966
+    ats = read_mmcif(PDBTools.TESTCIF, "resname HOH")
+    @test length(ats) == 445
+end
