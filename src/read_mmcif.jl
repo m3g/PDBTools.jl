@@ -219,4 +219,16 @@ end
     @test length(prot) == 2966
     ats = read_mmcif(PDBTools.TESTCIF, "resname HOH")
     @test length(ats) == 445
+
+    # peformance tests for innner functions for reading cif fields into Atoms
+    record = "ATOM   1    N  N   . VAL A 1 1   ? 6.204   16.869  4.854   1.00 49.05 ? 1   VAL A N   1"
+    inds_and_names = ((2, Val{:index_pdb}()), (4, Val{:name}()), (6, Val{:resname}()), (7, Val{:chain}()), (9, Val{:resnum}()), (11, Val{:x}()), (12, Val{:y}()), (13, Val{:z}()), (14, Val{:occup}()), (15, Val{:beta}()), (16, Val{:charge}()), (17, Val{:resnum}()), (18, Val{:resname}()), (19, Val{:chain}()), (20, Val{:name}()), (21, Val{:model}()))
+    lastatom = Atom()
+    NCOLS = 21
+    b = @benchmark PDBTools.read_atom_mmcif($(Val(NCOLS)), $record, $inds_and_names, $lastatom) samples=1 evals=1
+    @test b.allocs == 1
+    field_values = NTuple{NCOLS}(eachsplit(record))
+    atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
+    b = @benchmark PDBTools._fast_setfield!($atom, $field_values, $inds_and_names) samples=1 evals=1
+    @test b.allocs == 0
 end
