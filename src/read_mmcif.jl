@@ -142,7 +142,7 @@ end
 function _parse_mmCIF(
     cifdata::Union{IOStream,IOBuffer};
     only::Function,
-    memory_available::Real=0.9,
+    memory_available::Real=1, # defaults to 100% (MacOS requires this)
     stop_at=nothing,
 )
     _atom_symbol_for_cif_field = _supported_cif_fields()
