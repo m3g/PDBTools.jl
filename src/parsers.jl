@@ -31,15 +31,21 @@ function _parse(
     range=firstindex(string):lastindex(string); 
     alt::Union{S,Nothing}=nothing
 ) where {S<:AbstractString}
-    s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
-    first_char = findfirst(!isspace, s)
-    if !isnothing(first_char)
-        last_char = findlast(!isspace, s)
-        sr = @view(s[first_char:last_char])
-        return isempty(sr) ? alt : S(sr)
+    isempty(range) && return alt
+    first_char = if isspace(string[first(range)])
+        findfirst(!isspace, string)
     else
+        first(range)
+    end
+    last_char =  if isspace(string[last(range)])
+        findlast(!isspace, string)
+    else
+        last(range)
+    end
+    if isnothing(first_char) | isnothing(last_char)
         return alt
     end
+    return S(@view(string[first_char:last_char]))
 end
 
 #
