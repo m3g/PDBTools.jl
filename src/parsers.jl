@@ -1,19 +1,26 @@
-function _parse(::Type{T}, string, range=nothing; alt=zero(T)) where {T<:AbstractFloat}
-    s = if isnothing(range)
-        string
-    else
-        @view(string[range[begin]:min(range[end],length(string))])
-    end
+function _parse(
+    ::Type{T}, 
+    string, 
+    range=firstindex(string):lastindex(string); 
+    alt=zero(T)
+) where {T<:AbstractFloat}
+    s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
     x = tryparse(T, s)
-    return isnothing(x) ? alt : x
+    !isnothing(x) && return x
+    if isnothing(alt)
+        error("Could not read float from string: \"$s\"")
+    else
+        return alt
+    end
 end
 
-function _parse(::Type{T}, string, range=nothing; alt::Union{T,Nothing}=nothing) where {T<:Integer}
-    s = if isnothing(range)
-        string
-    else
-        @view(string[range[begin]:min(range[end],length(string))])
-    end
+function _parse(
+    ::Type{T}, 
+    string, 
+    range=firstindex(string):lastindex(string); 
+    alt::Union{T,Nothing}=nothing
+) where {T<:Integer}
+    s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
     i = tryparse(T, s)
     !isnothing(i) && return i
     # try to parse as hexadecimal number
@@ -26,18 +33,18 @@ function _parse(::Type{T}, string, range=nothing; alt::Union{T,Nothing}=nothing)
     end
 end
 
-function _parse(::Type{S}, string, range=nothing; alt::Union{S,Nothing}=nothing) where {S<:AbstractString}
-    s, range = if isnothing(range)
-        string, 1:length(string)
-    else
-        @view(string[range[begin]:min(range[end],length(string))]), range
-    end
+function _parse(
+    ::Type{S}, 
+    string, 
+    range=firstindex(string):lastindex(string); 
+    alt::Union{S,Nothing}=nothing
+) where {S<:AbstractString}
+    s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
     length(range) > 0 || return isnothing(alt) ? S("X") : alt
-    first_char = findfirst(>(' '), s)
+    first_char = findfirst(!isspace, s)
     isnothing(first_char) && return isnothing(alt) ? S("X") : alt
-    first_char = first(range) + first_char - 1
-    last_char = first(range) + findlast(>(' '), s) - 1
-    return S(string[first_char:last_char])
+    last_char = findlast(!isspace, s)
+    return S(s[first_char:last_char])
 end
 
 #
