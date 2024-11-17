@@ -32,11 +32,14 @@ function _parse(
     alt::Union{S,Nothing}=nothing
 ) where {S<:AbstractString}
     s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
-    length(range) > 0 || return isnothing(alt) ? S("X") : alt
     first_char = findfirst(!isspace, s)
-    isnothing(first_char) && return isnothing(alt) ? S("X") : alt
-    last_char = findlast(!isspace, s)
-    return S(s[first_char:last_char])
+    if !isnothing(first_char)
+        last_char = findlast(!isspace, s)
+        sr = @view(s[first_char:last_char])
+        return isempty(sr) ? alt : S(sr)
+    else
+        return alt
+    end
 end
 
 #
