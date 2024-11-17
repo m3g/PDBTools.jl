@@ -1,17 +1,12 @@
-function _parse(
-    ::Type{T}, 
-    string, 
-    range=firstindex(string):lastindex(string); 
-    alt=zero(T)
-) where {T<:AbstractFloat}
-    s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
-    x = tryparse(T, s)
-    !isnothing(x) && return x
-    if isnothing(alt)
-        error("Could not read float from string: \"$s\"")
-    else
-        return alt
+
+_tryparse(::Type{T}, s) where {T<:AbstractFloat} = tryparse(T, s)
+function _tryparse(::Type{T}, s) where {T<:Integer} 
+    i = tryparse(T, s) 
+    # try to parse hexadecimal number
+    if isnothing(i) 
+        i = tryparse(T, s, base=16)
     end
+    return i
 end
 
 function _parse(
@@ -19,15 +14,12 @@ function _parse(
     string, 
     range=firstindex(string):lastindex(string); 
     alt::Union{T,Nothing}=nothing
-) where {T<:Integer}
+) where {T<:Real}
     s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
-    i = tryparse(T, s)
-    !isnothing(i) && return i
-    # try to parse as hexadecimal number
-    i = tryparse(T, s, base=16)
-    !isnothing(i) && return i
+    x = _tryparse(T, s)
+    !isnothing(x) && return x
     if isnothing(alt)
-        error("Could not read integer from string: \"$s\"")
+        error("Could not read $T from string: \"$s\"")
     else
         return alt
     end
@@ -61,7 +53,7 @@ function _parse_charge(charge::AbstractString)
     return charge
 end
 
-function _parse(::Type{T}, string, range=1:1; alt=nothing) where {T<:Nothing}
+function _parse(::Type{T}, string, range; alt=nothing) where {T<:Nothing}
     return nothing
 end
 
