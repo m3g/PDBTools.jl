@@ -173,7 +173,7 @@ pdb_element(atom::Atom) = atom.pdb_element
 end
 
 function Base.copy(atom::Atom{CustomType}) where {CustomType}
-    if ismutable(atom.custom)
+    if ismutabletype(CustomType)
         throw(ArgumentError("""\n
             The Atom object contains a mutable custom field of type $CustomType. To create an independent copy of it, use the `deepcopy` function. 
         
