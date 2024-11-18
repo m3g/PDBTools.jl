@@ -11,6 +11,10 @@ read_pdb
 read_mmcif
 ```
 
+!!! note 
+    In the following examples, the `read_pdb` function will be illustrated. The usage is
+    similar to that of `read_mmcif`, to read `mmCIF (PDBx)` files. 
+
 ## Read a PDB file
 
 To read a PDB file and return a vector of atoms of

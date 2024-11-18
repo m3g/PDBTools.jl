@@ -30,8 +30,11 @@ atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
 
 PDBTools is not very strict in following the PDB or mmCIF formats. In particular,
 it does not read any of the meta-data of these files, only `ATOM` and `HETATM` fields
-are of interest. If more comprehensive support for these files is necessary,
-use the packages of 
+are of interest. Also, it supports repeated atom entries, as each atom is read as 
+an independent object. This flexibility provides support for common structure formats
+occurring in the Molecular Dynamics Simulations field. 
+
+If more comprehensive (and strict) support for these files is necessary, use the packages of 
 [BioJulia](https://github.com/BioJulia), 
 [BioStructures](https://github.com/BioJulia/BioStructures.jl) in
 particular.
