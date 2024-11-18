@@ -1,7 +1,10 @@
 """
-    wget(PDBid; selection)
+    wget(PDBid; selection; format="mmCIF")
 
 Retrieves a PDB file from the protein data bank. Selections may be applied.
+
+The optional format argument can be either "mmCIF" or "PDB". The default is "mmCIF".
+To download the data of large structures, it is recommended to use the "mmCIF" format.
 
 ### Example
 
@@ -19,12 +22,34 @@ julia> protein = wget("1LBD","chain A")
 
 ```
 """
-function wget(pdb_id::String, selection::String)
+function wget(pdb_id::String, selection::String; format="mmCIF")
     query = parse_query(selection)
-    return wget(pdb_id, only=atom -> apply_query(query, atom))
+    return wget(pdb_id, only=atom -> apply_query(query, atom); format)
 end
 
-function wget(pdb_id::String; only=all)
-    file = Downloads.download("https://files.rcsb.org/download/$(pdb_id).pdb")
-    return read_pdb(file, only=only)
+function wget(pdb_id::String; only=all, format::AbstractString="mmCIF")
+    atoms = if format == "PDB"
+        file = Downloads.download("https://files.rcsb.org/download/$(pdb_id).pdb")
+        read_pdb(file, only=only)
+    elseif format == "mmCIF"
+        file = Downloads.download("https://files.rcsb.org/download/$(pdb_id).cif")
+        read_mmcif(file, only=only)
+    else
+        throw(ArgumentError("""\n
+            format must be either "PDB" or "mmCIF"
+        
+        """))
+    end
+    return atoms
+end
+
+@testitem "wget" begin
+    using PDBTools
+    protein = wget("1LBD","chain A")
+    @test length(protein) == 1870
+    protein = wget("1LBD","chain A"; format="PDB")
+    @test length(protein) == 1870
+    protein = wget("1LBD","chain A"; format="mmCIF")
+    @test length(protein) == 1870
+    @test_throws ArgumentError wget("1LBD","chain A"; format="mmcif")
 end
