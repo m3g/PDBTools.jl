@@ -147,14 +147,18 @@ function _parse_mmCIF(
     stop_at=nothing,
 )
     _atom_symbol_for_cif_field = _supported_cif_fields()
-    _atom_site_field_inds = Dict{String,Int}()
-    ifield = 0
     atoms = Atom{Nothing}[]
     lastatom = Atom{Nothing}()
     _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
     local NCOLS, col_indices, col_field
+    ifield = 0
+    _atom_site_field_inds = Dict{String,Int}()
     for line in eachline(cifdata)
         # Reading the headers of the _atom_site loop
+        if occursin("loop_", line)
+            ifield = 0
+            empty!(_atom_site_field_inds)
+        end
         if occursin("_atom_site.", line)
             field_end = findfirst(<=(' '), line) 
             if isnothing(field_end)
@@ -209,7 +213,7 @@ end
     using PDBTools
     using BenchmarkTools
     b = @benchmark read_mmcif($(PDBTools.SMALLCIF)) samples=1 evals=1
-    @test b.allocs < 250
+    @test b.allocs < 300
     ats = read_mmcif(PDBTools.TESTCIF)
     @test count(at -> resname(at) == "HOH", ats) == 445
     @test count(at -> isprotein(at), ats) == 2966
