@@ -22,7 +22,7 @@ julia> protein = wget("1LBD","chain A")
 
 ```
 """
-function wget(pdb_id::String, selection::String; format="mmCIF")
+function wget(pdb_id::String, selection::String; format::AbstractString="mmCIF")
     query = parse_query(selection)
     return wget(pdb_id, only=atom -> apply_query(query, atom); format)
 end
