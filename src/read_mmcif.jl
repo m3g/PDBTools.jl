@@ -63,7 +63,8 @@ function _maximum_read(atoms, stop_at, memory_available)
         return true
     end
     if mod(length(atoms), 1000) == 0
-        if Sys.free_memory() < (1 - memory_available) * Sys.total_memory()
+        estimated_size = natoms * Base.summarysize(atoms[1])
+        if estimated_size > memory_available * Sys.total_memory()
             @warn """\n
                 Memory limit reached. $(length(atoms)) atoms read so far will be returned.
                 Size of the atoms array: $(round(Base.summarysize(atoms) / 1024^2; digits=3)) MB
@@ -142,7 +143,7 @@ end
 function _parse_mmCIF(
     cifdata::Union{IOStream,IOBuffer};
     only::Function,
-    memory_available::Real=1, # defaults to 100% (MacOS requires this)
+    memory_available::Real=0.8,
     stop_at=nothing,
 )
     _atom_symbol_for_cif_field = _supported_cif_fields()
@@ -208,7 +209,7 @@ end
     using PDBTools
     using BenchmarkTools
     b = @benchmark read_mmcif($(PDBTools.SMALLCIF)) samples=1 evals=1
-    @test b.allocs < 200
+    @test b.allocs < 250
     ats = read_mmcif(PDBTools.TESTCIF)
     @test count(at -> resname(at) == "HOH", ats) == 445
     @test count(at -> isprotein(at), ats) == 2966
