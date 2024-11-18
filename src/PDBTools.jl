@@ -3,6 +3,7 @@ module PDBTools
 import Dates
 import Downloads
 import InteractiveUtils
+import PrecompileTools
 using Format: format
 using LinearAlgebra: norm
 using Parameters: @unpack
@@ -83,5 +84,8 @@ include("./custom_types.jl")
 
 # Legacy compatibility
 include("./legacy.jl")
+
+# Precompilation
+include("./precompile.jl")
 
 end
