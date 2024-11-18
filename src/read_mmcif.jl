@@ -63,7 +63,7 @@ function _maximum_read(atoms, stop_at, memory_available)
         return true
     end
     if mod(length(atoms), 1000) == 0
-        estimated_size = natoms * Base.summarysize(atoms[1])
+        estimated_size = length(atoms) * Base.summarysize(atoms[1])
         if estimated_size > memory_available * Sys.total_memory()
             @warn """\n
                 Memory limit reached. $(length(atoms)) atoms read so far will be returned.
