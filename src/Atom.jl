@@ -172,6 +172,31 @@ pdb_element(atom::Atom) = atom.pdb_element
     @test charge(atom) == 0.0f0
 end
 
+function Base.copy(atom::Atom{CustomType}) where {CustomType}
+    if ismutable(atom.custom)
+        throw(ArgumentError("""\n
+            The Atom object contains a mutable custom field of type $CustomType. To create an independent copy of it, use the `deepcopy` function. 
+        
+        """))
+    else
+        Atom{CustomType}((getfield(atom, f) for f in fieldnames(Atom))...)
+    end
+end
+
+@testitem "copy atom" begin
+    using PDBTools
+    at1 = Atom()
+    at2 = copy(at1)
+    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    at1 = Atom(custom=1.0)
+    at2 = copy(at1)
+    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    at1 = Atom(custom=Int[])
+    @test_throws ArgumentError copy(at1)
+    at2 = deepcopy(at1)
+    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+end
+
 """
     add_custom_field(atom::Atom, value)
 
