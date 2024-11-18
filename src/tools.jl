@@ -1,13 +1,13 @@
 export add_hydrogens!
 
 """
-    add_hydrogens!(atoms::AbstractVector{Atom}; pH=7.0, obabel="obabel", debug=false)
+    add_hydrogens!(atoms::AbstractVector{<:Atom}; pH=7.0, obabel="obabel", debug=false)
 
 Add hydrogens to a PDB file using Open Babel. 
 
 # Arguments
 
-- `atoms::AbstractVector{Atom}`: structure (usually PDB file of a protein) to add hydrogens to.
+- `atoms::AbstractVector{<:Atom}`: structure (usually PDB file of a protein) to add hydrogens to.
 - `pH`: the pH of the solution. Default is 7.0.
 - `obabel`: path to the obabel executable. Default is "obabel".
 - `debug`: if true, print the output message from obabel. Default is false.
@@ -21,7 +21,7 @@ Add hydrogens to a PDB file using Open Babel.
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein and not element H");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and not element H");
 
 julia> add_hydrogens!(atoms)
    Array{Atoms,1} with 1459 atoms with fields:
@@ -37,14 +37,14 @@ julia> add_hydrogens!(atoms)
 
 """
 function add_hydrogens!(
-    atoms::AbstractVector{Atom};
+    atoms::AbstractVector{<:Atom};
     pH::Real=7.0,
     obabel="obabel",
     debug=false,
 )
     tmpfile = tempname() * ".pdb"
     tmpfile_out = tempname() * ".pdb"
-    writePDB(atoms, tmpfile)
+    write_pdb(tmpfile, atoms)
     if isnothing(Sys.which(obabel))
         throw(ArgumentError("""
 
@@ -67,9 +67,9 @@ function add_hydrogens!(
             Run with debug=true to see the error message from obabel.
         """))
     end
-    atoms_read = readPDB(tmpfile_out)
+    atoms_read = read_pdb(tmpfile_out)
     sort!(atoms_read; by=at -> resnum(at))
-    setfield!.(atoms_read, :index, eachindex(atoms_read))
+    setproperty!.(atoms_read, :index, eachindex(atoms_read))
     atoms .= atoms_read[1:length(atoms)]
     append!(atoms, atoms_read[length(atoms)+1:end])
     return atoms
@@ -77,7 +77,7 @@ end
 
 @testitem "add_hydrogens!" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB, "protein and not element H")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein and not element H")
     @test length(atoms) == 781
     if !isnothing(Sys.which("obabel"))
         add_hydrogens!(atoms)
@@ -95,16 +95,16 @@ Calculate the center of mass of the atoms.
 
 # Example
 
-```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
+```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
-  -5.584422752942997
- -13.110413157869903
-  -7.139970815730879
+  -5.584422772707132
+ -13.110413081059928
+  -7.139970851058855
 ```
 
 """
@@ -120,14 +120,10 @@ end
 
 @testitem "center_of_mass" begin
     using PDBTools
-    import StaticArrays
     atoms = [ Atom(name="C", x=-1.0, y=-1.0, z=-1.0), Atom(name="C", x=1.0, y=1.0, z=1.0) ]
-    @test center_of_mass(atoms) ≈ StaticArrays.SVector(0.0, 0.0, 0.0) atol = 1e-10
-    atoms = [ Atom(name="C", x=-1.0, y=-1.0, z=-1.0), Atom(name="C", x=1.0, y=1.0, z=1.0) ]
-    atoms = [ Atom(name="C", x=0.0, y=0.0, z=0.0), Atom(name="C", x=3.0, y=3.0, z=3.0, custom=Dict(:mass=>24.022)) ]
-    @test center_of_mass(atoms) ≈ StaticArrays.SVector(2.0, 2.0, 2.0) atol = 1e-10
-    atoms = readPDB(PDBTools.SMALLPDB)
-    @test center_of_mass(atoms) ≈ StaticArrays.SVector(-5.584422752942997, -13.110413157869903, -7.139970815730879) atol = 1e-10
+    @test center_of_mass(atoms) ≈ [0.0, 0.0, 0.0] atol = 1e-10
+    atoms = read_pdb(PDBTools.SMALLPDB)
+    @test center_of_mass(atoms) ≈ [-5.584422752942997, -13.110413157869903, -7.139970815730879] atol = 1e-7
 end
 
 """
@@ -137,24 +133,24 @@ Move the center of mass of the atoms to the specified `center` position, which d
 
 # Example
 
-```jldoctest; filter = r"([0-9]+\\.[0-9]{2})[0-9]+" => s"\\1***"
+```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
-  -5.584422752942997
- -13.110413157869903
-  -7.139970815730879
+  -5.584422772707132
+ -13.110413081059928
+  -7.139970851058855
 
 julia> moveto!(atoms; center = [1.0, 2.0, 3.0]);
 
 julia> center_of_mass(atoms)
 3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
- 1.0
- 2.0000000000000036
- 3.0000000000000018
+ 1.0000000263619948
+ 1.9999999934852166
+ 2.9999999509668918
 ```
 """
 function moveto!(atoms::AbstractVector{<:Atom}; center::AbstractVector{<:Real}=SVector(0.0, 0.0, 0.0))
@@ -169,7 +165,7 @@ end
 
 @testitem "moveto!" begin
     using PDBTools
-    atoms = readPDB(PDBTools.SMALLPDB)
-    @test center_of_mass(moveto!(atoms)) ≈ [0.0, 0.0, 0.0] atol = 1e-10
-    @test center_of_mass(moveto!(atoms; center=[1.0, 2.0, 3.0])) ≈ [1.0, 2.0, 3.0]
+    atoms = read_pdb(PDBTools.SMALLPDB)
+    @test center_of_mass(moveto!(atoms)) ≈ [0.0, 0.0, 0.0] atol = 1e-7
+    @test center_of_mass(moveto!(atoms; center=[1.0, 2.0, 3.0])) ≈ [1.0, 2.0, 3.0] atol=1e-7
 end

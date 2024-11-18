@@ -107,7 +107,7 @@ end
 
 function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
     tmp_file = tempname()
-    writePDB(atoms, tmp_file)
+    write_pdb(tmp_file, atoms)
     return select_with_vmd(tmp_file, selection; vmd=vmd, srcload=srcload)
 end
 
@@ -118,7 +118,7 @@ end
             [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
             ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],
         )
-        atoms = readPDB(pdbfile)
+        atoms = read_pdb(pdbfile)
         @test select_with_vmd(atoms, "protein and residue 1") == (
             [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
             ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],

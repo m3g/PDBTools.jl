@@ -26,7 +26,7 @@ julia> length(active_site_atoms)
 56
 
 julia> resname.(eachresidue(active_site_atoms))
-6-element Vector{String}:
+6-element Vector{InlineStrings.String7}:
  "PHE"
  "ARG"
  "LEU"
@@ -40,31 +40,18 @@ append to this array the list of atoms of each residue.
 
 ## Storing partial charges
 
-Here we exemplify the use of a custom field to store partial charges for all atoms
-in a protein:
+Here we exemplify the use of a custom field to store partial charges for all atoms in a protein:
 
-```julia-repl
+```jldoctest
 julia> using PDBTools
 
-julia> pdb = wget("1BSX", "protein");
+julia> ats = wget("1BSX", "protein");
 
-julia> charges = rand(length(pdb));
+julia> charges = ones(length(ats));
 
-julia> for (i, atom) in enumerate(pdb)
-           atom.custom[:charge] = charges[i]
-       end
+julia> ats_with_charges = add_custom_field.(ats, charges); # charges in custom field
 
-julia> pdb[1].custom[:charge]
-0.09441681249467149
+julia> ats_with_charges[1].custom
+1.0
 
-julia> custom_field(pdb[1], :charge) # alternative getter function
-0.09441681249467149
-
-julia> custom_field.(pdb, :charge) # broadcast to get all charges (with the dot syntax)
-3994-element Vector{Float64}:
- 0.09441681249467149
- 0.17811534472805368
- ⋮
- 0.8254040639975442
- 0.6153943592336552
 ```

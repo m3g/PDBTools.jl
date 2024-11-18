@@ -3,12 +3,12 @@ CollapsedDocStrings = true
 ```
 # Help entries
 
-These entries can be accessed from the Julia REPL by typing `?`, for example,
+The help entries for each function can be accessed from the Julia REPL by typing `?`, for example,
 ```julia-repl
 julia> ? mass
 search: mass mapslices MathConstants makedocs set_zero_subnormals get_zero_subnormals mutable struct
 
-  mass(name::String or atom::Atom or Vector{Atom})
+  mass(name::String or atom::Atom or Vector{<:Atom})
 
   Returns the mass of an atom given its name, or Atom structure, or the total mass of a vector of Atoms.
 
@@ -28,6 +28,3 @@ search: mass mapslices MathConstants makedocs set_zero_subnormals get_zero_subno
 
 ```
 
-```@autodocs
-Modules=[PDBTools]
-```

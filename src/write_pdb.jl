@@ -1,3 +1,53 @@
+"""
+    write_pdb(filename::String, atoms::AbstractVector{<:Atom}, selection; header=:auto, footer=:auto)
+
+Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string
+that can be used to select a subset of the atoms in `atoms`. For example, `write_pdb("test.pdb", atoms, "name CA")`.
+
+The `header` and `footer` arguments can be used to add a header and footer to the PDB file. If `header` is `:auto`,
+then a header will be added with the number of atoms in `atoms`. If `footer` is `:auto`, then a footer will be added
+with the "END" keyword. Either can be set to `nothing` if no header or footer is desired.
+
+"""
+function write_pdb(filename::String, atoms::AbstractVector{<:Atom}, selection::String; header=:auto, footer=:auto)
+    query = parse_query(selection)
+    write_pdb(filename, atoms, only=atom -> apply_query(query, atom); header, footer)
+end
+
+function write_pdb(filename::String, atoms::AbstractVector{<:Atom}; only::Function=all, header=:auto, footer=:auto)
+    file = open(expanduser(filename), "w")
+    if header == :auto
+        curr_date = Dates.format(Dates.today(), "dd-u-yy")
+        header = "PDBTools.jl - $(length(atoms)) atoms"
+        println(file, @sprintf "%-10s%-40s%9s" "HEADER" header curr_date)
+    elseif header !== nothing
+        println(file, header)
+    end
+    for atom in atoms
+        if only(atom)
+            println(file, write_pdb_atom(atom))
+        end
+    end
+    if footer == :auto
+        println(file, "END")
+    elseif footer !== nothing
+        println(file, footer)
+    end
+    close(file)
+end
+
+@testitem "write_pdb" begin
+    using PDBTools
+    using DelimitedFiles
+    pdb = read_pdb(PDBTools.SMALLPDB)
+    tmpfile = tempname()*".pdb"
+    write_pdb(tmpfile, pdb)
+    @test isfile(tmpfile)
+    f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
+    f2 = readdlm(tmpfile, '\n', header=true)
+    @test f1[1] == f2[1]
+end
+
 #
 # Function that returns an ATOM line in PDB format
 #
@@ -18,7 +68,7 @@ function _align_resname(resname)
     return resname
 end
 
-function write_atom(atom::Atom)
+function write_pdb_atom(atom::Atom)
 
     #ATOM      2  CA  GLY A   1      -1.774   6.778  32.054  1.00  0.08           C
     #COLUMNS        DATA  TYPE    FIELD        DEFINITION
@@ -92,16 +142,16 @@ function write_atom(atom::Atom)
     return line
 end
 
-@testitem "writeatom" begin
+@testitem "write_pdb_atom" begin
     using PDBTools
-    pdb = readPDB(PDBTools.SMALLPDB)
-    @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
-    @test PDBTools.write_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
+    pdb = read_pdb(PDBTools.SMALLPDB)
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
     pdb[1].index = 1000000
-    @test PDBTools.write_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     pdb[1].index = 1
     pdb[1].resnum = 1000000
-    @test PDBTools.write_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     pdb[1].index = 1000000
-    @test PDBTools.write_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
 end

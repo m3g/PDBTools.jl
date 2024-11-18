@@ -8,7 +8,7 @@ struct MaxMinCoords
 end
 
 """
-    maxmin(atoms::Vector{Atom}; selection)
+    maxmin(atoms::AbstractVector{<:Atom}; selection)
 
 Returns the maximum and minimum coordinates of an atom vector, and the length (maximum minus minimum) in each direction. 
 
@@ -26,12 +26,12 @@ julia> maxmin(protein)
 ```
 
 """
-function maxmin(atoms::AbstractVector{Atom}, selection::String)
+function maxmin(atoms::AbstractVector{<:Atom}, selection::String)
     query = parse_query(selection)
     return maxmin(atoms, only=atom -> apply_query(query, atom))
 end
 
-function maxmin(atoms::AbstractVector{Atom}; only=all)
+function maxmin(atoms::AbstractVector{<:Atom}; only=all)
     xmin = [+Inf, +Inf, +Inf]
     xmax = [-Inf, -Inf, -Inf]
     for at in atoms
@@ -53,9 +53,9 @@ function Base.show(io::IO, m::MaxMinCoords)
 end
 
 @testitem "maxmin" begin
-    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
     m = maxmin(atoms)
-    @test m.xmin ≈ [-14.18, -17.561, -15.369]
-    @test m.xmax ≈ [18.694, 14.182, 15.909]
-    @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278]
+    @test m.xmin ≈ [-14.18, -17.561, -15.369] atol=1e-3
+    @test m.xmax ≈ [18.694, 14.182, 15.909] atol=1e-3
+    @test m.xlength ≈ [32.873999999999995, 31.743000000000002, 31.278] atol=1e-3
 end

@@ -1,10 +1,14 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # Atomic and molecular properties
 
 Some simple atom properties can be retrieved using special functions, which
 operate on atoms of the type `Atom`. For example:
 
 ```julia-repl
-julia> atoms = readPDB("./file.pdb");
+julia> atoms = read_pdb("./file.pdb");
 
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
@@ -36,10 +40,18 @@ H₂O₁
 
 ```
 
-## AtomsBase compatibility
+```@docs
+mass
+element
+element_name
+element_symbol
+element_symbol_string
+formula
+stoichiometry
+printatom
+```
 
-!!! compat
-    This interface requires at least PDBTools version 0.14.2.
+## AtomsBase compatibility
 
 The following functions are supported as part of the API, to conform the `AtomsBase` interface:
 
@@ -51,66 +63,50 @@ The following functions are supported as part of the API, to conform the `AtomsB
 |`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
 
 
+```@docs
+atomic_number
+atomic_symbol
+atomic_mass
+position
+```
+
 ## Custom Atom fields
 
-!!! compat
-    Custom field support was introduced on PDBTools version 0.14.3.
-
-Custom atom fields can be added to an `Atom` object by defining the `custom` dictionary.
-The fields can be accessed by the standard dot syntax if the field name does not clash 
-with an existing `Atom` field, or by the `custom_field` getter function. 
+Custom atom fields can be created in `Atom` objects by defining the `custom` keyword.
+By default, `custom == nothing`. The custom fields can be added on construction, or 
+with the `add_custom_field` function, which creates a new instance of an `Atom` 
+with the added value in the custom field:
 
 For example:
-
-```julia-repl
-julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1))
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0    XXXX         0
-
-julia> atom.c
-"c"
-
-julia> atom.index
-0
-
-julia> custom_field(atom, :index)
-1
-```
-
-Setting new custom fields follow the standard Julia dictionary syntax:
-
-```julia-repl
-julia> atom.custom[:new] = "NEW"
-"NEW"
-
-julia> atom.new
-"NEW"
-
-julia> custom_field(atom, :new)
-"NEW"
-```
-
-!!! compat 
-    The following feature was introduced in PDBTools version 0.14.4.
-
-If a custom field with the `:mass` key is added to the atom, the `mass` function returns the mass
-set at that field: 
 
 ```jldoctest
 julia> using PDBTools
 
-julia> atom = Atom();
+julia> atom = Atom(custom="TEST");
 
-julia> atom.custom[:mass] = 10.0
-10.0
+julia> atom.custom
+"TEST"
 
-julia> mass(atom)
-10.0
+julia> atom = Atom(;name = "CA", resname="ALA"); # no custom field
+
+julia> atom.resname
+"ALA"
+
+julia> new_atom = add_custom_field(atom, Dict(:charge => 2.0));
+
+julia> new_atom.resname
+"ALA"
+
+julia> new_atom.custom[:charge]
+2.0
+
+```
+
+```@docs
+add_custom_field
 ```
 
 # Elements for custom atom types
-
-!!! compat
-    The `add_element!` function was introduced in version 1.4.0.
 
 The types of atoms that `PDBTools` recognizes is defined in the `PDBTools.elements` dictionary. 
 If new atom types are defined, it is possible to add these types to the dictionary, such that

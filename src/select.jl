@@ -20,7 +20,7 @@ Using a string to select the CA atoms of the first residue:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
 
 julia> findfirst(Select("name CA"), atoms)
 5
@@ -43,6 +43,14 @@ macro sel_str(str)
 end
 # Function that returns true for all atoms: the default selection
 all(atoms) = true
+
+"""
+    select(atoms::AbstractVector{<:Atom}, by::String)
+
+Selects atoms from a vector of atoms using a string query, or a function.
+
+"""
+function select end
 
 # Main function: receives the atoms vector and a julia function to select
 select(set::AbstractVector{<:Atom}, by::String) = filter(Select(by), set)
@@ -320,7 +328,7 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
 @testitem "Selections" begin
 
-    atoms = readPDB(PDBTools.TESTPDB)
+    atoms = read_pdb(PDBTools.TESTPDB)
 
     @test length(select(atoms, "name CA")) == 104
     sel = select(atoms, "index = 13")
@@ -366,7 +374,7 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
     @test length(select(atoms, "nonpolar")) == 583
 
-    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7]
+    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol=1e-3
 
     # Test editing a field
     atoms[1].index = 0

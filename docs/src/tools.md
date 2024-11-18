@@ -15,9 +15,6 @@ add_hydrogens!
 
 ## Custom protein residue types
 
-!!! compat
-    These functions were added in version 1.4.0.
-
 It is possible to add to the list of protein residues, custom residue types. 
 This can be done by simply adding to the `PDBTools.protein_residues` dictionary
 of residues a new `PDBTools.ProteinResidue` entry. For example, here we create
@@ -75,10 +72,10 @@ julia> custom_elements!(SIRAH)
 │
 └ @ PDBTools
 
-julia> sirah_pdb = readPDB(PDBTools.SIRAHPDB);
+julia> sirah_pdb = read_pdb(PDBTools.SIRAHPDB);
 
 julia> resname.(eachresidue(sirah_pdb))
-5-element Vector{String}:
+5-element Vector{InlineStrings.String7}:
  "sI"
  "sR"
  "sX"

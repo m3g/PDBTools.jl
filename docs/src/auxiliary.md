@@ -6,10 +6,6 @@ CollapsedDocStrings = true
 
 ## Get the protein sequence
 
-```@docs
-getseq
-```
-
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
 ```jldoctest
 julia> using PDBTools
@@ -40,13 +36,18 @@ julia> getseq(PDBTools.SMALLPDB, code=3)
  "Aspartic acid"
 ```
 
+```@docs
+getseq
+Sequence
+```
+
 !!! note
     If there is some non-standard protein residue in the sequence,
     inform the `getseq` function by adding a selection:
     ```jldoctest
     julia> using PDBTools
 
-    julia> atoms = readPDB(PDBTools.SMALLPDB);
+    julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
     julia> for at in atoms
               if resname(at) == "ALA"
@@ -68,7 +69,7 @@ last argument, as well as the reading and writing functions:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> getseq(atoms, "residue > 1")
 2-element Vector{String}:
@@ -77,10 +78,6 @@ julia> getseq(atoms, "residue > 1")
 ```
 
 ## Distance between sets of atoms
-
-```@docs
-distance
-```
 
 The distance between atoms, or sets of atoms, can be computed with the `distance` function. This
 function returns the *minimum distance* between the atoms of the sets involved. For example:
@@ -96,6 +93,10 @@ julia> ligand = select(model,"resname T3");
 
 julia> distance(protein,ligand)
 2.7775834820937417
+```
+
+```@docs
+distance
 ```
 
 ## Closest atoms and their distance
@@ -125,27 +126,27 @@ julia> distance(ligand[43],protein[3684])
 2.7775834820937417
 ```
 
-## Obtain arrays with coordinates
-
 ```@docs
-coor
+closest
 ```
+
+## Obtain arrays with coordinates
 
 Use the `coor` function:
 
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> coor(atoms[1])
-3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
   -9.229
  -14.861
   -5.481
 
 julia> coor(atoms[1:2])
-2-element Vector{StaticArraysCore.SVector{3, Float64}}:
+2-element Vector{StaticArraysCore.SVector{3, Float32}}:
  [-9.229, -14.861, -5.481]
  [-10.048, -15.427, -5.569]
 ```
@@ -157,7 +158,7 @@ C``\alpha`` coordinates:
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> coor(atoms, "name CA")
 3-element Vector{StaticArraysCore.SVector{3, Float64}}:
@@ -168,18 +169,18 @@ julia> coor(atoms, "name CA")
 
 The coordinates are output as arrays of static arrays (more specifically, as a `Vector{SVector{3,Float64}}`, from `StaticArrays`). 
 
-## Maximum and minimum coordinates of the atoms
-
 ```@docs
-maxmin
+coor
 ```
+
+## Maximum and minimum coordinates of the atoms
 
 Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
 
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> maxmin(atoms, "residue > 1")
  Minimum atom coordinates: xmin = [-6.974, -16.785, -10.863]
@@ -190,11 +191,11 @@ julia> maxmin(atoms, "residue > 1")
 `m` is a structure containing the three vectors with minimum and maximum
 coordinates, and lengths.
 
-## Residue tick labels for plots
-
 ```@docs
-residue_ticks
+maxmin
 ```
+
+## Residue tick labels for plots
 
 The `residue_ticks` function provides a practical way to define tick labels in plots associated to an amino-acid sequence:
 
@@ -205,7 +206,7 @@ residue_ticks(
 )
 ```
 
-The input structure can be provided as a vector of atoms (type `Vector{Atom}`) a residue iterator (obtained by `eachresidue(atoms)`) or a vector of residues (obtained by `collect(eachresidue(atoms))`). 
+The input structure can be provided as a vector of atoms (type `Vector{<:Atom}`) a residue iterator (obtained by `eachresidue(atoms)`) or a vector of residues (obtained by `collect(eachresidue(atoms))`). 
 
 The function returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
 
@@ -219,12 +220,14 @@ if `serial=false` the positions of the ticks will be returned as a the serial re
 If `serial=true` the positions of the ticks are returned as their residue numbers. This difference is important
 if the residue numbers do not start at `1` and depending on the indexing of the data to be plotted.  
 
-!!! compat
-    The functionality of the `residue_ticks` as described requires PDBTools version 1.6.0 or greater. 
-
-    The `serial` option was introduced in v1.8.1
+```@docs
+residue_ticks
+oneletter
+threeletter
+```
 
 ### Example
+
 
 Here we illustrate how to plot the average temperature factor of each residue of a crystallographic model as function of the residues.
 

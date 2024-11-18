@@ -26,5 +26,5 @@ end
 
 function wget(pdb_id::String; only=all)
     file = Downloads.download("https://files.rcsb.org/download/$(pdb_id).pdb")
-    return readPDB(file, only=only)
+    return read_pdb(file, only=only)
 end

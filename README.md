@@ -22,7 +22,7 @@ julia> import Pkg; Pkg.add("PDBTools")
 Simple data structure: 
 
 ```julia
-atoms = readPDB("./structure.pdb")
+atoms = read_pdb("./structure.pdb")
    Array{PDBTools.Atom,1} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1

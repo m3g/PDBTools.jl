@@ -20,7 +20,7 @@ const sub_int = (
 )
 
 """
-    formula(atoms::AbstractVector{Atom})
+    formula(atoms::AbstractVector{<:Atom})
 
 Returns the molecular formula of the current selection. 
 
@@ -29,7 +29,7 @@ Returns the molecular formula of the current selection.
 ```jldoctest
 julia> using PDBTools
 
-julia> pdb  = readPDB(PDBTools.TESTPDB, "residue 1"); # testing PDB file
+julia> pdb  = read_pdb(PDBTools.TESTPDB, "residue 1"); # testing PDB file
 
 julia> resname(pdb[1])
 "ALA"
@@ -39,7 +39,7 @@ H₇C₃N₁O₁
 ```
 
 """
-function formula(atoms::AbstractVector{Atom})
+function formula(atoms::AbstractVector{<:Atom})
     f = Formula(Tuple{Atom,Int}[])
     for at in atoms
         i = findfirst(el -> pdb_element(first(el)) == element(at), f.formula)
@@ -65,7 +65,7 @@ function Base.show(io::IO, f::Formula)
 end
 
 """
-    stoichiometry(atoms::AbstractVector{Atom})
+    stoichiometry(atoms::AbstractVector{<:Atom})
 
 Returns the stoichiometry of atom selection in a `Formula` structure. 
 
@@ -74,14 +74,14 @@ Returns the stoichiometry of atom selection in a `Formula` structure.
 ```julia-repl
 julia> using PDBTools
 
-julia> pdb  = readPDB(PDBTools.TESTPDB, "water"); # testing PDB file
+julia> pdb  = read_pdb(PDBTools.TESTPDB, "water"); # testing PDB file
 
 julia> stoichiometry(pdb)
 H₂O₁
 ```
 
 """
-function stoichiometry(atoms::AbstractVector{Atom})
+function stoichiometry(atoms::AbstractVector{<:Atom})
     f = formula(atoms)
     d = gcd((x[2] for x in f.formula)...)
     for (i, p) in pairs(f.formula)

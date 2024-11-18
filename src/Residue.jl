@@ -1,5 +1,5 @@
 """
-    Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
+    Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
 
 Residue data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
@@ -35,13 +35,13 @@ julia> residues[8].range
 struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
     atoms::Vec
     range::UnitRange{Int}
-    name::String
-    resname::String
-    residue::Int
-    resnum::Int
-    chain::String
-    model::Int
-    segname::String
+    name::String7
+    resname::String7
+    residue::Int32
+    resnum::Int32
+    chain::String3
+    model::Int32
+    segname::String7
 end
 name(residue::Residue) = residue.name
 resname(residue::Residue) = residue.resname
@@ -52,7 +52,7 @@ model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
-function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
+function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
     i = range[begin]
     # Check if the range effectivelly corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
@@ -72,7 +72,7 @@ function Residue(atoms::AbstractVector{Atom}, range::UnitRange{Int})
         atoms[i].segname,
     )
 end
-Residue(atoms::AbstractVector{Atom}) = Residue(atoms, 1:length(atoms))
+Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
 function Base.getindex(residue::Residue, i::Int)
     i > 0 || throw(ArgumentError("Index must be in 1:$(length(residue))"))
@@ -84,12 +84,12 @@ end
 #
 # Structure and function to define the eachresidue iterator
 #
-struct EachResidue{T<:AbstractVector{Atom}}
+struct EachResidue{T<:AbstractVector{<:Atom}}
     atoms::T
 end
 
 """
-    eachresidue(atoms::AbstractVector{Atom})
+    eachresidue(atoms::AbstractVector{<:Atom})
 
 Iterator for the residues (or molecules) of a selection. 
 
@@ -123,7 +123,7 @@ julia> for res in eachresidue(atoms)
 ```
 
 """
-eachresidue(atoms::AbstractVector{Atom}) = EachResidue(atoms)
+eachresidue(atoms::AbstractVector{<:Atom}) = EachResidue(atoms)
 
 # Collect residues default constructor
 Base.collect(residues::EachResidue) = collect(Residue, residues)
@@ -165,7 +165,7 @@ end
 
 
 @testitem "Residue iterator" begin
-    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
     residues = eachresidue(atoms)
     @test length(residues) == 104
     @test name(Residue(atoms, 1:12)) == "ALA"
@@ -229,7 +229,7 @@ iswater(r::Residue; water_residues=water_residues) = r.resname in water_residues
 iswater(atom::Atom; water_residues=water_residues) = atom.resname in water_residues
 
 @testitem "residue of atom" begin
-    pdb = readPDB(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB)
     glu = select(pdb, "resname GLU")
     @test isacidic(glu[1])
     @test !isaliphatic(glu[1])
@@ -257,7 +257,7 @@ iswater(atom::Atom; water_residues=water_residues) = atom.resname in water_resid
 end
 
 @testitem "full residue" begin
-    pdb = readPDB(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB)
     glu_atoms = select(pdb, "resname GLU")
     glu = collect(eachresidue(glu_atoms))
     @test isacidic(glu[1])
@@ -312,11 +312,11 @@ julia> using PDBTools
 
 julia> atoms = wget("1LBD", "protein");
 
-julia> residue_ticks(atoms; stride=50) # Vector{Atom} as input
+julia> residue_ticks(atoms; stride=50) # Vector{<:Atom} as input
 (1:50:201, ["S225", "Q275", "L325", "L375", "L425"])
 
 julia> residue_ticks(atoms; first=235, last=240, serial=false) # first=10 and resnum indexing
-([235, 236, 237, 238, 239, 240], ["I235", "L236", "E237", "A238", "E239", "L240"])
+(Int32[235, 236, 237, 238, 239, 240], ["I235", "L236", "E237", "A238", "E239", "L240"])
 
 julia> residue_ticks(eachresidue(atoms); stride=50) # residue iterator as input
 (1:50:201, ["S225", "Q275", "L325", "L375", "L425"])

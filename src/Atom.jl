@@ -1,27 +1,28 @@
 """
     Atom::DataType
 
-Structure that contains the atom properties. It is mutable, so it can be edited. 
+Structure that contains the atom properties. It is mutable, so its fields can be modified.
+
 Fields:
 
-    mutable struct Atom
-        index::Int # The sequential index of the atoms in the file
-        index_pdb::Int # The index as written in the PDB file (might be anything)
-        name::String # Atom name
-        resname::String # Residue name
-        chain::String # Chain identifier
-        resnum::Int # Number of residue as written in PDB file
-        residue::Int # Sequential residue (molecule) number in file
-        x::Float64 # x coordinate
-        y::Float64 # y coordinate
-        z::Float64 # z coordinate
-        beta::Float64 # temperature factor
-        occup::Float64 # occupancy
-        model::Int # model number
-        segname::String # Segment name (cols 73:76)
-        pdb_element::String # Element symbol string (cols 77:78)
-        charge::String # Charge (cols: 79:80)
-        custom::Dict{Symbol, Any} # Custom fields
+    mutable struct Atom{CustomType}
+        index::Int32 # The sequential index of the atoms in the file
+        index_pdb::Int32 # The index as written in the PDB file (might be anything)
+        name::String7 # Atom name
+        resname::String7 # Residue name
+        chain::String3 # Chain identifier
+        resnum::Int32 # Number of residue as written in PDB file
+        residue::Int32 # Sequential residue (molecule) number in file
+        x::Float32 # x coordinate
+        y::Float32 # y coordinate
+        z::Float32 # z coordinate
+        beta::Float32 # temperature factor
+        occup::Float32 # occupancy
+        model::Int32 # model number
+        segname::String7 # Segment name (cols 73:76)
+        pdb_element::String3 # Element symbol string (cols 77:78)
+        charge::Float32 # Charge (cols: 79:80)
+        custom::CustomType # Custom fields
     end
 
 ### Example
@@ -29,7 +30,7 @@ Fields:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.SMALLPDB)
+julia> atoms = read_pdb(PDBTools.SMALLPDB)
    Array{Atoms,1} with 35 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
@@ -53,7 +54,7 @@ julia> mass(atoms[1])
 14.0067
 
 julia> position(atoms[1])
-3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
   -9.229
  -14.861
   -5.481
@@ -62,9 +63,8 @@ julia> position(atoms[1])
 The `pdb_element` and `charge` fields, which are frequently left empty in PDB files, are not printed. 
 The direct access to the fields is considered part of the interface.
 
-Custom fields can be set on `Atom` construction with the `custom` keyword argument, which receives a 
-`Dict{Symbol,Any}` as parameter. They can be retrieved with the `custom_field` function or, if the custom 
-field names does not overlap with an existing field, with the dot syntax. Requires PDBTools > 0.14.3.
+Custom fields can be set on `Atom` construction with the `custom` keyword argument. The Atom structure
+will then be parameterized with the type of `custom`. 
 
 ### Example
 
@@ -73,35 +73,70 @@ julia> using PDBTools
 
 julia> atom = Atom(index = 0; custom=Dict(:c => "c", :index => 1));
 
-julia> atom.c
+julia> typeof(atom)
+Atom{Dict{Symbol, Any}}
+
+julia> atom.custom
+Dict{Symbol, Any} with 2 entries:
+  :index => 1
+  :c     => "c"
+
+julia> atom.custom[:c]
 "c"
-
-julia> index(atom)
-0
-
-julia> custom_field(atom, :index)
-1
 ```
 
 """
-Base.@kwdef mutable struct Atom
-    index::Int = 0 # The sequential index of the atoms in the file
-    index_pdb::Int = 0 # The index as written in the PDB file (might be anything)
-    name::String = "X"
-    resname::String = "XXX"
-    chain::String = "X"
-    resnum::Int = 0 # Number of residue as written in PDB file
-    residue::Int = 0 # Sequential residue (molecule) number in file
-    x::Float64 = 0.0
-    y::Float64 = 0.0
-    z::Float64 = 0.0
-    beta::Float64 = 0.0
-    occup::Float64 = 0.0
-    model::Int = 0
-    segname::String = "XXXX" # Segment name (cols 73:76)
-    pdb_element::String = "X"
-    charge::Union{Nothing,String} = nothing
-    custom::Dict{Symbol,Any} = Dict{Symbol,Any}()
+mutable struct Atom{CustomType}
+    index::Int32 # The sequential index of the atoms in the file
+    index_pdb::Int32 # The index as written in the PDB file (might be anything)
+    name::String7
+    resname::String7
+    chain::String3
+    resnum::Int32 # Number of residue as written in PDB file
+    residue::Int32 # Sequential residue (molecule) number in file
+    x::Float32
+    y::Float32
+    z::Float32
+    beta::Float32
+    occup::Float32
+    model::Int32
+    segname::String7 # Segment name (cols 73:76)
+    pdb_element::String3
+    charge::Float32
+    custom::CustomType
+end
+
+#
+# Default constructor
+#
+function Atom(;custom::CustomType=nothing, kargs...) where {CustomType}
+    atom = Atom{CustomType}(0,0,"X","XXX","X",0,0,0.0f0,0.0f0,0.0f0,0.0f0,0.0f0,0,"","X",0.0f0,custom)
+    kargs_values = values(kargs)
+    kargs_keys = keys(kargs_values)
+    ntuple(length(kargs_values)) do i 
+        @inline 
+        f = kargs_keys[i]
+        v = kargs_values[f]
+        setfield!(atom, f, fieldtype(typeof(atom), f)(v))
+    end
+    return atom
+end
+
+#
+# Constructor without custom::Nothing
+#
+Atom{Nothing}(;kargs...) = Atom(;custom=nothing, kargs...)
+
+@testitem "Atom constructors" begin
+    atref = Atom{Nothing}(0,0,"X","XXX","X",0,0,0.0f0,0.0f0,0.0f0,0.0f0,0.0f0,0,"","X",0.0f0,nothing)
+    at = Atom()
+    @test Base.summarysize(at) == 80
+    @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
+    at1 = Atom{Nothing}(;index=1, name="CA")
+    at2 = Atom(;custom=nothing, index=1, name="CA")
+    @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
+    @test (@allocations at = Atom()) <= 1 
+    @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
 end
 
 index(atom::Atom) = atom.index
@@ -115,29 +150,12 @@ beta(atom::Atom) = atom.beta
 occup(atom::Atom) = atom.occup
 model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
-pdb_element(atom::Atom) = atom.pdb_element
 charge(atom::Atom) = atom.charge
-custom_field(atom::Atom, field::Symbol) = atom.custom[field]
-function Base.copy(atom::Atom) 
-    throw(ArgumentError("""\n
-        The Atom object contains mutable fields. To create an independent copy 
-        of the object, use the `deepcopy` function. 
-    
-    """))
-end
-
-import Base: getproperty
-function getproperty(atom::Atom, field::Symbol)
-    if field in fieldnames(Atom)
-        getfield(atom, field)
-    else
-        atom.custom[field]
-    end
-end
+pdb_element(atom::Atom) = atom.pdb_element
 
 @testitem "Atom default fields" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2")
     atom = atoms[1]
     @test index(atom) == 13
     @test name(atom) == "N"
@@ -151,27 +169,87 @@ end
     @test model(atom) == 1
     @test segname(atom) == "PROT"
     @test index_pdb(atom) == 13
-    @test charge(atom) === nothing
-    @test_throws ArgumentError copy(atom)
+    @test charge(atom) == 0.0f0
+end
+
+function Base.copy(atom::Atom{CustomType}) where {CustomType}
+    if ismutabletype(CustomType)
+        throw(ArgumentError("""\n
+            The Atom object contains a mutable custom field of type $CustomType. To create an independent copy of it, use the `deepcopy` function. 
+        
+        """))
+    else
+        Atom{CustomType}((getfield(atom, f) for f in fieldnames(Atom))...)
+    end
+end
+
+@testitem "copy atom" begin
+    using PDBTools
+    at1 = Atom()
+    at2 = copy(at1)
+    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    at1 = Atom(custom=1.0)
+    at2 = copy(at1)
+    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    at1 = Atom(custom=Int[])
+    @test_throws ArgumentError copy(at1)
+    at2 = deepcopy(at1)
+    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+end
+
+"""
+    add_custom_field(atom::Atom, value)
+
+Adds a custom field to an `Atom` structure, returning a new `Atom` structure with the custom field added.
+The returning Atom structure is parameterized with the type of `value`.
+
+"""
+function add_custom_field(atom::Atom, value)
+    new_atom = Atom(;custom=value)
+    for field in fieldnames(Atom)
+        field == :custom && continue
+        setproperty!(new_atom, field, getproperty(atom, field))
+    end
+    return new_atom
 end
 
 @testitem "Atom custom fields" begin
-    atom = Atom()
-    @test length(atom.custom) == 0
     atom = Atom(; custom=Dict(:a => 1, :b => "b", :index => 1))
     @test atom.index == 0
-    @test atom.a == 1
-    @test atom.b == "b" 
-    @test custom_field(atom, :a) == 1
-    @test custom_field(atom, :b) == "b"
-    @test custom_field(atom, :index) == 1
+    @test atom.custom[:a] == 1
+    @test atom.custom[:b] == "b" 
+    at = Atom()
+    at2 = add_custom_field(at, Dict(:a => 1, :b => "b", :index => 1))
+    @test atom.index == 0
+    @test atom.custom[:a] == 1
+    @test atom.custom[:b] == "b" 
 end
 
 #
 # Compatibility with AtomsBase interface
 #
+"""
+    atomic_symbol(atom::Atom)
+
+Returns the atomic symbol of an atom given the `Atom` structure.
+
+"""
 atomic_symbol(atom::Atom) = element_symbol(atom)
+
+"""
+    atomic_mass(atom::Atom)
+
+Returns the atomic mass of an atom given the `Atom` structure.
+
+"""
 atomic_mass(atom::Atom) = mass(atom)
+
+"""
+    position(atom::Atom)
+
+Returns the position of an atom given the `Atom` structure.
+
+"""
 position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
 const atom_title = @sprintf(
@@ -211,10 +289,9 @@ atom_line(atom::Atom) = @sprintf(
 
 @testitem "atom_line" begin
     using PDBTools
-    atoms = readPDB(PDBTools.SMALLPDB, "protein and index 1")
+    atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
         "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
-
 end
 
 """
@@ -227,7 +304,7 @@ Prints an `Atom` structure in a human-readable format, with a title line.
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2");
 
 julia> printatom(atoms[1])
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
@@ -246,7 +323,7 @@ end
 #
 # Print a formatted list of atoms
 #
-function print_short_atom_list(io::IO, atoms::AbstractVector{Atom})
+function print_short_atom_list(io::IO, atoms::AbstractVector{<:Atom})
     println(io, atom_title)
     for i = 1:min(length(atoms), 3)
         print(io, atom_line(atoms[i]))
@@ -265,7 +342,7 @@ function Base.show(io::IO, atom::Atom)
     print(io, atom_line(atom))
 end
 
-function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{Atom})
+function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
     println(io, "   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
     print_short_atom_list(io, atoms)
 end
@@ -283,7 +360,7 @@ const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2"
 issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
 
 @testitem "atoms in struct" begin
-    pdb = readPDB(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB)
     glu = select(pdb, "resname GLU")
     @test isbackbone(glu[1])
     @test !issidechain(glu[1])
@@ -298,16 +375,14 @@ end
 # without, of course, checking the residue counter
 #
 function same_residue(atom1::Atom, atom2::Atom)
-    atom1.resnum != atom2.resnum && return false
-    atom1.model != atom2.model && return false
-    atom1.chain != atom2.chain && return false
-    atom1.resname != atom2.resname && return false
-    atom1.segname != atom2.segname && return false
-    return true
+    return (atom1.resnum == atom2.resnum) & 
+           (atom1.model == atom2.model) &
+           (atom1.chain == atom2.chain) &
+           (atom1.resname == atom2.resname)
 end
 
 @testitem "same_residue" begin
-    pdb = readPDB(PDBTools.TESTPDB, "protein")
+    pdb = read_pdb(PDBTools.TESTPDB, "protein")
     import PDBTools: same_residue
     @test same_residue(pdb[1], pdb[2])
     @test !same_residue(pdb[1], pdb[50])
@@ -367,7 +442,7 @@ end
 
 @testitem "get element" begin
     using PDBTools
-    atoms = readPDB(PDBTools.TESTPDB, "protein and residue 2")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2")
     @test element(atoms[1]) == "N"
     @test element(Atom()) === "X"
     @test element(Atom(pdb_element="")) === "X"
@@ -496,9 +571,7 @@ julia> mass(atoms)
 
 """
 function mass(at::Atom)
-   mass = if haskey(at.custom, :mass)
-       at.custom[:mass]::Float64
-   elseif element(at) == "X"
+   mass = if element(at) == "X"
         nothing
    else
        get_element_property(at, Val(:mass))
@@ -516,7 +589,12 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
+function Base.show(io::IO, atoms::AbstractVector{Atom})
+    println(io, " Structure file with ", length(atoms), " atoms. ")
+end
+
 @testitem "fetch atomic element properties" begin
+    using PDBTools
     using BenchmarkTools
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
@@ -524,10 +602,8 @@ end
     @test element_name(at) == "Nitrogen"
     @test mass(at) == 14.0067
     @test mass([at, at]) == 28.0134
-    atoms = readPDB(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
-    at.custom[:mass] = 1.0
-    @test mass(at) == 1.0
     @test mass(Atom(name="X")) === nothing
     @test mass(Atom(name=" ")) === nothing
     @test mass(Atom(name="A")) === nothing
@@ -536,8 +612,8 @@ end
     @test atomic_number(Atom(name="CAL")) == 20
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
-    a = @ballocated sum($mass, $atoms) evals=1 samples=1
-    @test a == 0
+    a = @benchmark sum($mass, $atoms) samples=1 evals=1
+    @test a.allocs == 0
 end
 
 @testitem "AtomsBase interface" begin
