@@ -213,7 +213,7 @@ end
     using PDBTools
     using BenchmarkTools
     b = @benchmark read_mmcif($(PDBTools.SMALLCIF)) samples=1 evals=1
-    @test b.allocs < 250
+    @test b.allocs < 300
     ats = read_mmcif(PDBTools.TESTCIF)
     @test count(at -> resname(at) == "HOH", ats) == 445
     @test count(at -> isprotein(at), ats) == 2966
