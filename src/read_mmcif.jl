@@ -62,9 +62,9 @@ function _maximum_read(atoms, stop_at, memory_available)
     if !isnothing(stop_at) && (length(atoms) >= stop_at) 
         return true
     end
-    if mod(length(atoms), 1000) == 0
-        estimated_size = length(atoms) * Base.summarysize(atoms[1])
-        if estimated_size > memory_available * Sys.total_memory()
+    if length(atoms) > 0 && mod(length(atoms), 1000) == 0
+        estimated_bytes = length(atoms) * Base.summarysize(atoms[1])
+        if estimated_bytes > memory_available * Sys.total_memory()
             @warn """\n
                 Memory limit reached. $(length(atoms)) atoms read so far will be returned.
                 Size of the atoms array: $(round(Base.summarysize(atoms) / 1024^2; digits=3)) MB
@@ -232,4 +232,11 @@ end
     atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
     b = @benchmark PDBTools._fast_setfield!($atom, $field_values, $inds_and_names) samples=1 evals=1
     @test b.allocs == 0
+
+    # Test early stoppers
+    ats = read_mmcif(PDBTools.TESTCIF; stop_at=10)
+    @test length(ats) == 10
+    ats = read_mmcif(PDBTools.TESTCIF; memory_available=1e-10)
+    @test length(ats) == 1000
+
 end
