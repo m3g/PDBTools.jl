@@ -624,6 +624,3 @@ end
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end
-
-
-# fiz uma mudança
