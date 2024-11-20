@@ -178,6 +178,7 @@ end
 @testitem "Chain iterator" begin
     pdb = read_pdb("protein_test.pdb")
     chains = eachchain(pdb)
+    @test Chain(pdb, 1:48).range == 1:48
     @test length(chains) == 3
     @test firstindex(chains) == 1
     @test lastindex(chains) == 3
