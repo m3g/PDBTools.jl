@@ -48,7 +48,7 @@ const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
 const TESTCIF = joinpath(@__DIR__,"../test/1yn8.cif")
 const SMALLCIF = joinpath(@__DIR__,"../test/small.cif")
-const CHAINSPDB = joinpath((@__DIR__,"../test/protein_test.pdb")
+const CHAINSPDB = joinpath(@__DIR__,"../test/protein_test.pdb")
 
 
 # Basic chemistry
