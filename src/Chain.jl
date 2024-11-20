@@ -5,9 +5,9 @@
 julia> pdb = read_pdb("protein_test.pdb")
 
 julia> for chains in eachchain(pdb)
-    println(" Chain: $(name(chains))")
+    println("  Chain: $(name(chains))")
     println(" with $(length(collect(eachresidue(chains)))) residues")
-    println("$(length(chains)) atoms")
+    println("each chain has $(length(chains)) atoms")
     end
 
 
