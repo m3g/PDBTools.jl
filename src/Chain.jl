@@ -1,3 +1,30 @@
+""" 
+
+###Examples
+```julia-repl
+julia> pdb = read_pdb("protein_test.pdb")
+
+julia> for chains in eachchain(pdb)
+    println(" Chain: $(name(chains))")
+    println(" with $(length(collect(eachresidue(chains)))) residues")
+    println("$(length(chains)) atoms")
+    end
+
+
+for chain in eachchain(pdb)
+    println(" Chain: $(name(chain))")
+    println("$(length(eachresidue(chain))) residues") 
+
+    for res in eachresidue(chain)
+        println("$(name(res))")
+        println(" with $(length(res)) atoms")
+    end
+end
+
+
+
+"""
+
 
 @kwdef struct Chain{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
     atoms::Vec
@@ -116,25 +143,3 @@ end
     @test length(chains) == 1
 end
 
-
-#atoms = readPDB("oligomer(1).pdb")
-#length(atoms)
-#atoms[1066].chain
-#Chain(atoms, 1:1065)
-#Residue(atoms, 1:13)
-
-#rx = for atoms in first(eachresidue(atoms))
-#    println(atoms)
-#end
-#xs = eachchain(atoms)
-#length(xs)
-
-#chainss =  collect(eachchain(atoms))
-
-#x = for chains in eachchain(atoms)
-#    println(chains)
-#    end
-
-#y = for res in eachresidue(atoms)
-#    println(res)
-#end
