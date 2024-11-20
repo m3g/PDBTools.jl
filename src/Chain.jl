@@ -2,7 +2,7 @@
 
 ###Examples
 ```julia-repl
-julia> pdb = read_pdb("PDBTools.CHAINSPDB")
+julia> pdb = read_pdb(PDBTools.CHAINSPDB)
 
 julia> for chains in eachchain(pdb)
     println("  Chain: $(name(chains))")
@@ -176,7 +176,7 @@ end
 end
 
 @testitem "Chain iterator" begin
-    pdb = read_pdb("PDBTools.CHAINSPDB")
+    pdb = read_pdb(PDBTools.CHAINSPDB)
     chains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
     @test length(chains) == 3
