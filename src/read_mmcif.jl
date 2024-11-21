@@ -180,6 +180,7 @@ end
 
 @testitem "_supported_cif_fields" begin
     using PDBTools 
+    using InlineStrings
     field_assignment = Dict(
         "type_symbol" => :name, # VMD
         "label_comp_id" => :resname, # VMD
@@ -309,13 +310,13 @@ end
     @test length(ats) == 1000
 
     # Read custom fields instead
-    custom_fields = Dict(
+    field_assignment = Dict(
         "type_symbol" => :name, # VMD
         "label_comp_id" => :resname, # VMD
         "label_asym_id" => :chain, # VMD
         "label_seq_id" => :resnum, # VMD
     )
-    ats1 = read_mmcif(PDBTools.SMALLCIF; custom_fields)
+    ats1 = read_mmcif(PDBTools.SMALLCIF; field_assignment)
     @test name.(ats1) == ["N", "C", "C", "O", "C", "C", "C"]
     @test all(resname.(ats1) .== "VAL")
     @test all(chain.(ats1) .== "A")
