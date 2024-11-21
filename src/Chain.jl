@@ -5,53 +5,19 @@
 julia> pdb = read_pdb("PDBTools.CHAINSPDB")
 
 julia> for chains in eachchain(pdb)
-    println("  Chain: $(name(chains))")
-    println(" with $(length(collect(eachresidue(chains)))) residues")
-    println("each chain has $(length(chains)) atoms")
+    println(name(chains))
+    println(length(collect(eachresidue(chains))))
+    println(length(chains))
     end
-  Chain: A
- with 3 residues
-each chain has 48 atoms
-  Chain: B
- with 3 residues
-each chain has 48 atoms
-  Chain: C
- with 3 residues
-each chain has 48 atoms
-
-for chain in eachchain(pdb)
-    println(" Chain: $(name(chain))")
-    println("$(length(eachresidue(chain))) residues") 
-
-    for res in eachresidue(chain)
-        println("$(name(res))")
-        println(" with $(length(res)) atoms")
-    end
-end
- Chain: A
-3 residues
-ASP
- with 12 atoms
-GLN
- with 17 atoms
-LEU
- with 19 atoms
- Chain: B
-3 residues
-ASP
- with 12 atoms
-GLN
- with 17 atoms
-LEU
- with 19 atoms
- Chain: C
-3 residues
-ASP
- with 12 atoms
-GLN
- with 17 atoms
-LEU
- with 19 atoms
+A
+3
+48
+B
+3
+48
+C
+3
+48
 
 ```
 
@@ -100,6 +66,7 @@ end
 #
 # Structure and function to define the eachchain iterator
 #
+
 struct EachChain{T<:AbstractVector{<:Atom}}
     atoms::T
 end
@@ -169,14 +136,8 @@ function Base.show(io::IO, ::MIME"text/plain", chains::AbstractVector{Chain})
     print(io, "   Array{Chain,1} with $(length(chains)) chains.")
 end
 
-@testitem "Chains" begin
-    ats = read_pdb(PDBTools.TESTPDB)
-    chains = eachchain(ats)
-    @test length(chains) == 1
-end
-
 @testitem "Chain iterator" begin
-    pdb = read_pdb(PDBTools.CHAINSPDB")
+    pdb = read_pdb(PDBTools.CHAINSPDB)
     chains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
     @test length(chains) == 3

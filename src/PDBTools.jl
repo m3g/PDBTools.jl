@@ -25,7 +25,7 @@ export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
 export add_custom_field
 export Residue, eachresidue, resname, residue, resnum, model, segname
-export Chain, eachchain, chain, chains 
+export Chain, eachchain, chain
 export residue_ticks
 export coor, maxmin, distance, closest
 export element, mass, element_name, element_symbol, element_symbol_string
