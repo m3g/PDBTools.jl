@@ -14,9 +14,11 @@ If the `only` function keyword is provided, only the atoms for which `only(atom)
 
 ### Examples
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
 julia> ats = read_mmcif(PDBTools.SMALLCIF)
-   Array{Atoms,1} with 7 atoms with fields:
+   Vector{Atom{Nothing}} with 7 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
        2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
@@ -26,13 +28,13 @@ julia> ats = read_mmcif(PDBTools.SMALLCIF)
        7  CG2     VAL     A        1        1    5.246   18.533    5.681  1.00 80.12     1                 7
 
 julia> ats = read_mmcif(PDBTools.SMALLCIF, "index < 3")
-   Array{Atoms,1} with 2 atoms with fields:
+   Vector{Atom{Nothing}} with 2 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
        2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
 
 julia> ats = read_mmcif(PDBTools.SMALLCIF; only = at -> name(at) == "CA")
-   Array{Atoms,1} with 1 atoms with fields:
+   Vector{Atom{Nothing}} with 1 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
 

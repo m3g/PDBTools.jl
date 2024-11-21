@@ -31,7 +31,7 @@ Fields:
 julia> using PDBTools
 
 julia> atoms = read_pdb(PDBTools.SMALLPDB)
-   Array{Atoms,1} with 35 atoms with fields:
+   Vector{Atom{Nothing}} with 35 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
@@ -343,7 +343,7 @@ function Base.show(io::IO, atom::Atom)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
-    println(io, "   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
+    println(io, "   $(typeof(atoms)) with $(length(atoms)) atoms with fields:")
     print_short_atom_list(io, atoms)
 end
 

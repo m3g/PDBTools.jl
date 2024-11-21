@@ -121,7 +121,7 @@ julia> using PDBTools
 julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
 
 julia> filter(Select("name CA"), atoms)
-   Array{Atoms,1} with 3 atoms with fields:
+   Vector{Atom{Nothing}} with 3 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
       15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
@@ -206,7 +206,7 @@ julia> using PDBTools
 julia> protein = read_pdb(PDBTools.SMALLPDB);
 
 julia> residues = collect(eachresidue(protein))
-   Array{Residue,1} with 3 residues.
+   Vector{Residue} with 3 residues.
 
 julia> residues[1]
  Residue of name ALA with 12 atoms.
