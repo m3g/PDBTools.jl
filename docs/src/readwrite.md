@@ -15,7 +15,7 @@ read_mmcif
     In the following examples, the `read_pdb` function will be illustrated. The usage is
     similar to that of `read_mmcif`, to read `mmCIF (PDBx)` files. 
 
-## Read a PDB file
+## Read a PDB/mmCIF file
 
 To read a PDB file and return a vector of atoms of
 type `Atom`, do:
@@ -57,7 +57,7 @@ Atom
     ```
     The same is valid for the `write` function, below. 
 
-## Atom field assignment in mmCIF files
+## [Atom field assignment in mmCIF files](@id field_assignment)
 
 By default, the assignment of the `_atom_site` fields of the mmCIF format to the fields of the `Atom` data structure is:
 
@@ -107,7 +107,7 @@ julia> name.(ats)
 
 ```
       
-## Retrieve from Protein Data Bank
+## Get structure from the Protein Data Bank
 
 Use the `wget` function to retrieve the atom data directly from the PDB database,
 optionally filtering the atoms with a selection:
@@ -128,7 +128,47 @@ julia> atoms = wget("1LBD","name CA")
 wget
 ```
 
-## Edit a PDB file
+## Write a PDB/mmCIF file
+
+To write a PDB file use the `write_pdb` function, as:
+
+```julia
+write_pdb("file.pdb", atoms)
+```
+where `atoms` contain a list of atoms with the `Atom` structures.
+
+```@docs
+write_pdb
+write_mmcif
+```
+
+The use of the `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section
+is possible in the call to `write_mmcif`. 
+
+# Read from string buffer
+
+In some cases a PDB file data may be available as a string and not a regular file. For example,
+when reading the output of a zipped file. In these cases, it is possible to obtain the array
+of atoms by reading directly the string buffer with, for example:
+
+```jldoctest
+julia> using PDBTools
+
+julia> pdbdata = read(PDBTools.TESTPDB, String); # returns a string with the PDB data, to exemplify
+
+julia> atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
+   Vector{Atom{Nothing}} with 104 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00  0.00     1    PROT        26
+                                                       ⋮
+    1425   CA     GLU     A      102      102    4.414   -4.302   -7.734  1.00  0.00     1    PROT      1425
+    1440   CA     CYS     A      103      103    4.134   -7.811   -6.344  1.00  0.00     1    PROT      1440
+    1454   CA     THR     A      104      104    3.244  -10.715   -8.603  1.00  0.00     1    PROT      1454
+```
+
+## Edit a Vector{<:Atom} object
 
 The `Atom` structure is mutable, meaning that the fields can be edited. For example:
 
@@ -172,43 +212,6 @@ julia> printatom(atoms[1])
 
 ```@docs
 edit!
-```
-
-## Write a PDB file
-
-To write a PDB file use the `write_pdb` function, as:
-
-```julia
-write_pdb("file.pdb", atoms)
-```
-where `atoms` contain a list of atoms with the `Atom` structures.
-
-```@docs
-write_pdb
-write_mmcif
-```
-
-# Read from string buffer
-
-In some cases a PDB file data may be available as a string and not a regular file. For example,
-when reading the output of a zipped file. In these cases, it is possible to obtain the array
-of atoms by reading directly the string buffer with, for example:
-
-```jldoctest
-julia> using PDBTools
-
-julia> pdbdata = read(PDBTools.TESTPDB, String); # returns a string with the PDB data, to exemplify
-
-julia> atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
-   Vector{Atom{Nothing}} with 104 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
-      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
-      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00  0.00     1    PROT        26
-                                                       ⋮
-    1425   CA     GLU     A      102      102    4.414   -4.302   -7.734  1.00  0.00     1    PROT      1425
-    1440   CA     CYS     A      103      103    4.134   -7.811   -6.344  1.00  0.00     1    PROT      1440
-    1454   CA     THR     A      104      104    3.244  -10.715   -8.603  1.00  0.00     1    PROT      1454
 ```
 
 
