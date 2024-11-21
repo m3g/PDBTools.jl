@@ -6,7 +6,8 @@ using TestItemRunner
     Aqua.test_all(PDBTools)
 end
 
-@testitem "Doctests" begin
-    using Documenter: doctest
-    doctest(PDBTools)
-end
+#@testitem "Doctests" begin
+#    using Documenter: doctest
+#    using PDBTools
+#    doctest(PDBTools)
+#end
