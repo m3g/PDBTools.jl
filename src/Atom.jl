@@ -632,3 +632,19 @@ end
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end
+
+@testitem "atom - show" begin
+    using PDBTools: Atom, print_short_atom_list
+    at = Atom(;segname="X")
+    buff = IOBuffer()
+    show(buff, at)
+    @test length(split(String(take!(buff)))) == 14
+    print_short_atom_list(buff, [at, at])
+    @test length(split(String(take!(buff)))) == 14*3
+    print_short_atom_list(buff, [at, at])
+    @test length(split(String(take!(buff)))) == 14*3
+    print_short_atom_list(buff, [copy(at) for _ in 1:20])
+    @test length(split(String(take!(buff)))) == 14*7 + 1
+    show(buff, [at])
+    @test String(take!(buff)) == "Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
+end
