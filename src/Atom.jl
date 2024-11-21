@@ -458,6 +458,8 @@ end
     @test element(Atom(name = "N", pdb_element="A")) == "A" 
     @test element(Atom(name = "A")) === nothing
     @test element(Atom(name = " ")) === nothing
+    atom = Atom(name="", pdb_element="")
+    @test element(atom) === nothing
 end
 
 #
