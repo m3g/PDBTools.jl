@@ -292,12 +292,17 @@ atom_line(atom::Atom) = @sprintf(
     atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
         "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
+    buff = IOBuffer()
+    printatom(buff, atoms[1])
+    @test length(split(String(take!(buff)))) == 28
 end
 
 """
     printatom(atom::Atom)
+    printatom(io::IO, atom::Atom)
 
-Prints an `Atom` structure in a human-readable format, with a title line.
+Prints an `Atom` structure in a human-readable format, with a title line. By default the output is printed to `stdout`,
+and the `io` argument can be used to specify a different output stream.
 
 ### Example
 
@@ -315,10 +320,11 @@ julia> atoms[1] # default show method
 ```
 
 """
-function printatom(atom::Atom)
-    println(atom_title)
-    println(atom_line(atom))
+function printatom(io::IO, atom::Atom)
+    println(io, atom_title)
+    println(io, atom_line(atom))
 end
+printatom(atom::Atom) = printatom(stdout, atom)
 
 #
 # Print a formatted list of atoms
@@ -452,6 +458,8 @@ end
     @test element(Atom(name = "N", pdb_element="A")) == "A" 
     @test element(Atom(name = "A")) === nothing
     @test element(Atom(name = " ")) === nothing
+    atom = Atom(name="", pdb_element="")
+    @test element(atom) === nothing
 end
 
 #
@@ -623,4 +631,20 @@ end
     @test atomic_symbol(at) == :N
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
+end
+
+@testitem "atom - show" begin
+    using PDBTools: print_short_atom_list
+    at = Atom(;segname="X")
+    buff = IOBuffer()
+    show(buff, at)
+    @test length(split(String(take!(buff)))) == 14
+    print_short_atom_list(buff, [at, at])
+    @test length(split(String(take!(buff)))) == 14*3
+    print_short_atom_list(buff, [at, at])
+    @test length(split(String(take!(buff)))) == 14*3
+    print_short_atom_list(buff, [copy(at) for _ in 1:20])
+    @test length(split(String(take!(buff)))) == 14*7 + 1
+    show(buff, [at])
+    @test String(take!(buff)) == "PDBTools.Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
 end

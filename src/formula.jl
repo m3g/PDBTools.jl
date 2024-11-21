@@ -4,7 +4,7 @@
 struct Formula
     formula::Vector{Tuple{Atom,Int}}
 end
-Base.getindex(f::Formula, i) = f.formula[i]
+Base.getindex(f::Formula, i) = (String(pdb_element(first(f.formula[i]))), last(f.formula[i]))
 
 const sub_int = (
     "0" => "₀",
@@ -22,7 +22,8 @@ const sub_int = (
 """
     formula(atoms::AbstractVector{<:Atom})
 
-Returns the molecular formula of the current selection. 
+Returns the molecular formula of the current selection. The output is an indexable
+"Formula" structure, where each element is a tuple with the element name and the number of atoms.
 
 ## Example
 
@@ -34,13 +35,17 @@ julia> pdb  = read_pdb(PDBTools.TESTPDB, "residue 1"); # testing PDB file
 julia> resname(pdb[1])
 "ALA"
 
-julia> formula(pdb)
+julia> f = formula(pdb)
 H₇C₃N₁O₁
+
+julia> f[1]
+("H", 7)
+
 ```
 
 """
-function formula(atoms::AbstractVector{<:Atom})
-    f = Formula(Tuple{Atom,Int}[])
+function formula(atoms::AbstractVector{<:AtomType}) where {AtomType<:Atom}
+    f = Formula(Tuple{AtomType,Int}[])
     for at in atoms
         i = findfirst(el -> pdb_element(first(el)) == element(at), f.formula)
         if isnothing(i)
@@ -71,7 +76,7 @@ Returns the stoichiometry of atom selection in a `Formula` structure.
 
 ### Example
 
-```julia-repl
+```jldoctest
 julia> using PDBTools
 
 julia> pdb  = read_pdb(PDBTools.TESTPDB, "water"); # testing PDB file
@@ -88,4 +93,21 @@ function stoichiometry(atoms::AbstractVector{<:Atom})
         f.formula[i] = (p[1], p[2] ÷ d)
     end
     f
+end
+
+@testitem "Formula" begin
+    using PDBTools
+    pdb  = read_pdb(PDBTools.TESTPDB, "resname GLY")
+    f = formula(pdb)
+    buff = IOBuffer()
+    show(buff, f)
+    @test String(take!(buff)) == "H₃₆C₂₄N₁₂O₁₂"
+    @test f[1] == ("H", 36)
+    @test f[4] == ("O", 12)
+    s = stoichiometry(pdb)
+    buff = IOBuffer()
+    show(buff, s)
+    @test String(take!(buff)) == "H₃C₂N₁O₁"
+    @test s[1] == ("H", 3)
+    @test s[4] == ("O", 1)
 end

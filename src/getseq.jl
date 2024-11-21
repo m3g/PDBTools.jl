@@ -5,23 +5,25 @@ Returns the sequence of aminoacids from the vector of atoms or file name. Select
 
 ### Example
 
-```julia-repl
-julia> protein = wget("1LBD");
+```jldoctest
+julia> using PDBTools
+
+julia> protein = read_pdb(PDBTools.TESTPDB);
 
 julia> getseq(protein,"residue < 3")
 2-element Vector{String}:
- "S"
  "A"
+ "C"
 
 julia> getseq(protein,"residue < 3", code=2)
 2-element Vector{String}:
- "SER"
  "ALA"
+ "CYS"
 
 julia> getseq(protein,"residue < 3",code=3)
 2-element Vector{String}:
- "Serine"
  "Alanine"
+ "Cysteine"
 
 ```
 
@@ -64,3 +66,26 @@ function getseq(file::String, selection::String; code::Int=1)
 end
 
 getseq(file::String; only=all, code::Int=1) = getseq(read_pdb(file), only=only, code=code)
+
+@testitem "getseq" begin
+    using PDBTools
+    ats = read_pdb(PDBTools.TESTPDB)
+    s = getseq(ats, "residue < 3")
+    @test s == ["A", "C"]
+    s = getseq(ats, "residue < 3"; code=2)
+    @test s == ["ALA", "CYS"]
+    s = getseq(ats, "residue < 3"; code=3)
+    @test s == ["Alanine", "Cysteine"]
+    wat = select(ats, "water")
+    s = getseq(wat, "resnum < 3")
+    @test s == ["T", "T", "T", "T"] 
+    s = getseq(wat, "resnum < 3"; code=2)
+    @test s == ["TIP3", "TIP3", "TIP3", "TIP3"] 
+    s = getseq(wat, "resnum < 3"; code=3)    
+    @test s == ["TIP3", "TIP3", "TIP3", "TIP3"] 
+    s = getseq(PDBTools.TESTPDB, "residue < 3")
+    s = getseq(ats, "residue < 3")
+    @test s == ["A", "C"]
+    s = getseq(PDBTools.TESTPDB; only = at -> resnum(at) == 1)
+    @test s == ["A", "C", "S", "T", "T", "T"]
+end
