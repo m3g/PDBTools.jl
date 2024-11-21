@@ -292,12 +292,17 @@ atom_line(atom::Atom) = @sprintf(
     atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
         "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
+    buff = IOBuffer()
+    printatom(buff, atoms[1])
+    @test length(split(String(take!(buff)))) == 28
 end
 
 """
     printatom(atom::Atom)
+    printatom(io::IO, atom::Atom)
 
-Prints an `Atom` structure in a human-readable format, with a title line.
+Prints an `Atom` structure in a human-readable format, with a title line. By default the output is printed to `stdout`,
+and the `io` argument can be used to specify a different output stream.
 
 ### Example
 
@@ -315,10 +320,11 @@ julia> atoms[1] # default show method
 ```
 
 """
-function printatom(atom::Atom)
-    println(atom_title)
-    println(atom_line(atom))
+function printatom(io::IO, atom::Atom)
+    println(io, atom_title)
+    println(io, atom_line(atom))
 end
+printatom(atom::Atom) = printatom(stdout, atom)
 
 #
 # Print a formatted list of atoms
