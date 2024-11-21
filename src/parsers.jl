@@ -19,7 +19,7 @@ function _parse(
     x = _tryparse(T, s)
     !isnothing(x) && return x
     if isnothing(alt)
-        error("Could not read $T from string: \"$s\"")
+        throw(ArgumentError("Could not read $T from string: \"$s\""))
     else
         return alt
     end
@@ -117,4 +117,19 @@ end
             setfield!(atom, field, _parse(T, field_values[ifield]; alt=_alt(T)))
         end
     end
+end
+
+@testitem "_parse" begin
+    using PDBTools: _parse, _parse_charge
+    @test _parse(Int, "  1  ") == 1
+    @test _parse(Int, "  A  ") == 10
+    @test _parse(Float32, "  1.0  ") == 1.0f0
+    @test_throws ArgumentError _parse(Int, "  ???  ") 
+    @test_throws ArgumentError _parse(Float32, "  A  ") 
+    @test _parse(String, "  A  ") == "A"
+    @test _parse(String, "") === nothing
+    @test _parse_charge("1+") == "1"
+    @test _parse_charge("+1") == "1"
+    @test _parse_charge("1-") == "-1"
+    @test _parse_charge("-1") == "-1"
 end
