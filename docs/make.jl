@@ -1,6 +1,5 @@
 import Pkg
 Pkg.add("Documenter")
-Pkg.add(path="../PDBTools")
 using Documenter
 using PDBTools
 makedocs(
