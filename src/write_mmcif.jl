@@ -9,18 +9,18 @@ function write_mmcif(
     filename::AbstractString, 
     atoms::AbstractVector{<:Atom}, 
     selection::String;
-    custom_types::Union{Nothing, Tuple{String, Symbol}}=nothing,
+    field_assignment::Union{Nothing, Dict{String, Symbol}}=nothing,
 )
     query = parse_query(selection)
-    write_mmcif(filename, atoms; only=atom -> apply_query(query, atom), custom_types)
+    write_mmcif(filename, atoms; only=atom -> apply_query(query, atom), field_assignment)
 end
 
 function write_mmcif(
     filename::AbstractString, atoms::AbstractVector{<:Atom}; 
     only::Function=all, 
-    custom_types::Union{Nothing, Tuple{String, Symbol}}=nothing,
+    field_assignment::Union{Nothing, Dict{String, Symbol}}=nothing,
 )
-    _cif_fields = _supported_cif_fields(custom_types)
+    _cif_fields = _supported_cif_fields(field_assignment)
     open(expanduser(filename), "w") do file
         # Header
         println(file, "_software.name PDBTools.jl $(VERSION)")
@@ -60,4 +60,10 @@ end
     @test isfile(tmpfile)
     ats_cif = read_mmcif(tmpfile)
     @test all(position(at1) ≈ position(at2) for (at1, at2) in zip(ats, ats_cif))
+    field_assignment = Dict("test" => :name)
+    write_mmcif(tmpfile, ats; field_assignment)
+    ats0 = read_mmcif(tmpfile)
+    @test all(name(at) == "X" for at in ats0)
+    ats1 = read_mmcif(tmpfile; field_assignment)
+    @test all(name(at1) == name(at2) for (at1, at2) in zip(ats, ats1))
 end
