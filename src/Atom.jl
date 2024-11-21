@@ -634,7 +634,8 @@ end
 end
 
 @testitem "atom - show" begin
-    using PDBTools: Atom, print_short_atom_list
+    using PDBTools
+    using PDBTools: print_short_atom_list
     at = Atom(;segname="X")
     buff = IOBuffer()
     show(buff, at)
