@@ -23,7 +23,7 @@ Simple data structure:
 
 ```julia
 atoms = read_pdb("./structure.pdb")
-   Array{PDBTools.Atom,1} with 62026 atoms with fields:
+   Vector{Atom{Nothing}} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2

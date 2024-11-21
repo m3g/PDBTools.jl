@@ -2,7 +2,6 @@ import Pkg
 Pkg.add("Documenter")
 using Documenter
 using PDBTools
-push!(LOAD_PATH, "../src/")
 makedocs(
     modules = [PDBTools],
     sitename = "PDBTools.jl",
