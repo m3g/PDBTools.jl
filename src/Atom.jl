@@ -634,7 +634,6 @@ end
 end
 
 @testitem "atom - show" begin
-    using PDBTools
     using PDBTools: print_short_atom_list
     at = Atom(;segname="X")
     buff = IOBuffer()
@@ -647,5 +646,5 @@ end
     print_short_atom_list(buff, [copy(at) for _ in 1:20])
     @test length(split(String(take!(buff)))) == 14*7 + 1
     show(buff, [at])
-    @test String(take!(buff)) == "Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
+    @test String(take!(buff)) == "PDBTools.Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
 end
