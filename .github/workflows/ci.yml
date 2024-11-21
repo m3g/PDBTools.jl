@@ -11,17 +11,18 @@ jobs:
       matrix:
         version:
           - '1.9'
+          - 'lts'
           - 'pre'
         os:
           - ubuntu-latest
           - macOS-latest
           - windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -41,10 +42,10 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
-          version: '1'
+          version: 'lts'
       - run: |
           julia --project=docs -e '
             import Pkg; Pkg.add("Documenter")
