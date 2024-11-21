@@ -5,13 +5,22 @@ Write a mmCIF file with the atoms in `atoms` to `filename`. The optional `select
 that can be used to select a subset of the atoms in `atoms`. For example, `write_mmcif(atoms, "test.cif", "name CA")`.
 
 """
-function write_mmcif(filename::AbstractString, atoms::AbstractVector{<:Atom}, selection::String)
+function write_mmcif(
+    filename::AbstractString, 
+    atoms::AbstractVector{<:Atom}, 
+    selection::String;
+    custom_types::Union{Nothing, Tuple{String, Symbol}}=nothing,
+)
     query = parse_query(selection)
-    write_mmcif(filename, atoms; only=atom -> apply_query(query, atom))
+    write_mmcif(filename, atoms; only=atom -> apply_query(query, atom), custom_types)
 end
 
-function write_mmcif(filename::AbstractString, atoms::AbstractVector{<:Atom}; only::Function=all)
-    _cif_fields = _supported_cif_fields()
+function write_mmcif(
+    filename::AbstractString, atoms::AbstractVector{<:Atom}; 
+    only::Function=all, 
+    custom_types::Union{Nothing, Tuple{String, Symbol}}=nothing,
+)
+    _cif_fields = _supported_cif_fields(custom_types)
     open(expanduser(filename), "w") do file
         # Header
         println(file, "_software.name PDBTools.jl $(VERSION)")

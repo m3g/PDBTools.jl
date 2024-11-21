@@ -1,9 +1,9 @@
 """
-    read_mmcif(mmCIF_file::String, selection::String)
-    read_mmcif(mmCIF_file::String; only::Function = all)
+    read_mmcif(mmCIF_file::String, selection::String; field_assignment)
+    read_mmcif(mmCIF_file::String; only::Function = all, field_assignment)
 
-    read_mmcif(mmCIF_data::IOBuffer, selection::String)
-    read_mmcif(mmCIF_data::IOBuffer; only::Function = all)
+    read_mmcif(mmCIF_data::IOBuffer, selection::String, field_assignment)
+    read_mmcif(mmCIF_data::IOBuffer; only::Function = all, field_assignment)
 
 Reads a mmCIF file and stores the data in a vector of type `Atom`. 
 
@@ -11,6 +11,25 @@ If a selection is provided, only the atoms matching the selection will be read.
 For example, `resname ALA` will select all the atoms in the residue ALA.
 
 If the `only` function keyword is provided, only the atoms for which `only(atom)` is true will be returned.
+
+The `field_assignment` keyword is `nothing` (default) or a `Dict{String,Symbol}` and can be used to specify which fields in the mmCIF file should be read into the `Atom` type.
+For example `field_assignment = Dict("type_symbol" => :name)` will read the `_atom_site.type_symbol` field in the mmCIF 
+file into the `name` field of the `Atom` type.
+
+The default assignment is:
+
+        "id" => :index_pdb
+        "Cartn_x" => :x
+        "Cartn_y" => :y
+        "Cartn_z" => :z
+        "occupancy" => :occup
+        "B_iso_or_equiv" => :beta
+        "pdbx_formal_charge" => :charge
+        "pdbx_PDB_model_num" => :model
+        "auth_atom_id" => :name
+        "auth_comp_id" => :resname
+        "auth_asym_id" => :chain
+        "auth_seq_id" => :resnum
 
 ### Examples
 
@@ -119,15 +138,11 @@ ATOM   5    C  CB  . VAL A 1 1   ? 6.369   19.044  5.810   1.00 72.12 ? 1   VAL 
 ATOM   6    C  CG1 . VAL A 1 1   ? 7.009   20.127  5.418   1.00 61.79 ? 1   VAL A CG1 1
 ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL A CG2 1 
 =#
-function _supported_cif_fields()
+function _supported_cif_fields(field_assignment)
     # We need this to be indexable (not a Dict) to keep the order of the fields
-    # when writting the mmCIF file
-    return (
+    # when writing the mmCIF file
+    _atom_symbol_for_cif_field = OrderedDict{String, Tuple{DataType, Symbol}}(
         "id" => (Int32, :index_pdb),
-        "label_atom_id" => (String7, :name), # VMD
-        "label_comp_id" => (String7, :resname), # VMD
-        "label_asym_id" => (String3, :chain), # VMD
-        "label_seq_id" => (Int32, :resnum), # VMD
         "Cartn_x" => (Float32,:x),
         "Cartn_y" => (Float32,:y),
         "Cartn_z" => (Float32,:z),
@@ -140,6 +155,53 @@ function _supported_cif_fields()
         "auth_asym_id" => (String3, :chain), # Standard mmCIF
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
     )
+    if !isnothing(field_assignment)
+        for (custom_key, custom_field) in field_assignment 
+            hasfield = any(s -> s == custom_field, s for (_, s) in values(_atom_symbol_for_cif_field))
+            if !hasfield
+                throw(ArgumentError("""\n
+                    Field $custom_field not available in the PDBTools.Atom type.
+
+                """))
+            end
+            for p in _atom_symbol_for_cif_field
+                key, val = p
+                if last(val) == custom_field
+                    T = first(val)
+                    pop!(_atom_symbol_for_cif_field, key)
+                    push!(_atom_symbol_for_cif_field, custom_key => (T, custom_field))
+                    break
+                end
+            end
+        end
+    end
+    return _atom_symbol_for_cif_field
+end
+
+@testitem "_supported_cif_fields" begin
+    using PDBTools 
+    field_assignment = Dict(
+        "type_symbol" => :name, # VMD
+        "label_comp_id" => :resname, # VMD
+        "label_asym_id" => :chain, # VMD
+        "label_seq_id" => :resnum, # VMD
+    )
+    _cif_fields = PDBTools._supported_cif_fields(field_assignment)
+    @test length(_cif_fields) == 12
+    @test _cif_fields["id"] == (Int32, :index_pdb)
+    @test _cif_fields["type_symbol"] == (String7, :name)
+    @test _cif_fields["label_comp_id"] == (String7, :resname)
+    @test _cif_fields["label_asym_id"] == (String3, :chain)
+    @test _cif_fields["label_seq_id"] == (Int32, :resnum)
+    @test _cif_fields["Cartn_x"] == (Float32, :x)
+    @test _cif_fields["Cartn_y"] == (Float32, :y)
+    @test _cif_fields["Cartn_z"] == (Float32, :z)
+    @test _cif_fields["occupancy"] == (Float32, :occup)
+    @test _cif_fields["B_iso_or_equiv"] == (Float32, :beta)
+    @test _cif_fields["pdbx_formal_charge"] == (Float32, :charge)
+    @test _cif_fields["pdbx_PDB_model_num"] == (Int32, :model)
+    push!(field_assignment, "fail" => :fail)
+    @test_throws ArgumentError PDBTools._supported_cif_fields(field_assignment)
 end
 
 function _parse_mmCIF(
@@ -147,8 +209,9 @@ function _parse_mmCIF(
     only::Function,
     memory_available::Real=0.8,
     stop_at=nothing,
+    field_assignment::Union{Nothing,Dict{String,Symbol}} = nothing,
 )
-    _atom_symbol_for_cif_field = _supported_cif_fields()
+    _atom_symbol_for_cif_field = _supported_cif_fields(field_assignment)
     atoms = Atom{Nothing}[]
     lastatom = Atom{Nothing}()
     _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
@@ -245,4 +308,16 @@ end
     ats = read_mmcif(PDBTools.TESTCIF; memory_available=1e-10)
     @test length(ats) == 1000
 
+    # Read custom fields instead
+    custom_fields = Dict(
+        "type_symbol" => :name, # VMD
+        "label_comp_id" => :resname, # VMD
+        "label_asym_id" => :chain, # VMD
+        "label_seq_id" => :resnum, # VMD
+    )
+    ats1 = read_mmcif(PDBTools.SMALLCIF; custom_fields)
+    @test name.(ats1) == ["N", "C", "C", "O", "C", "C", "C"]
+    @test all(resname.(ats1) .== "VAL")
+    @test all(chain.(ats1) .== "A")
+    @test all(resnum.(ats1) .== 1)
 end
