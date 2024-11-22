@@ -335,7 +335,9 @@ function print_short_atom_list(io::IO, atoms::AbstractVector{<:Atom})
         print(io, atom_line(atoms[i]))
         i == length(atoms) || print(io, "\n")
     end
-    if length(atoms) > 7
+    if length(atoms) == 7
+        println(io, atom_line(atoms[4]))
+    elseif length(atoms) > 7
         @printf(io, "%57s\n", "⋮ ")
     end
     for i = max(4, length(atoms) - 2):length(atoms)
