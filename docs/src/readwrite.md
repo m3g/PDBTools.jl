@@ -62,19 +62,23 @@ Atom
 By default, the assignment of the `_atom_site` fields of the mmCIF format to the fields of the `Atom` data structure 
 follows the [standard mmCIF convention](https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html):
 
-        "id" => :index_pdb
-        "Cartn_x" => :x
-        "Cartn_y" => :y
-        "Cartn_z" => :z
-        "occupancy" => :occup
-        "B_iso_or_equiv" => :beta
-        "pdbx_formal_charge" => :charge
-        "pdbx_PDB_model_num" => :model
-        "label_atom_id" => :name
-        "label_comp_id" => :resname
-        "label_asym_id" => :chain
-        "auth_seq_id" => :resnum
-        "type_symbol" => :pdb_element
+```julia
+Dict{String,Symbol}(
+    "id" => :index_pdb
+    "Cartn_x" => :x
+    "Cartn_y" => :y
+    "Cartn_z" => :z
+    "occupancy" => :occup
+    "B_iso_or_equiv" => :beta
+    "pdbx_formal_charge" => :charge
+    "pdbx_PDB_model_num" => :model
+    "label_atom_id" => :name
+    "label_comp_id" => :resname
+    "label_asym_id" => :chain
+    "auth_seq_id" => :resnum
+    "type_symbol" => :pdb_element
+)
+```
 
 This assignment can be customized by providing the `field_assignment` keyword parameter to the `read_mmcif` function. 
 In the following example, we exemplify the possibility of reading `_atom_site.type_symbol` field of the mmCIF file into the `name` field of the
@@ -93,7 +97,9 @@ julia> name.(ats)
  "O"
  "N"
 
-julia> ats = read_mmcif(PDBTools.TESTCIF, "index <= 5"; field_assignment=Dict("type_symbol" => :name));
+julia> ats = read_mmcif(PDBTools.TESTCIF, "index <= 5"; 
+           field_assignment=Dict("type_symbol" => :name)
+        );
 
 julia> name.(ats)
 5-element Vector{InlineStrings.String7}:
@@ -104,6 +110,11 @@ julia> name.(ats)
  "N"
 
 ```
+
+The custom entries set in the `field_assignment` keyword will overwrite the default 
+assignments for entries sharing keys or fields. For instance, in the example above,
+the `label_atom_id` fields which is by default assigned to `:name` is not being read
+anymore.
 
 ## Get structure from the Protein Data Bank
 

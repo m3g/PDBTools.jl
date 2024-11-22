@@ -20,19 +20,23 @@ file into the `name` field of the `Atom` type.
 
 The default assignment is follows the standard mmCIF convention:
 
-        "id" => :index_pdb
-        "Cartn_x" => :x
-        "Cartn_y" => :y
-        "Cartn_z" => :z
-        "occupancy" => :occup
-        "B_iso_or_equiv" => :beta
-        "pdbx_formal_charge" => :charge
-        "pdbx_PDB_model_num" => :model
-        "label_atom_id" => :name
-        "label_comp_id" => :resname
-        "label_asym_id" => :chain
-        "auth_seq_id" => :resnum
-        "type_symbol" => :pdb_element
+```julia
+Dict{String,Symbol}(
+    "id" => :index_pdb
+    "Cartn_x" => :x
+    "Cartn_y" => :y
+    "Cartn_z" => :z
+    "occupancy" => :occup
+    "B_iso_or_equiv" => :beta
+    "pdbx_formal_charge" => :charge
+    "pdbx_PDB_model_num" => :model
+    "label_atom_id" => :name
+    "label_comp_id" => :resname
+    "label_asym_id" => :chain
+    "auth_seq_id" => :resnum
+    "type_symbol" => :pdb_element
+)
+```
 
 Source: https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html
 
