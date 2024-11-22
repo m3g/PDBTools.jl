@@ -1,6 +1,7 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://m3g.github.io/PDBTools.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://m3g.github.io/PDBTools.jl/dev)
 [![Tests](https://img.shields.io/badge/build-passing-green)](https://github.com/m3g/PDBTools.jl/actions)
+[![codecov](https://codecov.io/gh/m3g/PDBTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/PDBTools.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 # PDBTools
@@ -23,7 +24,7 @@ Simple data structure:
 
 ```julia
 atoms = read_pdb("./structure.pdb")
-   Array{PDBTools.Atom,1} with 62026 atoms with fields:
+   Vector{Atom{Nothing}} with 62026 atoms with fields:
    index name resname chain   resnum  residue        x        y        z     b occup model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2

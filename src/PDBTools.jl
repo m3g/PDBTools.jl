@@ -16,8 +16,8 @@ using InlineStrings: String3, String7
 # Version
 const VERSION = pkgversion(@__MODULE__)
 
-# AtomsBase interface compatibility
-import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
+# AtomsBase interface compatibility: deprecated until AtomsBase becomes stable
+#import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
@@ -46,10 +46,8 @@ export SIRAH
 const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
-const TESTCIF = joinpath(@__DIR__,"../test/1yn8.cif")
-const SMALLCIF = joinpath(@__DIR__,"../test/small.cif")
+const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
 const CHAINSPDB = joinpath(@__DIR__,"../test/protein_test.pdb")
-
 
 # Basic chemistry
 include("./elements.jl")

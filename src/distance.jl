@@ -155,6 +155,8 @@ end
     @test all(isapprox.(closest(r1[1], coor(r2[2])),(1, 1, 5.121218702613667); atol=1e-3))
     @test all(isapprox.(closest(coor(r1[1]), r2[2]),(1, 1, 5.121218702613667); atol=1e-3))
     @test all(isapprox.(closest(r1[1], r2[2]),(1, 1, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(r1[1], r2), (1, 2, 5.121218702613667); atol=1e-3))
+    @test all(isapprox.(closest(r2, r1[1]), (2, 1, 5.121218702613667); atol=1e-3))
 
     @test distance(r1, r2) ≈ 3.6750402718881863 atol=1e-3
     @test distance(coor(r1), r2) ≈ 3.6750402718881863 atol=1e-3
@@ -173,6 +175,10 @@ end
     r = collect(eachresidue(atoms))
     @test all(isapprox.(closest(r[1], [0.0, 0.0, 0.0]), (12, 1, 16.545482827648158); atol=1e-3))
     @test all(isapprox.(closest([0.0, 0.0, 0.0], r[1]), (1, 12, 16.545482827648158); atol=1e-3))
+    @test all(isapprox.(closest(Atom(), r[1]), (1, 12, 16.545482827648158); atol=1e-3))
+    @test all(isapprox.(closest(r[1], Atom()), (12, 1, 16.545482827648158); atol=1e-3))
+    @test all(isapprox.(closest([coor(Atom())], r[1]), (1, 12, 16.545482827648158); atol=1e-3))
+    @test all(isapprox.(closest(r[1], [coor(Atom())]), (12, 1, 16.545482827648158); atol=1e-3))
 
 end
 

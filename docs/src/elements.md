@@ -51,25 +51,6 @@ stoichiometry
 printatom
 ```
 
-## AtomsBase compatibility
-
-The following functions are supported as part of the API, to conform the `AtomsBase` interface:
-
-| Function   |  Example              |  Output |
-|:-----------|:----------------------|:-------:|
-|`atomic_number(::PDBTools.Atom)` | `atomic_number(Atom(name="NE2"))` |  `7` |
-|`atomic_symbol(::PDBTools.Atom)` |  `atomic_symbol(Atom(name="NE2"))` |  `:N` |
-|`atomic_mass(::PDBTools.Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
-|`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
-
-
-```@docs
-atomic_number
-atomic_symbol
-atomic_mass
-position
-```
-
 ## Custom Atom fields
 
 Custom atom fields can be created in `Atom` objects by defining the `custom` keyword.
@@ -115,6 +96,27 @@ other functions work for the new types. The function to be used is `add_element!
 ```@docs
 add_element!
 remove_custom_elements!
+```
+
+## Additional property-retrieving functions
+
+The following functions are supported as part of the API, as a intending to interface
+with `AtomsBase`. Nevertheless, currently these functions do not overload the exported
+ones from `AtomsBase`, because that package is in a unstable state.
+
+| Function   |  Example              |  Output |
+|:-----------|:----------------------|:-------:|
+|`atomic_number(::PDBTools.Atom)` | `atomic_number(Atom(name="NE2"))` |  `7` |
+|`atomic_symbol(::PDBTools.Atom)` |  `atomic_symbol(Atom(name="NE2"))` |  `:N` |
+|`atomic_mass(::PDBTools.Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
+|`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
+
+
+```@docs
+atomic_number
+atomic_symbol
+atomic_mass
+position
 ```
 
 

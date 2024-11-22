@@ -11,14 +11,16 @@ meta data for each residue.
 
 ### Example
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
 julia> pdb = wget("1LBD");
 
 julia> residues = collect(eachresidue(pdb))
-   Array{Residue,1} with 238 residues.
+   Vector{Residue} with 238 residues.
 
 julia> resnum.(residues[1:3])
-3-element Vector{Int64}:
+3-element Vector{Int32}:
  225
  226
  227
@@ -191,7 +193,7 @@ function Base.show(io::IO, residues::EachResidue)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
-    print(io, "   Array{Residue,1} with $(length(residues)) residues.")
+    print(io, "   $(typeof(residues)) with $(length(residues)) residues.")
 end
 
 #

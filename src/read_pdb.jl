@@ -14,33 +14,41 @@ If the `only` function keyword is provided, only the atoms for which `only(atom)
 
 ### Examples
 
-```julia-repl
-julia> protein = read_pdb("../test/structure.pdb")
-   Array{Atoms,1} with 62026 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-                                                       ⋮ 
-   62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  0.00  1.00     1    WAT2     62025
-   62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  0.00  1.00     1    WAT2     62026
+```jldoctest
+julia> using PDBTools
 
-julia> ALA = read_pdb("../test/structure.pdb","resname ALA")
-   Array{Atoms,1} with 72 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+julia> protein = read_pdb(PDBTools.TESTPDB)
+   Vector{Atom{Nothing}} with 62026 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-                                                       ⋮ 
-    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
-    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮
+   62024  OH2    TIP3     C     9339    19638   13.485   -4.534  -34.438  1.00  0.00     1    WAT2     62024
+   62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  1.00  0.00     1    WAT2     62025
+   62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  1.00  0.00     1    WAT2     62026
 
-julia> ALA = read_pdb("../test/structure.pdb", only = atom -> atom.resname == "ALA")
-   Array{Atoms,1} with 72 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
+julia> ALA = read_pdb(PDBTools.TESTPDB,"resname ALA")
+   Vector{Atom{Nothing}} with 72 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-                                                       ⋮ 
-    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  0.00  1.00     1    PROT      1339
-    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  0.00  1.00     1    PROT      1340
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮
+    1338  HB3     ALA     A       95       95   11.464   -3.278   -4.953  1.00  0.00     1    PROT      1338
+    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  1.00  0.00     1    PROT      1339
+    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  1.00  0.00     1    PROT      1340
+
+julia> ALA = read_pdb(PDBTools.TESTPDB, only = atom -> atom.resname == "ALA")
+   Vector{Atom{Nothing}} with 72 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+                                                       ⋮
+    1338  HB3     ALA     A       95       95   11.464   -3.278   -4.953  1.00  0.00     1    PROT      1338
+    1339    C     ALA     A       95       95   14.815   -3.057   -5.633  1.00  0.00     1    PROT      1339
+    1340    O     ALA     A       95       95   14.862   -2.204   -6.518  1.00  0.00     1    PROT      1340
 ```
 
 """

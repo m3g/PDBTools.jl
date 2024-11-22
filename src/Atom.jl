@@ -31,7 +31,7 @@ Fields:
 julia> using PDBTools
 
 julia> atoms = read_pdb(PDBTools.SMALLPDB)
-   Array{Atoms,1} with 35 atoms with fields:
+   Vector{Atom{Nothing}} with 35 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
@@ -250,7 +250,7 @@ atomic_mass(atom::Atom) = mass(atom)
 Returns the position of an atom given the `Atom` structure.
 
 """
-position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
+Base.position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
 const atom_title = @sprintf(
     "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
@@ -292,12 +292,17 @@ atom_line(atom::Atom) = @sprintf(
     atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
     @test PDBTools.atom_line(atoms[1]) == 
         "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
+    buff = IOBuffer()
+    printatom(buff, atoms[1])
+    @test length(split(String(take!(buff)))) == 28
 end
 
 """
     printatom(atom::Atom)
+    printatom(io::IO, atom::Atom)
 
-Prints an `Atom` structure in a human-readable format, with a title line.
+Prints an `Atom` structure in a human-readable format, with a title line. By default the output is printed to `stdout`,
+and the `io` argument can be used to specify a different output stream.
 
 ### Example
 
@@ -315,10 +320,11 @@ julia> atoms[1] # default show method
 ```
 
 """
-function printatom(atom::Atom)
-    println(atom_title)
-    println(atom_line(atom))
+function printatom(io::IO, atom::Atom)
+    println(io, atom_title)
+    println(io, atom_line(atom))
 end
+printatom(atom::Atom) = printatom(stdout, atom)
 
 #
 # Print a formatted list of atoms
@@ -329,7 +335,9 @@ function print_short_atom_list(io::IO, atoms::AbstractVector{<:Atom})
         print(io, atom_line(atoms[i]))
         i == length(atoms) || print(io, "\n")
     end
-    if length(atoms) > 7
+    if length(atoms) == 7
+        println(io, atom_line(atoms[4]))
+    elseif length(atoms) > 7
         @printf(io, "%57s\n", "⋮ ")
     end
     for i = max(4, length(atoms) - 2):length(atoms)
@@ -343,7 +351,7 @@ function Base.show(io::IO, atom::Atom)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
-    println(io, "   Array{Atoms,1} with $(length(atoms)) atoms with fields:")
+    println(io, "   $(typeof(atoms)) with $(length(atoms)) atoms with fields:")
     print_short_atom_list(io, atoms)
 end
 
@@ -452,6 +460,8 @@ end
     @test element(Atom(name = "N", pdb_element="A")) == "A" 
     @test element(Atom(name = "A")) === nothing
     @test element(Atom(name = " ")) === nothing
+    atom = Atom(name="", pdb_element="")
+    @test element(atom) === nothing
 end
 
 #
@@ -617,10 +627,31 @@ end
 end
 
 @testitem "AtomsBase interface" begin
+    using PDBTools
     import StaticArrays
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
     @test atomic_symbol(at) == :N
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
+end
+
+@testitem "atom - show" begin
+    using PDBTools: print_short_atom_list
+    at = Atom(;segname="X")
+    buff = IOBuffer()
+    show(buff, at)
+    @test length(split(String(take!(buff)))) == 14
+    print_short_atom_list(buff, [at, at])
+    @test length(split(String(take!(buff)))) == 14*3
+    print_short_atom_list(buff, [at for _ in 1:6])
+    @test length(split(String(take!(buff)))) == 14*7
+    print_short_atom_list(buff, [at for _ in 1:7])
+    @test length(split(String(take!(buff)))) == 14*8
+    print_short_atom_list(buff, [at for _ in 1:8])
+    @test length(split(String(take!(buff)))) == 14*7 + 1
+    print_short_atom_list(buff, [at for _ in 1:9])
+    @test length(split(String(take!(buff)))) == 14*7 + 1
+    show(buff, [at])
+    @test String(take!(buff)) == "PDBTools.Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
 end

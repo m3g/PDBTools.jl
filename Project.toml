@@ -1,10 +1,9 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "2.0.1-DEV"
+version = "2.1.1-DEV"
 
 [deps]
-AtomsBase = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 Format = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
@@ -20,7 +19,6 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [compat]
 Aqua = "0.8.9"
-AtomsBase = "0.3.4, 0.4"
 BenchmarkTools = "1.5"
 Dates = "1.9"
 DelimitedFiles = "1.9"
