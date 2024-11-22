@@ -1,6 +1,6 @@
 """ 
 
-###Examples
+# Examples
 ```julia-repl
 julia> pdb = read_pdb("PDBTools.CHAINSPDB")
 
@@ -22,8 +22,6 @@ C
 ```
 
 """
-
-
 @kwdef struct Chain{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
     atoms::Vec
     range::UnitRange{Int}
