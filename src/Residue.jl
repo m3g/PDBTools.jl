@@ -1,5 +1,5 @@
 """
-    Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+   Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
 
 Residue data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
@@ -30,6 +30,9 @@ julia> residues[5].chain
 
 julia> residues[8].range
 52:58
+
+julia> mass(residue[1])
+114.08077999999999
 
 ```
 
@@ -178,6 +181,7 @@ end
     residues = collect(eachresidue(atoms))
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
     @test findall(at -> name(at) in ("N", "HG1"), residues[2]) == [1, 9]
+    @test mass(residues[1]) == 114.08077999999999
 end
 
 #
