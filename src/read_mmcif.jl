@@ -16,7 +16,7 @@ The `field_assignment` keyword is `nothing` (default) or a `Dict{String,Symbol}`
 For example `field_assignment = Dict("type_symbol" => :name)` will read the `_atom_site.type_symbol` field in the mmCIF 
 file into the `name` field of the `Atom` type.
 
-The default assignment is:
+The default assignment is follows the standard mmCIF convention:
 
         "id" => :index_pdb
         "Cartn_x" => :x
@@ -26,17 +26,20 @@ The default assignment is:
         "B_iso_or_equiv" => :beta
         "pdbx_formal_charge" => :charge
         "pdbx_PDB_model_num" => :model
-        "auth_atom_id" => :name
-        "auth_comp_id" => :resname
-        "auth_asym_id" => :chain
+        "label_atom_id" => :name
+        "label_comp_id" => :resname
+        "label_asym_id" => :chain
         "auth_seq_id" => :resnum
+        "type_symbol" => :pdb_element
+
+Source: https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html
 
 ### Examples
 
 ```jldoctest
 julia> using PDBTools
 
-julia> ats = read_mmcif(PDBTools.SMALLCIF)
+julia> ats = read_mmcif(PDBTools.TESTCIF)
    Vector{Atom{Nothing}} with 7 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
@@ -46,13 +49,13 @@ julia> ats = read_mmcif(PDBTools.SMALLCIF)
        6  CG1     VAL     A        1        1    7.009   20.127    5.418  1.00 61.79     1                 6
        7  CG2     VAL     A        1        1    5.246   18.533    5.681  1.00 80.12     1                 7
 
-julia> ats = read_mmcif(PDBTools.SMALLCIF, "index < 3")
+julia> ats = read_mmcif(PDBTools.TESTCIF, "index < 3")
    Vector{Atom{Nothing}} with 2 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
        2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
 
-julia> ats = read_mmcif(PDBTools.SMALLCIF; only = at -> name(at) == "CA")
+julia> ats = read_mmcif(PDBTools.TESTCIF; only = at -> name(at) == "CA")
    Vector{Atom{Nothing}} with 1 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
@@ -83,7 +86,7 @@ function _maximum_read(atoms, stop_at, memory_available)
     if !isnothing(stop_at) && (length(atoms) >= stop_at) 
         return true
     end
-    if length(atoms) > 0 && mod(length(atoms), 1000) == 0
+    if length(atoms) > 0 && mod(length(atoms), 50) == 0
         estimated_bytes = length(atoms) * Base.summarysize(atoms[1])
         if estimated_bytes > memory_available * Sys.total_memory()
             @warn """\n
@@ -150,29 +153,44 @@ function _supported_cif_fields(field_assignment)
         "B_iso_or_equiv" => (Float32,:beta),
         "pdbx_formal_charge" => (Float32,:charge),
         "pdbx_PDB_model_num" => (Int32,:model),
-        "auth_atom_id" => (String7, :name), # Standard mmCIF
-        "auth_comp_id" => (String7, :resname), # Standard mmCIF
-        "auth_asym_id" => (String3, :chain), # Standard mmCIF
+        "label_atom_id" => (String7, :name), # Standard mmCIF
+        "label_comp_id" => (String7, :resname), # Standard mmCIF
+        "label_asym_id" => (String3, :chain), # Standard mmCIF
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
+        "type_symbol" => (String7, :pdb_element), # Standard mmCIF
+        #"auth_atom_id" => (String7, :name), # alternate - standard mmCIF
+        #"auth_comp_id" => (String7, :resname), # alternate - standard mmCIF
+        #"auth_asym_id" => (String3, :chain), # alternate = standard mmCIF
     )
     if !isnothing(field_assignment)
         for (custom_key, custom_field) in field_assignment 
-            hasfield = any(s -> s == custom_field, s for (_, s) in values(_atom_symbol_for_cif_field))
-            if !hasfield
+            if !(custom_field in fieldnames(Atom))
                 throw(ArgumentError("""\n
                     Field $custom_field not available in the PDBTools.Atom type.
 
                 """))
             end
+            if custom_field == :custom
+                throw(ArgumentError("""\n
+                    Setting a custom field to :custom is not currently supported.
+
+                """))
+            end
+            # Type to assign to the field
+            T = fieldtype(Atom, custom_field)
+            # Remove the entry from the standard mmCIF fields, if available
+            if haskey(_atom_symbol_for_cif_field, custom_key)
+                pop!(_atom_symbol_for_cif_field, custom_key)
+            end
+            # Remove entry corresponding to custom_field, if available
             for p in _atom_symbol_for_cif_field
                 key, val = p
                 if last(val) == custom_field
-                    T = first(val)
                     pop!(_atom_symbol_for_cif_field, key)
-                    push!(_atom_symbol_for_cif_field, custom_key => (T, custom_field))
-                    break
                 end
             end
+            # Add entry associated to new assignment
+            push!(_atom_symbol_for_cif_field, custom_key => (T, custom_field))
         end
     end
     return _atom_symbol_for_cif_field
@@ -182,10 +200,10 @@ end
     using PDBTools 
     using InlineStrings
     field_assignment = Dict(
-        "type_symbol" => :name, # VMD
-        "label_comp_id" => :resname, # VMD
-        "label_asym_id" => :chain, # VMD
-        "label_seq_id" => :resnum, # VMD
+        "type_symbol" => :name, 
+        "label_comp_id" => :resname,
+        "label_asym_id" => :chain, 
+        "label_seq_id" => :resnum, 
     )
     _cif_fields = PDBTools._supported_cif_fields(field_assignment)
     @test length(_cif_fields) == 12
@@ -201,7 +219,9 @@ end
     @test _cif_fields["B_iso_or_equiv"] == (Float32, :beta)
     @test _cif_fields["pdbx_formal_charge"] == (Float32, :charge)
     @test _cif_fields["pdbx_PDB_model_num"] == (Int32, :model)
-    push!(field_assignment, "fail" => :fail)
+    push!(field_assignment, "type_symbol" => :fail)
+    @test_throws ArgumentError PDBTools._supported_cif_fields(field_assignment)
+    field_assignment = Dict("type_symbol" => :custom)
     @test_throws ArgumentError PDBTools._supported_cif_fields(field_assignment)
 end
 
@@ -278,18 +298,18 @@ end
 @testitem "read_mmcif" begin
     using PDBTools
     using BenchmarkTools
-    b = @benchmark read_mmcif($(PDBTools.SMALLCIF)) samples=1 evals=1
-    @test b.allocs < 300
+    b = @benchmark read_mmcif($(PDBTools.TESTCIF)) samples=1 evals=1
+    @test b.allocs < 500
     ats = read_mmcif(PDBTools.TESTCIF)
-    @test count(at -> resname(at) == "HOH", ats) == 445
-    @test count(at -> isprotein(at), ats) == 2966
-    @test length(eachresidue(select(ats, "protein"))) == 354
+    @test count(iswater, ats) == 5
+    @test count(isprotein, ats) == 69
+    @test length(eachresidue(filter(isprotein, ats))) == 9
     tmpfile = tempname()*".cif"
     write_mmcif(tmpfile, ats, "protein")
     prot = read_mmcif(tmpfile)
-    @test length(prot) == 2966
+    @test length(prot) == 69
     ats = read_mmcif(PDBTools.TESTCIF, "resname HOH")
-    @test length(ats) == 445
+    @test length(ats) == 5
 
     # peformance tests for innner functions for reading cif fields into Atoms
     record = "ATOM   1    N  N   . VAL A 1 1   ? 6.204   16.869  4.854   1.00 49.05 ? 1   VAL A N   1"
@@ -307,18 +327,21 @@ end
     ats = read_mmcif(PDBTools.TESTCIF; stop_at=10)
     @test length(ats) == 10
     ats = read_mmcif(PDBTools.TESTCIF; memory_available=1e-10)
-    @test length(ats) == 1000
+    @test length(ats) == 50 
 
     # Read custom fields instead
     field_assignment = Dict(
-        "type_symbol" => :name, # VMD
-        "label_comp_id" => :resname, # VMD
-        "label_asym_id" => :chain, # VMD
-        "label_seq_id" => :resnum, # VMD
+        "type_symbol" => :name, 
+        "label_comp_id" => :resname, 
+        "label_asym_id" => :chain, 
+        "label_seq_id" => :resnum, 
     )
-    ats1 = read_mmcif(PDBTools.SMALLCIF; field_assignment)
-    @test name.(ats1) == ["N", "C", "C", "O", "C", "C", "C"]
-    @test all(resname.(ats1) .== "VAL")
-    @test all(chain.(ats1) .== "A")
-    @test all(resnum.(ats1) .== 1)
+    ats0 = read_mmcif(PDBTools.TESTCIF)
+    ats1 = read_mmcif(PDBTools.TESTCIF; field_assignment)
+    @test all(name.(ats1) .== pdb_element.(ats0))
+    @test all(resname.(ats1) .== resname.(ats0))
+    @test all(chain.(ats1) .== chain.(ats0))
+    @test all(resnum.(filter(isprotein,ats1)) .== resnum.(filter(isprotein,ats0)))
+    @test resnum.(filter(iswater, ats0)) == Int32[60, 61, 62, 63, 64]
+    @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0] 
 end

@@ -59,20 +59,22 @@ Atom
 
 ## [Atom field assignment in mmCIF files](@id field_assignment)
 
-By default, the assignment of the `_atom_site` fields of the mmCIF format to the fields of the `Atom` data structure is:
+By default, the assignment of the `_atom_site` fields of the mmCIF format to the fields of the `Atom` data structure 
+follows the [standard mmCIF convention](https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html):
 
-      "id" => :index_pdb
-      "Cartn_x" => :x
-      "Cartn_y" => :y
-      "Cartn_z" => :z
-      "occupancy" => :occup
-      "B_iso_or_equiv" => :beta
-      "pdbx_formal_charge" => :charge
-      "pdbx_PDB_model_num" => :model
-      "auth_atom_id" => :name
-      "auth_comp_id" => :resname
-      "auth_asym_id" => :chain
-      "auth_seq_id" => :resnum
+        "id" => :index_pdb
+        "Cartn_x" => :x
+        "Cartn_y" => :y
+        "Cartn_z" => :z
+        "occupancy" => :occup
+        "B_iso_or_equiv" => :beta
+        "pdbx_formal_charge" => :charge
+        "pdbx_PDB_model_num" => :model
+        "label_atom_id" => :name
+        "label_comp_id" => :resname
+        "label_asym_id" => :chain
+        "auth_seq_id" => :resnum
+        "type_symbol" => :pdb_element
 
 This assignment can be customized by providing the `field_assignment` keyword parameter to the `read_mmcif` function. 
 In the following example, we exemplify the possibility of reading `_atom_site.type_symbol` field of the mmCIF file into the `name` field of the
@@ -81,7 +83,7 @@ atom data structure:
 ```jldoctest
 julia> using PDBTools
 
-julia> ats = read_mmcif(PDBTools.SMALLCIF);
+julia> ats = read_mmcif(PDBTools.TESTCIF);
 
 julia> name.(ats)
 7-element Vector{InlineStrings.String7}:
@@ -93,7 +95,7 @@ julia> name.(ats)
  "CG1"
  "CG2"
 
-julia> ats = read_mmcif(PDBTools.SMALLCIF; field_assignment=Dict("type_symbol" => :name));
+julia> ats = read_mmcif(PDBTools.TESTCIF; field_assignment=Dict("type_symbol" => :name));
 
 julia> name.(ats)
 7-element Vector{InlineStrings.String7}:
@@ -106,7 +108,7 @@ julia> name.(ats)
  "C"
 
 ```
-      
+
 ## Get structure from the Protein Data Bank
 
 Use the `wget` function to retrieve the atom data directly from the PDB database,
