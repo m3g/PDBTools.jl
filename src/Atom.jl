@@ -627,12 +627,13 @@ end
 end
 
 @testitem "AtomsBase interface" begin
+    using PDBTools
     import StaticArrays
     at = Atom(name="NT3")
     @test atomic_number(at) == 7
     @test atomic_symbol(at) == :N
     @test atomic_mass(at) ≈ 14.0067
-    @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
+    @test PDBTools.position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end
 
 @testitem "atom - show" begin
