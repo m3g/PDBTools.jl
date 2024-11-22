@@ -2,7 +2,7 @@ PrecompileTools.@setup_workload begin
     # Putting some things in `@setup_workload` instead of `@compile_workload` can reduce the size of the
     # precompile file and potentially make loading faster.
     PrecompileTools.@compile_workload begin
-        ats = read_mmcif(PDBTools.SMALLCIF)
+        ats = read_mmcif(PDBTools.TESTCIF)
         ats = read_pdb(PDBTools.SMALLPDB)
         select(ats, "protein")
         coor(ats)

@@ -45,8 +45,7 @@ export SIRAH
 const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
-const TESTCIF = joinpath(@__DIR__,"../test/1yn8.cif")
-const SMALLCIF = joinpath(@__DIR__,"../test/small.cif")
+const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
 
 # Basic chemistry
 include("./elements.jl")

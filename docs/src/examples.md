@@ -9,7 +9,7 @@ which is one of the monomers, that within 3.5$\AA$ of the ligand:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = wget("1BSX", "chain A");
+julia> atoms = wget("1BSX", "chain A"; format="PDB");
 
 julia> protein = select(atoms, "protein");
 
@@ -35,8 +35,13 @@ julia> resname.(eachresidue(active_site_atoms))
  "HIS"
 ```
 
-Note that `Atom[]` creates an empty vector of `PDBTools.Atom` objects, and we
-append to this array the list of atoms of each residue.
+!!! note
+   - The `Atom[]` creates an empty vector of `PDBTools.Atom` objects, and we
+     append to this array the list of atoms of each residue. 
+   - We opt here to download the file in the `"PDB"` format, because the chain
+     identifier in the `mmCIF` deposited file does not include the ligand in chain A.
+
+
 
 ## Storing partial charges
 
