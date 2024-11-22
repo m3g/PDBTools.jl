@@ -33,16 +33,33 @@ julia> filter(Select("name CA and residue 1"), atoms)
 ```
 
 """
-struct Select <: Function
-    sel::String
+struct Select{Q} <: Function
+    query_string::String
+    query::Q
 end
-(s::Select)(at) = apply_query(parse_query(s.sel), at)
+function Select(query_string::AbstractString) 
+    query = parse_query(query_string)
+    return Select(query_string, query)
+end
+(s::Select)(at) = apply_query(s.query, at)
+Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
 macro sel_str(str)
     Select(str)
 end
 # Function that returns true for all atoms: the default selection
 all(atoms) = true
+
+@testitem "Select and sel_str show" begin
+    using PDBTools
+    atoms = read_pdb(PDBTools.TESTPDB, "protein")
+    sel = Select("name CA and residue 1")
+    buff = IOBuffer()
+    show(buff, MIME"text/plain"(), sel)
+    @test String(take!(buff)) == """Select("name CA and residue 1")"""
+    show(buff, MIME"text/plain"(), sel"name CA and residue 1")
+    @test String(take!(buff)) == """Select("name CA and residue 1")"""
+end
 
 """
     select(atoms::AbstractVector{<:Atom}, by::String)
