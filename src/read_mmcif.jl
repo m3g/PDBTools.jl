@@ -40,25 +40,32 @@ Source: https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html
 julia> using PDBTools
 
 julia> ats = read_mmcif(PDBTools.TESTCIF)
-   Vector{Atom{Nothing}} with 7 atoms with fields:
+   Vector{Atom{Nothing}} with 76 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
-       2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
-       3    C     VAL     A        1        1    8.504   17.378    4.797  1.00 24.80     1                 3
-       5   CB     VAL     A        1        1    6.369   19.044    5.810  1.00 72.12     1                 5
-       6  CG1     VAL     A        1        1    7.009   20.127    5.418  1.00 61.79     1                 6
-       7  CG2     VAL     A        1        1    5.246   18.533    5.681  1.00 80.12     1                 7
+       1    N     GLY     A        1        1   -4.564   25.503   24.113  1.00 24.33     1                 1
+       2   CA     GLY     A        1        1   -4.990   26.813   24.706  1.00 24.29     1                 2
+       3    C     GLY     A        1        1   -4.558   27.997   23.861  1.00 23.83     1                 3
+                                                       ⋮
+      74    O     HOH     Q       62       14    2.156   31.115   23.421  1.00 18.43     1              2979
+      75    O     HOH     Q       63       15   -3.585   34.725   20.903  1.00 19.82     1              2980
+      76    O     HOH     Q       64       16   -4.799   40.689   37.419  1.00 20.13     1              2981
 
 julia> ats = read_mmcif(PDBTools.TESTCIF, "index < 3")
    Vector{Atom{Nothing}} with 2 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     VAL     A        1        1    6.204   16.869    4.854  1.00 49.05     1                 1
-       2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
+       1    N     GLY     A        1        1   -4.564   25.503   24.113  1.00 24.33     1                 1
+       2   CA     GLY     A        1        1   -4.990   26.813   24.706  1.00 24.29     1                 2
 
 julia> ats = read_mmcif(PDBTools.TESTCIF; only = at -> name(at) == "CA")
-   Vector{Atom{Nothing}} with 1 atoms with fields:
+   Vector{Atom{Nothing}} with 11 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       2   CA     VAL     A        1        1    6.913   17.759    4.607  1.00 43.14     1                 2
+       2   CA     GLY     A        1        1   -4.990   26.813   24.706  1.00 24.29     1                 2
+       6   CA     GLN     A        2        2   -4.738   30.402   23.484  1.00 23.74     1                 6
+      15   CA     ARG     A        3        3   -1.234   31.761   22.771  1.00 23.94     1                15
+                                                       ⋮
+      63   CA     ASP     A        9        9    7.831   38.316   36.914  1.00 24.27     1                63
+      70   CA      CA     G     1003       10  -24.170   27.201   64.364  1.00 27.40     1              2967
+      71   CA      CA     H     1004       11  -10.624   32.854   69.292  1.00 29.53     1              2968
 
 ```
 

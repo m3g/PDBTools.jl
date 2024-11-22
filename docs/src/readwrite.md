@@ -83,29 +83,25 @@ atom data structure:
 ```jldoctest
 julia> using PDBTools
 
-julia> ats = read_mmcif(PDBTools.TESTCIF);
+julia> ats = read_mmcif(PDBTools.TESTCIF, "index <= 5");
 
 julia> name.(ats)
-7-element Vector{InlineStrings.String7}:
+5-element Vector{InlineStrings.String7}:
  "N"
  "CA"
  "C"
  "O"
- "CB"
- "CG1"
- "CG2"
+ "N"
 
-julia> ats = read_mmcif(PDBTools.TESTCIF; field_assignment=Dict("type_symbol" => :name));
+julia> ats = read_mmcif(PDBTools.TESTCIF, "index <= 5"; field_assignment=Dict("type_symbol" => :name));
 
 julia> name.(ats)
-7-element Vector{InlineStrings.String7}:
+5-element Vector{InlineStrings.String7}:
  "N"
  "C"
  "C"
  "O"
- "C"
- "C"
- "C"
+ "N"
 
 ```
 
