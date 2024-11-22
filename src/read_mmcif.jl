@@ -2,10 +2,12 @@
     read_mmcif(mmCIF_file::String, selection::String; field_assignment)
     read_mmcif(mmCIF_file::String; only::Function = all, field_assignment)
 
-    read_mmcif(mmCIF_data::IOBuffer, selection::String, field_assignment)
+    read_mmcif(mmCIF_data::IOBuffer, selection::String; field_assignment)
     read_mmcif(mmCIF_data::IOBuffer; only::Function = all, field_assignment)
 
 Reads a mmCIF file and stores the data in a vector of type `Atom`. 
+
+All fields except the file name are optional.
 
 If a selection is provided, only the atoms matching the selection will be read. 
 For example, `resname ALA` will select all the atoms in the residue ALA.
