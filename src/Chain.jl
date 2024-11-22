@@ -1,24 +1,46 @@
-""" 
+"""
+    Chain(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+
+Creates a Chain data structure. It contains two fields: `atoms` which is a vector of
+`Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
+compose the chain. 
+
+The Chain structure carries the properties of the atoms it contains, but it does not
+copy the original vector of atoms. This means that any changes made in the Chain
+structure atoms, will overwrite the original vector of atoms. 
 
 # Examples
-```julia-repl
-julia> pdb = read_pdb("PDBTools.CHAINSPDB")
 
-julia> for chains in eachchain(pdb)
-    println(name(chains))
-    println(length(collect(eachresidue(chains))))
-    println(length(chains))
-    end
-A
-3
-48
-B
-3
-48
-C
-3
-48
+```jldoctest
+julia> using PDBTools
 
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chain.(eachchain(ats))
+3-element Vector{InlineStrings.String3}:
+ "A"
+ "B"
+ "C"
+
+julia> chains = collect(eachchain(ats))
+   Array{Chain,1} with 3 chains.
+
+julia> chains[2].range
+49:96
+
+julia> chains[1]
+ Chain of name A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+       3    C     ASP     A        1        1  135.099  117.439  -22.652  1.00  0.00     1    ASYN         3
+                                                       ⋮ 
+      46 HD22     LEU     A        3        3  130.704  113.003  -27.586  1.00  0.00     1    ASYN        46
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
+
+julia> mass(chains[1])
+353.37881000000016 
 ```
 
 """
@@ -39,7 +61,7 @@ mass(chain::Chain) = mass(@view chain.atoms[chain.range])
 function Chain(atoms::AbstractVector{<:Atom}, range::UnitRange{<:Integer})
     i = first(range) 
     if any(atoms[j].chain != atoms[i].chain for j in range)
-        error("Range $range does not correspond to a single residue or molecule.")
+        error("Range $range does not correspond to a single protein chain.")
     end
     Chain(
         atoms = atoms,
@@ -138,6 +160,7 @@ end
     pdb = read_pdb(PDBTools.CHAINSPDB)
     chains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
+    @test_throws ArgumentError Chain(pdb, 49:97)
     @test length(chains) == 3
     @test firstindex(chains) == 1
     @test lastindex(chains) == 3
@@ -146,5 +169,10 @@ end
     @test name(chains[3]) == "C"
     @test index.(filter(at -> resname(at) == "ASP" && name(at) == "CA", chains[1])) == [2]
     @test length(findall(at -> resname(at) == "GLN", chains[1])) == 17
+    @test mass(chains[1]) == 353.37881000000016
+    @test chains[3].segname == "ASYN"
+    @test chains[2].model == 1
+    @test chains[1].chain == "A"
+    
 end
 
