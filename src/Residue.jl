@@ -302,7 +302,7 @@ end
     show(buff, MIME"text/plain"(), watresiter)
     @test String(take!(buff)) == " Iterator with 6 residues."
     show(buff, MIME"text/plain"(), watres)
-    @test String(take!(buff)) == "   Vector{Residue} with 6 residues."
+    @test String(take!(buff)) == "   Vector{PDBTools.Residue} with 6 residues."
 end
 
 """
