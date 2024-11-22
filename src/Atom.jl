@@ -250,7 +250,7 @@ atomic_mass(atom::Atom) = mass(atom)
 Returns the position of an atom given the `Atom` structure.
 
 """
-position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
+Base.position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
 const atom_title = @sprintf(
     "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
@@ -627,6 +627,7 @@ end
 end
 
 @testitem "AtomsBase interface" begin
+    using PDBTools
     import StaticArrays
     at = Atom(name="NT3")
     @test atomic_number(at) == 7

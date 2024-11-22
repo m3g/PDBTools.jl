@@ -16,8 +16,8 @@ using InlineStrings: String3, String7
 # Version
 const VERSION = pkgversion(@__MODULE__)
 
-# AtomsBase interface compatibility
-import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
+# AtomsBase interface compatibility: deprecated until AtomsBase becomes stable
+#import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
