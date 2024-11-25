@@ -122,5 +122,7 @@ end
     pdbdata = read(pdb_file, String)
     atoms = readPDB(IOBuffer(pdbdata), "protein and name CA")
     @test length(atoms) == 104
+    atoms = read_pdb(pdb_file, "protein and name CA")
+    @test length(atoms) == 104
 end
 
