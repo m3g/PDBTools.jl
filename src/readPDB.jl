@@ -115,6 +115,8 @@ function Base.show(io::IO, atoms::AbstractVector{Atom})
     println(io, " Structure file with ", length(atoms), " atoms. ")
 end
 
+const read_pdb = readPDB
+
 @testitem "readPDB" begin
     pdb_file = "$(@__DIR__)/../test/structure.pdb"
     atoms = readPDB(pdb_file, "protein and name CA")

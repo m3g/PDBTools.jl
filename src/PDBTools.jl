@@ -15,7 +15,6 @@ using OrderedCollections: OrderedDict
 import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
 export atomic_number, atomic_symbol, atomic_mass, position
 
-export read_pdb
 export readPDB, writePDB, getseq, wget, edit!, oneletter, threeletter, residuename
 export Atom, printatom, index, index_pdb, name, beta, occup, custom_field, charge, pdb_element
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
@@ -25,8 +24,7 @@ export element, mass, element_name, element_symbol, element_symbol_string
 export formula, stoichiometry
 export Sequence
 export select_with_vmd
-
-const read_pdb = readPDB
+export read_pdb, write_pdb
 
 # Tools
 export center_of_mass

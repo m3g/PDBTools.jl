@@ -36,6 +36,9 @@ function writePDB(atoms::AbstractVector{Atom}, filename::String; only::Function=
     close(file)
 end
 
+write_pdb(filename::String, atoms, selection::String) = writePDB(atoms, filename, selection)
+write_pdb(filename::String, atoms; only::Function=all) = writePDB(atoms, filename; only)
+
 @testitem "writePDB" begin
     using PDBTools
     using DelimitedFiles
