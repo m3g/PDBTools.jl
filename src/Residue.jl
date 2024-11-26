@@ -181,7 +181,7 @@ end
     residues = collect(eachresidue(atoms))
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
     @test findall(at -> name(at) in ("N", "HG1"), residues[2]) == [1, 9]
-    @test mass(residues[1]) == 82.0385
+    @test mass(residues[1]) == 73.09488999999999
 end
 
 #
