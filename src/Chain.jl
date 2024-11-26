@@ -86,10 +86,33 @@ end
 #
 # Structure and function to define the eachchain iterator
 #
-
 struct EachChain{T<:AbstractVector{<:Atom}}
     atoms::T
 end
+
+"""
+    eachchain(atoms::AbstractVector{<:Atom})
+
+Iterator for the chains of a selection. 
+
+### Example
+
+```julia-repl
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia> length(eachchain(ats))
+3
+
+julia> for chain in eachchain(ats)
+              println(chain.range)
+              end
+1:48
+49:96
+97:144
+
+```
+
+"""
 eachchain(atoms::AbstractVector{<:Atom}) = EachChain(atoms)
 
 # Collect chains default constructor
