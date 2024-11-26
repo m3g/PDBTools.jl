@@ -48,6 +48,30 @@ protein_residues = OrderedDict{String,ProteinResidue}(
 )
 #! format: on
 
+#
+# Data for natural nucleosides
+#
+@kwdef struct NucleosideResidue
+    name::String
+    three_letter_code::String
+    one_letter_code::String
+    type::String
+    mono_isotopic_mass::Float64
+    mass::Float64
+    charge::Int
+end
+
+#! format: off
+nucleoside_residues = OrderedDict{String,NucleosideResidue}(
+    "ADO" => NucleosideResidue("Adenosine", "ADO", "A", "Purine", 267.094691, 267.094691, 0),
+    "GUO" => NucleosideResidue("Guanosine", "GUO", "G", "Purine", 283.090169, 283.090169, 0),
+    "URD" => NucleosideResidue("Uridine", "URD", "U", "Pyrimidine", 244.068163, 244.068163, 0),
+    "CYD" => NucleosideResidue("Cytidine", "CYD", "C", "Pyrimidine", 244.068163, 244.068163, 0),
+    "THD" => NucleosideResidue("Thymidine", "THD", "T", "Pyrimidine", 244.068163, 244.068163, 0),
+    "INO" => NucleosideResidue("Inosine", "INO", "I", "Purine", 268.090169, 268.090169, 0),
+)
+#! format: on
+
 """
     threeletter(residue::String) 
 
