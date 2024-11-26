@@ -59,10 +59,13 @@ mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
 function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
     i = range[begin]
-    # Check if the range effectivelly corresponds to a single residue (unsafe check)
+    # Check if the range effectively corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
         if atoms[j].residue != atoms[i].residue
-            error("Range $range does not correspond to a single residue or molecule.")
+            throw(ArgumentError("""\n 
+                Range $range does not correspond to a single residue or molecule.
+
+            """))
         end
     end
     Residue(
@@ -181,7 +184,7 @@ end
     residues = collect(eachresidue(atoms))
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
     @test findall(at -> name(at) in ("N", "HG1"), residues[2]) == [1, 9]
-    @test mass(residues[1]) == 73.09488999999999
+    @test_throws ArgumentError Residue(atoms, 1:15)
 end
 
 #
@@ -276,6 +279,10 @@ end
     @test ispolar(glu[1])
     @test !isnonpolar(glu[1])
     @test !iswater(glu[1])
+    @test mass(glu[1]) ≈ 128.1077 atol=1e-3
+    @test mass(glu[begin]) ≈ mass(glu[end])
+    @test segname(glu[begin]) == "PROT"
+    @test segname(glu[end]) == "PROT"
     phe_atoms = select(pdb, "resname PHE")
     phe = collect(eachresidue(phe_atoms))
     @test !isacidic(phe[1])
@@ -288,8 +295,17 @@ end
     @test !ispolar(phe[1])
     @test isnonpolar(phe[1])
     @test !iswater(glu[1])
-    wat = select(pdb, "water")
-    @test iswater(wat[1])
+    water = select(pdb, "water and resnum <= 3")
+    watresiter = eachresidue(water)
+    watres = collect(eachresidue(water))
+    @test iswater(watres[1])
+    buff = IOBuffer()
+    show(buff, MIME"text/plain"(), watres[1])
+    @test length(split(String(take!(buff)))) == 14*4 + 7
+    show(buff, MIME"text/plain"(), watresiter)
+    @test String(take!(buff)) == " Iterator with 6 residues."
+    show(buff, MIME"text/plain"(), watres)
+    @test String(take!(buff)) == "   Vector{PDBTools.Residue} with 6 residues."
 end
 
 """
