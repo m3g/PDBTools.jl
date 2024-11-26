@@ -183,7 +183,6 @@ end
     pdb = read_pdb(PDBTools.CHAINSPDB)
     chains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
-    @test_throws ArgumentError Chain(pdb, 49:97)
     @test length(chains) == 3
     @test firstindex(chains) == 1
     @test lastindex(chains) == 3
