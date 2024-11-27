@@ -61,7 +61,8 @@ mass(chain::Chain) = mass(@view chain.atoms[chain.range])
 function Chain(atoms::AbstractVector{<:Atom}, range::UnitRange{<:Integer})
     i = first(range) 
     if any(atoms[j].chain != atoms[i].chain for j in range)
-        error("Range $range does not correspond to a single protein chain.")
+        throw(ArgumentError("""\n 
+                Range $range does not correspond to a single protein chain."""))
     end
     Chain(
         atoms = atoms,
@@ -183,6 +184,7 @@ end
     pdb = read_pdb(PDBTools.CHAINSPDB)
     chains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
+    @test_throws ArgumentError Chain(pdb, 49:97).range 
     @test length(chains) == 3
     @test firstindex(chains) == 1
     @test lastindex(chains) == 3
