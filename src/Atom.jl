@@ -386,7 +386,8 @@ function same_residue(atom1::Atom, atom2::Atom)
     return (atom1.resnum == atom2.resnum) & 
            (atom1.model == atom2.model) &
            (atom1.chain == atom2.chain) &
-           (atom1.resname == atom2.resname)
+           (atom1.resname == atom2.resname) &
+           (atom1.segname == atom2.segname)
 end
 
 @testitem "same_residue" begin
@@ -394,6 +395,11 @@ end
     import PDBTools: same_residue
     @test same_residue(pdb[1], pdb[2])
     @test !same_residue(pdb[1], pdb[50])
+    at1 = Atom()
+    at2 = Atom()
+    @test same_residue(at1, at2)
+    at2.segname = "B"
+    @test !same_residue(at1, at2)
 end
 
 #
