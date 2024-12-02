@@ -350,22 +350,41 @@ The resulting tuple of residue numbers and labels can be used as `xticks` in `Pl
 function residue_ticks(residues::Union{AbstractVector{Residue},EachResidue};
     first=nothing, last=nothing, stride=1,
     oneletter::Bool = true,
-    serial::Bool=true,
+    serial::Bool=false,
 )
     resnames = resname.(residues)
     if oneletter
         resnames = PDBTools.oneletter.(resnames)
     end
     resnums = resnum.(residues)
-    first = isnothing(first) ? 1 : findfirst(==(first), resnums)
-    last = isnothing(last) ? length(residues) : findfirst(==(last), resnums)
-    (isnothing(first) || isnothing(last)) &&
-        throw(ArgumentError("First or last residue index out of residue number range: $(minimum(resnums)) to $(maximum(resnums))."))
     ticklabels = resnames .* string.(resnums)
-    ticks = if serial
-        (first:stride:last, ticklabels[first:stride:last])
+    if !serial && (!allunique(resnums) || !issorted(resnums))
+        @warn """\n
+            Residue numbers are not unique and/or are not sorted. Using serial indexing (1:$stride:$(lastindex(residues))) to define x-tick positions.
+        
+        """ _file=nothing _line=nothing
+        serial = true
+    end
+    if serial
+        first = isnothing(first) ? 1 : first
+        last = isnothing(last) ? length(residues) : last
+        if first < firstindex(resnums) || last > lastindex(resnums)
+            throw(ArgumentError("""\n
+                First or last residue index out of residue number range: $(firstindex(resnums)) to $(lastindex(resnums)).
+
+            """))
+        end
+        ticks = (first:stride:last, ticklabels[first:stride:last])
     else
-        (resnums[first:stride:last], ticklabels[first:stride:last])
+        first = isnothing(first) ? 1 : findfirst(==(first), resnums)
+        last = isnothing(last) ? length(residues) : findfirst(==(last), resnums)
+        if (isnothing(first) || isnothing(last)) 
+            throw(ArgumentError("""\n
+                First or last residue index out of residue number range: $(minimum(resnums)) to $(maximum(resnums)).
+
+            """))
+        end
+        ticks = (resnums[first:stride:last], ticklabels[first:stride:last])
     end
     return ticks
 end
@@ -404,16 +423,42 @@ end
     # serial indexing
     @test residue_ticks(atoms; stride=20,serial=true) == (1:20:61, ["M11", "D31", "Q51", "I71"])
     @test_throws ArgumentError residue_ticks(atoms; stride = 20, first = 0, serial=true)
-    @test residue_ticks(atoms; stride = 20, first = 13, serial=true) == (3:20:63, ["I13", "I33", "L53", "K73"])
-    @test residue_ticks(atoms; stride = 20, last = 42, serial=true) == (1:20:21, ["M11", "D31"])
+    @test residue_ticks(atoms; stride = 20, first = 13, serial=true) == (13:20:73, ["I23", "K43", "G63", "L83"])
+    @test residue_ticks(atoms; stride = 20, last = 42, serial=true) == (1:20:41, ["M11", "D31", "Q51"])
     @test_throws ArgumentError residue_ticks(atoms; stride = 20, first = 42, last = 90, serial=true) 
-    @test residue_ticks(atoms; stride = 20, first = 42, last = 85, serial=true) == (32:20:72, ["D42", "D62", "R82"]) 
+    @test residue_ticks(atoms; stride = 20, first = 32, last = 75, serial=true) == (32:20:72, ["D42", "D62", "R82"]) 
     # residue indices do not start with 1
     atoms = wget("1LBD", "protein")
     @test residue_ticks(atoms, stride=38, serial=false) == ([225, 263, 301, 339, 377, 415, 453], ["S225", "D263", "L301", "S339", "N377", "F415", "E453"])
     @test residue_ticks(atoms; stride=1, first = 227, last = 231, serial=false) == ([227, 228, 229, 230, 231], ["N227", "E228", "D229", "M230", "P231"])
     @test residue_ticks(atoms; stride=2, first = 227, last = 231, serial=false) == ([227, 229, 231], ["N227", "D229", "P231"])
-    @test residue_ticks(atoms; stride=2, first = 227, last = 231, serial=true) == (3:2:7, ["N227", "D229", "P231"])
+    @test residue_ticks(atoms; stride=2, first = 227, last = 231, serial=true) == (227:2:231, ["L451", "E453", "L455"])
     # three-letter return codes
-    @test residue_ticks(atoms; stride=2, first = 227, last = 231, oneletter = false,serial=false) == ([227, 229, 231], ["ASN227", "ASP229", "PRO231"])
+    @test residue_ticks(atoms; stride=2, first = 227, last = 231, oneletter=false, serial=false) == ([227, 229, 231], ["ASN227", "ASP229", "PRO231"])
+
+    # non-unique residue numbers
+    ats = read_pdb(PDBTools.SMALLPDB, "protein")
+    ats_dup = vcat(ats, copy(ats))
+    @test residue_ticks(ats_dup) == (1:1:6, ["A1", "C2", "D3", "A1", "C2", "D3"])
+    @test residue_ticks(ats_dup; stride=3) == (1:3:4, ["A1", "A1"])
+    @test residue_ticks(ats_dup; first=2, last=5) == (2:1:5, ["C2", "D3", "A1", "C2"])
+    @test residue_ticks(ats_dup; serial=false) == (1:1:6, ["A1", "C2", "D3", "A1", "C2", "D3"])
+
+    # additional input errors
+    @test_throws ArgumentError residue_ticks(ats; first=0)
+    @test_throws ArgumentError residue_ticks(ats; last=36)
+    @test_throws ArgumentError residue_ticks(ats; serial=true, first=0)
+    @test_throws ArgumentError residue_ticks(ats; serial=true, last=36)
+
+    # resnums out of order
+    for residue in eachresidue(ats)
+        if resnum(residue) == 2
+            for at in residue
+                at.resnum = 4
+            end
+        end
+    end
+    @test residue_ticks(ats; serial=false) == (1:1:3, ["A1", "C4", "D3"])
+    @test residue_ticks(ats; serial=true) == (1:1:3, ["A1", "C4", "D3"])
+
 end
