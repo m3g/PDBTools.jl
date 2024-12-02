@@ -308,7 +308,7 @@ end
 """
     residue_ticks(
         atoms (or) residues (or) residue iterator; 
-        first=nothing, last=nothing, stride=1, oneletter=true, serial=true
+        first=nothing, last=nothing, stride=1, oneletter=true, serial=false
     )
 
 Returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
@@ -332,16 +332,20 @@ julia> using PDBTools
 julia> atoms = wget("1LBD", "protein");
 
 julia> residue_ticks(atoms; stride=50) # Vector{<:Atom} as input
-(1:50:201, ["S225", "Q275", "L325", "L375", "L425"])
+(Int32[225, 275, 325, 375, 425], ["S225", "Q275", "L325", "L375", "L425"])
 
-julia> residue_ticks(atoms; first=235, last=240, serial=false) # first=10 and resnum indexing
+julia> residue_ticks(atoms; first=235, last=240) # first=10
 (Int32[235, 236, 237, 238, 239, 240], ["I235", "L236", "E237", "A238", "E239", "L240"])
 
 julia> residue_ticks(eachresidue(atoms); stride=50) # residue iterator as input
-(1:50:201, ["S225", "Q275", "L325", "L375", "L425"])
+(Int32[225, 275, 325, 375, 425], ["S225", "Q275", "L325", "L375", "L425"])
 
 julia> residue_ticks(collect(eachresidue(atoms)); stride=50) # Vector{Residue} as input
-(1:50:201, ["S225", "Q275", "L325", "L375", "L425"])
+(Int32[225, 275, 325, 375, 425], ["S225", "Q275", "L325", "L375", "L425"])
+
+julia> residue_ticks(atoms; first=10, stride=50, serial=true) # using serial=true
+(10:50:210, ["R234", "K284", "R334", "S384", "E434"])
+
 ```
 
 The resulting tuple of residue numbers and labels can be used as `xticks` in `Plots.plot`, for example.
