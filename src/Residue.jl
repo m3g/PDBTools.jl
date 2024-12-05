@@ -83,7 +83,7 @@ end
 Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
 function Base.getindex(residue::Residue, i::Int)
-    i > 0 || throw(ArgumentError("Index must be in 1:$(length(residue))"))
+    i > 0 || throw(ArgumentError("Residue index must be in 1:$(length(residue))"))
     (i <= length(residue)) || throw(ArgumentError("Residue has $(length(residue)) atoms, tried to fetch index $i."))
     i = first(residue.range) + i - 1
     residue.atoms[i]

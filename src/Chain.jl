@@ -76,9 +76,8 @@ end
 Chain(atoms::AbstractVector{<:Atom}) = Chain(atoms, 1:length(atoms))
 
 function Base.getindex(chain::Chain, i::Integer)
-    if i <= 0 || i > length(chain)
-        throw(ArgumentError("Index must be in 1:$(length(chain)). Attempted to access index $i."))
-    end
+    i > 0 || throw(ArgumentError("Chain index must be in 1:$(length(residue))"))
+    (i <= length(residue)) || throw(ArgumentError("Chain has $(length(residue)) atoms, tried to fetch index $i."))
     # Calculate the actual index in the atoms array
     atom_index = first(chain.range) + i - 1
     return chain.atoms[atom_index]
