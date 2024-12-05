@@ -76,8 +76,8 @@ end
 Chain(atoms::AbstractVector{<:Atom}) = Chain(atoms, 1:length(atoms))
 
 function Base.getindex(chain::Chain, i::Integer)
-    i > 0 || throw(ArgumentError("Chain index must be in 1:$(length(residue))"))
-    (i <= length(residue)) || throw(ArgumentError("Chain has $(length(residue)) atoms, tried to fetch index $i."))
+    i > 0 || throw(ArgumentError("Chain index must be in 1:$(length(chain))"))
+    (i <= length(chain)) || throw(ArgumentError("Chain has $(length(chain)) atoms, tried to fetch index $i."))
     # Calculate the actual index in the atoms array
     atom_index = first(chain.range) + i - 1
     return chain.atoms[atom_index]
@@ -176,7 +176,7 @@ function Base.show(io::IO, chains::EachChain)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", chains::AbstractVector{Chain})
-    print(io, "   Array{Chain,1} with $(length(chains)) chains.")
+    print(io, "   $(typeof(chains)) with $(length(chains)) chains.")
 end
 
 @testitem "Chain iterator" begin
