@@ -262,7 +262,7 @@ residuename
 
 ## Iterate over chains
 
-The `eachchain` iterator allows for iteration over the chains of a structure. A PDB file may contain more than one protein monomer listed as different chains, thus this iterator behaves similarly to iterating over each monomer of a structure. For example:
+The `eachchain` iterator allows for iteration over the chains of a structure. A PDB file may contain multiple protein chains, which means this iterator behaves similarly to iterating over each chain of a PDB structure. Additionally, a PDB file may contain different models for a protein.
 
 
 ```jldoctest
@@ -270,32 +270,46 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> chain.(eachchain(ats))
-3-element Vector{InlineStrings.String3}:
+julia> chain.(eachchain(ats))  # Get the names of all chains
+4-element Vector{InlineStrings.String3}:
  "A"
  "B"
  "C"
+ "A"
+
+julia> model.(eachchain(ats)) # Get the model numbers for each chain
+4-element Vector{Int32}:
+ 1
+ 1
+ 1
+ 2
+
+julia> chain_A1 = first(eachchain(ats)); # Get the first chain
+
+julia> resname.(eachresidue(chain_1)) # Get the residue names for chain A1
+3-element Vector{InlineStrings.String7}:
+ "ASP"
+ "GLN"
+ "LEU"
+
+julia> chain_A2 = last(eachchain(ats)); # Get the last chain
+
+julia> resname.(eachresidue(chain_A2)) # Get the residue names for chain A2
+3-element Vector{InlineStrings.String7}:
+ "ASP"
+ "GLN"
+ "VAL"
 
 ```
-The command `chain` provides the name of all the chains stored by the iterator `eachchain`. In this example, the PDB loaded has 3 chains identified in alphabetical order with the letters A, B and C. 
 
-The chains can be stored in diferent variables. In the example below, all the atoms belonging to chain A are stored in the variable chain_A with the command `first`, which selects the first element of the iterator `eachchain`. The command `last` and the indexing list is also supported. However, this type of indexing can only be used in a vector of elements `Atom`, so the chains must first to be collected in an array. 
+The command `chain.` provides the names of all the chains stored by the iterator eachchain, while `model.` lists the model number of each chain in the PDB structure. In this example, the PDB has two different models for chain A, in which the third sequence residue changes from leucine to valine in model 2.
+
+In the previous example, all the atoms belonging to chain A were stored in the variable `chain_A1` using the command `first`, which selects the first element of the iterator eachchain. Whilst `last` selects the last element in the iterator. Indexing is also supported. However, indexing can only be used on a vector of elements Atom, so the chains must first be collected in an array.
 
 ```julia-repl
 julia> using PDBTools
 
 ats = read_pdb(PDBTools.CHAINSPDB);
-
-julia> chain_A = first(eachchain(ats))
- Chain of name A with 48 atoms.
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
-       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
-       3    C     ASP     A        1        1  135.099  117.439  -22.652  1.00  0.00     1    ASYN         3
-                                                       ⋮ 
-      46 HD22     LEU     A        3        3  130.704  113.003  -27.586  1.00  0.00     1    ASYN        46
-      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
-      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
 
 julia> chains = collect(eachchain(ats))
    Array{Chain,1} with 3 chains.
@@ -310,72 +324,6 @@ julia> chain_B = chains[2]
       94 HD22     LEU     B        6        6  139.485  119.501  -16.418  1.00  0.00     1    ASYN        94
       95 HD23     LEU     B        6        6  138.780  120.216  -17.864  1.00  0.00     1    ASYN        95
       96    O     LEU     B        6        6  141.411  117.975  -21.923  1.00  0.00     1    ASYN        96
-
-julia> chain_C = last(chains)
- Chain of name C with 48 atoms.
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-      97    N     ASP     C        7        7  137.110  128.213  -20.946  1.00  0.00     1    ASYN        97
-      98   CA     ASP     C        7        7  137.938  127.668  -19.879  1.00  0.00     1    ASYN        98
-      99    C     ASP     C        7        7  137.485  128.196  -18.521  1.00  0.00     1    ASYN        99
-                                                       ⋮ 
-     142 HD22     LEU     C        9        9  141.370  132.570  -11.550  1.00  0.00     1    ASYN       142
-     143 HD23     LEU     C        9        9  142.275  131.839  -10.225  1.00  0.00     1    ASYN       143
-     144    O     LEU     C        9        9  141.311  127.197  -12.279  1.00  0.00     1    ASYN       144
-
-
-```
-
-Any changes made to the atoms of a chain variable will overwrite the properties of the original atoms. In the example below, the occupancy column of the atoms in chain_A is set to the value of 0.00. When calling the original ats vector, it is possible to see that the occupancy column values of the same set of atoms changed from 1.00 to 0.00.
-
-```julia-repl
-julia> using PDBTools
-
-julia> ats = read_pdb(PDBTools.CHAINSPDB)
-   Vector{Atom{Nothing}} with 144 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
-       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
-       3    C     ASP     A        1        1  135.099  117.439  -22.652  1.00  0.00     1    ASYN         3
-                                                       ⋮ 
-     142 HD22     LEU     C        9        9  141.370  132.570  -11.550  1.00  0.00     1    ASYN       142
-     143 HD23     LEU     C        9        9  142.275  131.839  -10.225  1.00  0.00     1    ASYN       143
-     144    O     LEU     C        9        9  141.311  127.197  -12.279  1.00  0.00     1    ASYN       144
-
-julia> chain_A = first(eachchain(ats));
-
-julia> for atom in chain_A
-       atom.occup = 0.00
-       end
-
-julia> ats
-   Vector{Atom{Nothing}} with 144 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ASP     A        1        1  133.978  119.386  -23.646  0.00  0.00     1    ASYN         1
-       2   CA     ASP     A        1        1  134.755  118.916  -22.497  0.00  0.00     1    ASYN         2
-       3    C     ASP     A        1        1  135.099  117.439  -22.652  0.00  0.00     1    ASYN         3
-                                                       ⋮ 
-     142 HD22     LEU     C        9        9  141.370  132.570  -11.550  1.00  0.00     1    ASYN       142
-     143 HD23     LEU     C        9        9  142.275  131.839  -10.225  1.00  0.00     1    ASYN       143
-     144    O     LEU     C        9        9  141.311  127.197  -12.279  1.00  0.00     1    ASYN       144 
-
-```
-
-When iterating over chains, it is possible to make equal changes along every chain. For instance, each chain in the example below starts with the  aspartic acid residue, ASP, but if one wishes to equally rename only the first ASP in each chain to its protonated state name, ASPP - as it is implemented in the CHARMM22 force field -, one would do as follows:
-
-
-```julia-repl
-julia> using PDBTools
-
-ats = read_pdb(PDBTools.CHAINSPDB);
-
-julia> for chx in eachchain(ats)
-       for res in first(eachresidue(chx))
-       res.resname = "ASPP"
-       end
-       end
-
-julia> count(res -> resname(res) == "ASPP", eachresidue(ats))
-3 
 
 ```
 
