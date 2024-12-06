@@ -16,17 +16,15 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> chain.(eachchain(ats))
-3-element Vector{InlineStrings.String3}:
+julia> chain.(eachchain(ats)) 
+4-element Vector{InlineStrings.String3}:
  "A"
  "B"
  "C"
+ "A"
 
 julia> chains = collect(eachchain(ats))
-   Array{Chain,1} with 3 chains.
-
-julia> chains[2].range
-49:96
+   Array{Chain,1} with 4 chains.
 
 julia> chains[1]
  Chain of name A with 48 atoms.
@@ -41,6 +39,13 @@ julia> chains[1]
 
 julia> mass(chains[1])
 353.37881000000016 
+
+julia> model(chains[4])
+2
+
+julia> segname(chains[2])
+"ASYN"
+
 ```
 
 """
@@ -101,14 +106,21 @@ Iterator for the chains of a selection.
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
 julia> length(eachchain(ats))
-3
+4
 
 julia> for chain in eachchain(ats)
-              println(chain.range)
-              end
-1:48
-49:96
-97:144
+           println("Chain of name \$(name(chain))")
+           println(resname.(eachresidue(chain)))
+       end
+A
+InlineStrings.String7["ASP", "GLN", "LEU"]
+B
+InlineStrings.String7["ASP", "GLN", "LEU"]
+C
+InlineStrings.String7["ASP", "GLN", "LEU"]
+A
+InlineStrings.String7["ASP", "GLN", "VAL"
+
 
 ```
 
@@ -120,13 +132,16 @@ Base.collect(c::EachChain) = collect(Chain, c)
 Base.length(chains::EachChain) = sum(1 for chain in chains)
 Base.firstindex(chains::EachChain) = 1
 Base.lastindex(chains::EachChain) = length(chains)
-# function Base.last(chains::EachChain) 
-#     local last_chain
-#     for chain in chains 
-#         last_chain = chain
-#     end
-#     return last_chain
-# end
+# Base.reverse(chains::EachChain) = reverse(chains)
+# #Base.last(chains::EachChain) =  first(reverse(chains))
+# Base.last(c::EachChain) = @inbounds c[max(firstindex(c), end + 1 - length(c)):end]
+function Base.last(chains::EachChain) 
+    local last_chain
+    for chain in chains 
+        last_chain = chain
+    end
+    return last_chain
+end
 
 function Base.getindex(::EachChain, ::Integer)
     throw(ArgumentError("""\n
@@ -194,6 +209,7 @@ end
     @test length(ichains) == 4
     @test firstindex(ichains) == 1
     @test lastindex(ichains) == 4
+    @test last(ichains).model == 2
     @test_throws ArgumentError ichains[1]
     chains = collect(eachchain(pdb))
     @test name(chains[3]) == "C"
@@ -201,7 +217,7 @@ end
     @test length(findall(at -> resname(at) == "GLN", chains[1])) == 17
     @test mass(chains[1]) == 353.37881000000016
     @test segname(chains[3]) == "ASYN"
-    @test model(chains[2]) == 1
+    @test model(chains[4]) == 2
     @test chain(chains[4]) == "A"
     @test_throws ArgumentError chains[1][49]
     buff = IOBuffer()
@@ -211,5 +227,7 @@ end
     @test String(take!(buff)) == " Iterator with 4 chains."
     show(buff, MIME"text/plain"(), chains)
     @test String(take!(buff)) == "   Vector{PDBTools.Chain} with 4 chains."
-end
+    show(buff, MIME"text/plain"(), last(eachchain(pdb)))
+    @test length(split(String(take!(buff)))) == 14*7 + 8
 
+end
