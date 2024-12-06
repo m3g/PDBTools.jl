@@ -262,7 +262,7 @@ residuename
 
 ## Iterate over chains
 
-The `eachchain` iterator allows for iteration over the chains of a structure. A PDB file may contain multiple protein chains, which means this iterator behaves similarly to iterating over each chain of a PDB structure. Additionally, a PDB file may contain different models for a protein.
+The `eachchain` iterator in PDBTools allows users to iterate over the chains in a PDB structure. A PDB file may contain multiple protein chains, and in some cases, it may also include different models of the same protein. This iterator simplifies operations involving individual chains.
 
 
 ```jldoctest
@@ -270,41 +270,42 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> chain.(eachchain(ats))  # Get the names of all chains
+julia> chain.(eachchain(ats))              # Retrieve the names of all chains in the structure
 4-element Vector{InlineStrings.String3}:
  "A"
  "B"
  "C"
  "A"
 
-julia> model.(eachchain(ats)) # Get the model numbers for each chain
+julia> model.(eachchain(ats))              # Retrieve the model numbers associated with each chain
 4-element Vector{Int32}:
  1
  1
  1
  2
 
-julia> chain_A1 = first(eachchain(ats)); # Get the first chain
+julia> chain_A1 = first(eachchain(ats));   # Access the first chain in the iterator
 
-julia> resname.(eachresidue(chain_1)) # Get the residue names for chain A1
+julia> resname.(eachresidue(chain_A1))     # Retrieve residue names for chain A in model 1
 3-element Vector{InlineStrings.String7}:
  "ASP"
  "GLN"
  "LEU"
 
-julia> chain_A2 = last(eachchain(ats)); # Get the last chain
+julia> chain_A2 = last(eachchain(ats));    # Access the last chain in the iterator
 
-julia> resname.(eachresidue(chain_A2)) # Get the residue names for chain A2
+julia> resname.(eachresidue(chain_A2))     # Retrieve residue names for chain A in model 2
 3-element Vector{InlineStrings.String7}:
  "ASP"
  "GLN"
  "VAL"
 
 ```
+In the example above, the `chain.` command retrieves the names of all chains in the structure, while  `model.` command lists the model numbers for each chain. This PDB structure contains two models for chain A, where the third residue changes from leucine (LEU) in model 1 to valine (VAL) in model 2.
 
-The command `chain.` provides the names of all the chains stored by the iterator eachchain, while `model.` lists the model number of each chain in the PDB structure. In this example, the PDB has two different models for chain A, in which the third sequence residue changes from leucine to valine in model 2.
+### Accessing Chains by Index
 
-In the previous example, all the atoms belonging to chain A were stored in the variable `chain_A1` using the command `first`, which selects the first element of the iterator eachchain. Whilst `last` selects the last element in the iterator. Indexing is also supported. However, indexing can only be used on a vector of elements Atom, so the chains must first be collected in an array.
+As seen in the previous example, The `first` and `last` commands allow quick access to the first and last chains in the iterator, respectively. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.
 
 ```julia-repl
 julia> using PDBTools

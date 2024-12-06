@@ -16,7 +16,7 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> chain.(eachchain(ats)) 
+julia> name.(eachchain(ats)) 
 4-element Vector{InlineStrings.String3}:
  "A"
  "B"
@@ -24,7 +24,7 @@ julia> chain.(eachchain(ats))
  "A"
 
 julia> chains = collect(eachchain(ats))
-   Array{Chain,1} with 4 chains.
+   Vector{Chain} with 4 chains.
 
 julia> chains[1]
  Chain of name A with 48 atoms.
