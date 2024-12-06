@@ -120,6 +120,13 @@ Base.collect(c::EachChain) = collect(Chain, c)
 Base.length(chains::EachChain) = sum(1 for chain in chains)
 Base.firstindex(chains::EachChain) = 1
 Base.lastindex(chains::EachChain) = length(chains)
+# function Base.last(chains::EachChain) 
+#     local last_chain
+#     for chain in chains 
+#         last_chain = chain
+#     end
+#     return last_chain
+# end
 
 function Base.getindex(::EachChain, ::Integer)
     throw(ArgumentError("""\n
@@ -181,21 +188,28 @@ end
 
 @testitem "Chain iterator" begin
     pdb = read_pdb(PDBTools.CHAINSPDB)
-    chains = eachchain(pdb)
+    ichains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
     @test_throws ArgumentError Chain(pdb, 49:97).range 
-    @test length(chains) == 3
-    @test firstindex(chains) == 1
-    @test lastindex(chains) == 3
-    @test_throws ArgumentError chains[1]
+    @test length(ichains) == 4
+    @test firstindex(ichains) == 1
+    @test lastindex(ichains) == 4
+    @test_throws ArgumentError ichains[1]
     chains = collect(eachchain(pdb))
     @test name(chains[3]) == "C"
     @test index.(filter(at -> resname(at) == "ASP" && name(at) == "CA", chains[1])) == [2]
     @test length(findall(at -> resname(at) == "GLN", chains[1])) == 17
     @test mass(chains[1]) == 353.37881000000016
-    @test chains[3].segname == "ASYN"
-    @test chains[2].model == 1
-    @test chains[1].chain == "A"
-    
+    @test segname(chains[3]) == "ASYN"
+    @test model(chains[2]) == 1
+    @test chain(chains[4]) == "A"
+    @test_throws ArgumentError chains[1][49]
+    buff = IOBuffer()
+    show(buff, MIME"text/plain"(), chains[1])
+    @test length(split(String(take!(buff)))) == 14*7 + 8
+    show(buff, MIME"text/plain"(), ichains)
+    @test String(take!(buff)) == " Iterator with 4 chains."
+    show(buff, MIME"text/plain"(), chains)
+    @test String(take!(buff)) == "   Vector{PDBTools.Chain} with 4 chains."
 end
 
