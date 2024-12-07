@@ -328,6 +328,55 @@ julia> chain_B = chains[2]
 
 ```
 
+### Modifying Atom Properties in a Chain
+
+Any changes made to the atoms of a chain variable directly overwrite the properties of the original atoms in the structure. For example, modifying the occupancy and beta-factor columns of atoms in model 2 of chain A will update the corresponding properties in the original structure.
+
+In the example below, the `occup` and `beta` properties of all atoms in model 2 of chain A are set to 0.00. The changes are reflected in the original `ats` vector, demonstrating that the modifications propagate to the parent data structure.
+
+```julia-repl
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia> last(eachchain(ats))
+ Chain of name A with 45 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+     145    N     ASP     A        1       10  133.978  119.386  -23.646  1.00  0.00     2    ASYN         1
+     146   CA     ASP     A        1       10  134.755  118.916  -22.497  1.00  0.00     2    ASYN         2
+     147    C     ASP     A        1       10  135.099  117.439  -22.652  1.00  0.00     2    ASYN         3
+                                                       ⋮ 
+     187 HD22     VAL     A        3       12  130.704  113.003  -27.586  1.00  0.00     2    ASYN        43
+     188 HD23     VAL     A        3       12  130.568  111.868  -26.242  1.00  0.00     2    ASYN        44
+     189    O     VAL     A        3       12  132.066  112.711  -21.739  1.00  0.00     2    ASYN        45
+
+ 
+julia> for chain in eachchain(ats)
+           if name(chain) == "A" && model(chain) == 2
+               for atom in chain
+               atom.occup = 0.00
+               atom.beta = 0.00
+               end
+           else continue
+           end
+       end
+
+julia> last(eachchain(ats))
+ Chain of name A with 45 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+     145    N     ASP     A        1       10  133.978  119.386  -23.646  0.00  0.00     2    ASYN         1
+     146   CA     ASP     A        1       10  134.755  118.916  -22.497  0.00  0.00     2    ASYN         2
+     147    C     ASP     A        1       10  135.099  117.439  -22.652  0.00  0.00     2    ASYN         3
+                                                       ⋮ 
+     187 HD22     VAL     A        3       12  130.704  113.003  -27.586  0.00  0.00     2    ASYN        43
+     188 HD23     VAL     A        3       12  130.568  111.868  -26.242  0.00  0.00     2    ASYN        44
+     189    O     VAL     A        3       12  132.066  112.711  -21.739  0.00  0.00     2    ASYN        45
+
+
+```
+
+This behavior ensures efficient data manipulation but requires careful handling to avoid unintended changes. 
+
 ```@docs
 Chain
 eachchain
