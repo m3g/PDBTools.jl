@@ -185,7 +185,7 @@ input, and returns `true` or `false` depending on the conditions required for th
 
 ## Iterate over residues (or molecules)
 
-The `eachresidue` iterator allows iteration over the residues of a structure (in PDB files distinct molecules are associated to different residues, thus this iterates similarly over the molecules of a structure). For example:
+The `eachresidue` iterator enables iteration over the residues of a structure. In PDB files, distinct molecules are often treated as separate residues, so this iterator can be used to iterate over the molecules within a structure. For example:
 
 ```jldoctest
 julia> using PDBTools
@@ -198,8 +198,12 @@ julia> count(atom -> resname(atom) == "ALA", protein)
 julia> count(res -> resname(res) == "ALA", eachresidue(protein))
 1
 ```
+Here, the first `count` counts the number of atoms with the residue name "ALA", while the second uses `eachresidue` to count the number of residues named "ALA". This highlights the distinction between residue-level and atom-level operations.
 
-The result of the iterator can also be collected, with:
+### Collecting Residues into a Vector
+
+Residues produced by `eachresidue` can be collected into a vector for further processing:
+
 ```jldoctest
 julia> using PDBTools
 
@@ -220,9 +224,14 @@ julia> residues[1]
       12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
 ```
 
-These residue vector *do not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
+### Key Note on Residue Vectors
 
-It is possible also to iterate over the atoms of one or more residue:
+Residue vectors *do not* create copies of the original atom data. This means that any changes made to the residue vector will directly modify the corresponding data in the original atom vector.
+
+### Iterating Over Atoms Within Residues
+
+You can iterate over the atoms of one or more residues using nested loops. For example, to calculate the total mass of all atoms in residues named "ALA":
+
 ```julia-repl
 julia> using PDBTools
 
@@ -239,14 +248,14 @@ julia> m_ALA = 0.
        m_ALA
 73.09488999999999
 ```
-Which, in this simple example, results in the same as:
+This method produces the same result as the more concise approaches:
 
 ```julia-repl
 julia> sum(mass(at) for at in protein if resname(at) == "ALA" )
 73.09488999999999
 ```
 
-or
+Or, alternatively:
 
 ```julia-repl
 julia> sum(mass(res) for res in eachresidue(protein) if resname(res) == "ALA" )
@@ -310,7 +319,7 @@ As seen in the previous example, The `first` and `last` commands allow quick acc
 ```julia-repl
 julia> using PDBTools
 
-ats = read_pdb(PDBTools.CHAINSPDB);
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
 julia> chains = collect(eachchain(ats))
    Array{Chain,1} with 3 chains.
