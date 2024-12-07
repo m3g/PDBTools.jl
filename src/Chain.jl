@@ -109,18 +109,29 @@ julia> length(eachchain(ats))
 4
 
 julia> for chain in eachchain(ats)
-           println("Chain of name \$(name(chain))")
-           println(resname.(eachresidue(chain)))
+           if name(chain) == "A" && model(chain) != 2
+               for atom in chain
+               atom.occup = 1.00
+               atom.beta = 0.00
+               end
+           else 
+               for atom in chain
+               atom.occup = 0.00
+               atom.beta = 0.00
+               end
+           end
        end
-A
-InlineStrings.String7["ASP", "GLN", "LEU"]
-B
-InlineStrings.String7["ASP", "GLN", "LEU"]
-C
-InlineStrings.String7["ASP", "GLN", "LEU"]
-A
-InlineStrings.String7["ASP", "GLN", "VAL"
 
+julia> ats
+   Vector{Atom{Nothing}} with 189 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+       3    C     ASP     A        1        1  135.099  117.439  -22.652  1.00  0.00     1    ASYN         3
+                                                       ⋮ 
+     187 HD22     VAL     A        3       12  130.704  113.003  -27.586  0.00  0.00     2    ASYN        43
+     188 HD23     VAL     A        3       12  130.568  111.868  -26.242  0.00  0.00     2    ASYN        44
+     189    O     VAL     A        3       12  132.066  112.711  -21.739  0.00  0.00     2    ASYN        45    
 
 ```
 
