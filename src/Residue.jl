@@ -1,5 +1,5 @@
 """
-    Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+   Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
 
 Residue data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
@@ -30,6 +30,9 @@ julia> residues[5].chain
 
 julia> residues[8].range
 52:58
+
+julia> mass(residues[1])
+82.0385
 
 ```
 
@@ -80,7 +83,7 @@ end
 Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
 function Base.getindex(residue::Residue, i::Int)
-    i > 0 || throw(ArgumentError("Index must be in 1:$(length(residue))"))
+    i > 0 || throw(ArgumentError("Residue index must be in 1:$(length(residue))"))
     (i <= length(residue)) || throw(ArgumentError("Residue has $(length(residue)) atoms, tried to fetch index $i."))
     i = first(residue.range) + i - 1
     residue.atoms[i]
