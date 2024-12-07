@@ -277,7 +277,7 @@ julia> chain.(eachchain(ats))              # Retrieve the names of all chains in
  "C"
  "A"
 
-julia> model.(eachchain(ats))              # Retrieve the model numbers associated with each chain
+julia> model.(eachchain(ats))          # Retrieve the model numbers associated with each chain
 4-element Vector{Int32}:
  1
  1
