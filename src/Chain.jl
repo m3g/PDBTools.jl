@@ -16,13 +16,6 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> name.(eachchain(ats)) 
-4-element Vector{InlineStrings.String3}:
- "A"
- "B"
- "C"
- "A"
-
 julia> chains = collect(eachchain(ats))
    Vector{Chain} with 4 chains.
 
