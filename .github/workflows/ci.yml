@@ -12,7 +12,7 @@ jobs:
         version:
           - '1.9'
           - 'lts'
-          - '1'
+          - 'pre'
         os:
           - ubuntu-latest
           - macOS-latest
