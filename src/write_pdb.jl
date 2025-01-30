@@ -62,9 +62,9 @@ function _align_name(name)
 end
 function _align_resname(resname)
     resname = strip(resname)
-    length(resname) == 1 && return "  $(resname) "
-    length(resname) == 2 && return " $(resname)  "
-    length(resname) == 3 && return " $(resname) "
+    length(resname) == 1 && return " $(resname) "
+    length(resname) == 2 && return "$(resname)  "
+    length(resname) == 3 && return "$(resname) "
     return resname
 end
 
@@ -115,6 +115,7 @@ function write_pdb_atom(atom::Atom)
             mod(atom.index,1048576),
             " ",
             _align_name(name),
+            " ",
             _align_resname(atom.resname),
             atom.chain,
             mod(atom.resnum, 65535), 
@@ -130,13 +131,13 @@ function write_pdb_atom(atom::Atom)
     )
 
     line = if atom.index <= 99999 && atom.resnum <= 9999 # standard integer printing
-        @sprintf("%-6s%5i%1s%4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+        @sprintf("%-6s%5i%1s%-4s%1s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
     elseif atom.index > 99999 && atom.resnum <= 9999 # Prints index in hexadecimal
-        @sprintf("%-6s%5x%1s%-4s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+        @sprintf("%-6s%5x%1s%-4s%1s%4s%1s%4i%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
     elseif atom.index <= 99999 && atom.resnum > 9999 # Prints resnum in hexadecimal code
-        @sprintf("%-6s%5i%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+        @sprintf("%-6s%5i%1s%-4s%1s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
     elseif atom.index > 99999 && atom.resnum > 9999 # Both hexadecimal
-        @sprintf("%-6s%5x%1s%-4s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
+        @sprintf("%-6s%5x%1s%-4s%1s%4s%1s%4x%4s%8.3f%8.3f%8.3f%6.2f%6.2f%5s%4s%2s", atom_data...)
     end
 
     return line
@@ -154,4 +155,6 @@ end
     @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
     pdb[1].index = 1000000
     @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    pdb[1].resname = "ALAX"
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALAXA424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
 end
