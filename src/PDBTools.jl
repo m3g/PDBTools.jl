@@ -9,7 +9,7 @@ using LinearAlgebra: norm
 using Parameters: @unpack
 using Printf: @printf, @sprintf
 using StaticArrays: SVector
-using TestItems: @testitem
+using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: String3, String7
 
