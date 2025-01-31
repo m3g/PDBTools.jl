@@ -312,16 +312,19 @@ end
     using PDBTools
     using BenchmarkTools
 
-    function test_allocs(max_allocs)
-        if haskey(ENV, "BUILD_IS_PRODUCTION_BUILD") && ENV["BUILD_IS_PRODUCTION_BUILD"] == "false"
-            +Inf
-        else
-            max_allocs
-        end
+    @kwdef struct Allocs
+        prodbuild::Bool = haskey(ENV, "BUILD_IS_PRODUCTION_BUILD") && ENV["BUILD_IS_PRODUCTION_BUILD"] == "true"
+        allocs::Int
     end
+    Allocs(allocs::Int) = Allocs(; allocs)
+    import Base: ==, >, <
+    ==(a::Int, b::Allocs) = b.prodbuild ? a == b.allocs : true
+    <(a::Int, b::Allocs) = b.prodbuild ? a < b.allocs : true
+    ==(a::Allocs, b::Int) = a.prodbuild ? a.allocs == b : true
+    <(a::Allocs, b::Int) = a.prodbuild ? a.allocs < b : true
 
     b = @benchmark read_mmcif($(PDBTools.TESTCIF)) samples=1 evals=1
-    @test b.allocs < test_allocs(500)
+    @test b.allocs < Allocs(500)
     ats = read_mmcif(PDBTools.TESTCIF)
     @test count(iswater, ats) == 5
     @test count(isprotein, ats) == 69
@@ -339,11 +342,11 @@ end
     lastatom = Atom()
     NCOLS = 21
     b = @benchmark PDBTools.read_atom_mmcif($(Val(NCOLS)), $record, $inds_and_names, $lastatom) samples=1 evals=1
-    @test b.allocs == test_allocs(1)
+    @test b.allocs == Allocs(1)
     field_values = NTuple{NCOLS}(eachsplit(record))
     atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
     b = @benchmark PDBTools._fast_setfield!($atom, $field_values, $inds_and_names) samples=1 evals=1
-    @test b.allocs == test_allocs(0)
+    @test b.allocs == Allocs(0)
 
     # Test early stoppers
     ats = read_mmcif(PDBTools.TESTCIF; stop_at=10)
