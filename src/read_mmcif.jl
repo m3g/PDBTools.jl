@@ -308,20 +308,10 @@ function read_atom_mmcif(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) w
     return atom
 end
 
-@testitem "read_mmcif" begin
+@testitem "read_mmcif" setup=[AllocTest] begin
     using PDBTools
     using BenchmarkTools
-
-    @kwdef struct Allocs
-        prodbuild::Bool = haskey(ENV, "BUILD_IS_PRODUCTION_BUILD") && ENV["BUILD_IS_PRODUCTION_BUILD"] == "true"
-        allocs::Int
-    end
-    Allocs(allocs::Int) = Allocs(; allocs)
-    import Base: ==, >, <
-    ==(a::Int, b::Allocs) = b.prodbuild ? a == b.allocs : true
-    <(a::Int, b::Allocs) = b.prodbuild ? a < b.allocs : true
-    ==(a::Allocs, b::Int) = a.prodbuild ? a.allocs == b : true
-    <(a::Allocs, b::Int) = a.prodbuild ? a.allocs < b : true
+    using .AllocTest: Allocs
 
     b = @benchmark read_mmcif($(PDBTools.TESTCIF)) samples=1 evals=1
     @test b.allocs < Allocs(500)
