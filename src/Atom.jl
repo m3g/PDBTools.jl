@@ -613,11 +613,11 @@ end
     using PDBTools
     using BenchmarkTools
 
-    function test_allocs(allocs, max_allocs)
+    function test_allocs(max_allocs)
         if haskey(ENV, "BUILD_IS_PRODUCTION_BUILD") && ENV["BUILD_IS_PRODUCTION_BUILD"] == "false"
-            true
+            +Inf
         else
-            allocs <= max_allocs
+            max_allocs
         end
     end
 
@@ -638,7 +638,7 @@ end
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
     a = @benchmark sum($mass, $atoms) samples=1 evals=1
-    @test test_allocs(a.allocs, 0)
+    @test a.allocs == test_allocs(0)
 end
 
 @testitem "AtomsBase interface" begin
