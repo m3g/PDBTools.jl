@@ -44,9 +44,31 @@ end
 (s::Select)(at) = apply_query(s.query, at)
 Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
-macro sel_str(str)
-    Select(str)
+#
+# Parse selection string allowing interpolation in sel macro:
+# https://discourse.julialang.org/t/str-string-interpolation/125766/11?u=lmiq
+#
+_select(args...) = Select(string(args...))
+macro sel_str(s)
+    ex = Expr(:call, GlobalRef(PDBTools, :_select))
+    i = firstindex(s)
+    buf = IOBuffer(maxsize=ncodeunits(s))
+    while i <= ncodeunits(s)
+        c = @inbounds s[i]
+        i = nextind(s, i)
+        if c === '$'
+            position(buf) > 0 && push!(ex.args, String(take!(buf)))
+            val, i = Meta.parse(s, i; greedy=false)
+            Meta.isexpr(val, :incomplete) && error(val.args[1])
+            val !== nothing && push!(ex.args, val)
+        else
+            print(buf, c)
+        end
+    end
+    position(buf) > 0 && push!(ex.args, String(take!(buf)))
+    return esc(ex)
 end
+
 # Function that returns true for all atoms: the default selection
 all(atoms) = true
 
@@ -197,7 +219,10 @@ function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
         return val
     catch
         parse_error(
-            "Could not parse $val for keyword $(key.name), expected $(key.ValueType)",
+            """\n
+                Could not parse $val for keyword $(key.name), expected $(key.ValueType)
+
+            """,
         )
     end
 end
@@ -205,7 +230,6 @@ end
 #
 # Keywords for PDBTools
 #
-
 keywords = [
     Keyword(Int, "index", :index, operators),
     Keyword(Int, "index_pdb", :index_pdb, operators),
@@ -328,20 +352,7 @@ function apply_query(q, a)
     end
 end
 
-#
-# Simple error message (https://discourse.julialang.org/t/a-julia-equivalent-to-rs-stop/36568/13)
-#
-struct NoBackTraceException
-    exc::Exception
-end
-
-function Base.showerror(io::IO, ex::NoBackTraceException, bt; backtrace=true)
-    Base.with_output_color(get(io, :color, false) ? Base.error_color() : :nothing, io) do io
-        showerror(io, ex.exc)
-    end
-end
-parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
-
+parse_error(str) = throw(ArgumentError(str))
 
 @testitem "Selections" begin
 
@@ -392,6 +403,17 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
     @test length(select(atoms, "nonpolar")) == 583
 
     @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol=1e-3
+
+    # test string interpolation
+    t = "protein"
+    n = "CA"
+    r = 15
+    at = filter(sel"$t and name $n and residue $r", atoms)
+    @test length(at) == 1
+    @test name(at[1]) == "CA"
+    @test residue(at[1]) == 15
+    @test_throws ArgumentError filter(sel"$t and name $n and residue abc", atoms)
+    @test_throws UndefVarError filter(sel"$t and name $n and residue $r and $MM", atoms)
 
     # Test editing a field
     atoms[1].index = 0
