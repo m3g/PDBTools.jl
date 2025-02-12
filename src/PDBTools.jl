@@ -11,7 +11,7 @@ using Printf: @printf, @sprintf
 using StaticArrays: SVector
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
-using InlineStrings: String3, String7
+using InlineStrings: String1, String3, String7
 
 # Version
 const VERSION = pkgversion(@__MODULE__)

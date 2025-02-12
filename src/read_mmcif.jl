@@ -122,59 +122,9 @@ function _error_if_no_atoms(atoms)
     end
 end
 
-#=
-data_all
-loop_
-_atom_site.group_PDB             # ATOM 
-_atom_site.id                    # 1 index_pdb
-_atom_site.type_symbol           # N symbol?  
-_atom_site.label_atom_id         # N name
-_atom_site.label_alt_id          # . 
-_atom_site.label_comp_id         # VAL resname
-_atom_site.label_asym_id         # A chain
-_atom_site.label_entity_id       # 1 ?
-_atom_site.label_seq_id          # 1 resnum
-_atom_site.pdbx_PDB_ins_code     # ? ? 
-_atom_site.Cartn_x               # 6.204 x
-_atom_site.Cartn_y               # 16.869 y
-_atom_site.Cartn_z               # 4.854 z
-_atom_site.occupancy             # 1.00 occup
-_atom_site.B_iso_or_equiv        # 49.05 beta
-_atom_site.pdbx_formal_charge    # ? charge
-_atom_site.auth_seq_id           # 1
-_atom_site.auth_comp_id          # VAL
-_atom_site.auth_asym_id          # A
-_atom_site.auth_atom_id          # N
-_atom_site.pdbx_PDB_model_num    # 1 model
-ATOM   1    N  N   . VAL A 1 1   ? 6.204   16.869  4.854   1.00 49.05 ? 1   VAL A N   1
-ATOM   2    C  CA  . VAL A 1 1   ? 6.913   17.759  4.607   1.00 43.14 ? 1   VAL A CA  1
-ATOM   3    C  C   . VAL A 1 1   ? 8.504   17.378  4.797   1.00 24.80 ? 1   VAL A C   1
-ATOM   4    O  O   . VAL A 1 1   ? 8.805   17.011  5.943   1.00 37.68 ? 1   VAL A O   1
-ATOM   5    C  CB  . VAL A 1 1   ? 6.369   19.044  5.810   1.00 72.12 ? 1   VAL A CB  1
-ATOM   6    C  CG1 . VAL A 1 1   ? 7.009   20.127  5.418   1.00 61.79 ? 1   VAL A CG1 1
-ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL A CG2 1 
-=#
-function _supported_cif_fields(field_assignment)
-    # We need this to be indexable (not a Dict) to keep the order of the fields
-    # when writing the mmCIF file
-    _atom_symbol_for_cif_field = OrderedDict{String, Tuple{DataType, Symbol}}(
-        "id" => (Int32, :index_pdb),
-        "Cartn_x" => (Float32,:x),
-        "Cartn_y" => (Float32,:y),
-        "Cartn_z" => (Float32,:z),
-        "occupancy" => (Float32,:occup),
-        "B_iso_or_equiv" => (Float32,:beta),
-        "pdbx_formal_charge" => (Float32,:charge),
-        "pdbx_PDB_model_num" => (Int32,:model),
-        "label_atom_id" => (String7, :name), # Standard mmCIF
-        "label_comp_id" => (String7, :resname), # Standard mmCIF
-        "label_asym_id" => (String3, :chain), # Standard mmCIF
-        "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
-        "type_symbol" => (String7, :pdb_element), # Standard mmCIF
-        #"auth_atom_id" => (String7, :name), # alternate - standard mmCIF
-        #"auth_comp_id" => (String7, :resname), # alternate - standard mmCIF
-        #"auth_asym_id" => (String3, :chain), # alternate = standard mmCIF
-    )
+# Internal function to replace the field assignment if a custom selection was
+# provided by the user
+function replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
     if !isnothing(field_assignment)
         for (custom_key, custom_field) in field_assignment 
             if !(custom_field in fieldnames(Atom))
@@ -209,7 +159,60 @@ function _supported_cif_fields(field_assignment)
     return _atom_symbol_for_cif_field
 end
 
-@testitem "_supported_cif_fields" begin
+#=
+data_all
+loop_
+_atom_site.group_PDB             # ATOM 
+_atom_site.id                    # 1 index_pdb
+_atom_site.type_symbol           # N symbol?  
+_atom_site.label_atom_id         # N name
+_atom_site.label_alt_id          # . 
+_atom_site.label_comp_id         # VAL resname
+_atom_site.label_asym_id         # A chain
+_atom_site.label_entity_id       # 1 ?
+_atom_site.label_seq_id          # 1 resnum
+_atom_site.pdbx_PDB_ins_code     # ? ? 
+_atom_site.Cartn_x               # 6.204 x
+_atom_site.Cartn_y               # 16.869 y
+_atom_site.Cartn_z               # 4.854 z
+_atom_site.occupancy             # 1.00 occup
+_atom_site.B_iso_or_equiv        # 49.05 beta
+_atom_site.pdbx_formal_charge    # ? charge
+_atom_site.auth_seq_id           # 1
+_atom_site.auth_comp_id          # VAL
+_atom_site.auth_asym_id          # A
+_atom_site.auth_atom_id          # N
+_atom_site.pdbx_PDB_model_num    # 1 model
+ATOM   1    N  N   . VAL A 1 1   ? 6.204   16.869  4.854   1.00 49.05 ? 1   VAL A N   1
+ATOM   2    C  CA  . VAL A 1 1   ? 6.913   17.759  4.607   1.00 43.14 ? 1   VAL A CA  1
+ATOM   3    C  C   . VAL A 1 1   ? 8.504   17.378  4.797   1.00 24.80 ? 1   VAL A C   1
+ATOM   4    O  O   . VAL A 1 1   ? 8.805   17.011  5.943   1.00 37.68 ? 1   VAL A O   1
+ATOM   5    C  CB  . VAL A 1 1   ? 6.369   19.044  5.810   1.00 72.12 ? 1   VAL A CB  1
+ATOM   6    C  CG1 . VAL A 1 1   ? 7.009   20.127  5.418   1.00 61.79 ? 1   VAL A CG1 1
+ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL A CG2 1 
+=#
+function _supported_read_cif_fields(field_assignment)
+    # We need this to be indexable (and ordered dict) to keep the order of the fields
+    # when writing the mmCIF file
+    _atom_symbol_for_cif_field = OrderedDict{String, Tuple{DataType, Symbol}}(
+        "id" => (Int32, :index_pdb), # Standard mmCIF
+        "type_symbol" => (String7, :pdb_element), # Standard mmCIF
+        "Cartn_x" => (Float32,:x),
+        "Cartn_y" => (Float32,:y),
+        "Cartn_z" => (Float32,:z),
+        "occupancy" => (Float32,:occup),
+        "B_iso_or_equiv" => (Float32,:beta),
+        "pdbx_formal_charge" => (Float32,:charge),
+        "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
+        "label_comp_id" => (String7, :resname), # Standard mmCIF
+        "label_asym_id" => (String3, :chain), # Standard mmCIF
+        "label_atom_id" => (String7, :name), # Standard mmCIF
+        "pdbx_PDB_model_num" => (Int32, :model),
+    )
+    return replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
+end
+
+@testitem "_supported_read_cif_fields" begin
     using PDBTools 
     using InlineStrings
     field_assignment = Dict(
@@ -218,7 +221,7 @@ end
         "label_asym_id" => :chain, 
         "label_seq_id" => :resnum, 
     )
-    _cif_fields = PDBTools._supported_cif_fields(field_assignment)
+    _cif_fields = PDBTools._supported_read_cif_fields(field_assignment)
     @test length(_cif_fields) == 12
     @test _cif_fields["id"] == (Int32, :index_pdb)
     @test _cif_fields["type_symbol"] == (String7, :name)
@@ -233,9 +236,9 @@ end
     @test _cif_fields["pdbx_formal_charge"] == (Float32, :charge)
     @test _cif_fields["pdbx_PDB_model_num"] == (Int32, :model)
     push!(field_assignment, "type_symbol" => :fail)
-    @test_throws ArgumentError PDBTools._supported_cif_fields(field_assignment)
+    @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
     field_assignment = Dict("type_symbol" => :custom)
-    @test_throws ArgumentError PDBTools._supported_cif_fields(field_assignment)
+    @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
 end
 
 function _parse_mmCIF(
@@ -245,7 +248,7 @@ function _parse_mmCIF(
     stop_at=nothing,
     field_assignment::Union{Nothing,Dict{String,Symbol}} = nothing,
 )
-    _atom_symbol_for_cif_field = _supported_cif_fields(field_assignment)
+    _atom_symbol_for_cif_field = _supported_read_cif_fields(field_assignment)
     atoms = Atom{Nothing}[]
     lastatom = Atom{Nothing}()
     _atom_field_columns = Vector{Tuple{Int,Tuple{DataType,Symbol}}}()
