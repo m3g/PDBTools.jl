@@ -146,4 +146,6 @@ end
     @test all(name(at) == "X" for at in ats0)
     ats1 = read_mmcif(tmpfile; field_assignment)
     @test all(name(at1) == name(at2) for (at1, at2) in zip(ats, ats1))
+    field_assignment = Dict("test" => :abc)
+    @test_throws ArgumentError write_mmcif(tmpfile, ats; field_assignment)
 end
