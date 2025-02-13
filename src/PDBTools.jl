@@ -24,7 +24,8 @@ export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residue
 export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
 export add_custom_field
-export Residue, eachresidue, resname, residue, resnum, chain, model, segname
+export Residue, eachresidue, resname, residue, resnum, model, segname
+export Chain, eachchain, chain
 export residue_ticks
 export coor, maxmin, distance, closest
 export element, mass, element_name, element_symbol, element_symbol_string
@@ -46,6 +47,7 @@ const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
 const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
+const CHAINSPDB = joinpath(@__DIR__,"../test/chains.pdb")
 
 # Basic chemistry
 include("./elements.jl")
@@ -56,6 +58,7 @@ include("./protein_residues.jl")
 #
 include("./Atom.jl")
 include("./Residue.jl")
+include("./Chain.jl")
 
 # Selection functions
 include("./select.jl")
