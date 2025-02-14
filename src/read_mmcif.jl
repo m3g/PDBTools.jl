@@ -284,6 +284,9 @@ function _parse_mmCIF(
             break
         end
     end
+    if length(col_indices) == 0
+        throw(ArgumentError("Invalid mmCIF file: no ATOM or HETATM fields found."))
+    end
     inds_and_names = ntuple(length(col_indices)) do i 
         ((col_indices[i], Val(col_field[i]))) 
     end
