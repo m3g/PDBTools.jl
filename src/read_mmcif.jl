@@ -367,5 +367,5 @@ end
     @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0] 
     
     # Throw error if no ATOM fields were found
-    @test_throws read_mmcif(PDBTools.BROKENCIF)
+    @test_throws ArgumentError read_mmcif(PDBTools.BROKENCIF)
 end
