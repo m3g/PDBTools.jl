@@ -31,10 +31,10 @@ end
 
 function wget(pdb_id::String; only=all, format::AbstractString="mmCIF")
     atoms = if format == "PDB"
-        file = Downloads.download("https://files.rcsb.org/download/$(pdb_id).pdb")
+        file = Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).pdb")
         read_pdb(file, only=only)
     elseif format == "mmCIF"
-        file = Downloads.download("https://files.rcsb.org/download/$(pdb_id).cif")
+        file = Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).cif")
         read_mmcif(file, only=only)
     else
         throw(ArgumentError("""\n
