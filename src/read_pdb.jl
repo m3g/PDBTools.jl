@@ -64,8 +64,8 @@ function read_pdb(pdbdata::IOBuffer; only::Function=all)
     return atoms
 end
 
-function read_pdb(file::String; only=all)
-    atoms = open(expanduser(file), "r") do f
+function read_pdb(filename::String; only=all)
+    atoms = open(expanduser(filename), "r") do f
         _parse_pdb(f, only)
     end
     return atoms

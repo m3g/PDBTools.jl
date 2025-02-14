@@ -88,8 +88,8 @@ function read_mmcif(cifdata::IOBuffer; only::Function=all, kargs...)
     return atoms
 end
 
-function read_mmcif(file::String; only=all, kargs...)
-    atoms = open(expanduser(file), "r") do f
+function read_mmcif(filename::String; only=all, kargs...)
+    atoms = open(expanduser(filename), "r") do f
         _parse_mmCIF(f; only, kargs...)
     end
     return atoms
