@@ -88,8 +88,8 @@ function read_mmcif(cifdata::IOBuffer; only::Function=all, kargs...)
     return atoms
 end
 
-function read_mmcif(file::String; only=all, kargs...)
-    atoms = open(expanduser(file), "r") do f
+function read_mmcif(filename::String; only=all, kargs...)
+    atoms = open(expanduser(filename), "r") do f
         _parse_mmCIF(f; only, kargs...)
     end
     return atoms
@@ -284,6 +284,9 @@ function _parse_mmCIF(
             break
         end
     end
+    if length(_atom_field_columns) == 0
+        throw(ArgumentError("Invalid mmCIF file: no ATOM or HETATM fields found."))
+    end
     inds_and_names = ntuple(length(col_indices)) do i 
         ((col_indices[i], Val(col_field[i]))) 
     end
@@ -362,4 +365,7 @@ end
     @test all(resnum.(filter(isprotein,ats1)) .== resnum.(filter(isprotein,ats0)))
     @test resnum.(filter(iswater, ats0)) == Int32[60, 61, 62, 63, 64]
     @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0] 
+    
+    # Throw error if no ATOM fields were found
+    @test_throws ArgumentError read_mmcif(PDBTools.BROKENCIF)
 end

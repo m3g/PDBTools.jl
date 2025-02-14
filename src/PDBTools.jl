@@ -46,6 +46,7 @@ const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
 const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
+const BROKENCIF = joinpath(@__DIR__,"../test/broken.cif")
 
 # Basic chemistry
 include("./elements.jl")
