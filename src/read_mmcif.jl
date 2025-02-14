@@ -284,7 +284,7 @@ function _parse_mmCIF(
             break
         end
     end
-    if length(col_indices) == 0
+    if length(_atom_field_columns) == 0
         throw(ArgumentError("Invalid mmCIF file: no ATOM or HETATM fields found."))
     end
     inds_and_names = ntuple(length(col_indices)) do i 
@@ -365,4 +365,7 @@ end
     @test all(resnum.(filter(isprotein,ats1)) .== resnum.(filter(isprotein,ats0)))
     @test resnum.(filter(iswater, ats0)) == Int32[60, 61, 62, 63, 64]
     @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0] 
+    
+    # Throw error if no ATOM fields were found
+    @test_throws read_mmcif(PDBTools.BROKENCIF)
 end
