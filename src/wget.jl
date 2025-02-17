@@ -32,11 +32,11 @@ end
 function wget(pdb_id::String; only=all, format::AbstractString="mmCIF")
     buf = IOBuffer()
     atoms = if format == "PDB"
-        Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).pdb", buf)
+        Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).pdb", buf)
         seekstart(buf)
         read_pdb(buf, only=only)
     elseif format == "mmCIF"
-        Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).cif", buf)
+        Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).cif", buf)
         seekstart(buf)
         read_mmcif(buf, only=only)
     else
