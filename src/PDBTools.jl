@@ -12,6 +12,7 @@ using StaticArrays: SVector
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: String1, String3, String7
+import MolSimToolkitShared: center_of_mass
 
 # Version
 const VERSION = pkgversion(@__MODULE__)

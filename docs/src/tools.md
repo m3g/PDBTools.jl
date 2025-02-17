@@ -113,5 +113,3 @@ or to a specified position:
 center_of_mass
 moveto!
 ```
-
-
