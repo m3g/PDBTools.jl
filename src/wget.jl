@@ -29,16 +29,27 @@ function wget(pdb_id::String, selection::String; format::AbstractString="mmCIF")
     return wget(pdb_id, only=atom -> apply_query(query, atom); format)
 end
 
-function wget(pdb_id::String; only=all, format::AbstractString="mmCIF")
+function _wget(pdb_id, format, only)
     buf = IOBuffer()
-    atoms = if format == "PDB"
-        Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).pdb", buf)
+    atoms = try
+        Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).$format", buf)
         seekstart(buf)
         read_pdb(buf, only=only)
-    elseif format == "mmCIF"
-        Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).cif", buf)
+    catch
+        @info "Failed downloading from `download` PDB repository, trying `view` repository ..."
+        Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).$format", buf)
         seekstart(buf)
         read_mmcif(buf, only=only)
+    end
+    return atoms
+end
+
+
+function wget(pdb_id::String; only=all, format::Union{AbstractString,Nothing}=nothing)
+    atoms = if format == "PDB"
+        _wget(pdb_id, "pdb", only)
+    elseif isnothing(format) || format == "mmCIF" 
+        _wget(pdb_id, "cif", only)
     else
         throw(ArgumentError("""\n
             format must be either "PDB" or "mmCIF"
