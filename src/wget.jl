@@ -34,12 +34,20 @@ function _wget(pdb_id, format, only)
     atoms = try
         Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).$format", buf)
         seekstart(buf)
-        read_pdb(buf, only=only)
+        if format == "pdb"
+            read_pdb(buf, only=only)
+        else
+            read_mmcif(buf, only=only)
+        end
     catch
         @info "Failed downloading from `download` PDB repository, trying `view` repository ..."
         Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).$format", buf)
         seekstart(buf)
-        read_mmcif(buf, only=only)
+        if format == "pdb"
+            read_pdb(buf, only=only)
+        else
+            read_mmcif(buf, only=only)
+        end
     end
     return atoms
 end
