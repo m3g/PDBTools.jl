@@ -2,8 +2,10 @@
     distance(x,y)
 
 Computes the minimum distance between two sets of atoms, between an atom and a set of atoms, or simply 
-the distance between two atoms. The input may be a vector of `Atom`s, or the 
-coordinates that are output of the `coor` function. 
+the distance between two atoms, or from the coordinates or sets of coordinates. 
+
+The input may be an `Atom` vector of `Atom`s, or a 3D vector, or a vector of 3D vector of coordinates, for examples
+as output by the `coor` function.
 
 ### Examples
 
@@ -26,11 +28,11 @@ julia> distance(coor(ligand),protein)
 ```
 
 """
-distance(x::SVector, y::SVector) = norm(x - y)
 distance(x::Atom, y::Atom) = norm(coor(x) - coor(y))
-distance(x::Atom, y::SVector) = norm(coor(x) - y)
-distance(x::SVector, y::Atom) = norm(x - coor(y))
-distance(x, y) = last(closest(x, y))
+distance(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}) = norm(x - y)
+distance(x::Atom, y::AbstractVector{<:Real}) = norm(coor(x) - y)
+distance(x::AbstractVector{<:Real}, y::Atom) = norm(x - coor(y))
+distance(x, y) = last(closest(x,y))
 
 """
     closest(x,y)
@@ -72,42 +74,54 @@ julia> closest(ligand,x)
 """
 function closest end
 
-# Wrap individual atoms or coordinates in a SVector to dispatch to the above function
+#
+# Wrap individual atoms or coordinates in a SVector to dispatch to the _closest function
+#
+# Distances involving single atoms and single coordinates 
 closest(x::Atom, y::Atom) = _closest(SVector{1}(x), SVector{1}(y))
+closest(x::Atom, y::AbstractVector{<:Real}) = _closest(SVector{1}(x), SVector{1}((y,)))
+closest(x::AbstractVector{<:Real}, y::Atom) = _closest(SVector{1}((x,)), SVector{1}(y))
+closest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}) = _closest(SVector{1}((x,)), SVector{1}((y,)))
+# Distances involving single atoms and vectors of atoms or coordinates
 closest(x::Atom, y::AbstractVector{<:Atom}) = _closest(SVector{1}(x), y)
+closest(x::Atom, y::AbstractVector{<:AbstractVector{<:Real}}) = _closest(SVector{1}(x), y)
 closest(x::AbstractVector{<:Atom}, y::Atom) = _closest(x, SVector{1}(y))
-closest(x::Atom, y::AbstractVector{<:Real}) = _closest(SVector{1}(x), SVector{1}(SVector{3}(y)))
-closest(x::AbstractVector{<:Real}, y::Atom) = _closest(SVector{1}(SVector{3}(x)), SVector{1}(y))
-closest(x::Atom, y::AbstractVector{<:SVector}) = _closest(SVector{1}(x), y)
-closest(x::AbstractVector{<:SVector}, y::Atom) = _closest(x, SVector{1}(y))
-closest(x::AbstractVector{<:Real}, y::AbstractVector{<:Atom}) = _closest(SVector{1}(x), y)
-closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:Real}) = _closest(x, SVector{1}(y))
+closest(x::AbstractVector{<:AbstractVector{<:Real}},y::Atom) = _closest(x, SVector{1}(y))
+# Distances involving single coordinates and vectors of atoms or coordinates
+closest(x::AbstractVector{<:Real}, y::AbstractVector{<:Atom}) = _closest(SVector{1}((x,)), y)
+closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:Real}) = _closest(x, SVector{1}((y,)))
+closest(x::AbstractVector{<:Real}, y::AbstractVector{<:AbstractVector{<:Real}}) = _closest(SVector{1}((x,)), y)
+closest(x::AbstractVector{<:AbstractVector{<:Real}}, y::AbstractVector{<:Real}) = _closest(x, SVector{1}((y,)))
+# Distance between vectors of atoms / vectors of coordinates
 closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:Atom}) = _closest(x, y)
-closest(x::AbstractVector{<:SVector}, y::AbstractVector{<:SVector}) = _closest(x, y)
-closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:SVector}) = _closest(x, y)
-closest(x::AbstractVector{<:SVector}, y::AbstractVector{<:Atom}) = _closest(x, y)
-closest(x::AbstractVector{<:SVector}, y::AbstractVector{<:Real}) = _closest(x, SVector{1}(y))
-closest(x::AbstractVector{<:Real}, y::AbstractVector{<:SVector}) = _closest(SVector{1}(x), y)
-closest(x::AbstractVector{<:Real}, y::AbstractVector{<:Real}) = _closest(SVector{1}(x), SVector{1}(y))
-
+closest(x::AbstractVector{<:AbstractVector{<:Real}}, y::AbstractVector{<:AbstractVector{<:Real}}) = _closest(x, y)
+# Distances involving vectors of atoms and vector of coordinates
+closest(x::AbstractVector{<:Atom}, y::AbstractVector{<:AbstractVector{<:Real}}) = _closest(x, y)
+closest(x::AbstractVector{<:AbstractVector{<:Real}}, y::AbstractVector{<:Atom}) = _closest(x, y)
+# Distances involving for residues
 closest(x::Residue, y::Residue) = _closest(x.atoms[x.range], y.atoms[y.range])
 closest(x::Residue, y::Atom) = _closest(x.atoms[x.range], SVector{1}(y))
 closest(x::Atom, y::Residue) = _closest(SVector{1}(x), y.atoms[y.range])
-closest(x::Residue, y::AbstractVector{<:Real}) = _closest(x.atoms[x.range], SVector{1}(SVector{3}(y)))
-closest(x::AbstractVector{<:Real}, y::Residue) = _closest(SVector{1}(SVector{3}(x)), y.atoms[y.range])
+closest(x::Residue, y::AbstractVector{<:Real}) = _closest(x.atoms[x.range], SVector{1}((y,)))
+closest(x::AbstractVector{<:Real}, y::Residue) = _closest(SVector{1}((x,)), y.atoms[y.range])
 closest(x::Residue, y::AbstractVector{<:SVector}) = _closest(x.atoms[x.range], y)
 closest(x::AbstractVector{<:SVector}, y::Residue) = _closest(x, y.atoms[y.range])
 
+_float_type(::AbstractVector{<:AbstractVector{T1}}) where {T1<:Real} = T1
+_float_type(atoms::AbstractVector{<:Atom}) = eltype(coor(first(atoms)))
+_coor(x::AbstractVector{<:Real}) = x
+_coor(x::Atom) = coor(x)
+
 function _closest(
-    x::AbstractVector, 
-    y::AbstractVector
-) 
+    x::AbstractVector{T1}, 
+    y::AbstractVector{T2}, 
+) where {T1,T2} 
     imin = -1
     jmin = -1
-    dmin = +Inf
+    dmin = typemax(promote_type(_float_type(x), _float_type(y)))
     for (i, xatom) in pairs(x)
         for (j, yatom) in pairs(y)
-            d = distance(xatom, yatom)
+            d = norm(_coor(xatom) - _coor(yatom))
             if d < dmin
                 imin = i
                 jmin = j
