@@ -12,7 +12,7 @@ using StaticArrays: SVector
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: String1, String3, String7
-import MolSimToolkitShared: center_of_mass
+import MolSimToolkitShared: center_of_mass, wrap
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
@@ -48,6 +48,7 @@ const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
 const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
 const BROKENCIF = joinpath(@__DIR__,"../test/broken.cif")
+const DIMERPDB = joinpath(@__DIR__,"../test/dimer.pdb")
 
 # Basic chemistry
 include("./elements.jl")
@@ -82,6 +83,9 @@ include("./tools.jl")
 
 # Custom element and residue definitions
 include("./custom_types.jl")
+
+# Contact maps
+include("./contacts.jl")
 
 # Legacy compatibility
 include("./legacy.jl")
