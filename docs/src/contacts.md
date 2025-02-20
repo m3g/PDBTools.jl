@@ -13,6 +13,18 @@ contact_map
 heatmap(::ContactMap)
 ```
 
+!!! note
+    The distance computed in these functions is the **minimum distance** between the 
+    atoms of the residues. If, for example, a contact map computed from the distance
+    between Cα atoms is desired, select the atoms before computing the map:
+    ```julia
+    cA = select("chain A and name CA")
+    contact_map(cA; dmax=8.0)
+    ```
+    Importantly, the maximum distance defining a contact has to be adjusted, as
+    it is, by default, `dmax=4.0`, which is a reasonable contact measure from
+    minimum distance between atoms, but too short for distances between backbone
+    atoms.
 
 ## Contact map
 

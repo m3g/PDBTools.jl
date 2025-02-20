@@ -76,7 +76,7 @@ end
 
 Data structure to store contact maps between residues in a protein structure.
 The contact map is a matrix of distances between residues. A contact is defined 
-when the distance between two residues is less than a given threshold `dmax`.
+when the distance between any two atoms of the residues is less than a given threshold `dmax`.
 
 If the distance between two residues is greater than `dmax`, the value in the
 matrix is `missing`, indicating that there is no contact between the residues.
@@ -134,6 +134,11 @@ end
 Calculate the contact map between residues in a protein* structure (if only 
 `atoms1` is provided) or between residues in two different protein* structures
 (`atoms1` and `atoms2`). 
+
+!!! note 
+    The distance used to define a contact is the **minimum** distance between
+    any two atoms of the residues of the atoms groups provided, with a 
+    threshold distance `dmax`.
 
 Returns the contact map as a `ContactMap` object.
 
