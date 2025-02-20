@@ -12,7 +12,7 @@ function _plot_size(map::ContactMap)
 end
 
 """
-    heatmap(map::ContactMap; kwargs...)
+    heatmap(map::PDBTools.ContactMap; kwargs...)
 
 Plot a contact map.
 
@@ -46,9 +46,11 @@ ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0
 julia> plt = heatmap(map) # produced the figure
 
 julia> map = contact_map(cA, cB; discrete=false) # distance map
-ContactMap{Float32} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Union{Missing, Float32}} of size (243, 12), with threshold 4.0 and gap 0
 
 julia> plt = heatmap(map) # produces the figure
+```
+
 """
 function heatmap(::ContactMap) end
 
