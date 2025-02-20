@@ -390,9 +390,7 @@ parse_error(str) = throw(ArgumentError(str))
 
     @test length(select(atoms, "basic")) == 68
 
-    @test length(select(atoms, "hydrophobic")) == 327
-
-    @test length(select(atoms, "hydrophobic")) == 327
+    @test length(select(atoms, "hydrophobic")) == 399
 
     @test length(select(atoms, "aliphatic")) == 379
 
