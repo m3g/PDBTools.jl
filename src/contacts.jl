@@ -13,81 +13,33 @@ If the `positions` argument is not provided, the function calculates the distanc
 using the coordinates of the atoms in the residues. If `positions` is provided,
 the function uses the coordinates in the positions array. 
 
-!!! note
-    The index of the atoms in the residues must match the index of the atoms in the
-    positions array. 
-
 # Arguments
 
 - `r1::PDBTools.Residue`: Residue 1
 - `r2::PDBTools.Residue`: Residue 2
-- `positions::AbstractVector{AbstractVector{T}}`: Positions of the atoms in the structure.
-- `unitcell=nothing`: Unit cell dimensions for periodic boundary conditions.
+- `positions::AbstractVector{AbstractVector{T}}`: Optional alternate positions of the atoms in the structure.
+- `unitcell=nothing`: Optional unit cell dimensions for periodic boundary conditions.
+
+!!! note
+    The index of the atoms in the residues must match the index of the atoms in the
+    positions array. 
 
 # Example
 
-## From a PDB file
-
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+julia> using PDBTools
 
-julia> ats = read_pdb(Testing.namd2_pdb, "protein");
+julia> ats = read_pdb(PDBTools.DIMERPDB);
 
 julia> residues = collect(eachresidue(ats));
 
 julia> r1 = residues[1]; r10 = residues[10];
 
 julia> println(name(r1), resnum(r1), " and ", name(r10), resnum(r10))
-ALA1 and CYS10
+LYS211 and GLU220
 
 julia> d = residue_residue_distance(r1, r10)
-5.6703672f0
-```
-
-## From positions in a frame of the simulation, with unit cell
-
-```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
-
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj);
-
-julia> firstframe!(sim); 
-
-julia> p = positions(current_frame(sim)); uc = unitcell(current_frame(sim));
-
-julia> residues = collect(eachresidue(atoms(sim))); 
-
-julia> r1 = residues[1]; r10 = residues[10];
-
-julia> println(name(r1), resnum(r1), " and ", name(r10), resnum(r10))
-ALA1 and CYS10
-
-julia> d = residue_residue_distance(r1, r10, p; unitcell=uc)
-4.375855163436525
-```
-
-## Iterating over a simulation
-
-```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
-
-julia> sim = Simulation(Testing.namd2_pdb, Testing.namd2_traj; step=5);
-
-julia> residues = collect(eachresidue(atoms(sim)));
-
-julia> r1 = residues[1]; r10 = residues[10];
-
-julia> d = zeros(length(sim)) 
-       for (iframe, frame) in enumerate(sim)
-           p = positions(frame); uc = unitcell(frame)
-           d[iframe] = residue_residue_distance(r1, r10, p; unitcell=uc)
-       end
-       d
-4-element Vector{Float64}:
- 4.375855163436519
- 6.259510221375278
- 6.443451538114475
- 5.9046427913540604
+16.16511f0
 ```
 
 """
@@ -208,11 +160,40 @@ Returns the contact map as a `ContactMap` object.
 ## Contact map between residues in the same structure
 
 ```jldoctest
-julia> using MolSimToolkit, MolSimToolkit.Testing, PDBTools
+julia> using PDBTools
 
-julia> pdb = wget("1bsx", "chain A")
+julia> ats = read_pdb(PDBTools.DIMERPDB);
 
-julia> map = contact_map(pdb)
+julia> cA = select(ats, "chain A");
+
+julia> cB = select(ats, "chain B");
+
+julia> map = contact_map(cA, cB) # contact map between chains A and B
+ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
+
+julia> using Plots
+
+julia> heatmap(map) # plot the contact map
+```
+
+## Contact map between residues in two different structures
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.DIMERPDB);
+
+julia> cA = select(ats, "chain A");
+
+julia> cB = select(ats, "chain B");
+
+julia> map = contact_map(cA, cB) # contact map between chains A and B
+ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
+
+julia> using Plots
+
+julia> heatmap(map) # plot the contact map
+```
 
 """
 function contact_map end

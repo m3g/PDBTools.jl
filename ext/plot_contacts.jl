@@ -11,6 +11,48 @@ function _plot_size(map::ContactMap)
     return (xpixels, ypixels)
 end
 
+"""
+    heatmap(map::ContactMap; kwargs...)
+
+Plot a contact map.
+
+# Arguments
+
+- `map::ContactMap`: the contact map to plot
+
+All other arguments are default keywords of `Plots.heatmap` and can be adjusted to
+customize the plot.
+
+Most typical options to adjust are:
+
+- `color`: the color palette to use (default: `:grayC` for distances, `:Greys_9` for binary maps)
+- `clims`: the range of the color scale.
+- `colorbar_title`: the title of the colorbar. Default: "distance (Å)" for distances, no title for binary maps.
+
+# Example 
+
+```jldoctest
+julia> using PDBTools, Plots
+
+julia> ats = read_pdb(PDBTools.DIMERPDB);
+
+julia> cA = select(ats, "chain A");
+
+julia> cB = select(ats, "chain B");
+
+julia> map = contact_map(cA, cB)
+ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0
+
+julia> plt = heatmap(map) # produced the figure
+
+julia> map = contact_map(cA, cB; discrete=false) # distance map
+ContactMap{Float32} of size (243, 12), with threshold 4.0 and gap 0
+
+julia> plt = heatmap(map) # produces the figure
+"""
+function heatmap(::ContactMap) end
+
+# heatmap for distance (quantitative) maps
 function heatmap(
     map::ContactMap{<:Real}; 
     plot_size=_plot_size(map),
@@ -41,6 +83,7 @@ function heatmap(
     )
 end
 
+# heatmap for binary (discrete) maps
 function heatmap(
     map::ContactMap{<:Bool}; 
     plot_size=_plot_size(map),
