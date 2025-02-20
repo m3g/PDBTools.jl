@@ -210,11 +210,11 @@ function contact_map(
         r2 = residues[jres]
         d12 = residue_residue_distance(r1, r2; positions, unitcell)
         if discrete
-            map.matrix[ires, jres] = d12 <= dmax ? true : false
+            map[ires, jres] = d12 <= dmax ? true : false
         else
-            map.matrix[ires, jres] = d12 <= dmax ? d12 : missing
+            map[ires, jres] = d12 <= dmax ? d12 : missing
         end
-        map.matrix[jres, ires] = map.matrix[ires, jres]
+        map[jres, ires] = map.matrix[ires, jres]
     end
     return map
 end
@@ -236,9 +236,9 @@ function contact_map(
         r2 = residues2[jres]
         d12 = residue_residue_distance(r1, r2; positions, unitcell)
         if discrete
-            map.matrix[ires, jres] = d12 <= dmax ? true : false
+            map[ires, jres] = d12 <= dmax ? true : false
         else
-            map.matrix[ires, jres] = d12 <= dmax ? d12 : missing
+            map[ires, jres] = d12 <= dmax ? d12 : missing
         end
     end
     return map
@@ -259,6 +259,8 @@ end
     cB = select(ats, "chain B")
     map = contact_map(cA, cB)
     @test sum(map.matrix) == 17
+    @test map[235,:] == [false, false, true, false, false, false, false, false, false, false, false, false]
+    @test count(map[:,3]) == 3
     map = contact_map(cA, cB; discrete=false)
     @test sum(skipmissing(map.matrix)) ≈ 58.00371f0
 end
