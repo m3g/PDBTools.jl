@@ -58,6 +58,20 @@ plot(
 All `heatmap` parametes can be customized using the `Plots` keyword syntax. Above, 
 we illustrate this by removing the color bar and changing the color scale. 
 
+## Indexing
+
+The `ContactMap` data structure can be indexed to extract the contacts of a specific 
+residue. For example:
+
+```@example
+using PDBTools
+ats = read_pdb(PDBTools.DIMERPDB);
+cA = select(ats, "chain A");
+cB = select(ats, "chain B");
+map = contact_map(cA, cB; discrete=false, dmax=12.0)
+map[235,:] # all distances below 12.0 Angs of residue 235 of cA with cB
+```
+
 ## Data structure and auxiliary functions
 
 ```@docs
