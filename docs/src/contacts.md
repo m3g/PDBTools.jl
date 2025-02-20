@@ -3,13 +3,16 @@ CollapsedDocStrings = true
 ```
 # Contact and distance maps
 
-```@docs
-contact_map
-```
-
 The `contact_map` function computes a contact map for a structure or a pair of structures.
 These structures are typically proteins, but any structures defined by sequences of residues
-can be provided as inputs. 
+can be provided as inputs. The `heatmap` function, from `Plots`, is overloaded here
+to provide a convenient way to plot the contact or distance maps.
+
+```@docs
+contact_map
+heatmap(::ContactMap)
+```
+
 
 ## Contact map
 

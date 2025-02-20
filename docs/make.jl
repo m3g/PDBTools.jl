@@ -4,7 +4,10 @@ using Documenter
 using Plots
 using PDBTools
 makedocs(
-    modules = [PDBTools],
+    modules = [
+        PDBTools, 
+        isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :Plotting) : PDBTools.Plotting
+    ],
     sitename = "PDBTools.jl",
     pages = [
         "Home" => "index.md",

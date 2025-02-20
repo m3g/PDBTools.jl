@@ -43,14 +43,14 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB)
-ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0
 
-julia> plt = heatmap(map) # produced the figure
+julia> # plt = heatmap(map) # uncomment to plot
 
 julia> map = contact_map(cA, cB; discrete=false) # distance map
 ContactMap{Union{Missing, Float32}} of size (243, 12), with threshold 4.0 and gap 0
 
-julia> plt = heatmap(map) # produces the figure
+julia> # plt = heatmap(map) # uncomment to plot
 ```
 
 """
