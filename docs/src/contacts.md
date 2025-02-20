@@ -1,7 +1,7 @@
 ```@meta
 CollapsedDocStrings = true
 ```
-# Contacts and contact maps
+# Contact and distance maps
 
 ```@docs
 contact_map
@@ -10,6 +10,8 @@ contact_map
 The `contact_map` function computes a contact map for a structure or a pair of structures.
 These structures are typically proteins, but any structures defined by sequences of residues
 can be provided as inputs. 
+
+## Contact map
 
 A typical usage consists in computing the contact map and plotting it:
 
@@ -22,6 +24,8 @@ cB = select(ats, "chain B");
 map = contact_map(cA, cB) # contact map between chains A and B
 heatmap(map)
 ```
+
+## Distance map
 
 In the example above we opted to plot a discrete contact map, with the default contact 
 distance `dmax=4.0`. Now we change two parameters: `discrete=false` and `dmax=12.0`, to
@@ -36,6 +40,8 @@ cB = select(ats, "chain B");
 map = contact_map(cA, cB; discrete=false, dmax=12.0) # contact map between chains A and B
 heatmap(map)
 ```
+
+## Single structure
 
 Similarly, we can produce plots for the contact map of a single structure. Here, we 
 showcase the use of the `gap` parameter, to ignore residues closer in the sequence
@@ -55,8 +61,18 @@ plot(
 )
 ```
 
+## Customizing the plot
+
 All `heatmap` parametes can be customized using the `Plots` keyword syntax. Above, 
-we illustrate this by removing the color bar and changing the color scale. 
+we illustrated this by removing the color bar and changing the color scale. 
+
+Common customization options are:
+
+- `xstep`: the stride of the x-axis ticks 
+- `ystep`: the stride of the y-axis ticks
+- `color`: the color palette to use (default: `:grayC` for distances, `:Greys_9` for binary maps)
+- `clims`: the range of the color scale.
+- `colorbar_title`: the title of the colorbar. Default: "distance (Å)" for distances, no title for binary maps.
 
 ## Indexing
 

@@ -25,6 +25,8 @@ customize the plot.
 
 Most typical options to adjust are:
 
+- `xstep`: the stride of the x-axis ticks 
+- `ystep`: the stride of the y-axis ticks
 - `color`: the color palette to use (default: `:grayC` for distances, `:Greys_9` for binary maps)
 - `clims`: the range of the color scale.
 - `colorbar_title`: the title of the colorbar. Default: "distance (Å)" for distances, no title for binary maps.
