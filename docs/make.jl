@@ -1,6 +1,7 @@
 import Pkg
 Pkg.add("Documenter")
 using Documenter
+using Plots
 using PDBTools
 makedocs(
     modules = [PDBTools],
@@ -11,6 +12,7 @@ makedocs(
         "Read and Write" => "readwrite.md",
         "Selections" => "selections.md",
         "Element properties" => "elements.md",
+        "Contact maps" => "contacts.md",
         "Auxiliary functions" => "auxiliary.md",
         "Examples" => "examples.md",
         "Tools" => "tools.md",
