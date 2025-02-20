@@ -49,13 +49,14 @@ cA = select(ats, "chain A");
 distance_map = contact_map(cA; gap=4, discrete=false, dmax=12.0) # chain A only
 discrete_map = contact_map(cA; gap=4, discrete=true, dmax=12.0) # chain A only
 plot(
-    heatmap(distance_map; colorbar=nothing), 
+    heatmap(distance_map; colorbar=nothing, color=:davos), 
     heatmap(discrete_map); 
     layout=(1,2), size=(800,500)
 )
 ```
 
-All `heatmap` parametes can be customized using the `Plots` keyword syntax. 
+All `heatmap` parametes can be customized using the `Plots` keyword syntax. Above, 
+we illustrate this by removing the color bar and changing the color scale. 
 
 ## Data structure and auxiliary functions
 
