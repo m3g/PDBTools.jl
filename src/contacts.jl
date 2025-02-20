@@ -99,8 +99,8 @@ On the other hand, if `discrete=false`, the matrix contains distances between
 residues.
 
 """
-struct ContactMap{T}
-    matrix::Matrix{Union{Missing,T}}
+struct ContactMap{T<:Union{Union{Missing,Bool},Union{Missing,<:Real}}}
+    matrix::Matrix{T}
     d::Float64
     gap::Int
     residues1::Vector{PDBTools.Residue}
@@ -169,7 +169,7 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB) # contact map between chains A and B
-ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
+ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0 
 
 julia> # using Plots; heatmap(map); # uncoment to plot the contact map
 ```
@@ -186,7 +186,7 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB) # contact map between chains A and B
-ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
+ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0 
 
 julia> # using Plots; heatmap(map); # uncoment plot the contact map
 ```
@@ -202,7 +202,7 @@ function contact_map(
     unitcell=nothing,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
 )
-    type = discrete ? Bool : typeof(atoms1[1].x) 
+    type = Union{Missing, discrete ? Bool : typeof(atoms1[1].x)}
     residues = collect(PDBTools.eachresidue(atoms1))
     map = zero(ContactMap{type}, length(residues), length(residues), dmax, gap, residues, residues)
     for ires in eachindex(residues), jres in ires+gap:length(residues)
@@ -227,7 +227,7 @@ function contact_map(
     unitcell=nothing,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
 )
-    type = discrete ? Bool : typeof(atoms1[1].x)
+    type = Union{Missing, discrete ? Bool : typeof(atoms1[1].x)}
     residues = collect(PDBTools.eachresidue(atoms1))
     residues2 = collect(PDBTools.eachresidue(atoms2))
     map = zero(ContactMap{type}, length(residues), length(residues2), dmax, 0, residues, residues2)

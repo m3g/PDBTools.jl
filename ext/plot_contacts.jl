@@ -54,7 +54,7 @@ function heatmap(::ContactMap) end
 
 # heatmap for distance (quantitative) maps
 function heatmap(
-    map::ContactMap{<:Real}; 
+    map::ContactMap{Union{Missing,T}}; 
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -74,7 +74,7 @@ function heatmap(
     clims=(0,1.1) .* extrema(skipmissing(map.matrix)),
     margin=0.5Plots.Measures.cm,
     kargs...
-)
+) where {T<:Real}
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
@@ -85,7 +85,7 @@ end
 
 # heatmap for binary (discrete) maps
 function heatmap(
-    map::ContactMap{<:Bool}; 
+    map::ContactMap{Union{Missing, Bool}}; 
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
