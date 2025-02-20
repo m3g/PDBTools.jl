@@ -29,7 +29,7 @@ function heatmap(
     size=plot_size,
     framestyle=:box,
     grid=false,
-    clims=(1,1.5) .* extrema(skipmissing(map.matrix)),
+    clims=(0,1.1) .* extrema(skipmissing(map.matrix)),
     margin=0.5Plots.Measures.cm,
     kargs...
 )
@@ -69,4 +69,25 @@ function heatmap(
         size, framestyle, grid, clims, margin,
         kargs...
     )
+end
+
+@testitem "contact plots" begin
+    using PDBTools
+    using Plots
+    tmpplot = tempname()*".png"
+    ats = read_pdb(PDBTools.DIMERPDB)
+    cA = select(ats, "chain A")
+    cB = select(ats, "chain B")
+    plt = heatmap(contact_map(cA, cB))
+    savefig(plt, tmpplot)
+    @test isfile(tmpplot)
+    plt = heatmap(contact_map(cA, cB; discrete=false))
+    savefig(plt, tmpplot)
+    @test isfile(tmpplot)
+    plt = heatmap(contact_map(cA))
+    savefig(plt, tmpplot)
+    @test isfile(tmpplot)
+    plt = heatmap(contact_map(cA; discrete=false))
+    savefig(plt, tmpplot)
+    @test isfile(tmpplot)
 end

@@ -279,9 +279,9 @@ end
     # dimer
     ats = read_pdb(PDBTools.DIMERPDB)
     cA = select(ats, "chain A")
-    cC = select(ats, "chain C")
-    map = contact_map(cA, cC)
-
-
-
+    cB = select(ats, "chain B")
+    map = contact_map(cA, cB)
+    @test sum(map.matrix) == 17
+    map = contact_map(cA, cB; discrete=false)
+    @test sum(skipmissing(map.matrix)) ≈ 58.00371f0
 end
