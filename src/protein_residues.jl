@@ -293,7 +293,7 @@ julia> using PDBTools
 julia> remove_custom_protein_residues!();
 
 julia> add_protein_residue!("sA", PDBTools.protein_residues["ALA"])
-PDBTools.ProteinResidue("sA", "ALA", "A", "Aliphatic", false, false, 71.037114, 71.0779, 0, true)
+PDBTools.ProteinResidue("sA", "ALA", "A", "Aliphatic", false, true, 71.037114, 71.0779, 0, true)
 
 julia> isprotein(Atom(resname="sA"))
 true
@@ -340,7 +340,7 @@ julia> using PDBTools
 julia> remove_custom_protein_residues!(); # clean up
 
 julia> add_protein_residue!("sA", PDBTools.protein_residues["ALA"])
-PDBTools.ProteinResidue("sA", "ALA", "A", "Aliphatic", false, false, 71.037114, 71.0779, 0, true)
+PDBTools.ProteinResidue("sA", "ALA", "A", "Aliphatic", false, true, 71.037114, 71.0779, 0, true)
 
 julia> isprotein(Atom(resname="sA"))
 true

@@ -27,7 +27,7 @@ julia> using PDBTools
 julia> remove_custom_protein_residues!();
 
 julia> add_protein_residue!("NEW", PDBTools.protein_residues["ALA"])
-PDBTools.ProteinResidue("NEW", "ALA", "A", "Aliphatic", false, false, 71.037114, 71.0779, 0, true)
+PDBTools.ProteinResidue("NEW", "ALA", "A", "Aliphatic", false, true, 71.037114, 71.0779, 0, true)
 
 julia> atom = Atom(resname="NEW");
 
