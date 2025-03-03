@@ -346,14 +346,29 @@ function print_short_atom_list(io::IO, atoms::AbstractVector{<:Atom})
     end
 end
 
-function Base.show(io::IO, atom::Atom)
-    print(io, atom_line(atom))
+function Base.show(io::IO, ::MIME"text/plain", at::Atom)
+    if get(io, :compact, false)::Bool
+        print(io, "$(index(at))$(name(at))-$(resname(at))-$(chain(at))-$(resnum(at))")
+    else
+        println(io, atom_title)
+        print(io, atom_line(at))
+    end
 end
 
-function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
-    println(io, "   $(typeof(atoms)) with $(length(atoms)) atoms with fields:")
-    print_short_atom_list(io, atoms)
+function Base.show(io::IO, at::Atom)
+    if get(io, :compact, false)::Bool
+        print(io, "$(index(at))$(name(at))-$(resname(at))-$(chain(at))-$(resnum(at))")
+    else
+        print(io, atom_line(at))
+    end
 end
+
+#function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
+    #println(io, "   $(typeof(atoms)) with $(length(atoms)) atoms with fields:")
+    #println(io, atom_title)
+#    print(io, atoms)
+    #print_short_atom_list(io, atoms)
+#end
 
 #
 # atom properties on the structure
@@ -605,9 +620,9 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
-function Base.show(io::IO, atoms::AbstractVector{Atom})
-    println(io, " Structure file with ", length(atoms), " atoms. ")
-end
+#function Base.show(io::IO, atoms::AbstractVector{Atom})
+#    println(io, " Structure file with ", length(atoms), " atoms. ")
+#end
 
 @testitem "fetch atomic element properties" setup=[AllocTest] begin
     using PDBTools
