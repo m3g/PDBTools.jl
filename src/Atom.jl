@@ -383,8 +383,12 @@ end
 Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
 function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}})
-
-
+    println(io, typeof(vecat), "[ ")
+    for v in vecat
+        show(io, v; compact=true)
+        println(io)
+    end
+    print(io, "]")
 end
 
 #
