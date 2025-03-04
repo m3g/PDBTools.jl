@@ -189,7 +189,7 @@ end
 #
 function Base.show(io::IO, ::MIME"text/plain", residue::Residue)
     println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
-    print_short_atom_list(io, @view residue.atoms[residue.range])
+    show(io, @view residue.atoms[residue.range]; type=false)
 end
 
 function Base.show(io::IO, residues::EachResidue)
@@ -198,6 +198,29 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
     print(io, "   $(typeof(residues)) with $(length(residues)) residues.")
+end
+
+@testitem "residue show" begin
+    using PDBTools
+    using ShowMethodTesting
+    ats = read_pdb(PDBTools.SMALLPDB)
+    r = eachresidue(ats)
+    @test parse_show(r) ≈ "Iterator with 3 residues."
+    rc = collect(r)
+    @test parse_show(rc) ≈ "Vector{Residue} with 3 residues."
+    @test parse_show(rc[1]) ≈ """
+     Residue of name ALA with 12 atoms.
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+    ⋮
+       8  HB1     ALA     A        1        1  -10.428  -14.602   -7.600  1.00  0.00     1    PROT         8
+       9  HB2     ALA     A        1        1   -9.200  -13.413   -8.098  1.00  0.00     1    PROT         9
+      10  HB3     ALA     A        1        1   -9.164  -15.063   -8.765  1.00  0.00     1    PROT        10
+      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
+      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
+    """
 end
 
 #
