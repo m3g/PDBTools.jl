@@ -320,55 +320,72 @@ julia> atoms[1] # default show method
 ```
 
 """
-function printatom(io::IO, atom::Atom)
-    println(io, atom_title)
-    println(io, atom_line(atom))
-end
-printatom(atom::Atom) = printatom(stdout, atom)
-
-#
-# Print a formatted list of atoms
-#
-function print_short_atom_list(io::IO, atoms::AbstractVector{<:Atom})
-    println(io, atom_title)
-    for i = 1:min(length(atoms), 3)
-        print(io, atom_line(atoms[i]))
-        i == length(atoms) || print(io, "\n")
-    end
-    if length(atoms) == 7
-        println(io, atom_line(atoms[4]))
-    elseif length(atoms) > 7
-        @printf(io, "%57s\n", "⋮ ")
-    end
-    for i = max(4, length(atoms) - 2):length(atoms)
-        print(io, atom_line(atoms[i]))
-        i == length(atoms) || print(io, "\n")
+function printatom(io::IO, at::Atom; compact=false, title=!compact, newline=false)
+    title && println(io, atom_title)
+    ln = newline ? '\n' : ""
+    if !compact
+        print(io, atom_line(at), ln)
+    else
+        print(io, "Atom($(index(at))$(name(at)),$(resname(at))$(chain(at))$(resnum(at)))", ln)
     end
 end
+printatom(atom::Atom; kargs...) = printatom(stdout, atom; kargs...)
 
 function Base.show(io::IO, ::MIME"text/plain", at::Atom)
     if get(io, :compact, false)::Bool
-        print(io, "$(index(at))$(name(at))-$(resname(at))-$(chain(at))-$(resnum(at))")
+        printatom(io, at; compact=true)
     else
+        printatom(io, at; compact=false)
+    end
+end
+
+function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing)
+    lines, cols = displaysize(stdout)
+    natprint = min(lines-5, length(ats))
+    io_compact = get(io, :compact, false)::Bool
+    if !io_compact && cols >= 115 && !(compact == true) && natprint > 5
+        println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         println(io, atom_title)
-        print(io, atom_line(at))
+        idot = div(natprint,2)
+        if length(ats) > natprint
+            dots = true
+        else
+            dots = false
+        end
+        for i in 1:natprint-1
+            if dots && i == idot
+                println(io, "⋮")
+            else
+                if i <= idot
+                    printatom(io, ats[i]; compact=false, title=false, newline=true)
+                else
+                    printatom(io, ats[end-natprint+i]; compact=false, title=false, newline=true)
+                end
+            end
+        end
+        printatom(ats[end]; compact=false, title=false, newline=false)
+    else # compact vector printing
+        print(io,"$(typeof(ats))[ ")
+        maxatcols = min(length(ats), div(cols, 25))
+        for i in 1:maxatcols - 1
+            printatom(io, ats[i]; compact=true, title=false, newline=false)
+            print(io, ", ")
+        end
+        if length(ats) <= maxatcols
+            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            print(io, " ]")
+        else
+            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            print(io, "…")
+        end
     end
 end
+Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
-function Base.show(io::IO, at::Atom)
-    if get(io, :compact, false)::Bool
-        print(io, "$(index(at))$(name(at))-$(resname(at))-$(chain(at))-$(resnum(at))")
-    else
-        print(io, atom_line(at))
-    end
+function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}})
+
+
 end
-
-#function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
-    #println(io, "   $(typeof(atoms)) with $(length(atoms)) atoms with fields:")
-    #println(io, atom_title)
-#    print(io, atoms)
-    #print_short_atom_list(io, atoms)
-#end
 
 #
 # atom properties on the structure
@@ -678,3 +695,4 @@ end
     show(buff, [at])
     @test String(take!(buff)) == "PDBTools.Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
 end
+
