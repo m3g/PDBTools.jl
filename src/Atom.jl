@@ -339,13 +339,13 @@ function Base.show(io::IO, ::MIME"text/plain", at::Atom)
     end
 end
 
-function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=4)
+function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=4, type=true, title=true)
     lines, cols = displaysize(stdout)
     natprint = min(lines-5, length(ats))
     io_compact = get(io, :compact, false)::Bool
     if !io_compact && cols >= 115 && !(compact == true) && lines > 4 
-        println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
-        println(io, atom_title)
+        type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
+        title && println(io, atom_title)
         idot = div(natprint,2)
         if length(ats) > natprint
             dots = true
