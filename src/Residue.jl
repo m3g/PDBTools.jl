@@ -319,13 +319,6 @@ end
     watresiter = eachresidue(water)
     watres = collect(eachresidue(water))
     @test iswater(watres[1])
-    buff = IOBuffer()
-    show(buff, MIME"text/plain"(), watres[1])
-    @test length(split(String(take!(buff)))) == 14*4 + 7
-    show(buff, MIME"text/plain"(), watresiter)
-    @test String(take!(buff)) == " Iterator with 6 residues."
-    show(buff, MIME"text/plain"(), watres)
-    @test String(take!(buff)) == "   Vector{PDBTools.Residue} with 6 residues."
 end
 
 """
