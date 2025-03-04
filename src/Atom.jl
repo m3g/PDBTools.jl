@@ -36,7 +36,13 @@ julia> atoms = read_pdb(PDBTools.SMALLPDB)
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
        3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
-                                                       ⋮
+       4  HT3     ALA     A        1        1   -8.652  -15.208   -4.741  0.00  0.00     1    PROT         4
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
+⋮
+      29  HB1     ASP     A        3        3   -4.417   -9.552   -9.060  0.00  0.00     1    PROT        29
+      30  HB2     ASP     A        3        3   -5.543   -9.911   -7.784  1.00  0.00     1    PROT        30
+      31   CG     ASP     A        3        3   -5.867  -10.850   -9.684  1.00  0.00     1    PROT        31
+      32  OD1     ASP     A        3        3   -5.451  -10.837  -10.863  1.00  0.00     1    PROT        32
       33  OD2     ASP     A        3        3   -6.974  -11.289   -9.300  1.00  0.00     1    PROT        33
       34    C     ASP     A        3        3   -2.626  -10.480   -7.749  1.00  0.00     1    PROT        34
       35    O     ASP     A        3        3   -1.940  -10.014   -8.658  1.00  0.00     1    PROT        35
@@ -316,6 +322,7 @@ julia> printatom(atoms[1])
       13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
 
 julia> atoms[1] # default show method
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
       13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
 ```
 
@@ -347,11 +354,7 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
         idot = div(natprint,2)
-        if length(ats) > natprint
-            dots = true
-        else
-            dots = false
-        end
+        dots = length(ats) > natprint
         for i in 1:natprint-1
             if dots && i == idot
                 println(io, "⋮")
@@ -363,7 +366,7 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=
                 end
             end
         end
-        printatom(ats[end]; compact=false, title=false, newline=false)
+        printatom(io, ats[end]; compact=false, title=false, newline=false)
     else # compact vector printing
         maxatcols = min(length(ats), div(cols, 25))
         print(io,repeat(' ', indent)*"[ ")
