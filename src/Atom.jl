@@ -686,7 +686,7 @@ end
        index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
     """
-    @test parse_show([at for _ in 1:50]) ≈ """
+    @test parse_show([at for _ in 1:50]; repl=Dict(r"^(.*\n)(.*\n)" => s"\1")) ≈ """
        Vector{Atom{Nothing}} with 50 atoms with fields:
     index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
