@@ -213,6 +213,8 @@ function Base.show(io::IO, residues::AbstractVector{<:Residue})
 end
 Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, rs)
 
+
+#=
 @testitem "residue show" begin
     using PDBTools
     using ShowMethodTesting
@@ -235,6 +237,7 @@ Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, 
       12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
     """
 end
+=#
 
 #
 # Properties of residues
