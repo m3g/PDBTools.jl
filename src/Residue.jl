@@ -187,22 +187,31 @@ end
 #
 # io show functions
 #
-function Base.show(io::IO, residue::Residue)
-    if get(io, :compact, false)::Bool
-        print(io, "Residue($(name(residue))$(resnum(residue))$(chain(residue)))")
+function Base.show(io::IO, residue::Residue; compact=false, newline=false)
+    ln = newline ? '\n' : ""
+    if get(io, :compact, false)::Bool || compact
+        print(io, "$(name(residue))$(resnum(residue))$(chain(residue))$ln")
     else
         println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
         show(io, @view residue.atoms[residue.range]; type=false)
     end
 end
 
-function Base.show(io::IO, residues::EachResidue)
+ function Base.show(io::IO, residues::EachResidue)
     print(io, " Iterator with $(length(residues)) residues.")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
-    print(io, "   $(typeof(residues)) with $(length(residues)) residues.")
+function Base.show(io::IO, residues::AbstractVector{<:Residue})
+    println("$(length(residues))-element $(typeof(residues)):")
+    iot = IOBuffer()
+    vstr = String[]
+    for r in residues
+        show(iot, r; compact=true)
+        push!(vstr, String(take!(iot)))
+    end
+    show(io, vstr)
 end
+Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, rs)
 
 @testitem "residue show" begin
     using PDBTools
