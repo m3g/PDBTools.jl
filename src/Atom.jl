@@ -338,7 +338,7 @@ function printatom(io::IO, at::Atom; compact=false, title=!compact, newline=fals
 end
 printatom(atom::Atom; kargs...) = printatom(stdout, atom; kargs...)
 
-function Base.show(io::IO, ::MIME"text/plain", at::Atom)
+function Base.show(io::IO, at::Atom)
     if get(io, :compact, false)::Bool
         printatom(io, at; compact=true)
     else
