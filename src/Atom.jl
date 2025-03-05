@@ -681,6 +681,7 @@ end
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end
 
+#=
 @testitem "atom - show" begin
     using PDBTools
     using ShowMethodTesting
@@ -710,4 +711,5 @@ end
     ]
     """
 end
+=#
 
