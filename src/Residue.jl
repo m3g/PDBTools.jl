@@ -187,9 +187,13 @@ end
 #
 # io show functions
 #
-function Base.show(io::IO, ::MIME"text/plain", residue::Residue)
-    println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
-    show(io, @view residue.atoms[residue.range]; type=false)
+function Base.show(io::IO, residue::Residue)
+    if get(io, :compact, false)::Bool
+        print(io, "Residue($(name(residue))$(resnum(residue))$(chain(residue)))")
+    else
+        println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
+        show(io, @view residue.atoms[residue.range]; type=false)
+    end
 end
 
 function Base.show(io::IO, residues::EachResidue)
