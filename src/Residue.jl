@@ -214,8 +214,6 @@ function Base.show(io::IO, residues::AbstractVector{<:Residue})
 end
 Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, rs)
 
-
-#=
 @testitem "residue show" begin
     using PDBTools
     using ShowMethodTesting
@@ -223,22 +221,16 @@ Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, 
     r = eachresidue(ats)
     @test parse_show(r) ≈ "Iterator with 3 residues."
     rc = collect(r)
-    @test parse_show(rc) ≈ "Vector{Residue} with 3 residues."
-    @test parse_show(rc[1]) ≈ """
+    @test parse_show(rc) ≈ """
+        3-element Vector{Residue}:
+        ["ALA1A", "CYS2A", "ASP3A"]
+    """
+    @test parse_show(rc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
      Residue of name ALA with 12 atoms.
     index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
-       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
-    ⋮
-       8  HB1     ALA     A        1        1  -10.428  -14.602   -7.600  1.00  0.00     1    PROT         8
-       9  HB2     ALA     A        1        1   -9.200  -13.413   -8.098  1.00  0.00     1    PROT         9
-      10  HB3     ALA     A        1        1   -9.164  -15.063   -8.765  1.00  0.00     1    PROT        10
-      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
-      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
     """
 end
-=#
 
 #
 # Properties of residues

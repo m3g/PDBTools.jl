@@ -675,26 +675,20 @@ end
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end
 
-#=
 @testitem "atom - show" begin
     using PDBTools
     using ShowMethodTesting
-    ENV["LINES"] = 120
-    ENV["COLUMNS"] = 10
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
     at = Atom(;segname="X")
     @test parse_show(at) ≈ """
        index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
     """
-    @test parse_show([at for _ in 1:50]) ≈ """
+    # regex keeps only the first three lines
+    @test parse_show([at for _ in 1:50]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
        Vector{Atom{Nothing}} with 50 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-      ⋮
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
     """
     @test parse_show(Dict(1 => [at, at, at])) ≈ """
@@ -708,5 +702,4 @@ end
     ]
     """
 end
-=#
 
