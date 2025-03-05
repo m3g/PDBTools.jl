@@ -17,7 +17,8 @@ julia> using PDBTools
 julia> pdb = wget("1LBD");
 
 julia> residues = collect(eachresidue(pdb))
-   Vector{Residue} with 238 residues.
+238-element Vector{Residue}:
+["SER225A", "ALA226A", "ASN227A", "GLU228A", "ASP229A", "MET230A", "PRO231A", "VAL232A", "GLU233A", "ARG234A"  …  "GLU453A", "MET454A", "LEU455A", "GLU456A", "ALA457A", "PRO458A", "HIS459A", "GLN460A", "MET461A", "THR462A"]
 
 julia> resnum.(residues[1:3])
 3-element Vector{Int32}:
@@ -202,7 +203,7 @@ end
 end
 
 function Base.show(io::IO, residues::AbstractVector{<:Residue})
-    println("$(length(residues))-element $(typeof(residues)):")
+    println(io, "$(length(residues))-element $(typeof(residues)):")
     iot = IOBuffer()
     vstr = String[]
     for r in residues
