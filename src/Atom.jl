@@ -349,7 +349,7 @@ function Base.show(io::IO, at::Atom)
 end
 
 function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=4, type=true, title=true)
-    lines, cols = displaysize(stdout)
+    lines, cols = displaysize(io)
     natprint = min(lines-5, length(ats))
     io_compact = get(io, :compact, false)::Bool
     if !io_compact && cols >= 115 && !(compact == true) && lines > 4 
