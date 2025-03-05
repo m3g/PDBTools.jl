@@ -360,7 +360,7 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=
         end
         printatom(io, ats[end]; compact=false, title=false, newline=false)
     else # compact vector printing
-        maxatcols = min(length(ats), div(cols, 25))
+        maxatcols = max(1,min(length(ats), div(cols, 25)))
         print(io,repeat(' ', indent)*"[ ")
         for i in 1:maxatcols - 1
             printatom(io, ats[i]; compact=true, title=false, newline=false)
@@ -677,17 +677,20 @@ end
 @testitem "atom - show" begin
     using PDBTools
     using ShowMethodTesting
+    ENV["LINES"] = 120
+    ENV["COLUMNS"] = 10
     at = Atom(;segname="X")
     @test parse_show(at) ≈ """
        index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
     """
-    @test parse_show([at for _ in 1:50]; repl=Dict(r"^(.*\n)(.*\n)" => s"\1")) ≈ """
+    @test parse_show([at for _ in 1:50]) ≈ """
        Vector{Atom{Nothing}} with 50 atoms with fields:
-    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-       ⋮
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+      ⋮
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
