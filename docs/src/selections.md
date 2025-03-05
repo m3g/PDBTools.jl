@@ -214,14 +214,7 @@ julia> residues[1]
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
-       4  HT3     ALA     A        1        1   -8.652  -15.208   -4.741  0.00  0.00     1    PROT         4
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
-       6   HA     ALA     A        1        1   -8.185  -15.947   -6.894  1.00  0.00     1    PROT         6
-       7   CB     ALA     A        1        1   -9.383  -14.465   -7.880  1.00  0.00     1    PROT         7
-       8  HB1     ALA     A        1        1  -10.428  -14.602   -7.600  1.00  0.00     1    PROT         8
-       9  HB2     ALA     A        1        1   -9.200  -13.413   -8.098  1.00  0.00     1    PROT         9
-      10  HB3     ALA     A        1        1   -9.164  -15.063   -8.765  1.00  0.00     1    PROT        10
+⋮
       11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
       12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
 ```
