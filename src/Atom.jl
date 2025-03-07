@@ -342,13 +342,16 @@ function Base.show(io::IO, at::Atom)
     end
 end
 
-function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=4, type=true, title=true)
+function Base.show(io::IO, ats::AbstractVector{<:Atom})
     lines, cols = displaysize(io)
     haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
     haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
     natprint = min(lines-5, length(ats))
-    io_compact = get(io, :compact, false)::Bool
-    if !io_compact && cols >= 115 && !(compact == true) && lines > 4 
+    compact = get(io, :compact, false)::Bool
+    indent = get(io, :indent, 0)::Int
+    type = get(io, :type, true)::Bool
+    title = get(io, :title, true)::Bool
+    if !compact && cols >= 115 && lines > 4 
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
         idot = div(natprint,2) + 1
@@ -384,14 +387,28 @@ end
 Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
 function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}})
+    lines, cols = displaysize(io)
+    haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
+    haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
+    natprint = min(lines-5, length(vecat))
+    dots = length(vecat) > natprint
+    idot = div(natprint,2) + 1
     println(io, typeof(vecat), "[ ")
-    for v in vecat
-        show(io, v; compact=true, indent=4)
-        println(io)
+    for i in 1:natprint-1
+        if dots && i == idot
+            println(io, "⋮")
+        else
+            iprint = i <= idot ? i : lastindex(vecat)-natprint+i
+            show(IOContext(io, :compact => true, :indent => 4), vecat[iprint])
+            println(io)
+        end
     end
+    show(io, vecat[end]; compact=true, indent=4)
+    println(io)
     print(io, "]")
 end
 
+#
 #
 # atom properties on the structure
 #

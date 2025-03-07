@@ -188,13 +188,15 @@ end
 #
 # io show functions
 #
-function Base.show(io::IO, residue::Residue; compact=false, newline=false)
+function Base.show(io::IO, residue::Residue)
+    newline = get(io, :newline, true)::Bool 
+    compact = get(io, :compact, false)::Bool
     ln = newline ? '\n' : ""
-    if get(io, :compact, false)::Bool || compact
+    if compact
         print(io, "$(name(residue))$(resnum(residue))$(chain(residue))$ln")
     else
         println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
-        show(io, @view residue.atoms[residue.range]; type=false)
+        show(IOContext(io, :type => false), @view residue.atoms[residue.range])
     end
 end
 
@@ -207,7 +209,7 @@ function Base.show(io::IO, residues::AbstractVector{<:Residue})
     iot = IOBuffer()
     vstr = String[]
     for r in residues
-        show(iot, r; compact=true)
+        show(IOContext(iot, :compact => true, :newline => false), r)
         push!(vstr, String(take!(iot)))
     end
     show(io, vstr)
