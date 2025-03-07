@@ -17,7 +17,8 @@ julia> using PDBTools
 julia> pdb = wget("1LBD");
 
 julia> residues = collect(eachresidue(pdb))
-   Vector{Residue} with 238 residues.
+238-element Vector{Residue}:
+["SER225A", "ALA226A", "ASN227A", "GLU228A", "ASP229A", "MET230A", "PRO231A", "VAL232A", "GLU233A", "ARG234A"  …  "GLU453A", "MET454A", "LEU455A", "GLU456A", "ALA457A", "PRO458A", "HIS459A", "GLN460A", "MET461A", "THR462A"]
 
 julia> resnum.(residues[1:3])
 3-element Vector{Int32}:
@@ -187,17 +188,50 @@ end
 #
 # io show functions
 #
-function Base.show(io::IO, ::MIME"text/plain", residue::Residue)
-    println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
-    print_short_atom_list(io, @view residue.atoms[residue.range])
+function Base.show(io::IO, residue::Residue; compact=false, newline=false)
+    ln = newline ? '\n' : ""
+    if get(io, :compact, false)::Bool || compact
+        print(io, "$(name(residue))$(resnum(residue))$(chain(residue))$ln")
+    else
+        println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
+        show(io, @view residue.atoms[residue.range]; type=false)
+    end
 end
 
-function Base.show(io::IO, residues::EachResidue)
+ function Base.show(io::IO, residues::EachResidue)
     print(io, " Iterator with $(length(residues)) residues.")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
-    print(io, "   $(typeof(residues)) with $(length(residues)) residues.")
+function Base.show(io::IO, residues::AbstractVector{<:Residue})
+    println(io, "$(length(residues))-element $(typeof(residues)):")
+    iot = IOBuffer()
+    vstr = String[]
+    for r in residues
+        show(iot, r; compact=true)
+        push!(vstr, String(take!(iot)))
+    end
+    show(io, vstr)
+end
+Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, rs)
+
+@testitem "residue show" begin
+    using PDBTools
+    using ShowMethodTesting
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
+    ats = read_pdb(PDBTools.SMALLPDB)
+    r = eachresidue(ats)
+    @test parse_show(r) ≈ "Iterator with 3 residues."
+    rc = collect(r)
+    @test parse_show(rc; repl=Dict("PDBTools." => "")) ≈ """
+        3-element Vector{Residue}:
+        ["ALA1A", "CYS2A", "ASP3A"]
+    """
+    @test parse_show(rc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
+     Residue of name ALA with 12 atoms.
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+    """
 end
 
 #
@@ -296,13 +330,6 @@ end
     watresiter = eachresidue(water)
     watres = collect(eachresidue(water))
     @test iswater(watres[1])
-    buff = IOBuffer()
-    show(buff, MIME"text/plain"(), watres[1])
-    @test length(split(String(take!(buff)))) == 14*4 + 7
-    show(buff, MIME"text/plain"(), watresiter)
-    @test String(take!(buff)) == " Iterator with 6 residues."
-    show(buff, MIME"text/plain"(), watres)
-    @test String(take!(buff)) == "   Vector{PDBTools.Residue} with 6 residues."
 end
 
 """

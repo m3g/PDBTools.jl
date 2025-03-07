@@ -35,9 +35,7 @@ julia> atoms = read_pdb(PDBTools.SMALLPDB)
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
-                                                       ⋮
-      33  OD2     ASP     A        3        3   -6.974  -11.289   -9.300  1.00  0.00     1    PROT        33
+⋮
       34    C     ASP     A        3        3   -2.626  -10.480   -7.749  1.00  0.00     1    PROT        34
       35    O     ASP     A        3        3   -1.940  -10.014   -8.658  1.00  0.00     1    PROT        35
 
@@ -269,7 +267,7 @@ const atom_title = @sprintf(
     "segname",
     "index_pdb"
 )
-atom_line(atom::Atom) = @sprintf(
+atom_line(atom::Atom; indent=0) = repeat(' ', indent)*@sprintf(
     "%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i",
     atom.index,
     atom.name,
@@ -295,6 +293,10 @@ atom_line(atom::Atom) = @sprintf(
     buff = IOBuffer()
     printatom(buff, atoms[1])
     @test length(split(String(take!(buff)))) == 28
+    printatom(buff, atoms[1]; compact=true) 
+    @test String(take!(buff)) == "Atom(1N-ALA1A)"
+    # just test reaching this line
+    @test printatom(atoms[1]; compact=true) === nothing
 end
 
 """
@@ -316,43 +318,78 @@ julia> printatom(atoms[1])
       13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
 
 julia> atoms[1] # default show method
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
       13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
 ```
 
 """
-function printatom(io::IO, atom::Atom)
-    println(io, atom_title)
-    println(io, atom_line(atom))
+function printatom(io::IO, at::Atom; compact=false, title=!compact, newline=false, indent=0)
+    title && println(io, atom_title)
+    ln = newline ? '\n' : ""
+    if !compact
+        print(io, atom_line(at; indent), ln)
+    else
+        print(io, repeat(' ', indent)*"Atom($(index(at))$(name(at))-$(resname(at))$(resnum(at))$(chain(at)))", ln)
+    end
 end
-printatom(atom::Atom) = printatom(stdout, atom)
+printatom(atom::Atom; kargs...) = printatom(stdout, atom; kargs...)
 
-#
-# Print a formatted list of atoms
-#
-function print_short_atom_list(io::IO, atoms::AbstractVector{<:Atom})
-    println(io, atom_title)
-    for i = 1:min(length(atoms), 3)
-        print(io, atom_line(atoms[i]))
-        i == length(atoms) || print(io, "\n")
-    end
-    if length(atoms) == 7
-        println(io, atom_line(atoms[4]))
-    elseif length(atoms) > 7
-        @printf(io, "%57s\n", "⋮ ")
-    end
-    for i = max(4, length(atoms) - 2):length(atoms)
-        print(io, atom_line(atoms[i]))
-        i == length(atoms) || print(io, "\n")
+function Base.show(io::IO, at::Atom)
+    if get(io, :compact, false)::Bool
+        printatom(io, at; compact=true)
+    else
+        printatom(io, at; compact=false)
     end
 end
 
-function Base.show(io::IO, atom::Atom)
-    print(io, atom_line(atom))
+function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=4, type=true, title=true)
+    lines, cols = displaysize(io)
+    haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
+    haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
+    natprint = min(lines-5, length(ats))
+    io_compact = get(io, :compact, false)::Bool
+    if !io_compact && cols >= 115 && !(compact == true) && lines > 4 
+        type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
+        title && println(io, atom_title)
+        idot = div(natprint,2) + 1
+        dots = length(ats) > natprint
+        for i in 1:natprint-1
+            if dots && i == idot
+                println(io, "⋮")
+            else
+                if i <= idot
+                    printatom(io, ats[i]; compact=false, title=false, newline=true)
+                else
+                    printatom(io, ats[end-natprint+i]; compact=false, title=false, newline=true)
+                end
+            end
+        end
+        printatom(io, ats[end]; compact=false, title=false, newline=false)
+    else # compact vector printing
+        maxatcols = max(1,min(length(ats), div(cols, 25)))
+        print(io,repeat(' ', indent)*"[ ")
+        for i in 1:maxatcols - 1
+            printatom(io, ats[i]; compact=true, title=false, newline=false)
+            print(io, ", ")
+        end
+        if length(ats) <= maxatcols
+            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            print(io, " ]")
+        else
+            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            print(io, "…")
+        end
+    end
 end
+Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
-function Base.show(io::IO, ::MIME"text/plain", atoms::AbstractVector{<:Atom})
-    println(io, "   $(typeof(atoms)) with $(length(atoms)) atoms with fields:")
-    print_short_atom_list(io, atoms)
+function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}})
+    println(io, typeof(vecat), "[ ")
+    for v in vecat
+        show(io, v; compact=true, indent=4)
+        println(io)
+    end
+    print(io, "]")
 end
 
 #
@@ -483,8 +520,6 @@ function get_element_property(at::Atom, ::Val{property}) where {property}
     end
 end
 
-
-
 """
     atomic_number(atom::Atom)
 
@@ -605,9 +640,9 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
-function Base.show(io::IO, atoms::AbstractVector{Atom})
-    println(io, " Structure file with ", length(atoms), " atoms. ")
-end
+#function Base.show(io::IO, atoms::AbstractVector{Atom})
+#    println(io, " Structure file with ", length(atoms), " atoms. ")
+#end
 
 @testitem "fetch atomic element properties" setup=[AllocTest] begin
     using PDBTools
@@ -645,21 +680,30 @@ end
 end
 
 @testitem "atom - show" begin
-    using PDBTools: print_short_atom_list
+    using PDBTools
+    using ShowMethodTesting
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
     at = Atom(;segname="X")
-    buff = IOBuffer()
-    show(buff, at)
-    @test length(split(String(take!(buff)))) == 14
-    print_short_atom_list(buff, [at, at])
-    @test length(split(String(take!(buff)))) == 14*3
-    print_short_atom_list(buff, [at for _ in 1:6])
-    @test length(split(String(take!(buff)))) == 14*7
-    print_short_atom_list(buff, [at for _ in 1:7])
-    @test length(split(String(take!(buff)))) == 14*8
-    print_short_atom_list(buff, [at for _ in 1:8])
-    @test length(split(String(take!(buff)))) == 14*7 + 1
-    print_short_atom_list(buff, [at for _ in 1:9])
-    @test length(split(String(take!(buff)))) == 14*7 + 1
-    show(buff, [at])
-    @test String(take!(buff)) == "PDBTools.Atom{Nothing}[       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0]"
+    @test parse_show(at) ≈ """
+       index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    # regex keeps only the first three lines
+    @test parse_show([at for _ in 1:50]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1", r"PDBTools." => "")) ≈ """
+       Vector{Atom{Nothing}} with 50 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    @test parse_show(Dict(1 => [at, at, at]); repl=Dict("PDBTools." => "")) ≈ """
+    Dict{Int64, Vector{Atom{Nothing}}} with 1 entry:
+       1 =>     [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+    """
+    @test parse_show([[at, at], [at, at, at]]; repl=Dict("PDBTools." => "")) ≈ """
+    Vector{Vector{Atom{Nothing}}}[ 
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+    ]
+    """
 end
+

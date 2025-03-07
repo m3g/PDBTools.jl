@@ -3,6 +3,8 @@ Pkg.add("Documenter")
 using Documenter
 using Plots
 using PDBTools
+ENV["LINES"] = 10 
+ENV["COLUMNS"] = 120
 makedocs(
     modules = [
         PDBTools, 
