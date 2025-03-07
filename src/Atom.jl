@@ -390,7 +390,7 @@ function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractV
     lines, cols = displaysize(io)
     haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
     haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
-    natprint = min(lines-5, length(vecat))
+    natprint = min(lines-4, length(vecat))
     dots = length(vecat) > natprint
     idot = div(natprint,2) + 1
     println(io, typeof(vecat), "[ ")
@@ -403,12 +403,37 @@ function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractV
             println(io)
         end
     end
-    show(io, vecat[end]; compact=true, indent=4)
-    println(io)
-    print(io, "]")
+    show(IOContext(io, :compact => true, :indent => 4), vecat[end])
+    print(io, " ]")
 end
 
-#
+@testitem "atom - show" begin
+    using PDBTools
+    using ShowMethodTesting
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
+    at = Atom(;segname="X")
+    @test parse_show(at) ≈ """
+       index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    # regex keeps only the first three lines
+    @test parse_show([at for _ in 1:50]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1", r"PDBTools." => "")) ≈ """
+       Vector{Atom{Nothing}} with 50 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    @test parse_show(Dict(1 => [at, at, at]); repl=Dict("PDBTools." => "")) ≈ """
+    Dict{Int64, Vector{Atom{Nothing}}} with 1 entry:
+       1 =>     [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+    """
+    @test parse_show([[at, at], [at, at, at]]; repl=Dict("PDBTools." => "")) ≈ """
+    Vector{Vector{Atom{Nothing}}}[ 
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ] ]
+    """
+end
+
 #
 # atom properties on the structure
 #
@@ -694,33 +719,5 @@ end
     @test atomic_symbol(at) == :N
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
-end
-
-@testitem "atom - show" begin
-    using PDBTools
-    using ShowMethodTesting
-    ENV["LINES"] = 10
-    ENV["COLUMNS"] = 120
-    at = Atom(;segname="X")
-    @test parse_show(at) ≈ """
-       index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-    """
-    # regex keeps only the first three lines
-    @test parse_show([at for _ in 1:50]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1", r"PDBTools." => "")) ≈ """
-       Vector{Atom{Nothing}} with 50 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-    """
-    @test parse_show(Dict(1 => [at, at, at]); repl=Dict("PDBTools." => "")) ≈ """
-    Dict{Int64, Vector{Atom{Nothing}}} with 1 entry:
-       1 =>     [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-    """
-    @test parse_show([[at, at], [at, at, at]]; repl=Dict("PDBTools." => "")) ≈ """
-    Vector{Vector{Atom{Nothing}}}[ 
-        [ Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-    ]
-    """
 end
 
