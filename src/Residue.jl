@@ -221,7 +221,7 @@ Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, 
     r = eachresidue(ats)
     @test parse_show(r) ≈ "Iterator with 3 residues."
     rc = collect(r)
-    @test parse_show(rc) ≈ """
+    @test parse_show(rc; repl=Dict("PDBTools." => "")) ≈ """
         3-element Vector{Residue}:
         ["ALA1A", "CYS2A", "ASP3A"]
     """
