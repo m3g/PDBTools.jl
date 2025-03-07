@@ -295,6 +295,8 @@ atom_line(atom::Atom; indent=0) = repeat(' ', indent)*@sprintf(
     @test length(split(String(take!(buff)))) == 28
     printatom(buff, atoms[1]; compact=true) 
     @test String(take!(buff)) == "Atom(1N-ALA1A)"
+    # just test reaching this line
+    @test printatom(atoms[1]; compact=true) === nothing
 end
 
 """
