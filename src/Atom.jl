@@ -293,6 +293,8 @@ atom_line(atom::Atom; indent=0) = repeat(' ', indent)*@sprintf(
     buff = IOBuffer()
     printatom(buff, atoms[1])
     @test length(split(String(take!(buff)))) == 28
+    printatom(buff, atoms[1]; compact=true) 
+    @test String(take!(buff)) == "Atom(1N-ALA1A)"
 end
 
 """
