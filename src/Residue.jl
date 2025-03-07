@@ -217,6 +217,8 @@ Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, 
 @testitem "residue show" begin
     using PDBTools
     using ShowMethodTesting
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
     ats = read_pdb(PDBTools.SMALLPDB)
     r = eachresidue(ats)
     @test parse_show(r) ≈ "Iterator with 3 residues."
