@@ -351,6 +351,8 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
     indent = get(io, :indent, 0)::Int
     type = get(io, :type, true)::Bool
     title = get(io, :title, true)::Bool
+    comma = get(io, :comma, true)::Bool
+    braces = get(io, :braces, true)::Bool
     if !compact && cols >= 115 && lines > 4 
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
@@ -370,14 +372,15 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
         printatom(io, ats[end]; compact=false, title=false, newline=false)
     else # compact vector printing
         maxatcols = max(1,min(length(ats), div(cols, 25)))
-        print(io,repeat(' ', indent)*"[ ")
+        print(io, repeat(' ', indent))
+        braces && print(io,"[ ")
         for i in 1:maxatcols - 1
             printatom(io, ats[i]; compact=true, title=false, newline=false)
-            print(io, ", ")
+            comma ? print(io, ", ") : print(io, " ")
         end
         if length(ats) <= maxatcols
             printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
-            print(io, " ]")
+            braces ? print(io, " ]") : print(io, "")
         else
             printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
             print(io, "…")
@@ -386,7 +389,7 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
 end
 Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
-function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}})
+function Base.show(io::IO, vecat::AbstractVector{<:AbstractVector{<:Atom}})
     lines, cols = displaysize(io)
     haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
     haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
@@ -405,6 +408,30 @@ function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractV
     end
     show(IOContext(io, :compact => true, :indent => 4), vecat[end])
     print(io, " ]")
+end
+
+function Base.show(io::IO, mat::AbstractMatrix{<:Atom})
+    title = get(io, :title, true)::Bool
+    newline = get(io, :newline, true)::Bool
+    ioc = IOContext(io, :compact => true, :braces => false, :comma => false, :indent => 4, :title => title)
+    title && print(ioc, " $(size(mat,1))x$(size(mat,2)) $(typeof(mat))" )
+    newline && println(io)
+    for row in 1:length(eachrow(mat))-1
+        show(ioc, vec(row))
+        println(io)
+    end
+    show(ioc, last(eachrow(mat)))
+end
+
+function Base.show(io::IO, vecmat::AbstractVector{<:AbstractMatrix{<:Atom}})
+    title = get(io, :title, true)::Bool
+    title && print(io, " $(typeof(vecmat))" )
+    ioc = IOContext(io, :title => false, :newline => false)
+    for mat in vecmat
+        print(ioc, "\n [")
+        show(ioc, mat)
+        print(ioc, "]")
+    end
 end
 
 @testitem "atom - show" begin
@@ -681,10 +708,6 @@ function mass(atoms::AbstractVector{<:Atom})
     end
     return totmass
 end
-
-#function Base.show(io::IO, atoms::AbstractVector{Atom})
-#    println(io, " Structure file with ", length(atoms), " atoms. ")
-#end
 
 @testitem "fetch atomic element properties" setup=[AllocTest] begin
     using PDBTools
