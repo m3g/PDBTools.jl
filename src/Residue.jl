@@ -189,32 +189,18 @@ end
 # io show functions
 #
 function Base.show(io::IO, residue::Residue)
-    newline = get(io, :newline, true)::Bool 
     compact = get(io, :compact, false)::Bool
-    ln = newline ? '\n' : ""
     if compact
-        print(io, "$(name(residue))$(resnum(residue))$(chain(residue))$ln")
+        print(io, "$(name(residue))$(resnum(residue))$(chain(residue))")
     else
         println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
         show(IOContext(io, :type => false), @view residue.atoms[residue.range])
     end
 end
 
- function Base.show(io::IO, residues::EachResidue)
+function Base.show(io::IO, residues::EachResidue)
     print(io, " Iterator with $(length(residues)) residues.")
 end
-
-function Base.show(io::IO, residues::AbstractVector{<:Residue})
-    println(io, "$(length(residues))-element $(typeof(residues)):")
-    iot = IOBuffer()
-    vstr = String[]
-    for r in residues
-        show(IOContext(iot, :compact => true, :newline => false), r)
-        push!(vstr, String(take!(iot)))
-    end
-    show(io, vstr)
-end
-Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, rs)
 
 @testitem "residue show" begin
     using PDBTools
@@ -226,8 +212,11 @@ Base.show(io::IO, ::MIME"text/plain", rs::AbstractVector{<:Residue}) = show(io, 
     @test parse_show(r) ≈ "Iterator with 3 residues."
     rc = collect(r)
     @test parse_show(rc; repl=Dict("PDBTools." => "")) ≈ """
-        3-element Vector{Residue}:
-        ["ALA1A", "CYS2A", "ASP3A"]
+    3-element Vector{Residue}[ 
+        ALA1A
+        CYS2A
+        ASP3A
+    ]
     """
     @test parse_show(rc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
      Residue of name ALA with 12 atoms.
