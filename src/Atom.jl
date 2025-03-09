@@ -347,10 +347,15 @@ function Base.show(io::IO, at::Atom)
     )
 end
 
+function _displaysize(io)
+    lines, columns = displaysize(io)
+    haskey(ENV, "LINES") && (lines = parse(Int, ENV["LINES"]))
+    haskey(ENV, "COLUMNS") && (columns = parse(Int, ENV["COLUMNS"]))
+    return lines, columns
+end
+
 function Base.show(io::IO, ats::AbstractVector{<:Atom})
-    lines, cols = displaysize(io)
-    haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
-    haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
+    lines, cols = _displaysize(io)
     natprint = min(lines-5, length(ats))
     compact = get(io, :compact, false)::Bool
     indent = get(io, :indent, 0)::Int
@@ -394,9 +399,7 @@ end
 Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
 function Base.show(io::IO, vecat::AbstractVector{<:AbstractVector{<:Atom}})
-    lines, cols = displaysize(io)
-    haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
-    haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
+    lines, _ = _displaysize(io)
     nvecprint = min(lines-5, length(vecat))
     dots = length(vecat) > nvecprint
     idot = div(nvecprint,2) + 1
