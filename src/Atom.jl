@@ -417,30 +417,6 @@ function Base.show(io::IO, vecat::AbstractVector{<:AbstractVector{<:Atom}})
     print(io, " ]")
 end
 
-function Base.show(io::IO, mat::AbstractMatrix{<:Atom})
-    title = get(io, :title, true)::Bool
-    newline = get(io, :newline, true)::Bool
-    ioc = IOContext(io, :compact => true, :braces => false, :comma => false, :indent => 4, :title => title)
-    title && print(ioc, " $(size(mat,1))x$(size(mat,2)) $(typeof(mat))" )
-    newline && println(io)
-    for row in 1:length(eachrow(mat))-1
-        show(ioc, vec(mat[row, :]))
-        println(io)
-    end
-    show(ioc, last(eachrow(mat)))
-end
-
-function Base.show(io::IO, vecmat::AbstractVector{<:AbstractMatrix{<:Atom}})
-    title = get(io, :title, true)::Bool
-    title && print(io, " $(typeof(vecmat))" )
-    ioc = IOContext(io, :title => false, :newline => false)
-    for mat in vecmat
-        print(ioc, "\n [")
-        show(ioc, mat)
-        print(ioc, "]")
-    end
-end
-
 @testitem "atom - show" begin
     using PDBTools
     using ShowMethodTesting
