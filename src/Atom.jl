@@ -368,11 +368,8 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
             if dots && i == idot
                 println(io, "⋮")
             else
-                if i <= idot
-                    show(ioc, ats[i])
-                else
-                    show(ioc, ats[end-natprint+i])
-                end
+                iprint = i <= idot ? i : lastindex(ats)-natprint+i
+                show(ioc, ats[iprint])
             end
         end
         show(IOContext(ioc, :newline => false), ats[end])
@@ -400,22 +397,28 @@ function Base.show(io::IO, vecat::AbstractVector{<:AbstractVector{<:Atom}})
     lines, cols = displaysize(io)
     haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
     haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
-    natprint = min(lines-4, length(vecat))
-    dots = length(vecat) > natprint
-    idot = div(natprint,2) + 1
-    println(io, typeof(vecat), "[ ")
-    for i in 1:natprint-1
+    nvecprint = min(lines-5, length(vecat))
+    dots = length(vecat) > nvecprint
+    idot = div(nvecprint,2) + 1
+    compact = get(io, :compact, true)::Bool
+    indent = get(io, :indent, 4)::Int
+    ioc = IOContext(io, :compact => compact, :indent => 0)
+    println(io, "$(length(vecat))-element $(typeof(vecat))[ ")
+    for i in 1:nvecprint-1
+        print(io, repeat(' ', indent))
         if dots && i == idot
             println(io, "⋮")
         else
-            iprint = i <= idot ? i : lastindex(vecat)-natprint+i
-            show(IOContext(io, :compact => true, :indent => 4), vecat[iprint])
+            iprint = i <= idot ? i : lastindex(vecat)-nvecprint+i
+            show(ioc, vecat[iprint])
             println(io)
         end
     end
-    show(IOContext(io, :compact => true, :indent => 4), vecat[end])
-    print(io, " ]")
+    print(io, repeat(' ', indent))
+    show(ioc, vecat[end])
+    print(io, "\n]")
 end
+Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}}) = show(io, vecat)
 
 @testitem "atom - show" begin
     using PDBTools
@@ -438,9 +441,15 @@ end
        1 =>     [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
     """
     @test parse_show([[at, at], [at, at, at]]; repl=Dict("PDBTools." => "")) ≈ """
-    Vector{Vector{Atom{Nothing}}}[ 
+    2-element Vector{Vector{Atom{Nothing}}}[ 
         [ Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ] ]
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ] 
+    ]
+    """
+    @test parse_show([ at at at ; at at at ]; repl=Dict("PDBTools." => "")) ≈ """
+    2×3 Matrix{Atom{Nothing}}:
+    Atom(0X-XXX0X)  Atom(0X-XXX0X)  Atom(0X-XXX0X)
+    Atom(0X-XXX0X)  Atom(0X-XXX0X)  Atom(0X-XXX0X)
     """
 end
 
