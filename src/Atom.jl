@@ -398,12 +398,12 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
 end
 Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
-function Base.show(io::IO, vecat::AbstractVector{<:AbstractVector{<:Atom}})
+function Base.show(io::IO, vecat::AbstractVector{<:AbstractVecOrMat{<:Atom}})
     lines, _ = _displaysize(io)
     nvecprint = min(lines-5, length(vecat))
     dots = length(vecat) > nvecprint
     idot = div(nvecprint,2) + 1
-    compact = get(io, :compact, true)::Bool
+    compact = eltype(vecat) <: AbstractMatrix ? true : get(io, :compact, true)::Bool
     indent = get(io, :indent, 4)::Int
     ioc = IOContext(io, :compact => compact, :indent => 0)
     println(io, "$(length(vecat))-element $(typeof(vecat))[ ")
@@ -421,7 +421,7 @@ function Base.show(io::IO, vecat::AbstractVector{<:AbstractVector{<:Atom}})
     show(ioc, vecat[end])
     print(io, "\n]")
 end
-Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}}) = show(io, vecat)
+Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVecOrMat{<:Atom}}) = show(io, vecat)
 
 @testitem "atom - show" begin
     using PDBTools
@@ -453,6 +453,16 @@ Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:A
     2×3 Matrix{Atom{Nothing}}:
     Atom(0X-XXX0X)  Atom(0X-XXX0X)  Atom(0X-XXX0X)
     Atom(0X-XXX0X)  Atom(0X-XXX0X)  Atom(0X-XXX0X)
+    """
+    @test parse_show([ [ at at at; at at at ] for _ in 1:20 ]; 
+        repl=Dict(r"^((?:[^\n]*\n){2}).*"s => s"\1", "PDBTools." => "")) ≈ """
+    20-element Vector{Matrix{Atom{Nothing}}}[ 
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    ⋮
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    ]
     """
 end
 
