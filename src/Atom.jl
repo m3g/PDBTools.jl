@@ -335,61 +335,135 @@ end
 printatom(atom::Atom; kargs...) = printatom(stdout, atom; kargs...)
 
 function Base.show(io::IO, at::Atom)
-    if get(io, :compact, false)::Bool
-        printatom(io, at; compact=true)
-    else
-        printatom(io, at; compact=false)
-    end
+    compact = get(io, :compact, false)::Bool
+    title = get(io, :title, !compact)::Bool
+    newline = get(io, :newline, false)::Bool
+    indent = get(io, :indent, 0)::Int
+    printatom(io, at; 
+        compact = compact,
+        title = title,
+        newline = newline,
+        indent = indent,
+    )
 end
 
-function Base.show(io::IO, ats::AbstractVector{<:Atom}; compact=nothing, indent=4, type=true, title=true)
-    lines, cols = displaysize(io)
-    haskey(ENV, "LINES") && (lines = parse(Int,ENV["LINES"]))
-    haskey(ENV, "COLUMNS") && (cols = parse(Int,ENV["COLUMNS"]))
+function _displaysize(io)
+    lines, columns = displaysize(io)
+    haskey(ENV, "LINES") && (lines = parse(Int, ENV["LINES"]))
+    haskey(ENV, "COLUMNS") && (columns = parse(Int, ENV["COLUMNS"]))
+    return lines, columns
+end
+
+function Base.show(io::IO, ats::AbstractVector{<:Atom})
+    lines, cols = _displaysize(io)
     natprint = min(lines-5, length(ats))
-    io_compact = get(io, :compact, false)::Bool
-    if !io_compact && cols >= 115 && !(compact == true) && lines > 4 
+    compact = get(io, :compact, false)::Bool
+    indent = get(io, :indent, 0)::Int
+    type = get(io, :type, true)::Bool
+    title = get(io, :title, true)::Bool
+    comma = get(io, :comma, true)::Bool
+    braces = get(io, :braces, true)::Bool
+    if !compact && cols >= 115 && lines > 4 
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
         idot = div(natprint,2) + 1
         dots = length(ats) > natprint
+        ioc = IOContext(io, :compact => false, :title => false, :newline => true)
         for i in 1:natprint-1
             if dots && i == idot
                 println(io, "⋮")
             else
-                if i <= idot
-                    printatom(io, ats[i]; compact=false, title=false, newline=true)
-                else
-                    printatom(io, ats[end-natprint+i]; compact=false, title=false, newline=true)
-                end
+                iprint = i <= idot ? i : lastindex(ats)-natprint+i
+                show(ioc, ats[iprint])
             end
         end
-        printatom(io, ats[end]; compact=false, title=false, newline=false)
+        show(IOContext(ioc, :newline => false), ats[end])
     else # compact vector printing
+        ioc = IOContext(io, :compact => true, :title => false, :newline => false)
         maxatcols = max(1,min(length(ats), div(cols, 25)))
-        print(io,repeat(' ', indent)*"[ ")
+        print(io, repeat(' ', indent))
+        braces && print(io,"[ ")
         for i in 1:maxatcols - 1
-            printatom(io, ats[i]; compact=true, title=false, newline=false)
-            print(io, ", ")
+            show(ioc, ats[i])
+            comma ? print(io, ", ") : print(io, " ")
         end
         if length(ats) <= maxatcols
-            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
-            print(io, " ]")
+            show(ioc, ats[maxatcols])
+            braces ? print(io, " ]") : print(io, "")
         else
-            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            show(ioc, ats[maxatcols])
             print(io, "…")
         end
     end
 end
 Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, ats)
 
-function Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVector{<:Atom}})
-    println(io, typeof(vecat), "[ ")
-    for v in vecat
-        show(io, v; compact=true, indent=4)
-        println(io)
+function Base.show(io::IO, vecat::AbstractVector{<:AbstractVecOrMat{<:Atom}})
+    lines, _ = _displaysize(io)
+    nvecprint = min(lines-5, length(vecat))
+    dots = length(vecat) > nvecprint
+    idot = div(nvecprint,2) + 1
+    compact = eltype(vecat) <: AbstractMatrix ? true : get(io, :compact, true)::Bool
+    indent = get(io, :indent, 4)::Int
+    ioc = IOContext(io, :compact => compact, :indent => 0)
+    println(io, "$(length(vecat))-element $(typeof(vecat))[ ")
+    for i in 1:nvecprint-1
+        print(io, repeat(' ', indent))
+        if dots && i == idot
+            println(io, "⋮")
+        else
+            iprint = i <= idot ? i : lastindex(vecat)-nvecprint+i
+            show(ioc, vecat[iprint])
+            println(io)
+        end
     end
-    print(io, "]")
+    print(io, repeat(' ', indent))
+    show(ioc, vecat[end])
+    print(io, "\n]")
+end
+Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVecOrMat{<:Atom}}) = show(io, vecat)
+
+@testitem "atom - show" begin
+    using PDBTools
+    using ShowMethodTesting
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
+    at = Atom(;segname="X")
+    @test parse_show(at) ≈ """
+       index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    # regex keeps only the first three lines
+    @test parse_show([at for _ in 1:50]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1", r"PDBTools." => "")) ≈ """
+       Vector{Atom{Nothing}} with 50 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    @test parse_show(Dict(1 => [at, at, at]); repl=Dict("PDBTools." => "")) ≈ """
+    Dict{Int64, Vector{Atom{Nothing}}} with 1 entry:
+       1 =>     [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+    """
+    @test parse_show([[at, at], [at, at, at]]; repl=Dict("PDBTools." => "")) ≈ """
+    2-element Vector{Vector{Atom{Nothing}}}[ 
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X) ]
+        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ] 
+    ]
+    """
+    @test parse_show([ at at at ; at at at ]; repl=Dict("PDBTools." => "")) ≈ """
+    2×3 Matrix{Atom{Nothing}}:
+    Atom(0X-XXX0X)  Atom(0X-XXX0X)  Atom(0X-XXX0X)
+    Atom(0X-XXX0X)  Atom(0X-XXX0X)  Atom(0X-XXX0X)
+    """
+    @test parse_show([ [ at at at; at at at ] for _ in 1:20 ]; 
+        repl=Dict(r"^((?:[^\n]*\n){2}).*"s => s"\1", "PDBTools." => "")) ≈ """
+    20-element Vector{Matrix{Atom{Nothing}}}[ 
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    ⋮
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    ]
+    """
 end
 
 #
@@ -640,10 +714,6 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
-#function Base.show(io::IO, atoms::AbstractVector{Atom})
-#    println(io, " Structure file with ", length(atoms), " atoms. ")
-#end
-
 @testitem "fetch atomic element properties" setup=[AllocTest] begin
     using PDBTools
     using BenchmarkTools
@@ -677,33 +747,5 @@ end
     @test atomic_symbol(at) == :N
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
-end
-
-@testitem "atom - show" begin
-    using PDBTools
-    using ShowMethodTesting
-    ENV["LINES"] = 10
-    ENV["COLUMNS"] = 120
-    at = Atom(;segname="X")
-    @test parse_show(at) ≈ """
-       index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-    """
-    # regex keeps only the first three lines
-    @test parse_show([at for _ in 1:50]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1", r"PDBTools." => "")) ≈ """
-       Vector{Atom{Nothing}} with 50 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
-    """
-    @test parse_show(Dict(1 => [at, at, at]); repl=Dict("PDBTools." => "")) ≈ """
-    Dict{Int64, Vector{Atom{Nothing}}} with 1 entry:
-       1 =>     [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-    """
-    @test parse_show([[at, at], [at, at, at]]; repl=Dict("PDBTools." => "")) ≈ """
-    Vector{Vector{Atom{Nothing}}}[ 
-        [ Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-        [ Atom(0X-XXX0X), Atom(0X-XXX0X), Atom(0X-XXX0X) ]
-    ]
-    """
 end
 

@@ -206,8 +206,11 @@ julia> using PDBTools
 julia> protein = read_pdb(PDBTools.SMALLPDB);
 
 julia> residues = collect(eachresidue(protein))
-3-element Vector{Residue}:
-["ALA1A", "CYS2A", "ASP3A"]
+3-element Vector{Residue}[
+    ALA1A
+    CYS2A
+    ASP3A
+]
 
 julia> residues[1]
  Residue of name ALA with 12 atoms.
