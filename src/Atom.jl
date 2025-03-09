@@ -335,11 +335,16 @@ end
 printatom(atom::Atom; kargs...) = printatom(stdout, atom; kargs...)
 
 function Base.show(io::IO, at::Atom)
-    if get(io, :compact, false)::Bool
-        printatom(io, at; compact=true)
-    else
-        printatom(io, at; compact=false)
-    end
+    compact = get(io, :compact, false)::Bool
+    title = get(io, :title, !compact)::Bool
+    newline = get(io, :newline, false)::Bool
+    indent = get(io, :indent, 0)::Int
+    printatom(io, at; 
+        compact = compact,
+        title = title,
+        newline = newline,
+        indent = indent,
+    )
 end
 
 function Base.show(io::IO, ats::AbstractVector{<:Atom})
@@ -358,31 +363,33 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
         title && println(io, atom_title)
         idot = div(natprint,2) + 1
         dots = length(ats) > natprint
+        ioc = IOContext(io, :compact => false, :title => false, :newline => true)
         for i in 1:natprint-1
             if dots && i == idot
                 println(io, "⋮")
             else
                 if i <= idot
-                    printatom(io, ats[i]; compact=false, title=false, newline=true)
+                    show(ioc, ats[i])
                 else
-                    printatom(io, ats[end-natprint+i]; compact=false, title=false, newline=true)
+                    show(ioc, ats[end-natprint+i])
                 end
             end
         end
-        printatom(io, ats[end]; compact=false, title=false, newline=false)
+        show(IOContext(ioc, :newline => false), ats[end])
     else # compact vector printing
+        ioc = IOContext(io, :compact => true, :title => false, :newline => false)
         maxatcols = max(1,min(length(ats), div(cols, 25)))
         print(io, repeat(' ', indent))
         braces && print(io,"[ ")
         for i in 1:maxatcols - 1
-            printatom(io, ats[i]; compact=true, title=false, newline=false)
+            show(ioc, ats[i])
             comma ? print(io, ", ") : print(io, " ")
         end
         if length(ats) <= maxatcols
-            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            show(ioc, ats[maxatcols])
             braces ? print(io, " ]") : print(io, "")
         else
-            printatom(io, ats[maxatcols]; compact=true, title=false, newline=false)
+            show(ioc, ats[maxatcols])
             print(io, "…")
         end
     end
@@ -417,7 +424,7 @@ function Base.show(io::IO, mat::AbstractMatrix{<:Atom})
     title && print(ioc, " $(size(mat,1))x$(size(mat,2)) $(typeof(mat))" )
     newline && println(io)
     for row in 1:length(eachrow(mat))-1
-        show(ioc, vec(row))
+        show(ioc, vec(mat[row, :]))
         println(io)
     end
     show(ioc, last(eachrow(mat)))
