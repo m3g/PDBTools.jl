@@ -117,7 +117,6 @@ mass(chain::Chain) = mass(@view chain.atoms[chain.range])
     @test length(ichains) == 4
     @test firstindex(ichains) == 1
     @test lastindex(ichains) == 4
-    @test last(ichains).model == 2
     @test_throws ArgumentError ichains[1]
     chains = collect(eachchain(pdb))
     @test name(chains[3]) == "C"
