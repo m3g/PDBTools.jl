@@ -60,7 +60,7 @@ function Segment(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
         atoms[i].segname,
     )
 end
-Segment(atoms::AbstractVector{<:Atom}) = Segment(atoms, 1:length(atoms))
+Segment(atoms::AbstractVector{<:Atom}) = Segment(atoms, eachindex(atoms))
 
 function Base.getindex(segment::Segment, i::Int)
     i >= 0 || throw(ArgumentError("Index must be in 1:$(length(segment))"))
@@ -168,11 +168,14 @@ end
     @test s[1].range == 1:1905
     @test s[2].range == 1906:1997
     @test name(s[1]) == "A"
+    @test segname(s[1]) == "A"
     @test length(s[1]) == 1905
     @test mass(s[1]) ≈ 25222.33909999994
     @test size(s[1]) == (1905,)
     @test eltype(s[1]) == Atom
     @test sum(mass(at) for at in s[1]) ≈ 25222.33909999994
+    s = Segment(atoms[1:1905])
+    @test name(s) == "A"
 end
 
 #
