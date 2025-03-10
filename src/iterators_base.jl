@@ -17,7 +17,7 @@ struct EachStructuralElement{STYPE, T<:AbstractVector{<:Atom}}
 end
 EachStructuralElement{STYPE}(atoms) where {STYPE} = EachStructuralElement{STYPE, typeof(atoms)}(atoms)
 
-Base.collect(sit::EachStructuralElement) = collect(s, sit)
+Base.collect(sit::EachStructuralElement{STYPE}) where {STYPE} = collect(STYPE, sit)
 Base.length(sit::EachStructuralElement) = sum(1 for s in sit)
 Base.firstindex(sit::EachStructuralElement) = 1
 Base.lastindex(sit::EachStructuralElement) = length(sit)

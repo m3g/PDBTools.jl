@@ -124,13 +124,13 @@ end
 #
 # io show functions
 #
-function Base.show(io::IO, model::Model)
+function Base.show(io::IO, mod::Model)
     compact = get(io, :compact, false)::Bool
     if compact
-        print(io, "$(name(segment))-($(length(segment)) atoms))")
+        print(io, "$(model(mod))-($(length(mod)) atoms))")
     else
-        println(io, " Segment of name $(name(segment)) with $(length(segment)) atoms.")
-        show(IOContext(io, :type => false), @view segment.atoms[segment.range])
+        println(io, " Model $(model(mod)) with $(length(mod)) atoms.")
+        show(IOContext(io, :type => false), @view mod.atoms[mod.range])
     end
 end
 
