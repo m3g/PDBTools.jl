@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Iterators · PDBTools.jl</title><meta name="title" content="Iterators · PDBTools.jl"/><meta property="og:title" content="Iterators · PDBTools.jl"/><meta property="twitter:title" content="Iterators · PDBTools.jl"/><meta name="description" content="Documentation for PDBTools.jl."/><meta property="og:description" content="Documentation for PDBTools.jl."/><meta property="twitter:description" content="Documentation for PDBTools.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="PDBTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">PDBTools.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../readwrite/">Read and Write</a></li><li><a class="tocitem" href="../selections/">Selections</a></li><li class="is-active"><a class="tocitem" href>Iterators</a><ul class="internal"><li><a class="tocitem" href="#Iterate-over-residues-(or-molecules)"><span>Iterate over residues (or molecules)</span></a></li><li><a class="tocitem" href="#Iterate-over-segments"><span>Iterate over segments</span></a></li></ul></li><li><a class="tocitem" href="../elements/">Element properties</a></li><li><a class="tocitem" href="../contacts/">Contact maps</a></li><li><a class="tocitem" href="../auxiliary/">Auxiliary functions</a></li><li><a class="tocitem" href="../examples/">Examples</a></li><li><a class="tocitem" href="../tools/">Tools</a></li><li><a class="tocitem" href="../help/">Help entries</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Iterators</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Iterators</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl/blob/main/docs/src/iterators.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Iterators"><a class="docs-heading-anchor" href="#Iterators">Iterators</a><a id="Iterators-1"></a><a class="docs-heading-anchor-permalink" href="#Iterators" title="Permalink"></a></h1><h2 id="Iterate-over-residues-(or-molecules)"><a class="docs-heading-anchor" href="#Iterate-over-residues-(or-molecules)">Iterate over residues (or molecules)</a><a id="Iterate-over-residues-(or-molecules)-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-residues-(or-molecules)" title="Permalink"></a></h2><p>The <code>eachresidue</code> iterator allows iteration over the residues of a structure (in PDB files distinct molecules are associated to different residues, thus this iterates similarly over the molecules of a structure). For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; protein = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; count(atom -&gt; resname(atom) == &quot;ALA&quot;, protein)
+12
+
+julia&gt; count(res -&gt; resname(res) == &quot;ALA&quot;, eachresidue(protein))
+1</code></pre><p>The result of the iterator can also be collected, with:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; protein = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(protein))
+3-element Vector{Residue}[
+    ALA1A
+    CYS2A
+    ASP3A
+]
+
+julia&gt; residues[1]
+ Residue of name ALA with 12 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+⋮
+      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
+      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12</code></pre><p>These residue vector <em>do not</em> copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  </p><p>It is possible also to iterate over the atoms of one or more residue:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; protein = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; m_ALA = 0.
+       for residue in eachresidue(protein)
+         if name(residue) == &quot;ALA&quot;
+           for atom in residue
+             m_ALA += mass(atom)
+           end
+         end
+       end
+       m_ALA
+73.09488999999999</code></pre><p>Which, in this simple example, results in the same as:</p><pre><code class="language-julia-repl hljs">julia&gt; sum(mass(at) for at in protein if resname(at) == &quot;ALA&quot; )
+73.09488999999999</code></pre><p>or</p><pre><code class="language-julia-repl hljs">julia&gt; sum(mass(res) for res in eachresidue(protein) if resname(res) == &quot;ALA&quot; )
+73.09488999999999</code></pre><h3 id="Reference-documentation"><a class="docs-heading-anchor" href="#Reference-documentation">Reference documentation</a><a id="Reference-documentation-1"></a><a class="docs-heading-anchor-permalink" href="#Reference-documentation" title="Permalink"></a></h3><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.Residue" href="#PDBTools.Residue"><code>PDBTools.Residue</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Residue(atoms::AbstractVector{&lt;:Atom}, range::UnitRange{Int})</code></pre><p>Residue data structure. It contains two fields: <code>atoms</code> which is a vector of <code>Atom</code> elements, and <code>range</code>, which indicates which atoms of the <code>atoms</code> vector compose the residue.</p><p>The Residue structure carries the properties of the residue or molecule of the atoms it contains, but it does not copy the original vector of atoms, only the residue meta data for each residue.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; pdb = wget(&quot;1LBD&quot;);
+
+julia&gt; residues = collect(eachresidue(pdb))
+238-element Vector{Residue}[
+    SER225A
+    ALA226A
+    ⋮
+    MET461A
+    THR462A
+]
+
+julia&gt; resnum.(residues[1:3])
+3-element Vector{Int32}:
+ 225
+ 226
+ 227
+
+julia&gt; residues[5].chain
+&quot;A&quot;
+
+julia&gt; residues[8].range
+52:58
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/94e96d80b6409bbe3979c9d1d965860a9c2f708c/src/Residue.jl#L1-L42">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachresidue" href="#PDBTools.eachresidue"><code>PDBTools.eachresidue</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachresidue(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the residues (or molecules) of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; atoms = wget(&quot;1LBD&quot;);
+
+julia&gt; length(eachresidue(atoms))
+238
+
+julia&gt; for res in eachresidue(atoms)
+         println(res)
+       end
+ Residue of name SER with 6 atoms.
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
+       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
+       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
+       4    O     SER     A      225        1   45.823   80.796   69.974 64.85  1.00     1       -         4
+       5   CB     SER     A      225        1   47.147   82.980   71.413 70.79  1.00     1       -         5
+       6   OG     SER     A      225        1   46.541   82.639   72.662 73.55  1.00     1       -         6
+
+ Residue of name ALA with 5 atoms.
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+       7    N     ALA     A      226        2   43.940   81.982   70.474 67.09  1.00     1       -         7
+       8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
+       9    C     ALA     A      226        2   41.996   80.878   69.340 59.69  1.00     1       -         9
+                                                      ...
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/94e96d80b6409bbe3979c9d1d965860a9c2f708c/src/Residue.jl#L102-L136">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.resname" href="#PDBTools.resname"><code>PDBTools.resname</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">resname(residue::Union{AbstractString,Char})</code></pre><p>Returns the residue name, given the one-letter code or residue name. Differently from <code>threeletter</code>, this function will return the force-field name if available in the list of protein residues.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; resname(&quot;ALA&quot;)
+&quot;ALA&quot;
+
+julia&gt; resname(&quot;GLUP&quot;)
+&quot;GLUP&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/94e96d80b6409bbe3979c9d1d965860a9c2f708c/src/protein_residues.jl#L147-L162">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.residuename" href="#PDBTools.residuename"><code>PDBTools.residuename</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">residuename(residue::Union{AbstractString,Char})</code></pre><p>Function to return the long residue name from other residue codes. The function is case-insensitive.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; residuename(&quot;A&quot;)
+&quot;Alanine&quot;
+
+julia&gt; residuename(&quot;Glu&quot;)
+&quot;Glutamic Acid&quot;
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/94e96d80b6409bbe3979c9d1d965860a9c2f708c/src/protein_residues.jl#L182-L198">source</a></section></article><h2 id="Iterate-over-segments"><a class="docs-heading-anchor" href="#Iterate-over-segments">Iterate over segments</a><a id="Iterate-over-segments-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-segments" title="Permalink"></a></h2><p>The <code>eachsegment</code> iterator allows iteration over the segments of a structure. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; eachsegment(ats)
+ Iterator with 2 segments.
+
+julia&gt; name.(eachsegment(ats))
+2-element Vector{InlineStrings.String7}:
+ &quot;A&quot;
+ &quot;B&quot;</code></pre><p>The result of the iterator can also be collected, with:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; s = collect(eachsegment(ats))
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]
+
+julia&gt; s[1]
+ Segment of name A with 1905 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     LYS     A      211        1   52.884   24.022   35.587  1.00 53.10     1       A         1
+       2   CA     LYS     A      211        1   52.916   24.598   36.993  1.00 53.10     1       A         2
+⋮
+    1904  OD2     ASP     A      461      243   17.538   51.009   45.748  1.00 97.43     1       A      1904
+    1905  OXT     ASP     A      461      243   14.506   47.082   47.528  1.00 97.43     1       A      1905</code></pre><p>These segment structure <em>does not</em> copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  </p><p>Iterators can be used to obtain or modify properties of the segments. Here we illustrate computing the mass of each segment and renaming segment of all atoms with the segment indices:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; s = collect(eachsegment(ats))
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]
+
+julia&gt; mass.(s)
+2-element Vector{Float64}:
+ 25222.339099999943
+  1210.7300999999993
+
+julia&gt; for (iseg, seg) in enumerate(eachsegment(ats))
+           for at in seg
+               at.segname = &quot;$(at.segname)$iseg&quot;
+           end
+       end
+
+julia&gt; collect(eachsegment(ats))
+2-element Vector{Segment}[ 
+    A1-(1905 atoms))
+    B2-(92 atoms))
+]</code></pre><h3 id="Reference-documentation-2"><a class="docs-heading-anchor" href="#Reference-documentation-2">Reference documentation</a><a class="docs-heading-anchor-permalink" href="#Reference-documentation-2" title="Permalink"></a></h3><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.Segment" href="#PDBTools.Segment"><code>PDBTools.Segment</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Segment(atoms::AbstractVector{&lt;:Atom}, range::UnitRange{Int})</code></pre><p>Segment data structure. It contains two fields: <code>atoms</code> which is a vector of <code>Atom</code> elements, and <code>range</code>, which indicates which atoms of the <code>atoms</code> vector compose the segment. Segments must be consecutive in the <code>atoms</code> vector, and are identified by having the same <code>segname</code> and <code>model</code> fields.</p><p>The Segment structure carries the properties of the segment  it contains, but it does not copy the original vector of atoms, only the segment meta data and the reference to the original vector.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; segments = collect(eachsegment(ats))
+2-element Vector{Segment}[
+    A-(1905 atoms))
+    B-(92 atoms))
+]
+
+julia&gt; segname.(segments[1:2])
+2-element Vector{InlineStrings.String7}:
+ &quot;A&quot;
+ &quot;B&quot;
+
+julia&gt; length(segments[2])
+92
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/94e96d80b6409bbe3979c9d1d965860a9c2f708c/src/Segment.jl#L1-L36">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachsegment" href="#PDBTools.eachsegment"><code>PDBTools.eachsegment</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachsegment(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the segments of a selection.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; sit = eachsegment(ats)
+ Iterator with 2 segments.
+
+julia&gt; for seg in sit
+           @show length(seg)
+       end
+length(seg) = 1905
+length(seg) = 92
+
+julia&gt; collect(sit)
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/94e96d80b6409bbe3979c9d1d965860a9c2f708c/src/Segment.jl#L79-L107">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../selections/">« Selections</a><a class="docs-footer-nextpage" href="../elements/">Element properties »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.1 on <span class="colophon-date" title="Monday 10 March 2025 14:12">Monday 10 March 2025</span>. Using Julia version 1.10.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
