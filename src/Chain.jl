@@ -56,7 +56,7 @@ _same(::Type{Chain}, at1::Atom, at2::Atom) =
     at1.chain == at2.chain && at1.model == at2.model && at1.segname == at2.segname
 
 # Constructors
-function Chain(atoms::AbstractVector{<:Atom}, range::UnitRange{<:Integer})
+function Chain(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
     i = first(range) 
     if any(!(_same(Chain, atoms[j], atoms[i])) for j in range)
         throw(ArgumentError("""\n 
@@ -66,7 +66,7 @@ function Chain(atoms::AbstractVector{<:Atom}, range::UnitRange{<:Integer})
     end
     Chain(
         atoms = atoms,
-        range = range,
+        range = UnitRange{Int}(range),
         chain = chain(atoms[i]),
         model = model(atoms[i]),
         segname = segname(atoms[i]),
@@ -113,6 +113,7 @@ mass(chain::Chain) = mass(@view chain.atoms[chain.range])
     pdb = read_pdb(PDBTools.CHAINSPDB)
     ichains = eachchain(pdb)
     @test Chain(pdb, 1:48).range == 1:48
+    @test Chain(pdb[1:48]).range == 1:48
     @test_throws ArgumentError Chain(pdb, 49:97).range 
     @test length(ichains) == 4
     @test firstindex(ichains) == 1
