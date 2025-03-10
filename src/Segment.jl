@@ -3,8 +3,9 @@
 
 Segment data structure. It contains two fields: `atoms` which is a vector of
 `Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
-compose the segment.
-
+compose the segment. Segments must be consecutive in the `atoms` vector, and
+are identified by having the same `segname` and `model` fields.
+ 
 The Segment structure carries the properties of the segment 
 it contains, but it does not copy the original vector of atoms, only the segment
 meta data and the reference to the original vector.
