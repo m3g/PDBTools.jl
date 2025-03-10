@@ -53,3 +53,10 @@ function Base.iterate(s::AbstractStructuralElement, current_atom=firstindex(s))
     current_atom > lastindex(s) && return nothing
     return (s[current_atom], current_atom + 1)
 end
+
+#
+# Default iterator show method
+#
+function Base.show(io::IO, sit::EachStructuralElement{STYPE}) where {STYPE}
+    print(io, " $STYPE iterator with length = $(length(sit))")
+end

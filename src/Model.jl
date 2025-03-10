@@ -1,14 +1,14 @@
 """
-    Model(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+    Model
 
-Model data structure. It contains two fields: `atoms` which is a vector of
-`Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
-compose the model. Models must be consecutive in the `atoms` vector, and
+Model data structure. It carries the data of a model in a PDB file.
+Models must be consecutive in the `atoms` vector, and
 are identified by having the same `model` field.
  
 The Model structure carries the properties of the model
 it contains, but it does not copy the original vector of atoms, only the model
-meta data and the reference to the original vector.
+meta data and the reference to the original vector. Thus, changes
+in the model atoms will be reflected in the original vector of atoms.
 
 ### Example
 
@@ -20,18 +20,22 @@ julia> using PDBTools
 julia> ats = wget("1RDE");
 
 julia> models = collect(eachmodel(ats))
-2-element Vector{Model}[
-    A-(1905 atoms))
-    B-(92 atoms))
+11-element Vector{Model}[ 
+    1-(488 atoms))
+    2-(488 atoms))
+    ⋮
+    10-(488 atoms))
+    11-(488 atoms))
 ]
 
-julia> segname.(models[1:2])
-2-element Vector{InlineStrings.String7}:
- "A"
- "B"
-
-julia> length(models[2])
-92
+julia> models[1]
+ Model 1 with 488 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1 "O5'"      DG     A        1        1    1.219  -10.433    3.612  1.00  1.19     1                 1
+       2 "C5'"      DG     A        1        1    0.922   -9.237    4.340  1.00  0.67     1                 2
+⋮
+     487  H21      DG     A       15       15   -0.851   -2.459    6.832  1.00  0.45     1               487
+     488  H22      DG     A       15       15   -1.519   -1.617    8.214  1.00  0.49     1               488
 
 ```
 
@@ -75,24 +79,31 @@ Iterator for the models of a selection.
 
 ### Example
 
+Here we show how to iterate over the models of a PDB file, annotate 
+the index of the first atom of each model, and collect all models.
+
 ```jldoctest
 julia> using PDBTools
 
-julia> ats = wget("1RDE");
+julia> ats = wget("8S8N");
 
 julia> models = eachmodel(ats)
  Iterator with 11 models.
 
-julia> for model in models
-           @show length(model)
+julia> first_atom = Atom[]
+       for model in models
+           push!(first_atom, model[1])
        end
-length(seg) = 1905
-length(seg) = 92
+       @show index.(first_atom);
+index.(first_atom) = Int32[1, 235, 469, 703, 937, 1171, 1405, 1639, 1873, 2107, 2341]
 
 julia> collect(models)
-2-element Vector{Segment}[ 
-    A-(1905 atoms))
-    B-(92 atoms))
+11-element Vector{Model}[
+    1-(234 atoms))
+    2-(234 atoms))
+    ⋮
+    10-(234 atoms))
+    11-(234 atoms))
 ]
 ```
 
@@ -107,27 +118,25 @@ model(model::Model) = model.number
 #
 @testitem "Model iterator" begin
     using PDBTools
-    atoms = read_pdb(PDBTools.DIMERPDB)
-    segments = eachsegment(atoms)
-    @test length(segments) == 2
-    @test firstindex(segments) == 1
-    @test lastindex(segments) == 2
-    @test_throws ArgumentError Segment(atoms, 1904:1910) 
-    @test_throws ArgumentError segments[1]
-    s = collect(segments)
-    @test name(s[1]) == "A"
-    @test name(s[2]) == "B"
-    @test s[1].range == 1:1905
-    @test s[2].range == 1906:1997
-    @test name(s[1]) == "A"
-    @test segname(s[1]) == "A"
-    @test length(s[1]) == 1905
-    @test mass(s[1]) ≈ 25222.33909999994
-    @test size(s[1]) == (1905,)
-    @test eltype(s[1]) == Atom
-    @test sum(mass(at) for at in s[1]) ≈ 25222.33909999994
-    s = Segment(atoms[1:1905])
-    @test name(s) == "A"
+    atoms = wget("8S8N");
+    modes = eachmodel(atoms)
+    @test length(models) == 11 
+    @test firstindex(models) == 1
+    @test lastindex(models) == 11 
+    @test_throws ArgumentError Model(atoms, 230:240) 
+    @test_throws ArgumentError models[1]
+    m = collect(models)
+    @test model(m[1]) == 1
+    @test model(m[2]) == 2
+    @test m[1].range == 1:234
+    @test m[2].range == 235:468
+    @test length(m[1]) == 234
+    @test mass(m[1]) ≈ 1561.8828799999928
+    @test size(m[1]) == (234,)
+    @test eltype(m[1]) == Atom
+    @test sum(mass(at) for at in m[1]) ≈ 1561.8828799999928
+    m = Model(atoms[1:234])
+    @test model(m) == 1
 end
 
 #
@@ -143,28 +152,27 @@ function Base.show(io::IO, mod::Model)
     end
 end
 
-function Base.show(io::IO, model_iterator::EachStructuralElement{Model})
-    print(io, " Iterator with $(length(model_iterator)) models.")
-end
-
 @testitem "Model show" begin
     using PDBTools
     using ShowMethodTesting
     ENV["LINES"] = 10
     ENV["COLUMNS"] = 120
-    ats = read_pdb(PDBTools.DIMERPDB)
-    s = eachsegment(ats)
-    @test parse_show(s) ≈ "Iterator with 2 segments."
-    sc = collect(s)
-    @test parse_show(sc; repl=Dict("PDBTools." => "")) ≈ """
-    2-element Vector{Segment}[ 
-    A-(1905 atoms))
-    B-(92 atoms))
+    ats = wget("8S8N")
+    m = eachmodel(ats)
+    @test parse_show(m) ≈ "Model iterator with length = 11"
+    mc = collect(m)
+    @test parse_show(mc; repl=Dict("PDBTools." => "")) ≈ """
+    11-element Vector{Model}[ 
+    1-(234 atoms))
+    2-(234 atoms))
+    ⋮
+    10-(234 atoms))
+    11-(234 atoms))
     """
-    @test parse_show(sc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
-     Segment of name A with 1905 atoms.
-    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     LYS     A      211        1   52.884   24.022   35.587  1.00 53.10     1       A         1
-       2   CA     LYS     A      211        1   52.916   24.598   36.993  1.00 53.10     1       A         2
+    @test parse_show(mc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
+     Model 1 with 234 atoms.
+     index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     DLE     A        2        1   -5.811   -0.380   -2.159  1.00  0.00     1       1         1
+       2   CA     DLE     A        2        1   -4.785   -0.493   -3.227  1.00  0.00     1       1         2
     """
 end
