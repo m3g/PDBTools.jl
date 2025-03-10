@@ -4,6 +4,8 @@ CollapsedDocStrings = true
 
 # Iterators
 
+PDBTools.jl provides lazy iterators over Residues, Segments, and Models of a structure file. The iterators behave similarly, and can be used bo computed properties of independent structural elements.
+
 ## Iterate over residues (or molecules)
 
 The `eachresidue` iterator allows iteration over the residues of a structure (in PDB files distinct molecules are associated to different residues, thus this iterates similarly over the molecules of a structure). For example:
