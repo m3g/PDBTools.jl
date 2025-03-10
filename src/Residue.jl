@@ -60,7 +60,7 @@ model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
-function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+function Residue(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
     i = range[begin]
     # Check if the range effectively corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
@@ -73,7 +73,7 @@ function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
     end
     Residue(
         atoms,
-        range,
+        UnitRange{Int}(range),
         atoms[i].resname,
         atoms[i].resname,
         atoms[i].residue,
@@ -83,7 +83,7 @@ function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
         atoms[i].segname,
     )
 end
-Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
+Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, eachindex(atoms))
 
 function Base.getindex(residue::Residue, i::Int)
     i > 0 || throw(ArgumentError("Index must be in 1:$(length(residue))"))
@@ -181,6 +181,7 @@ end
     @test length(residues) == 104
     @test name(Residue(atoms, 1:12)) == "ALA"
     @test Residue(atoms, 1:12).range == 1:12
+    @test Residue(atoms[1:12]).range == 1:12
     @test firstindex(residues) == 1
     @test lastindex(residues) == 104
     @test_throws ArgumentError residues[1]

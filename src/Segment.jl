@@ -43,7 +43,7 @@ name(segment::Segment) = segment.name
 segname(segment::Segment) = segment.name
 mass(segment::Segment) = mass(@view segment.atoms[segment.range])
 
-function Segment(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+function Segment(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
     i = range[begin]
     # Check if the range effectively corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
@@ -56,7 +56,7 @@ function Segment(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
     end
     Segment(
         atoms,
-        range,
+        UnitRange{Int}(range),
         atoms[i].segname,
     )
 end
