@@ -4,7 +4,7 @@ mass(s::AbstractStructuralElement) = mass(@view s.atoms[s.range])
 
 function Base.getindex(s::AbstractStructuralElement, i::Integer)
     i >= 0 || throw(ArgumentError("Index must be in 1:$(length(s))"))
-    (i <= length(s)) || throw(ArgumentError("$(typeof(s)) has $(length(model)) atoms, tried to fetch index $i."))
+    (i <= length(s)) || throw(ArgumentError("$(typeof(s)) has $(length(s)) atoms, tried to fetch index $i."))
     i = first(s.range) + i - 1
     s.atoms[i]
 end
