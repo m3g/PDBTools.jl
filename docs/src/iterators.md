@@ -245,3 +245,79 @@ Segment
 eachsegment
 ```
 
+## Iterate over models
+
+The `eachmodel` iterator allows iteration over the segments of a structure. For example:
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = wget("8S8N");
+
+julia> eachmodel(ats)
+ Model iterator with length = 11
+
+julia> model.(eachmodel(ats))
+11-element Vector{Int32}:
+  1
+  2
+  3
+  ⋮
+ 10
+ 11
+```
+
+The result of the iterator can also be collected, with:
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = wget("8S8N");
+
+julia> m = collect(eachmodel(ats))
+11-element Vector{Model}[
+    1-(234 atoms))
+    2-(234 atoms))
+    ⋮
+    10-(234 atoms))
+    11-(234 atoms))
+]
+
+julia> m[1]
+ Model 1 with 234 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     DLE     A        2        1   -5.811   -0.380   -2.159  1.00  0.00     1                 1
+       2   CA     DLE     A        2        1   -4.785   -0.493   -3.227  1.00  0.00     1                 2
+⋮
+     233  HT2   A1H5T     B      101       13   -5.695    5.959   -3.901  1.00  0.00     1               233
+     234  HT1   A1H5T     B      101       13   -4.693    4.974   -2.743  1.00  0.00     1               234
+```
+
+The model structure *does not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
+
+Iterators can be used to obtain or modify properties of the segments. Here we illustrate computing the mass of
+each segment and renaming segment of all atoms with the segment indices:
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = wget("8S8N");
+
+julia> center_of_mass.(eachmodel(ats))
+11-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [0.633762128213737, -0.1413050285597195, -0.21796044955626692]
+ [0.560772763043067, -0.15154922049365185, 0.1354801245061217]
+ [0.506559232784597, -0.09771757024270422, 0.030405317843908077]
+ ⋮
+ [0.3889973654414868, -0.2110381926238272, 0.21802466991599198]
+ [0.6995386823110438, -0.1537225338789714, 0.21793134264425737]
+
+```
+
+### Reference documentation
+
+```@docs
+Model
+eachmodel
+```
+

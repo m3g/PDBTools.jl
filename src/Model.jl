@@ -12,30 +12,30 @@ in the model atoms will be reflected in the original vector of atoms.
 
 ### Example
 
-In the example below, 1RDE is PDB entry with 11 models.
+In the example below, 8S8N is PDB entry with 11 models.
 
 ```jldoctest
 julia> using PDBTools
 
-julia> ats = wget("1RDE");
+julia> ats = wget("8S8N");
 
 julia> models = collect(eachmodel(ats))
-11-element Vector{Model}[ 
-    1-(488 atoms))
-    2-(488 atoms))
+11-element Vector{Model}[
+    1-(234 atoms))
+    2-(234 atoms))
     ⋮
-    10-(488 atoms))
-    11-(488 atoms))
+    10-(234 atoms))
+    11-(234 atoms))
 ]
 
 julia> models[1]
- Model 1 with 488 atoms.
+ Model 1 with 234 atoms.
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1 "O5'"      DG     A        1        1    1.219  -10.433    3.612  1.00  1.19     1                 1
-       2 "C5'"      DG     A        1        1    0.922   -9.237    4.340  1.00  0.67     1                 2
+       1    N     DLE     A        2        1   -5.811   -0.380   -2.159  1.00  0.00     1                 1
+       2   CA     DLE     A        2        1   -4.785   -0.493   -3.227  1.00  0.00     1                 2
 ⋮
-     487  H21      DG     A       15       15   -0.851   -2.459    6.832  1.00  0.45     1               487
-     488  H22      DG     A       15       15   -1.519   -1.617    8.214  1.00  0.49     1               488
+     233  HT2   A1H5T     B      101       13   -5.695    5.959   -3.901  1.00  0.00     1               233
+     234  HT1   A1H5T     B      101       13   -4.693    4.974   -2.743  1.00  0.00     1               234
 
 ```
 
