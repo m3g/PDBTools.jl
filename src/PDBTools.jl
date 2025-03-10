@@ -27,6 +27,7 @@ export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
 export add_custom_field
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
+export Segment, eachsegment
 export coor, maxmin, distance, closest
 export element, mass, element_name, element_symbol, element_symbol_string
 export formula, stoichiometry
@@ -59,6 +60,7 @@ include("./protein_residues.jl")
 #
 include("./Atom.jl")
 include("./Residue.jl")
+include("./Segment.jl")
 
 # Selection functions
 include("./select.jl")
