@@ -165,3 +165,85 @@ julia> collect(eachsegment(ats))
 Segment
 eachsegment
 ```
+
+## Iterate over models
+
+The `eachmodel` iterator enables iteration over the models of a structure. For example:
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.DIMERPDB);
+
+julia> eachsegment(ats)
+ Iterator with 2 segments.
+
+julia> name.(eachsegment(ats))
+2-element Vector{InlineStrings.String7}:
+ "A"
+ "B"
+```
+
+The result of the iterator can also be collected, with:
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.DIMERPDB);
+
+julia> s = collect(eachsegment(ats))
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]
+
+julia> s[1]
+ Segment of name A with 1905 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     LYS     A      211        1   52.884   24.022   35.587  1.00 53.10     1       A         1
+       2   CA     LYS     A      211        1   52.916   24.598   36.993  1.00 53.10     1       A         2
+⋮
+    1904  OD2     ASP     A      461      243   17.538   51.009   45.748  1.00 97.43     1       A      1904
+    1905  OXT     ASP     A      461      243   14.506   47.082   47.528  1.00 97.43     1       A      1905
+```
+
+These segment structure *does not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
+
+Iterators can be used to obtain or modify properties of the segments. Here we illustrate computing the mass of
+each segment and renaming segment of all atoms with the segment indices:
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.DIMERPDB);
+
+julia> s = collect(eachsegment(ats))
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]
+
+julia> mass.(s)
+2-element Vector{Float64}:
+ 25222.339099999943
+  1210.7300999999993
+
+julia> for (iseg, seg) in enumerate(eachsegment(ats))
+           for at in seg
+               at.segname = "$(at.segname)$iseg"
+           end
+       end
+
+julia> collect(eachsegment(ats))
+2-element Vector{Segment}[ 
+    A1-(1905 atoms))
+    B2-(92 atoms))
+]
+```
+
+### Reference documentation
+
+```@docs
+Segment
+eachsegment
+```
+
