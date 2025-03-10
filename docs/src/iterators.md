@@ -4,11 +4,12 @@ CollapsedDocStrings = true
 
 # Iterators
 
-PDBTools.jl provides lazy iterators over Residues, Segments, and Models of a structure file. The iterators behave similarly, and can be used bo computed properties of independent structural elements.
+PDBTools.jl provides lazy iterators over Residues, Chains, Segments, and Models of a structure file. The iterators behave similarly, and can be used bo computed properties of independent structural elements.
+The documentation bellow exemplifies in more detail the features associated to Residue and Chain interators, but the properties and valid for Segment and Model iterators similarly.
 
 ## Iterate over residues (or molecules)
 
-The `eachresidue` iterator allows iteration over the residues of a structure (in PDB files distinct molecules are associated to different residues, thus this iterates similarly over the molecules of a structure). For example:
+The `eachresidue` iterator enables iteration over the residues of a structure. In PDB files, distinct molecules are often treated as separate residues, so this iterator can be used to iterate over the molecules within a structure. For example:
 
 ```jldoctest
 julia> using PDBTools
@@ -22,7 +23,12 @@ julia> count(res -> resname(res) == "ALA", eachresidue(protein))
 1
 ```
 
-The result of the iterator can also be collected, with:
+Here, the first `count` counts the number of atoms with the residue name "ALA", while the second uses `eachresidue` to count the number of residues named "ALA". This highlights the distinction between residue-level and atom-level operations.
+
+### Collecting Residues into a Vector
+
+Residues produced by `eachresidue` can be collected into a vector for further processing:
+
 ```jldoctest
 julia> using PDBTools
 
@@ -45,9 +51,13 @@ julia> residues[1]
       12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
 ```
 
-These residue vector *do not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
+!!! note
+    Iterators or collected vectors *do not* create copies of the original atom data. This means that any changes made to the residue vector will directly modify the corresponding data in the original atom vector.
 
-It is possible also to iterate over the atoms of one or more residue:
+### Iterating Over Atoms Within Residues
+
+You can iterate over the atoms of one or more residues using nested loops. Here, we compute the total number of atoms of ALA residues: 
+
 ```jldoctest
 julia> using PDBTools
 
@@ -65,7 +75,7 @@ julia> n_ala_cys = 0
 23
 ```
 
-Which, in this simple example, results in the same as:
+This method produces the same result as the more concise approach:
 
 ```jldoctest 
 julia> using PDBTools
@@ -85,9 +95,122 @@ resname
 residuename
 ```
 
+## Iterate over chains
+
+The `eachchain` iterator in PDBTools enables users to iterate over the chains in a PDB structure. A PDB file may contain multiple protein chains. This iterator simplifies operations involving individual chains.
+
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chain.(eachchain(ats))              # Retrieve the names of all chains in the structure
+4-element Vector{InlineStrings.String3}:
+ "A"
+ "B"
+ "C"
+ "A"
+
+julia> model.(eachchain(ats))          # Retrieve the model numbers associated with each chain
+4-element Vector{Int32}:
+ 1
+ 1
+ 1
+ 2
+
+julia> chain_A1 = first(eachchain(ats));   # Access the first chain in the iterator
+
+julia> resname.(eachresidue(chain_A1))     # Retrieve residue names for chain A in model 1
+3-element Vector{InlineStrings.String7}:
+ "ASP"
+ "GLN"
+ "LEU"
+
+```
+In the example above, the `chain.` command retrieves the names of all chains in the structure, while  `model.` command lists the model numbers for each chain. This PDB structure contains two models for chain A, where the third residue changes from leucine (LEU) in model 1 to valine (VAL) in model 2.
+
+### Accessing Chains by Index
+
+As seen in the previous example, The `first` command allow quick access to the first chain in the iterator. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chains = collect(eachchain(ats))
+4-element Vector{Chain}[
+    Chain(A-48 atoms)
+    Chain(B-48 atoms)
+    Chain(C-48 atoms)
+    Chain(A-45 atoms)
+]
+
+julia> chain_B = chains[2]
+ Chain B with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      49    N     ASP     B        4        4  135.661  123.866  -22.311  1.00  0.00     1    ASYN        49
+      50   CA     ASP     B        4        4  136.539  123.410  -21.227  1.00  0.00     1    ASYN        50
+⋮
+      95 HD23     LEU     B        6        6  138.780  120.216  -17.864  1.00  0.00     1    ASYN        95
+      96    O     LEU     B        6        6  141.411  117.975  -21.923  1.00  0.00     1    ASYN        96
+
+```
+
+### Modifying Atom Properties in a Chain
+
+Any changes made to the atoms of a chain variable directly overwrite the properties of the original atoms in the structure. For example, modifying the occupancy and beta-factor columns of atoms in model 2 of chain A will update the corresponding properties in the original structure.
+
+In the example below, the `occup` and `beta` properties of all atoms in model 2 of chain A are set to 0.00. The changes are reflected in the original `ats` vector, demonstrating that the modifications propagate to the parent data structure.
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia> first(eachchain(ats))
+ Chain A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
+
+ 
+julia> for chain in eachchain(ats)
+           if name(chain) == "A" && model(chain) == 2
+               for atom in chain
+                   atom.occup = 0.00
+                   atom.beta = 0.00
+               end
+           end
+       end
+
+julia> first(eachchain(ats))
+ Chain A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
+
+```
+
+This behavior ensures efficient data manipulation but requires careful handling to avoid unintended changes. 
+
+### Reference documentation
+
+```@docs
+Chain
+eachchain
+```
+
 ## Iterate over segments 
 
-The `eachsegment` iterator allows iteration over the segments of a structure. For example:
+The `eachsegment` iterator enables iteration over the segments of a structure. For example:
 
 ```jldoctest
 julia> using PDBTools
@@ -168,7 +291,7 @@ eachsegment
 
 ## Iterate over models
 
-The `eachmodel` iterator allows iteration over the segments of a structure. For example:
+The `eachmodel` iterator enables iteration over the segments of a structure. For example:
 
 ```jldoctest
 julia> using PDBTools

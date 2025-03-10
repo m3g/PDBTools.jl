@@ -25,7 +25,12 @@ julia> chains = collect(eachchain(ats))
 
 julia> chains[1]
  Chain A with 48 atoms.
-[ Atom(1N-ASP1A), Atom(2CA-ASP1A), Atom(3C-ASP1A)…
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
 
 julia> mass(chains[1])
 353.37881000000016 
@@ -76,24 +81,21 @@ Iterator for the chains of a selection.
 
 ### Example
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> length(eachchain(ats))
-4
+julia> eachchain(ats)
+ Chain iterator with length = 4
 
-julia> for chain in eachchain(ats)
-            if model(chain) == 1
-                println(name(chain))
-                println(resname.(eachresidue(chain)))
-            end
-        end   
-A
-InlineStrings.String7["ASP", "GLN", "LEU"]
-B
-InlineStrings.String7["ASP", "GLN", "LEU"]
-C
-InlineStrings.String7["ASP", "GLN", "LEU"]
+julia> chains = collect(eachchain(ats))
+4-element Vector{Chain}[
+    Chain(A-48 atoms)
+    Chain(B-48 atoms)
+    Chain(C-48 atoms)
+    Chain(A-45 atoms)
+]
 ```
 
 """
