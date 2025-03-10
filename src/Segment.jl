@@ -130,7 +130,6 @@ Base.size(segment::Segment) = (length(segment.range),)
 Base.length(segment::Segment) = length(segment.range)
 Base.eltype(::Segment) = Atom
 
-
 #
 # Iterate, lazily, over the segments of a structure
 #
@@ -168,6 +167,12 @@ end
     @test name(s[2]) == "B"
     @test s[1].range == 1:1905
     @test s[2].range == 1906:1997
+    @test name(s[1]) == "A"
+    @test length(s[1]) == 1905
+    @test mass(s[1]) ≈ 25222.33909999994
+    @test size(s[1]) == (1905,)
+    @test eltype(s[1]) == Atom
+    @test sum(mass(at) for at in s[1]) ≈ 25222.33909999994
 end
 
 #
