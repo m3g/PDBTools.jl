@@ -43,7 +43,7 @@ julia> models[1]
 struct Model{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
-    number::Int
+    number::Int32
 end
 
 # Necessary for the interface: define the _same function
@@ -61,7 +61,7 @@ function Model(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
             """))
         end
     end
-    return Model(atoms, UnitRange{Int}(range), Int(atoms[i].model))
+    return Model(atoms, UnitRange{Int}(range), atoms[i].model)
 end
 Model(atoms::AbstractVector{<:Atom}) = Model(atoms, eachindex(atoms))
 
@@ -115,7 +115,7 @@ model(model::Model) = model.number
 @testitem "Model iterator" begin
     using PDBTools
     atoms = wget("8S8N");
-    modes = eachmodel(atoms)
+    models = eachmodel(atoms)
     @test length(models) == 11 
     @test firstindex(models) == 1
     @test lastindex(models) == 11 
@@ -155,7 +155,7 @@ end
     ENV["COLUMNS"] = 120
     ats = wget("8S8N")
     m = eachmodel(ats)
-    @test parse_show(m) ≈ "Model iterator with length = 11"
+    @test parse_show(m;repl=Dict("PDBTools." => "")) ≈ "Model iterator with length = 11"
     mc = collect(m)
     @test parse_show(mc; repl=Dict("PDBTools." => "")) ≈ """
     11-element Vector{Model}[ 
