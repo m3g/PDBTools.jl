@@ -83,31 +83,25 @@ Iterator for the segments of a selection.
 
 ### Example
 
-```julia-repl
-julia> atoms = wget("1LBD");
+```jldoctest
+julia> using PDBTools
 
-julia> length(eachresidue(atoms))
-238
+julia> ats = read_pdb(PDBTools.DIMERPDB);
 
-julia> for res in eachresidue(atoms)
-         println(res)
+julia> sit = eachsegment(ats)
+ Iterator with 2 segments.
+
+julia> for seg in sit
+           @show length(seg)
        end
- Residue of name SER with 6 atoms.
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
-       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
-       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
-       4    O     SER     A      225        1   45.823   80.796   69.974 64.85  1.00     1       -         4
-       5   CB     SER     A      225        1   47.147   82.980   71.413 70.79  1.00     1       -         5
-       6   OG     SER     A      225        1   46.541   82.639   72.662 73.55  1.00     1       -         6
+length(seg) = 1905
+length(seg) = 92
 
- Residue of name ALA with 5 atoms.
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       7    N     ALA     A      226        2   43.940   81.982   70.474 67.09  1.00     1       -         7
-       8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
-       9    C     ALA     A      226        2   41.996   80.878   69.340 59.69  1.00     1       -         9
-                                                      ...
-
+julia> collect(sit)
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]
 ```
 
 """
