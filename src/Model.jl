@@ -61,11 +61,7 @@ function Model(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
             """))
         end
     end
-    Model(
-        atoms,
-        UnitRange{Int}(range),
-        Int(atoms[i].model),
-    )
+    return Model(atoms, UnitRange{Int}(range), Int(atoms[i].model))
 end
 Model(atoms::AbstractVector{<:Atom}) = Model(atoms, eachindex(atoms))
 
