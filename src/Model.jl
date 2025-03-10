@@ -41,11 +41,11 @@ struct Model{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     range::UnitRange{Int}
     number::Int
 end
-model(model::Model) = model.number
 
 # Necessary for the interface: define the _same function
 _same(::Type{Model}, at1::Atom, at2::Atom) = at1.model == at2.model
 
+# Constructors
 function Model(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
     i = range[begin]
     # Check if the range effectively corresponds to a single residue (unsafe check)
@@ -65,6 +65,9 @@ function Model(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
 end
 Model(atoms::AbstractVector{<:Atom}) = Model(atoms, eachindex(atoms))
 
+#
+# Define the iterator
+#
 """
     eachmodel(atoms::AbstractVector{<:Atom})
 
@@ -96,6 +99,12 @@ julia> collect(models)
 """
 eachmodel(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Model}(atoms)
 
+# Specific getters for this type
+model(model::Model) = model.number
+
+#
+# Testing interface
+#
 @testitem "Model iterator" begin
     using PDBTools
     atoms = read_pdb(PDBTools.DIMERPDB)
