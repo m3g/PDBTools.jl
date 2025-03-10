@@ -36,6 +36,9 @@ julia> residues[5].chain
 julia> residues[8].range
 52:58
 
+julia> mass(residues[1])
+82.0385
+
 ```
 
 """
@@ -77,7 +80,7 @@ function Residue(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
         atoms[i].segname,
     )
 end
-Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, eachindex(atoms))
+Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
 """
     eachresidue(atoms::AbstractVector{<:Atom})

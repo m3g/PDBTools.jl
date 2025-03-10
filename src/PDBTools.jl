@@ -25,7 +25,8 @@ export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residue
 export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
 export add_custom_field
-export Residue, eachresidue, resname, residue, resnum, chain, model, segname
+export Residue, eachresidue, resname, residue, resnum, model, segname
+export Chain, eachchain, chain
 export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
@@ -49,6 +50,7 @@ const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
 const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
+const CHAINSPDB = joinpath(@__DIR__,"../test/chains.pdb")
 const BROKENCIF = joinpath(@__DIR__,"../test/broken.cif")
 const DIMERPDB = joinpath(@__DIR__,"../test/dimer.pdb")
 
@@ -62,6 +64,7 @@ include("./protein_residues.jl")
 include("./Atom.jl")
 include("./iterators_base.jl")
 include("./Residue.jl")
+include("./Chain.jl")
 include("./Segment.jl")
 include("./Model.jl")
 
