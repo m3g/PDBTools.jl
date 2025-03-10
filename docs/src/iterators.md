@@ -6,13 +6,6 @@ CollapsedDocStrings = true
 
 ## Iterate over residues (or molecules)
 
-```@docs
-Residue
-eachresidue
-resname
-residuename
-```
-
 The `eachresidue` iterator allows iteration over the residues of a structure (in PDB files distinct molecules are associated to different residues, thus this iterates similarly over the molecules of a structure). For example:
 
 ```jldoctest
@@ -83,12 +76,16 @@ julia> sum(mass(res) for res in eachresidue(protein) if resname(res) == "ALA" )
 73.09488999999999
 ```
 
-## Iterate over segments 
+### Reference documentation
 
 ```@docs
-Segment
-eachsegment
+Residue
+eachresidue
+resname
+residuename
 ```
+
+## Iterate over segments 
 
 The `eachsegment` iterator allows iteration over the segments of a structure. For example:
 
@@ -160,4 +157,11 @@ julia> collect(eachsegment(ats))
     A1-(1905 atoms))
     B2-(92 atoms))
 ]
+```
+
+### Reference documentation
+
+```@docs
+Segment
+eachsegment
 ```
