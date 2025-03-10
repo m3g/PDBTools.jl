@@ -28,6 +28,7 @@ export add_custom_field
 export Residue, eachresidue, resname, residue, resnum, chain, model, segname
 export residue_ticks
 export Segment, eachsegment
+export Model, eachmodel
 export coor, maxmin, distance, closest
 export element, mass, element_name, element_symbol, element_symbol_string
 export formula, stoichiometry
@@ -59,8 +60,10 @@ include("./protein_residues.jl")
 # Data structures
 #
 include("./Atom.jl")
+include("./iterators_base.jl")
 include("./Residue.jl")
 include("./Segment.jl")
+include("./Model.jl")
 
 # Selection functions
 include("./select.jl")

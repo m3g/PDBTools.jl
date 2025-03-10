@@ -377,7 +377,7 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
                 show(ioc, ats[iprint])
             end
         end
-        show(IOContext(ioc, :newline => false), ats[end])
+        length(ats) > 0 && show(IOContext(ioc, :newline => false), ats[end])
     else # compact vector printing
         ioc = IOContext(io, :compact => true, :title => false, :newline => false)
         maxatcols = max(1,min(length(ats), div(cols, 25)))
@@ -388,7 +388,7 @@ function Base.show(io::IO, ats::AbstractVector{<:Atom})
             comma ? print(io, ", ") : print(io, " ")
         end
         if length(ats) <= maxatcols
-            show(ioc, ats[maxatcols])
+            length(ats) > 0 && show(ioc, ats[maxatcols])
             braces ? print(io, " ]") : print(io, "")
         else
             show(ioc, ats[maxatcols])
@@ -462,6 +462,15 @@ Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVecOrMat{<
     ⋮
     Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
     Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
+    ]
+    """
+    @test parse_show(Atom[]; repl=Dict("PDBTools." => "")) ≈ """
+       Vector{Atom} with 0 atoms with fields:
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+    """
+    @test parse_show([ Atom[] ]; repl=Dict("PDBTools." => "")) ≈ """
+    1-element Vector{Vector{Atom}}[ 
+        [   ] 
     ]
     """
 end

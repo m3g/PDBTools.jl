@@ -1,14 +1,13 @@
 """
-    Segment(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+    Segment
 
-Segment data structure. It contains two fields: `atoms` which is a vector of
-`Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
-compose the segment. Segments must be consecutive in the `atoms` vector, and
+Segment data structure. Segments must be consecutive in the `atoms` vector, and
 are identified by having the same `segname` and `model` fields.
  
 The Segment structure carries the properties of the segment 
 it contains, but it does not copy the original vector of atoms, only the segment
-meta data and the reference to the original vector.
+meta data and the reference to the original vector. Thus, changes
+in the segment atoms will be reflected in the original vector of atoms.
 
 ### Example
 
@@ -34,47 +33,30 @@ julia> length(segments[2])
 ```
 
 """
-struct Segment{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
+struct Segment{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
     name::String7
 end
-name(segment::Segment) = segment.name
-segname(segment::Segment) = segment.name
-mass(segment::Segment) = mass(@view segment.atoms[segment.range])
 
+# Necessary for the interface: define the _same function
+_same(::Type{Segment}, at1::Atom, at2::Atom) = at1.segname == at2.segname && at1.model == at2.model
+
+# Constructors 
 function Segment(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
     i = range[begin]
     # Check if the range effectively corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
-        if atoms[j].segname != atoms[i].segname
+        if !(_same(Segment, atoms[i], atoms[j]))
             throw(ArgumentError("""\n 
                 Range $range does not correspond to a single segment.
 
             """))
         end
     end
-    Segment(
-        atoms,
-        UnitRange{Int}(range),
-        atoms[i].segname,
-    )
+    return Segment(atoms, UnitRange{Int}(range), atoms[i].segname)
 end
 Segment(atoms::AbstractVector{<:Atom}) = Segment(atoms, eachindex(atoms))
-
-function Base.getindex(segment::Segment, i::Int)
-    i >= 0 || throw(ArgumentError("Index must be in 1:$(length(segment))"))
-    (i <= length(segment)) || throw(ArgumentError("Segment has $(length(segment)) atoms, tried to fetch index $i."))
-    i = first(segment.range) + i - 1
-    segment.atoms[i]
-end
-
-#
-# Structure and function to define the eachsegment iterator
-#
-struct EachSegment{T<:AbstractVector{<:Atom}}
-    atoms::T
-end
 
 """
     eachsegment(atoms::AbstractVector{<:Atom})
@@ -89,7 +71,7 @@ julia> using PDBTools
 julia> ats = read_pdb(PDBTools.DIMERPDB);
 
 julia> sit = eachsegment(ats)
- Iterator with 2 segments.
+ Segment iterator with length = 2
 
 julia> for seg in sit
            @show length(seg)
@@ -105,47 +87,12 @@ julia> collect(sit)
 ```
 
 """
-eachsegment(atoms::AbstractVector{<:Atom}) = EachSegment(atoms)
+eachsegment(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Segment}(atoms)
 
-# Collect residues default constructor
-Base.collect(segments::EachSegment) = collect(Segment, segments)
-Base.length(segments::EachSegment) = sum(1 for segment in segments)
-Base.firstindex(segments::EachSegment) = 1
-Base.lastindex(segments::EachSegment) = length(segments)
-function Base.getindex(::EachSegment, ::Int)
-    throw(ArgumentError("""\n
-        The eachsegment iterator does not support indexing. 
-        Use collect(eachsegment(atoms)) to get an indexable list of segments.
-    """))
-end
-
-# Array interface
-Base.size(segment::Segment) = (length(segment.range),)
-Base.length(segment::Segment) = length(segment.range)
-Base.eltype(::Segment) = Atom
-
-#
-# Iterate, lazily, over the segments of a structure
-#
-same_segment(at1::Atom, at2::Atom) = at1.segname == at2.segname && at1.model == at2.model
-function Base.iterate(segments::EachSegment, current_atom=firstindex(segments.atoms))
-    current_atom > length(segments.atoms) && return nothing
-    next_atom = current_atom + 1
-    while next_atom <= length(segments.atoms) && 
-          same_segment(segments.atoms[current_atom], segments.atoms[next_atom]) 
-        next_atom += 1
-    end
-    return (Segment(segments.atoms, current_atom:next_atom-1), next_atom)
-end
-
-#
-# Iterate over atoms of one residue
-#
-function Base.iterate(segment::Segment, current_atom=firstindex(segment))
-    current_atom > lastindex(segment) && return nothing
-    return (segment[current_atom], current_atom + 1)
-end
-
+# Specific getters for this type
+name(segment::Segment) = segment.name
+segname(segment::Segment) = segment.name
+mass(segment::Segment) = mass(@view segment.atoms[segment.range])
 
 @testitem "Segment iterator" begin
     using PDBTools
@@ -185,10 +132,6 @@ function Base.show(io::IO, segment::Segment)
     end
 end
 
-function Base.show(io::IO, segments::EachSegment)
-    print(io, " Iterator with $(length(segments)) segments.")
-end
-
 @testitem "Segment show" begin
     using PDBTools
     using ShowMethodTesting
@@ -196,7 +139,7 @@ end
     ENV["COLUMNS"] = 120
     ats = read_pdb(PDBTools.DIMERPDB)
     s = eachsegment(ats)
-    @test parse_show(s) ≈ "Iterator with 2 segments."
+    @test parse_show(s; repl=Dict("PDBTools." => "")) ≈ "Segment iterator with length = 2"
     sc = collect(s)
     @test parse_show(sc; repl=Dict("PDBTools." => "")) ≈ """
     2-element Vector{Segment}[ 
