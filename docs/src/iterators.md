@@ -136,7 +136,7 @@ each segment and renaming segment of all atoms with the segment indices:
 ```jldoctest
 julia> using PDBTools
 
-julia> ats = read_pdb(PDBTools.DIMERPDB)
+julia> ats = read_pdb(PDBTools.DIMERPDB);
 
 julia> s = collect(eachsegment(ats))
 2-element Vector{Segment}[ 

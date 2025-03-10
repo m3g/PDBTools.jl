@@ -14,20 +14,21 @@ meta data and the reference to the original vector.
 ```jldoctest
 julia> using PDBTools
 
-julia> pdb = wget("1LBD");
+julia> ats = read_pdb(PDBTools.DIMERPDB);
 
-julia> segments = collect(eachsegment(pdb))
-238-element Vector{Segment}[
+julia> segments = collect(eachsegment(ats))
+2-element Vector{Segment}[
+    A-(1905 atoms))
+    B-(92 atoms))
 ]
 
-julia> segname.(segments[1:3])
-3-element Vector{Int32}:
- 225
- 226
- 227
+julia> segname.(segments[1:2])
+2-element Vector{InlineStrings.String7}:
+ "A"
+ "B"
 
-julia> length(segments[5])
-12
+julia> length(segments[2])
+92
 
 ```
 
