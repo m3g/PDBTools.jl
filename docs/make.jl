@@ -16,6 +16,7 @@ makedocs(
         "Installation" => "installation.md",
         "Read and Write" => "readwrite.md",
         "Selections" => "selections.md",
+        "Iterators" => "iterators.md",
         "Element properties" => "elements.md",
         "Contact maps" => "contacts.md",
         "Auxiliary functions" => "auxiliary.md",
