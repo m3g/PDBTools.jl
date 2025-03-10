@@ -84,7 +84,7 @@ julia> using PDBTools
 julia> ats = wget("8S8N");
 
 julia> models = eachmodel(ats)
- Iterator with 11 models.
+ Model iterator with length = 11
 
 julia> first_atom = Atom[]
        for model in models

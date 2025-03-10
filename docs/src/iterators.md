@@ -95,7 +95,7 @@ julia> using PDBTools
 julia> ats = read_pdb(PDBTools.DIMERPDB);
 
 julia> eachsegment(ats)
- Iterator with 2 segments.
+ Segment iterator with length = 2
 
 julia> name.(eachsegment(ats))
 2-element Vector{InlineStrings.String7}:
@@ -176,7 +176,7 @@ julia> using PDBTools
 julia> ats = read_pdb(PDBTools.DIMERPDB);
 
 julia> eachsegment(ats)
- Iterator with 2 segments.
+ Segment iterator with length = 2
 
 julia> name.(eachsegment(ats))
 2-element Vector{InlineStrings.String7}:

@@ -71,7 +71,7 @@ julia> using PDBTools
 julia> ats = read_pdb(PDBTools.DIMERPDB);
 
 julia> sit = eachsegment(ats)
- Iterator with 2 segments.
+ Segment iterator with length = 2
 
 julia> for seg in sit
            @show length(seg)
