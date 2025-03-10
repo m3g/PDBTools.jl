@@ -46,34 +46,32 @@ julia> residues[1]
 These residue vector *do not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
 
 It is possible also to iterate over the atoms of one or more residue:
-```julia-repl
+```jldoctest
 julia> using PDBTools
 
 julia> protein = read_pdb(PDBTools.SMALLPDB);
 
-julia> m_ALA = 0.
+julia> n_ala_cys = 0
        for residue in eachresidue(protein)
-         if name(residue) == "ALA"
-           for atom in residue
-             m_ALA += mass(atom)
-           end
-         end
+            if name(residue) in ("ALA", "CYS")
+                for atom in residue
+                   n_ala_cys += 1
+                end
+            end
        end
-       m_ALA
-73.09488999999999
+       n_ala_cys
+23
 ```
+
 Which, in this simple example, results in the same as:
 
-```julia-repl
-julia> sum(mass(at) for at in protein if resname(at) == "ALA" )
-73.09488999999999
-```
+```jldoctest 
+julia> using PDBTools
 
-or
+julia> protein = read_pdb(PDBTools.SMALLPDB);
 
-```julia-repl
-julia> sum(mass(res) for res in eachresidue(protein) if resname(res) == "ALA" )
-73.09488999999999
+julia> sum(length(r) for r in eachresidue(protein) if name(r) in ("ALA", "CYS"))
+23
 ```
 
 ### Reference documentation
