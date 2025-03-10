@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "2.1.4-DEV"
+version = "2.4.2-DEV"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -10,12 +10,19 @@ Format = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
 InlineStrings = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MolSimToolkitShared = "aea21201-7910-416e-b888-414710bebccb"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
+
+[weakdeps]
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+
+[extensions]
+Plotting = "Plots"
 
 [compat]
 Aqua = "0.8.9"
@@ -28,14 +35,17 @@ Format = "1.3"
 InlineStrings = "1.4.2"
 InteractiveUtils = "1.9"
 LinearAlgebra = "1.9"
+MolSimToolkitShared = "1.1.2"
 OrderedCollections = "1.6.3"
 Parameters = "0.12"
+Plots = "1.39"
 PrecompileTools = "1.2.1"
 Printf = "1.9"
+ShowMethodTesting = "1.0.1"
 StaticArrays = "1.6"
 Test = "1.9"
-TestItemRunner = "0.2"
-TestItems = "0.1, 1"
+TestItemRunner = "1.1"
+TestItems = "1"
 julia = "1.9"
 
 [extras]
@@ -43,9 +53,11 @@ Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+ShowMethodTesting = "aed2ae9c-e0a3-4a50-8068-bdeec279239a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Test", "TestItemRunner", "StaticArrays", "Aqua", "Documenter", "DelimitedFiles", "BenchmarkTools"]
+test = ["Test", "TestItemRunner", "StaticArrays", "Aqua", "Documenter", "DelimitedFiles", "BenchmarkTools", "Plots", "ShowMethodTesting"]

@@ -1,13 +1,12 @@
 """
-   Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+    Residue
 
-Residue data structure. It contains two fields: `atoms` which is a vector of
-`Atom` elements, and `range`, which indicates which atoms of the `atoms` vector
-compose the residue.
+Residue data structure. 
 
 The Residue structure carries the properties of the residue or molecule of the atoms
 it contains, but it does not copy the original vector of atoms, only the residue
-meta data for each residue.
+meta data for each residue. Thus, changes in the residue atoms will be reflected in the
+original vector of atoms.
 
 ### Example
 
@@ -17,7 +16,13 @@ julia> using PDBTools
 julia> pdb = wget("1LBD");
 
 julia> residues = collect(eachresidue(pdb))
-   Vector{Residue} with 238 residues.
+238-element Vector{Residue}[
+    SER225A
+    ALA226A
+    ⋮
+    MET461A
+    THR462A
+]
 
 julia> resnum.(residues[1:3])
 3-element Vector{Int32}:
@@ -37,7 +42,7 @@ julia> mass(residues[1])
 ```
 
 """
-struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
+struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
     name::String7
@@ -48,29 +53,24 @@ struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractVector{T}
     model::Int32
     segname::String7
 end
-name(residue::Residue) = residue.name
-resname(residue::Residue) = residue.resname
-residue(residue::Residue) = residue.residue
-resnum(residue::Residue) = residue.resnum
-chain(residue::Residue) = residue.chain
-model(residue::Residue) = residue.model
-segname(residue::Residue) = residue.segname
-mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
-function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+# Necessary for the interface: define the _same function
+_same(::Type{Residue}, at1::Atom, at2::Atom) = same_residue(at1, at2) 
+
+# Constructors
+function Residue(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
     i = range[begin]
     # Check if the range effectively corresponds to a single residue (unsafe check)
     for j = range[begin]+1:range[end]
-        if atoms[j].residue != atoms[i].residue
+        if !(_same(Residue, atoms[j], atoms[i]))
             throw(ArgumentError("""\n 
                 Range $range does not correspond to a single residue or molecule.
 
             """))
         end
     end
-    Residue(
-        atoms,
-        range,
+    Residue(atoms,
+        UnitRange{Int}(range),
         atoms[i].resname,
         atoms[i].resname,
         atoms[i].residue,
@@ -82,20 +82,6 @@ function Residue(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
 end
 Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
-function Base.getindex(residue::Residue, i::Int)
-    i > 0 || throw(ArgumentError("Residue index must be in 1:$(length(residue))"))
-    (i <= length(residue)) || throw(ArgumentError("Residue has $(length(residue)) atoms, tried to fetch index $i."))
-    i = first(residue.range) + i - 1
-    residue.atoms[i]
-end
-
-#
-# Structure and function to define the eachresidue iterator
-#
-struct EachResidue{T<:AbstractVector{<:Atom}}
-    atoms::T
-end
-
 """
     eachresidue(atoms::AbstractVector{<:Atom})
 
@@ -103,81 +89,45 @@ Iterator for the residues (or molecules) of a selection.
 
 ### Example
 
-```julia-repl
+```jldoctest
+julia> using PDBTools
+
 julia> atoms = wget("1LBD");
 
-julia> length(eachresidue(atoms))
-238
+julia> eachresidue(atoms)
+ Residue iterator with length = 238
 
-julia> for res in eachresidue(atoms)
-         println(res)
-       end
- Residue of name SER with 6 atoms.
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     SER     A      225        1   45.228   84.358   70.638 67.05  1.00     1       -         1
-       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
-       3    C     SER     A      225        1   45.257   81.872   70.236 67.90  1.00     1       -         3
-       4    O     SER     A      225        1   45.823   80.796   69.974 64.85  1.00     1       -         4
-       5   CB     SER     A      225        1   47.147   82.980   71.413 70.79  1.00     1       -         5
-       6   OG     SER     A      225        1   46.541   82.639   72.662 73.55  1.00     1       -         6
-
- Residue of name ALA with 5 atoms.
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       7    N     ALA     A      226        2   43.940   81.982   70.474 67.09  1.00     1       -         7
-       8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
-       9    C     ALA     A      226        2   41.996   80.878   69.340 59.69  1.00     1       -         9
-                                                      ...
-
+julia> collect(eachresidue(atoms))
+238-element Vector{Residue}[ 
+    SER225A
+    ALA226A
+    ⋮
+    MET461A
+    THR462A
+]
 ```
 
 """
-eachresidue(atoms::AbstractVector{<:Atom}) = EachResidue(atoms)
+eachresidue(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Residue}(atoms)
 
-# Collect residues default constructor
-Base.collect(residues::EachResidue) = collect(Residue, residues)
-Base.length(residues::EachResidue) = sum(1 for residue in residues)
-Base.firstindex(residues::EachResidue) = 1
-Base.lastindex(residues::EachResidue) = length(residues)
-function Base.getindex(::EachResidue, ::Int)
-    throw(ArgumentError("""\n
-        The eachresidue iterator does not support indexing. 
-        Use collect(eachresidue(atoms)) to get an indexable list of residues.
-    """))
-end
-
-# Array interface
-Base.size(residue::Residue) = (length(residue.range),)
-Base.length(residue::Residue) = length(residue.range)
-Base.eltype(::Residue) = Atom
-
-#
-# Iterate, lazily, over residues of a structure
-#
-function Base.iterate(residues::EachResidue, current_atom=firstindex(residues.atoms))
-    current_atom > length(residues.atoms) && return nothing
-    next_atom = current_atom + 1
-    while next_atom <= length(residues.atoms) && 
-          same_residue(residues.atoms[current_atom], residues.atoms[next_atom]) 
-        next_atom += 1
-    end
-    return (Residue(residues.atoms, current_atom:next_atom-1), next_atom)
-end
-
-#
-# Iterate over atoms of one residue
-#
-function Base.iterate(residue::Residue, current_atom=firstindex(residue))
-    current_atom > lastindex(residue) && return nothing
-    return (residue[current_atom], current_atom + 1)
-end
-
+# Specific getters for this type
+name(residue::Residue) = residue.name
+resname(residue::Residue) = residue.resname
+residue(residue::Residue) = residue.residue
+resnum(residue::Residue) = residue.resnum
+chain(residue::Residue) = residue.chain
+model(residue::Residue) = residue.model
+segname(residue::Residue) = residue.segname
+mass(residue::Residue) = mass(@view residue.atoms[residue.range])
 
 @testitem "Residue iterator" begin
+    using PDBTools
     atoms = read_pdb(PDBTools.TESTPDB, "protein")
     residues = eachresidue(atoms)
     @test length(residues) == 104
     @test name(Residue(atoms, 1:12)) == "ALA"
     @test Residue(atoms, 1:12).range == 1:12
+    @test Residue(atoms[1:12]).range == 1:12
     @test firstindex(residues) == 1
     @test lastindex(residues) == 104
     @test_throws ArgumentError residues[1]
@@ -190,17 +140,37 @@ end
 #
 # io show functions
 #
-function Base.show(io::IO, ::MIME"text/plain", residue::Residue)
-    println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
-    print_short_atom_list(io, @view residue.atoms[residue.range])
+function Base.show(io::IO, residue::Residue)
+    compact = get(io, :compact, false)::Bool
+    if compact
+        print(io, "$(name(residue))$(resnum(residue))$(chain(residue))")
+    else
+        println(io, " Residue of name $(name(residue)) with $(length(residue)) atoms.")
+        show(IOContext(io, :type => false), @view residue.atoms[residue.range])
+    end
 end
 
-function Base.show(io::IO, residues::EachResidue)
-    print(io, " Iterator with $(length(residues)) residues.")
-end
-
-function Base.show(io::IO, ::MIME"text/plain", residues::AbstractVector{Residue})
-    print(io, "   $(typeof(residues)) with $(length(residues)) residues.")
+@testitem "residue show" begin
+    using PDBTools
+    using ShowMethodTesting
+    ENV["LINES"] = 10
+    ENV["COLUMNS"] = 120
+    ats = read_pdb(PDBTools.SMALLPDB)
+    r = eachresidue(ats)
+    @test parse_show(r; repl=Dict("PDBTools." => "")) ≈ "Residue iterator with length = 3"
+    rc = collect(r)
+    @test parse_show(rc; repl=Dict("PDBTools." => "")) ≈ """
+    3-element Vector{Residue}[ 
+        ALA1A
+        CYS2A
+        ASP3A
+    ]
+    """
+    @test parse_show(rc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """
+     Residue of name ALA with 12 atoms.
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+    """
 end
 
 #
@@ -299,13 +269,6 @@ end
     watresiter = eachresidue(water)
     watres = collect(eachresidue(water))
     @test iswater(watres[1])
-    buff = IOBuffer()
-    show(buff, MIME"text/plain"(), watres[1])
-    @test length(split(String(take!(buff)))) == 14*4 + 7
-    show(buff, MIME"text/plain"(), watresiter)
-    @test String(take!(buff)) == " Iterator with 6 residues."
-    show(buff, MIME"text/plain"(), watres)
-    @test String(take!(buff)) == "   Vector{PDBTools.Residue} with 6 residues."
 end
 
 """
@@ -316,7 +279,7 @@ end
 
 Returns a tuple with residue numbers and residue names for the given atoms, to be used as tick labels in plots.
 
-The structure data can be provided a vector of `Atom`s, a vector of `Residue`s or an `EachResidue` iterator. 
+The structure data can be provided a vector of `Atom`s, a vector of `Residue`s or an `eachresidue` iterator. 
 
 `first` and `last` optional keyword parameters are integers that refer to the residue numbers to be included. 
 The `stride` option can be used to skip residues and declutter the tick labels.
@@ -354,7 +317,7 @@ julia> residue_ticks(atoms; first=10, stride=50, serial=true) # using serial=tru
 The resulting tuple of residue numbers and labels can be used as `xticks` in `Plots.plot`, for example.
 
 """
-function residue_ticks(residues::Union{AbstractVector{Residue},EachResidue};
+function residue_ticks(residues::Union{AbstractVector{Residue}, EachStructuralElement{<:Residue}};
     first=nothing, last=nothing, stride=1,
     oneletter::Bool = true,
     serial::Bool=false,

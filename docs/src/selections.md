@@ -182,7 +182,6 @@ input, and returns `true` or `false` depending on the conditions required for th
     and `ishydrophobic`.                          
     
 
-
 ## Iterate over residues (or molecules)
 
 The `eachresidue` iterator enables iteration over the residues of a structure. In PDB files, distinct molecules are often treated as separate residues, so this iterator can be used to iterate over the molecules within a structure. For example:

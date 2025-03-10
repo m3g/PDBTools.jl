@@ -170,9 +170,7 @@ julia> atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
       15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
-      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00  0.00     1    PROT        26
-                                                       ⋮
-    1425   CA     GLU     A      102      102    4.414   -4.302   -7.734  1.00  0.00     1    PROT      1425
+⋮
     1440   CA     CYS     A      103      103    4.134   -7.811   -6.344  1.00  0.00     1    PROT      1440
     1454   CA     THR     A      104      104    3.244  -10.715   -8.603  1.00  0.00     1    PROT      1454
 ```
@@ -189,9 +187,7 @@ julia> atoms = read_pdb(PDBTools.TESTPDB)
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
-                                                       ⋮
-   62024  OH2    TIP3     C     9339    19638   13.485   -4.534  -34.438  1.00  0.00     1    WAT2     62024
+⋮
    62025   H1    TIP3     C     9339    19638   13.218   -3.647  -34.453  1.00  0.00     1    WAT2     62025
    62026   H2    TIP3     C     9339    19638   12.618   -4.977  -34.303  1.00  0.00     1    WAT2     62026
 
