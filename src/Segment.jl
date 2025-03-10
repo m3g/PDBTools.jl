@@ -1,5 +1,5 @@
 """
-    Segment(atoms::AbstractVector{<:Atom}, range::UnitRange{Int})
+    Segment
 
 Segment data structure. Segments must be consecutive in the `atoms` vector, and
 are identified by having the same `segname` and `model` fields.
@@ -139,7 +139,7 @@ end
     ENV["COLUMNS"] = 120
     ats = read_pdb(PDBTools.DIMERPDB)
     s = eachsegment(ats)
-    @test parse_show(s) ≈ "Segment iterator with length = 2"
+    @test parse_show(s; repl=Dict("PDBTools." => "")) ≈ "Segment iterator with length = 2"
     sc = collect(s)
     @test parse_show(sc; repl=Dict("PDBTools." => "")) ≈ """
     2-element Vector{Segment}[ 
