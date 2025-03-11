@@ -78,17 +78,17 @@ coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], s
 @testitem "coor" begin
     atoms = read_pdb(PDBTools.TESTPDB)
     s = select(atoms, "residue = 3")
-    @test all(isapprox.(stack(coor(s)),[
-        -4.383   -4.51    -3.903   -3.731   -4.938  -4.417  -5.543   -5.867   -5.451   -6.974   -2.626   -1.94
-        -11.903  -11.263  -11.262  -12.076  -10.279  -9.552  -9.911  -10.85   -10.837  -11.289  -10.48   -10.014
-         -6.849   -6.096   -8.062   -8.767   -8.612  -9.06   -7.784   -9.684  -10.863   -9.3     -7.749   -8.658
-    ]; atol=1e-3))
+    @test all(isapprox.(stack(coor(s)), [
+            -4.383 -4.51 -3.903 -3.731 -4.938 -4.417 -5.543 -5.867 -5.451 -6.974 -2.626 -1.94
+            -11.903 -11.263 -11.262 -12.076 -10.279 -9.552 -9.911 -10.85 -10.837 -11.289 -10.48 -10.014
+            -6.849 -6.096 -8.062 -8.767 -8.612 -9.06 -7.784 -9.684 -10.863 -9.3 -7.749 -8.658
+        ]; atol=1e-3))
     r = Residue(select(atoms, "residue = 3"))
     @test coor(s) == coor(r)
     residues = collect(eachresidue(atoms))
     @test coor(select(atoms, "residue = 3")) == coor(residues[3])
     @test coor(atoms, "residue = 3") == coor(s)
     @test coor(residues[1]) == coor(select(atoms, "residue = 1"))
-    @test all(isapprox.(coor(residues[1]; only = at -> name(at) == "N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
-    @test all(isapprox.(coor(residues[1], "name N")[1],[-9.229, -14.861, -5.481]; atol=1e-3)) 
+    @test all(isapprox.(coor(residues[1]; only=at -> name(at) == "N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
+    @test all(isapprox.(coor(residues[1], "name N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
 end

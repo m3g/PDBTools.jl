@@ -43,16 +43,16 @@ export moveto!
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
 export custom_elements!, add_element!, remove_custom_elements!
-export SIRAH 
+export SIRAH
 
 # Test files
-const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
-const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
-const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
-const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
-const CHAINSPDB = joinpath(@__DIR__,"../test/chains.pdb")
-const BROKENCIF = joinpath(@__DIR__,"../test/broken.cif")
-const DIMERPDB = joinpath(@__DIR__,"../test/dimer.pdb")
+const TESTPDB = joinpath(@__DIR__, "../test/structure.pdb")
+const SMALLPDB = joinpath(@__DIR__, "../test/small.pdb")
+const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
+const TESTCIF = joinpath(@__DIR__, "../test/small.cif")
+const CHAINSPDB = joinpath(@__DIR__, "../test/chains.pdb")
+const BROKENCIF = joinpath(@__DIR__, "../test/broken.cif")
+const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")

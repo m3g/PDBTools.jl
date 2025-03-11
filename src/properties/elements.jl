@@ -157,16 +157,16 @@ function add_element!(symbol::String, reference_element::Element; elements=eleme
         @warn """\n
             Element $symbol already exists. Overwriting.
 
-        """ _file=nothing _line=nothing
+        """ _file = nothing _line = nothing
     end
     elements[symbol] = Element(
-            reference_element.symbol,
-            reference_element.symbol_string,
-            reference_element.name,
-            reference_element.atomic_number,
-            reference_element.mass,
-            true,
-        )
+        reference_element.symbol,
+        reference_element.symbol_string,
+        reference_element.name,
+        reference_element.atomic_number,
+        reference_element.mass,
+        true,
+    )
     push!(element_names, symbol)
     sort!(element_names)
     return elements[symbol]
@@ -231,7 +231,7 @@ end
     add_element!("GN", PDBTools.elements["N"])
     for prop in fieldnames(PDBTools.Element)
         prop == :custom && continue
-        @test getfield(PDBTools.elements["GN"],prop) == getfield(PDBTools.elements["N"],prop)
+        @test getfield(PDBTools.elements["GN"], prop) == getfield(PDBTools.elements["N"], prop)
     end
     @test mass(Atom(name="GN")) == mass(Atom(name="N"))
     @test length(PDBTools.element_names) == 268

@@ -66,8 +66,8 @@ function read_pdb(filename::String; only=all)
 end
 
 function _parse_pdb(
-    pdbdata::Union{IOStream, IOBuffer}, 
-    only::Function, 
+    pdbdata::Union{IOStream,IOBuffer},
+    only::Function,
 )
     imodel = 1
     atoms = Atom{Nothing}[]
@@ -97,21 +97,21 @@ end
 
 # read atom from PDB file
 function read_atom_pdb(record::String, lastatom::Atom=Atom{Nothing}(), imodel::Int=1)
-    atom = Atom{Nothing}(;index=index(lastatom) + 1, residue=residue(lastatom), model=imodel)
+    atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom), model=imodel)
     inds_and_names = (
-        (1, Val(:name)), 
-        (2, Val(:resname)), 
-        (3, Val(:chain)), 
-        (4, Val(:index_pdb)), 
-        (5, Val(:resnum)), 
-        (6, Val(:x)), 
-        (7, Val(:y)), 
-        (8, Val(:z)), 
-        (9, Val(:occup)), 
-        (10,Val(:beta)), 
-        (11,Val(:segname)), 
-        (12,Val(:pdb_element)), 
-        (13,Val(:charge)),
+        (1, Val(:name)),
+        (2, Val(:resname)),
+        (3, Val(:chain)),
+        (4, Val(:index_pdb)),
+        (5, Val(:resnum)),
+        (6, Val(:x)),
+        (7, Val(:y)),
+        (8, Val(:z)),
+        (9, Val(:occup)),
+        (10, Val(:beta)),
+        (11, Val(:segname)),
+        (12, Val(:pdb_element)),
+        (13, Val(:charge)),
     )
     @views field_values = (
         record[13:16], # :name

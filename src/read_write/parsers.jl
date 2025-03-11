@@ -1,21 +1,21 @@
 
 _tryparse(::Type{T}, s) where {T<:AbstractFloat} = tryparse(T, s)
-function _tryparse(::Type{T}, s) where {T<:Integer} 
-    i = tryparse(T, s) 
+function _tryparse(::Type{T}, s) where {T<:Integer}
+    i = tryparse(T, s)
     # try to parse hexadecimal number
-    if isnothing(i) 
+    if isnothing(i)
         i = tryparse(T, s, base=16)
     end
     return i
 end
 
 function _parse(
-    ::Type{T}, 
-    string, 
-    range=firstindex(string):lastindex(string); 
+    ::Type{T},
+    string,
+    range=firstindex(string):lastindex(string);
     alt::Union{T,Nothing}=nothing
 ) where {T<:Real}
-    s = @view(string[firstindex(range):min(lastindex(range),lastindex(string))])
+    s = @view(string[firstindex(range):min(lastindex(range), lastindex(string))])
     x = _tryparse(T, s)
     !isnothing(x) && return x
     if isnothing(alt)
@@ -26,9 +26,9 @@ function _parse(
 end
 
 function _parse(
-    ::Type{S}, 
-    string, 
-    range=firstindex(string):lastindex(string); 
+    ::Type{S},
+    string,
+    range=firstindex(string):lastindex(string);
     alt::Union{S,Nothing}=nothing
 ) where {S<:AbstractString}
     isempty(range) && return alt
@@ -37,7 +37,7 @@ function _parse(
     else
         first(range)
     end
-    last_char =  if isspace(string[last(range)])
+    last_char = if isspace(string[last(range)])
         findlast(!isspace, string)
     else
         last(range)
@@ -52,7 +52,7 @@ end
 # In PDB, the charge sometimes appears as "+1" or "-1" and sometimes as "1+" or "1-"
 #
 function _parse_charge(charge::AbstractString)
-    charge = if occursin('+', charge) 
+    charge = if occursin('+', charge)
         replace(charge, "+" => "")
     elseif occursin('-', charge)
         "-$(replace(charge, "-" => ""))"
@@ -84,11 +84,11 @@ setfield_recursive!(atom, field_values, inds_and_names)
 would set atom.index = 1, atom.occup = 2.0, atom.name = "CA"
 
 =#
-function _fast_setfield!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType, FIELDS, TUPTUP} 
+function _fast_setfield!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType,FIELDS,TUPTUP}
     setfield_recursive!(atom, field_values, inds_and_names)
-# Alternative with generated function:
-#    N = length(inds_and_names)
-#    setfield_generated!(atom, field_values, inds_and_names, Val(N))
+    # Alternative with generated function:
+    #    N = length(inds_and_names)
+    #    setfield_generated!(atom, field_values, inds_and_names, Val(N))
 end
 
 # Alternate values for fields that might be empty
@@ -96,7 +96,7 @@ _alt(::Type{S}) where {S<:AbstractString} = S("X")
 _alt(::Type{T}) where {T} = zero(T)
 # Unwrap Val-wrapped values
 unwrap(::Val{T}) where {T} = T
-function setfield_recursive!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType, FIELDS, TUPTUP}
+function setfield_recursive!(atom::AtomType, field_values::FIELDS, inds_and_names::TUPTUP) where {AtomType,FIELDS,TUPTUP}
     isempty(inds_and_names) && return atom
     i, valfield = first(inds_and_names)
     field = unwrap(valfield)
@@ -124,8 +124,8 @@ end
     @test _parse(Int, "  1  ") == 1
     @test _parse(Int, "  A  ") == 10
     @test _parse(Float32, "  1.0  ") == 1.0f0
-    @test_throws ArgumentError _parse(Int, "  ???  ") 
-    @test_throws ArgumentError _parse(Float32, "  A  ") 
+    @test_throws ArgumentError _parse(Int, "  ???  ")
+    @test_throws ArgumentError _parse(Float32, "  A  ")
     @test _parse(String, "  A  ") == "A"
     @test _parse(String, "") === nothing
     @test _parse_charge("1+") == "1"

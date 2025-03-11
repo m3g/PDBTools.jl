@@ -107,12 +107,12 @@ end
 #
 # Default constructor
 #
-function Atom(;custom::CustomType=nothing, kargs...) where {CustomType}
-    atom = Atom{CustomType}(0,0,"X","XXX","X",0,0,0.0f0,0.0f0,0.0f0,0.0f0,0.0f0,0,"","X",0.0f0,custom)
+function Atom(; custom::CustomType=nothing, kargs...) where {CustomType}
+    atom = Atom{CustomType}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, custom)
     kargs_values = values(kargs)
     kargs_keys = keys(kargs_values)
-    ntuple(length(kargs_values)) do i 
-        @inline 
+    ntuple(length(kargs_values)) do i
+        @inline
         f = kargs_keys[i]
         v = kargs_values[f]
         setfield!(atom, f, fieldtype(typeof(atom), f)(v))
@@ -123,17 +123,17 @@ end
 #
 # Constructor without custom::Nothing
 #
-Atom{Nothing}(;kargs...) = Atom(;custom=nothing, kargs...)
+Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
 
 @testitem "Atom constructors" begin
-    atref = Atom{Nothing}(0,0,"X","XXX","X",0,0,0.0f0,0.0f0,0.0f0,0.0f0,0.0f0,0,"","X",0.0f0,nothing)
+    atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing)
     at = Atom()
     @test Base.summarysize(at) == 80
     @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
-    at1 = Atom{Nothing}(;index=1, name="CA")
-    at2 = Atom(;custom=nothing, index=1, name="CA")
+    at1 = Atom{Nothing}(; index=1, name="CA")
+    at2 = Atom(; custom=nothing, index=1, name="CA")
     @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
-    @test (@allocations at = Atom()) <= 1 
+    @test (@allocations at = Atom()) <= 1
     @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
 end
 
@@ -174,7 +174,7 @@ function Base.copy(atom::Atom{CustomType}) where {CustomType}
     if ismutabletype(CustomType)
         throw(ArgumentError("""\n
             The Atom object contains a mutable custom field of type $CustomType. To create an independent copy of it, use the `deepcopy` function. 
-        
+
         """))
     else
         Atom{CustomType}((getfield(atom, f) for f in fieldnames(Atom))...)
@@ -185,14 +185,14 @@ end
     using PDBTools
     at1 = Atom()
     at2 = copy(at1)
-    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    @test all(getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom))
     at1 = Atom(custom=1.0)
     at2 = copy(at1)
-    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    @test all(getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom))
     at1 = Atom(custom=Int[])
     @test_throws ArgumentError copy(at1)
     at2 = deepcopy(at1)
-    @test all(getfield(at1,f) == getfield(at2,f) for f in fieldnames(Atom))
+    @test all(getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom))
 end
 
 """
@@ -203,7 +203,7 @@ The returning Atom structure is parameterized with the type of `value`.
 
 """
 function add_custom_field(atom::Atom, value)
-    new_atom = Atom(;custom=value)
+    new_atom = Atom(; custom=value)
     for field in fieldnames(Atom)
         field == :custom && continue
         setproperty!(new_atom, field, getproperty(atom, field))
@@ -215,12 +215,12 @@ end
     atom = Atom(; custom=Dict(:a => 1, :b => "b", :index => 1))
     @test atom.index == 0
     @test atom.custom[:a] == 1
-    @test atom.custom[:b] == "b" 
+    @test atom.custom[:b] == "b"
     at = Atom()
     at2 = add_custom_field(at, Dict(:a => 1, :b => "b", :index => 1))
     @test atom.index == 0
     @test atom.custom[:a] == 1
-    @test atom.custom[:b] == "b" 
+    @test atom.custom[:b] == "b"
 end
 
 #
@@ -267,7 +267,7 @@ const atom_title = @sprintf(
     "segname",
     "index_pdb"
 )
-atom_line(atom::Atom; indent=0) = repeat(' ', indent)*@sprintf(
+atom_line(atom::Atom; indent=0) = repeat(' ', indent) * @sprintf(
     "%8i %4s %7s %5s %8i %8i %8.3f %8.3f %8.3f %5.2f %5.2f %5i %7s %9i",
     atom.index,
     atom.name,
@@ -288,12 +288,12 @@ atom_line(atom::Atom; indent=0) = repeat(' ', indent)*@sprintf(
 @testitem "atom_line" begin
     using PDBTools
     atoms = read_pdb(PDBTools.SMALLPDB, "protein and index 1")
-    @test PDBTools.atom_line(atoms[1]) == 
-        "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
+    @test PDBTools.atom_line(atoms[1]) ==
+          "       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1"
     buff = IOBuffer()
     printatom(buff, atoms[1])
     @test length(split(String(take!(buff)))) == 28
-    printatom(buff, atoms[1]; compact=true) 
+    printatom(buff, atoms[1]; compact=true)
     @test String(take!(buff)) == "Atom(1N-ALA1A)"
     # just test reaching this line
     @test printatom(atoms[1]; compact=true) === nothing
@@ -329,7 +329,7 @@ function printatom(io::IO, at::Atom; compact=false, title=!compact, newline=fals
     if !compact
         print(io, atom_line(at; indent), ln)
     else
-        print(io, repeat(' ', indent)*"Atom($(index(at))$(name(at))-$(resname(at))$(resnum(at))$(chain(at)))", ln)
+        print(io, repeat(' ', indent) * "Atom($(index(at))$(name(at))-$(resname(at))$(resnum(at))$(chain(at)))", ln)
     end
 end
 printatom(atom::Atom; kargs...) = printatom(stdout, atom; kargs...)
@@ -339,11 +339,11 @@ function Base.show(io::IO, at::Atom)
     title = get(io, :title, !compact)::Bool
     newline = get(io, :newline, false)::Bool
     indent = get(io, :indent, 0)::Int
-    printatom(io, at; 
-        compact = compact,
-        title = title,
-        newline = newline,
-        indent = indent,
+    printatom(io, at;
+        compact=compact,
+        title=title,
+        newline=newline,
+        indent=indent,
     )
 end
 
@@ -356,34 +356,34 @@ end
 
 function Base.show(io::IO, ats::AbstractVector{<:Atom})
     lines, cols = _displaysize(io)
-    natprint = min(lines-5, length(ats))
+    natprint = min(lines - 5, length(ats))
     compact = get(io, :compact, false)::Bool
     indent = get(io, :indent, 0)::Int
     type = get(io, :type, true)::Bool
     title = get(io, :title, true)::Bool
     comma = get(io, :comma, true)::Bool
     braces = get(io, :braces, true)::Bool
-    if !compact && cols >= 115 && lines > 4 
+    if !compact && cols >= 115 && lines > 4
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
-        idot = div(natprint,2) + 1
+        idot = div(natprint, 2) + 1
         dots = length(ats) > natprint
         ioc = IOContext(io, :compact => false, :title => false, :newline => true)
         for i in 1:natprint-1
             if dots && i == idot
                 println(io, "⋮")
             else
-                iprint = i <= idot ? i : lastindex(ats)-natprint+i
+                iprint = i <= idot ? i : lastindex(ats) - natprint + i
                 show(ioc, ats[iprint])
             end
         end
         length(ats) > 0 && show(IOContext(ioc, :newline => false), ats[end])
     else # compact vector printing
         ioc = IOContext(io, :compact => true, :title => false, :newline => false)
-        maxatcols = max(1,min(length(ats), div(cols, 25)))
+        maxatcols = max(1, min(length(ats), div(cols, 25)))
         print(io, repeat(' ', indent))
-        braces && print(io,"[ ")
-        for i in 1:maxatcols - 1
+        braces && print(io, "[ ")
+        for i in 1:maxatcols-1
             show(ioc, ats[i])
             comma ? print(io, ", ") : print(io, " ")
         end
@@ -400,9 +400,9 @@ Base.show(io::IO, ::MIME"text/plain", ats::AbstractVector{<:Atom}) = show(io, at
 
 function Base.show(io::IO, vecat::AbstractVector{<:AbstractVecOrMat{<:Atom}})
     lines, _ = _displaysize(io)
-    nvecprint = min(lines-5, length(vecat))
+    nvecprint = min(lines - 5, length(vecat))
     dots = length(vecat) > nvecprint
-    idot = div(nvecprint,2) + 1
+    idot = div(nvecprint, 2) + 1
     compact = eltype(vecat) <: AbstractMatrix ? true : get(io, :compact, true)::Bool
     indent = get(io, :indent, 4)::Int
     ioc = IOContext(io, :compact => compact, :indent => 0)
@@ -412,7 +412,7 @@ function Base.show(io::IO, vecat::AbstractVector{<:AbstractVecOrMat{<:Atom}})
         if dots && i == idot
             println(io, "⋮")
         else
-            iprint = i <= idot ? i : lastindex(vecat)-nvecprint+i
+            iprint = i <= idot ? i : lastindex(vecat) - nvecprint + i
             show(ioc, vecat[iprint])
             println(io)
         end
@@ -428,7 +428,7 @@ Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVecOrMat{<
     using ShowMethodTesting
     ENV["LINES"] = 10
     ENV["COLUMNS"] = 120
-    at = Atom(;segname="X")
+    at = Atom(; segname="X")
     @test parse_show(at) ≈ """
        index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
@@ -503,7 +503,7 @@ end
 # without, of course, checking the residue counter
 #
 function same_residue(atom1::Atom, atom2::Atom)
-    return (atom1.resnum == atom2.resnum) & 
+    return (atom1.resnum == atom2.resnum) &
            (atom1.model == atom2.model) &
            (atom1.chain == atom2.chain) &
            (atom1.resname == atom2.resname) &
@@ -554,7 +554,7 @@ function element(atom::Atom)
     element_name = name(atom)
     iel = searchsortedfirst(element_names, element_name)
     if iel <= length(element_names) && element_name == element_names[iel]
-        return elements[element_name].symbol_string 
+        return elements[element_name].symbol_string
     end
     # Now try to inferr from the atom name
     element_name = name(atom)
@@ -567,7 +567,7 @@ function element(atom::Atom)
     lmatch = searchsortedlast(element_names, @view(element_name[i0:i0]); by=first)
     for iel in imatch:lmatch
         el = element_names[iel]
-        if lastindex(element_name) >= i0+length(el)-1 && el == @view(element_name[i0:i0+length(el)-1])
+        if lastindex(element_name) >= i0 + length(el) - 1 && el == @view(element_name[i0:i0+length(el)-1])
             return el == "X" ? nothing : el
         end
     end
@@ -581,11 +581,11 @@ end
     @test element(Atom()) === "X"
     @test element(Atom(pdb_element="")) === "X"
     @test element(Atom(pdb_element="N")) == "N"
-    @test element(Atom(name = "N", pdb_element="X")) == "N"
-    @test element(Atom(name = "X", pdb_element="A")) == "A" 
-    @test element(Atom(name = "N", pdb_element="A")) == "A" 
-    @test element(Atom(name = "A")) === nothing
-    @test element(Atom(name = " ")) === nothing
+    @test element(Atom(name="N", pdb_element="X")) == "N"
+    @test element(Atom(name="X", pdb_element="A")) == "A"
+    @test element(Atom(name="N", pdb_element="A")) == "A"
+    @test element(Atom(name="A")) === nothing
+    @test element(Atom(name=" ")) === nothing
     atom = Atom(name="", pdb_element="")
     @test element(atom) === nothing
 end
@@ -705,14 +705,14 @@ julia> mass(atoms)
 
 """
 function mass(at::Atom)
-   mass = if element(at) == "X"
+    mass = if element(at) == "X"
         nothing
-   else
-       get_element_property(at, Val(:mass))
-   end
-   return mass
+    else
+        get_element_property(at, Val(:mass))
+    end
+    return mass
 end
-function mass(atoms::AbstractVector{<:Atom}) 
+function mass(atoms::AbstractVector{<:Atom})
     totmass = 0.0
     for at in atoms
         if isnothing(mass(at))
@@ -723,7 +723,7 @@ function mass(atoms::AbstractVector{<:Atom})
     return totmass
 end
 
-@testitem "fetch atomic element properties" setup=[AllocTest] begin
+@testitem "fetch atomic element properties" setup = [AllocTest] begin
     using PDBTools
     using BenchmarkTools
     using .AllocTest: Allocs
@@ -744,7 +744,7 @@ end
     @test atomic_number(Atom(name="CAL")) == 20
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
-    a = @benchmark sum($mass, $atoms) samples=1 evals=1
+    a = @benchmark sum($mass, $atoms) samples = 1 evals = 1
     @test a.allocs == Allocs(0)
 end
 
