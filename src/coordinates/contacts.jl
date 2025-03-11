@@ -44,16 +44,16 @@ julia> d = residue_residue_distance(r1, r10)
 
 """
 function residue_residue_distance(
-    r1::PDBTools.Residue, 
-    r2::PDBTools.Residue; 
+    r1::PDBTools.Residue,
+    r2::PDBTools.Residue;
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
     unitcell=nothing
-) 
+)
     dmin = typemax(first(r1).x)
-    for (iat, jat) in Iterators.product(eachindex(r1),eachindex(r2))
+    for (iat, jat) in Iterators.product(eachindex(r1), eachindex(r2))
         p_i = isnothing(positions) ? PDBTools.coor(r1[iat]) : positions[PDBTools.index(r1[iat])]
         p_j = isnothing(positions) ? PDBTools.coor(r2[jat]) : positions[PDBTools.index(r2[jat])]
-        p_j = !isnothing(unitcell) ? wrap(p_j,p_i,unitcell) : p_j
+        p_j = !isnothing(unitcell) ? wrap(p_j, p_i, unitcell) : p_j
         d = norm(p_j - p_i)
         d < dmin && (dmin = d)
     end
@@ -64,7 +64,8 @@ end
     using PDBTools
     ats = read_pdb(PDBTools.TESTPDB, "protein")
     residues = collect(eachresidue(ats))
-    r1 = residues[1]; r10 = residues[10]
+    r1 = residues[1]
+    r10 = residues[10]
     # Testing call with residue information only
     @test residue_residue_distance(r1, r10) ≈ 5.6703672f0
     d = residue_residue_distance(r1, r10; positions=coor(ats))
@@ -107,11 +108,11 @@ struct ContactMap{T<:Union{Union{Missing,Bool},Union{Missing,<:Real}}}
     residues2::Vector{PDBTools.Residue}
 end
 function Base.zero(
-    ::Type{ContactMap{T}}, 
-    n, m, d::Real, gap::Int, 
+    ::Type{ContactMap{T}},
+    n, m, d::Real, gap::Int,
     residues1::Vector{PDBTools.Residue},
     residues2::Vector{PDBTools.Residue},
-) where {T} 
+) where {T}
     ContactMap{T}([missing for i in 1:n, j in 1:m], d, gap, residues1, residues2)
 end
 Base.setindex!(map::ContactMap, value, i, j) = map.matrix[i, j] = value
@@ -207,7 +208,7 @@ function contact_map(
     unitcell=nothing,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
 )
-    type = Union{Missing, discrete ? Bool : typeof(atoms1[1].x)}
+    type = Union{Missing,discrete ? Bool : typeof(atoms1[1].x)}
     residues = collect(PDBTools.eachresidue(atoms1))
     map = zero(ContactMap{type}, length(residues), length(residues), dmax, gap, residues, residues)
     for ires in eachindex(residues), jres in ires+gap:length(residues)
@@ -232,7 +233,7 @@ function contact_map(
     unitcell=nothing,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
 )
-    type = Union{Missing, discrete ? Bool : typeof(atoms1[1].x)}
+    type = Union{Missing,discrete ? Bool : typeof(atoms1[1].x)}
     residues = collect(PDBTools.eachresidue(atoms1))
     residues2 = collect(PDBTools.eachresidue(atoms2))
     map = zero(ContactMap{type}, length(residues), length(residues2), dmax, 0, residues, residues2)
@@ -264,8 +265,8 @@ end
     cB = select(ats, "chain B")
     map = contact_map(cA, cB)
     @test sum(map.matrix) == 17
-    @test map[235,:] == [false, false, true, false, false, false, false, false, false, false, false, false]
-    @test count(map[:,3]) == 3
+    @test map[235, :] == [false, false, true, false, false, false, false, false, false, false, false, false]
+    @test count(map[:, 3]) == 3
     map = contact_map(cA, cB; discrete=false)
     @test sum(skipmissing(map.matrix)) ≈ 58.00371f0
 end

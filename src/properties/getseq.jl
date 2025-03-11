@@ -78,14 +78,14 @@ getseq(file::String; only=all, code::Int=1) = getseq(read_pdb(file), only=only, 
     @test s == ["Alanine", "Cysteine"]
     wat = select(ats, "water")
     s = getseq(wat, "resnum < 3")
-    @test s == ["T", "T", "T", "T"] 
+    @test s == ["T", "T", "T", "T"]
     s = getseq(wat, "resnum < 3"; code=2)
-    @test s == ["TIP3", "TIP3", "TIP3", "TIP3"] 
-    s = getseq(wat, "resnum < 3"; code=3)    
-    @test s == ["TIP3", "TIP3", "TIP3", "TIP3"] 
+    @test s == ["TIP3", "TIP3", "TIP3", "TIP3"]
+    s = getseq(wat, "resnum < 3"; code=3)
+    @test s == ["TIP3", "TIP3", "TIP3", "TIP3"]
     s = getseq(PDBTools.TESTPDB, "residue < 3")
     s = getseq(ats, "residue < 3")
     @test s == ["A", "C"]
-    s = getseq(PDBTools.TESTPDB; only = at -> resnum(at) == 1)
+    s = getseq(PDBTools.TESTPDB; only=at -> resnum(at) == 1)
     @test s == ["A", "C", "S", "T", "T", "T"]
 end

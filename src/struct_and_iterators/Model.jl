@@ -114,12 +114,12 @@ model(model::Model) = model.number
 #
 @testitem "Model iterator" begin
     using PDBTools
-    atoms = wget("8S8N");
+    atoms = wget("8S8N")
     models = eachmodel(atoms)
-    @test length(models) == 11 
+    @test length(models) == 11
     @test firstindex(models) == 1
-    @test lastindex(models) == 11 
-    @test_throws ArgumentError Model(atoms, 230:240) 
+    @test lastindex(models) == 11
+    @test_throws ArgumentError Model(atoms, 230:240)
     @test_throws ArgumentError models[1]
     m = collect(models)
     @test model(m[1]) == 1
@@ -155,7 +155,7 @@ end
     ENV["COLUMNS"] = 120
     ats = wget("8S8N")
     m = eachmodel(ats)
-    @test parse_show(m;repl=Dict("PDBTools." => "")) ≈ "Model iterator with length = 11"
+    @test parse_show(m; repl=Dict("PDBTools." => "")) ≈ "Model iterator with length = 11"
     mc = collect(m)
     @test parse_show(mc; repl=Dict("PDBTools." => "")) ≈ """
     11-element Vector{Model}[ 

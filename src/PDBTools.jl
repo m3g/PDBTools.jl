@@ -43,62 +43,67 @@ export moveto!
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
 export custom_elements!, add_element!, remove_custom_elements!
-export SIRAH 
+export SIRAH
 
 # Test files
-const TESTPDB = joinpath(@__DIR__,"../test/structure.pdb")
-const SMALLPDB = joinpath(@__DIR__,"../test/small.pdb")
-const SIRAHPDB = joinpath(@__DIR__,"../test/sirah.pdb")
-const TESTCIF = joinpath(@__DIR__,"../test/small.cif")
-const CHAINSPDB = joinpath(@__DIR__,"../test/chains.pdb")
-const BROKENCIF = joinpath(@__DIR__,"../test/broken.cif")
-const DIMERPDB = joinpath(@__DIR__,"../test/dimer.pdb")
+const TESTPDB = joinpath(@__DIR__, "../test/structure.pdb")
+const SMALLPDB = joinpath(@__DIR__, "../test/small.pdb")
+const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
+const TESTCIF = joinpath(@__DIR__, "../test/small.cif")
+const CHAINSPDB = joinpath(@__DIR__, "../test/chains.pdb")
+const BROKENCIF = joinpath(@__DIR__, "../test/broken.cif")
+const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
 
 # Basic chemistry
-include("./elements.jl")
-include("./protein_residues.jl")
+include("./properties/elements.jl")
+include("./properties/protein_residues.jl")
 
 #
-# Data structures
+# Data structures and their iterators
 #
-include("./Atom.jl")
-include("./iterators_base.jl")
-include("./Residue.jl")
-include("./Chain.jl")
-include("./Segment.jl")
-include("./Model.jl")
+include("./struct_and_iterators/Atom.jl")
+include("./struct_and_iterators/iterators_base.jl")
+include("./struct_and_iterators/Residue.jl")
+include("./struct_and_iterators/Chain.jl")
+include("./struct_and_iterators/Segment.jl")
+include("./struct_and_iterators/Model.jl")
 
 # Selection functions
-include("./select.jl")
-include("./select_with_vmd.jl")
+include("./select/select.jl")
+include("./select/select_with_vmd.jl")
 
 #
 # Input and output functions
 #
-include("./parsers.jl")
-include("./formula.jl")
-include("./read_pdb.jl")
-include("./write_pdb.jl")
-include("./read_mmcif.jl")
-include("./write_mmcif.jl")
-include("./edit.jl")
-include("./getseq.jl")
-include("./coor.jl")
-include("./distance.jl")
-include("./maxmin.jl")
-include("./wget.jl")
-include("./tools.jl")
+include("./read_write/parsers.jl")
+include("./read_write/read_pdb.jl")
+include("./read_write/write_pdb.jl")
+include("./read_write/read_mmcif.jl")
+include("./read_write/write_mmcif.jl")
+include("./read_write/edit.jl")
+include("./read_write/wget.jl")
+
+include("./properties/formula.jl")
+include("./properties/getseq.jl")
+
+# Coordinates-dependent functions
+include("./coordinates/coor.jl")
+include("./coordinates/distance.jl")
+include("./coordinates/maxmin.jl")
+include("./coordinates/contacts.jl")
+
+# Miscellaneous tools
+include("./tools/tools.jl")
 
 # Custom element and residue definitions
-include("./custom_types.jl")
+include("./tools/custom_types.jl")
 
 # Contact maps
-include("./contacts.jl")
 
 # Legacy compatibility
-include("./legacy.jl")
+include("./package_internals/legacy.jl")
 
 # Precompilation
-include("./precompile.jl")
+include("./package_internals/precompile.jl")
 
 end

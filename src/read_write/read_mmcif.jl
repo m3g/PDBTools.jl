@@ -92,7 +92,7 @@ function read_mmcif(filename::String; only=all, kargs...)
 end
 
 function _maximum_read(atoms, stop_at, memory_available)
-    if !isnothing(stop_at) && (length(atoms) >= stop_at) 
+    if !isnothing(stop_at) && (length(atoms) >= stop_at)
         return true
     end
     if length(atoms) > 0 && mod(length(atoms), 50) == 0
@@ -122,7 +122,7 @@ end
 # provided by the user
 function replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
     if !isnothing(field_assignment)
-        for (custom_key, custom_field) in field_assignment 
+        for (custom_key, custom_field) in field_assignment
             if !(custom_field in fieldnames(Atom))
                 throw(ArgumentError("""\n
                     Field $custom_field not available in the PDBTools.Atom type.
@@ -190,15 +190,15 @@ ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL 
 function _supported_read_cif_fields(field_assignment)
     # We need this to be indexable (and ordered dict) to keep the order of the fields
     # when writing the mmCIF file
-    _atom_symbol_for_cif_field = OrderedDict{String, Tuple{DataType, Symbol}}(
+    _atom_symbol_for_cif_field = OrderedDict{String,Tuple{DataType,Symbol}}(
         "id" => (Int32, :index_pdb), # Standard mmCIF
         "type_symbol" => (String7, :pdb_element), # Standard mmCIF
-        "Cartn_x" => (Float32,:x),
-        "Cartn_y" => (Float32,:y),
-        "Cartn_z" => (Float32,:z),
-        "occupancy" => (Float32,:occup),
-        "B_iso_or_equiv" => (Float32,:beta),
-        "pdbx_formal_charge" => (Float32,:charge),
+        "Cartn_x" => (Float32, :x),
+        "Cartn_y" => (Float32, :y),
+        "Cartn_z" => (Float32, :z),
+        "occupancy" => (Float32, :occup),
+        "B_iso_or_equiv" => (Float32, :beta),
+        "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "label_comp_id" => (String7, :resname), # Standard mmCIF
         "label_asym_id" => (String3, :chain), # Standard mmCIF
@@ -209,13 +209,13 @@ function _supported_read_cif_fields(field_assignment)
 end
 
 @testitem "_supported_read_cif_fields" begin
-    using PDBTools 
+    using PDBTools
     using InlineStrings
     field_assignment = Dict(
-        "type_symbol" => :name, 
+        "type_symbol" => :name,
         "label_comp_id" => :resname,
-        "label_asym_id" => :chain, 
-        "label_seq_id" => :resnum, 
+        "label_asym_id" => :chain,
+        "label_seq_id" => :resnum,
     )
     _cif_fields = PDBTools._supported_read_cif_fields(field_assignment)
     @test length(_cif_fields) == 12
@@ -242,7 +242,7 @@ function _parse_mmCIF(
     only::Function,
     memory_available::Real=0.8,
     stop_at=nothing,
-    field_assignment::Union{Nothing,Dict{String,Symbol}} = nothing,
+    field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
     _atom_symbol_for_cif_field = _supported_read_cif_fields(field_assignment)
     atoms = Atom{Nothing}[]
@@ -258,7 +258,7 @@ function _parse_mmCIF(
             empty!(_atom_site_field_inds)
         end
         if occursin("_atom_site.", line)
-            field_end = findfirst(<=(' '), line) 
+            field_end = findfirst(<=(' '), line)
             if isnothing(field_end)
                 field_end = length(line) + 1
             end
@@ -273,7 +273,7 @@ function _parse_mmCIF(
                     push!(_atom_field_columns, (_atom_site_field_inds[key], keyval))
                 end
             end
-            sort!( _atom_field_columns; by = first)
+            sort!(_atom_field_columns; by=first)
             col_indices = NTuple{length(_atom_field_columns),Int}(first(el) for el in _atom_field_columns)
             col_field = NTuple{length(_atom_field_columns),Symbol}(last(last(el)) for el in _atom_field_columns)
             NCOLS = length(keys(_atom_site_field_inds))
@@ -283,8 +283,8 @@ function _parse_mmCIF(
     if length(_atom_field_columns) == 0
         throw(ArgumentError("Invalid mmCIF file: no ATOM or HETATM fields found."))
     end
-    inds_and_names = ntuple(length(col_indices)) do i 
-        ((col_indices[i], Val(col_field[i]))) 
+    inds_and_names = ntuple(length(col_indices)) do i
+        ((col_indices[i], Val(col_field[i])))
     end
     seekstart(cifdata)
     for line in eachline(cifdata)
@@ -302,7 +302,7 @@ end
 
 function read_atom_mmcif(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) where {NCOLS}
     field_values = NTuple{NCOLS}(eachsplit(record))
-    atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
+    atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom))
     _fast_setfield!(atom, field_values, inds_and_names)
     if !same_residue(atom, lastatom)
         atom.residue = residue(lastatom) + 1
@@ -310,18 +310,18 @@ function read_atom_mmcif(::Val{NCOLS}, record, inds_and_names, lastatom::Atom) w
     return atom
 end
 
-@testitem "read_mmcif" setup=[AllocTest] begin
+@testitem "read_mmcif" setup = [AllocTest] begin
     using PDBTools
     using BenchmarkTools
     using .AllocTest: Allocs
 
-    b = @benchmark read_mmcif($(PDBTools.TESTCIF)) samples=1 evals=1
+    b = @benchmark read_mmcif($(PDBTools.TESTCIF)) samples = 1 evals = 1
     @test b.allocs < Allocs(500)
     ats = read_mmcif(PDBTools.TESTCIF)
     @test count(iswater, ats) == 5
     @test count(isprotein, ats) == 69
     @test length(eachresidue(filter(isprotein, ats))) == 9
-    tmpfile = tempname()*".cif"
+    tmpfile = tempname() * ".cif"
     write_mmcif(tmpfile, ats, "protein")
     prot = read_mmcif(tmpfile)
     @test length(prot) == 69
@@ -333,35 +333,35 @@ end
     inds_and_names = ((2, Val{:index_pdb}()), (4, Val{:name}()), (6, Val{:resname}()), (7, Val{:chain}()), (9, Val{:resnum}()), (11, Val{:x}()), (12, Val{:y}()), (13, Val{:z}()), (14, Val{:occup}()), (15, Val{:beta}()), (16, Val{:charge}()), (17, Val{:resnum}()), (18, Val{:resname}()), (19, Val{:chain}()), (20, Val{:name}()), (21, Val{:model}()))
     lastatom = Atom()
     NCOLS = 21
-    b = @benchmark PDBTools.read_atom_mmcif($(Val(NCOLS)), $record, $inds_and_names, $lastatom) samples=1 evals=1
+    b = @benchmark PDBTools.read_atom_mmcif($(Val(NCOLS)), $record, $inds_and_names, $lastatom) samples = 1 evals = 1
     @test b.allocs == Allocs(1)
     field_values = NTuple{NCOLS}(eachsplit(record))
-    atom = Atom{Nothing}(; index = index(lastatom) + 1, residue = residue(lastatom))
-    b = @benchmark PDBTools._fast_setfield!($atom, $field_values, $inds_and_names) samples=1 evals=1
+    atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom))
+    b = @benchmark PDBTools._fast_setfield!($atom, $field_values, $inds_and_names) samples = 1 evals = 1
     @test b.allocs == Allocs(0)
 
     # Test early stoppers
     ats = read_mmcif(PDBTools.TESTCIF; stop_at=10)
     @test length(ats) == 10
     ats = read_mmcif(PDBTools.TESTCIF; memory_available=1e-10)
-    @test length(ats) == 50 
+    @test length(ats) == 50
 
     # Read custom fields instead
     field_assignment = Dict(
-        "type_symbol" => :name, 
-        "label_comp_id" => :resname, 
-        "label_asym_id" => :chain, 
-        "label_seq_id" => :resnum, 
+        "type_symbol" => :name,
+        "label_comp_id" => :resname,
+        "label_asym_id" => :chain,
+        "label_seq_id" => :resnum,
     )
     ats0 = read_mmcif(PDBTools.TESTCIF)
     ats1 = read_mmcif(PDBTools.TESTCIF; field_assignment)
     @test all(name.(ats1) .== pdb_element.(ats0))
     @test all(resname.(ats1) .== resname.(ats0))
     @test all(chain.(ats1) .== chain.(ats0))
-    @test all(resnum.(filter(isprotein,ats1)) .== resnum.(filter(isprotein,ats0)))
+    @test all(resnum.(filter(isprotein, ats1)) .== resnum.(filter(isprotein, ats0)))
     @test resnum.(filter(iswater, ats0)) == Int32[60, 61, 62, 63, 64]
-    @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0] 
-    
+    @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0]
+
     # Throw error if no ATOM fields were found
     @test_throws ArgumentError read_mmcif(PDBTools.BROKENCIF)
 end

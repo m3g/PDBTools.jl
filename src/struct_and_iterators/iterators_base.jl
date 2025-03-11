@@ -1,4 +1,4 @@
-abstract type AbstractStructuralElement{T} <:AbstractVector{T} end
+abstract type AbstractStructuralElement{T} <: AbstractVector{T} end
 
 mass(s::AbstractStructuralElement) = mass(@view s.atoms[s.range])
 
@@ -12,10 +12,10 @@ end
 #
 # Structure and function to define the iterators
 #
-struct EachStructuralElement{STYPE, T<:AbstractVector{<:Atom}}
+struct EachStructuralElement{STYPE,T<:AbstractVector{<:Atom}}
     atoms::T
 end
-EachStructuralElement{STYPE}(atoms) where {STYPE} = EachStructuralElement{STYPE, typeof(atoms)}(atoms)
+EachStructuralElement{STYPE}(atoms) where {STYPE} = EachStructuralElement{STYPE,typeof(atoms)}(atoms)
 
 Base.collect(sit::EachStructuralElement{STYPE}) where {STYPE} = collect(STYPE, sit)
 Base.length(sit::EachStructuralElement) = sum(1 for s in sit)

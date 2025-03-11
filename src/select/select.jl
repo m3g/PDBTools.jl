@@ -37,7 +37,7 @@ struct Select{Q} <: Function
     query_string::String
     query::Q
 end
-function Select(query_string::AbstractString) 
+function Select(query_string::AbstractString)
     query = parse_query(query_string)
     return Select(query_string, query)
 end
@@ -100,24 +100,24 @@ selindex(set::AbstractVector{<:Atom}, by::String) = findall(Select(by), set)
 selindex(set::AbstractVector{<:Atom}, by::Function) = findall(by, set)
 
 # These two methods probably will be deprecated
-function select(set::AbstractVector; by=all) 
-    @warn begin 
+function select(set::AbstractVector; by=all)
+    @warn begin
         """\n
         The `select` function with the keyword argument `by` will be deprecated. 
         Use `select(atoms, function)` instead. Or simply `filter(function, atoms)`.
 
         """
-    end _file=nothing _line=nothing
+    end _file = nothing _line = nothing
     filter(by, set)
 end
-function selindex(set::AbstractVector; by=all) 
+function selindex(set::AbstractVector; by=all)
     @warn begin
-    """\n
-    The `selindex` function with the keyword argument `by` will be deprecated. 
-    Use `findall(function, atoms)` instead."
-        
-    """
-    end _file=nothing _line=nothing
+        """\n
+        The `selindex` function with the keyword argument `by` will be deprecated. 
+        Use `findall(function, atoms)` instead."
+            
+        """
+    end _file = nothing _line = nothing
     findall(by, set)
 end
 
@@ -400,7 +400,7 @@ parse_error(str) = throw(ArgumentError(str))
 
     @test length(select(atoms, "nonpolar")) == 583
 
-    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol=1e-3
+    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol = 1e-3
 
     # test string interpolation
     t = "protein"

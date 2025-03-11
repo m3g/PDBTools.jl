@@ -32,7 +32,7 @@ ATOM   7    C  CG2 . VAL A 1 1   ? 5.246   18.533  5.681   1.00 80.12 ? 1   VAL 
 function _supported_write_cif_fields(field_assignment)
     # We need this to be indexable (and ordered dict) to keep the order of the fields
     # when writing the mmCIF file
-    _atom_symbol_for_cif_field = OrderedDict{String, Tuple{DataType, Symbol}}(
+    _atom_symbol_for_cif_field = OrderedDict{String,Tuple{DataType,Symbol}}(
         "id" => (Int32, :index_pdb), # Standard mmCIF
         "type_symbol" => (String7, :pdb_element), # Standard mmCIF
         "label_atom_id" => (String7, :name), # redundant - atom name
@@ -42,27 +42,27 @@ function _supported_write_cif_fields(field_assignment)
         "label_entity_id" => (Int32, :_entity_id), # entity_id: print 1 for protein, 2 for water, 3 for all others
         "label_seq_id" => (Int32, :resnum), # redundant - residue number
         "pdbx_PDB_ins_code" => (String1, :_print_question_mark), # nothing - print ?
-        "Cartn_x" => (Float32,:x),
-        "Cartn_y" => (Float32,:y),
-        "Cartn_z" => (Float32,:z),
-        "occupancy" => (Float32,:occup),
-        "B_iso_or_equiv" => (Float32,:beta),
-        "pdbx_formal_charge" => (Float32,:charge),
+        "Cartn_x" => (Float32, :x),
+        "Cartn_y" => (Float32, :y),
+        "Cartn_z" => (Float32, :z),
+        "occupancy" => (Float32, :occup),
+        "B_iso_or_equiv" => (Float32, :beta),
+        "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "auth_comp_id" => (String7, :resname), # Standard mmCIF
         "auth_asym_id" => (String3, :chain), # Standard mmCIF
         "auth_atom_id" => (String7, :name), # Standard mmCIF
-        "pdbx_PDB_model_num" => (Int32,:model),
+        "pdbx_PDB_model_num" => (Int32, :model),
     )
     return replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
 end
 
-function _get_mmcif_field(atom, field_name) 
+function _get_mmcif_field(atom, field_name)
     field_name == :_print_atom && return "ATOM"
     field_name == :_print_dot && return "."
     field_name == :_print_question_mark && return "?"
     field_name == :charge && return round(Int, charge(atom))
-    if field_name == :_entity_id 
+    if field_name == :_entity_id
         isprotein(atom) && return 1
         iswater(atom) && return 2
         return 3
@@ -81,19 +81,19 @@ that can be used to select a subset of the atoms in `atoms`. For example, `write
 
 """
 function write_mmcif(
-    filename::AbstractString, 
-    atoms::AbstractVector{<:Atom}, 
+    filename::AbstractString,
+    atoms::AbstractVector{<:Atom},
     selection::String;
-    field_assignment::Union{Nothing, Dict{String, Symbol}}=nothing,
+    field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
     query = parse_query(selection)
     write_mmcif(filename, atoms; only=atom -> apply_query(query, atom), field_assignment)
 end
 
 function write_mmcif(
-    filename::AbstractString, atoms::AbstractVector{<:Atom}; 
-    only::Function=all, 
-    field_assignment::Union{Nothing, Dict{String, Symbol}}=nothing,
+    filename::AbstractString, atoms::AbstractVector{<:Atom};
+    only::Function=all,
+    field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
     _cif_fields = _supported_write_cif_fields(field_assignment)
     open(expanduser(filename), "w") do file
@@ -109,7 +109,7 @@ function write_mmcif(
         for atom in atoms
             !only(atom) && continue
             index += 1
-            buff = IOBuffer(;append=true)
+            buff = IOBuffer(; append=true)
             write(buff, "ATOM $(@sprintf("%9i", index))")
             for (_, field) in _cif_fields
                 field_type = first(field)
@@ -135,7 +135,7 @@ end
 @testitem "write_mmcif" begin
     using PDBTools
     ats = read_pdb(PDBTools.SMALLPDB)
-    tmpfile = tempname()*".cif"
+    tmpfile = tempname() * ".cif"
     write_mmcif(tmpfile, ats)
     @test isfile(tmpfile)
     ats_cif = read_mmcif(tmpfile)

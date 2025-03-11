@@ -54,12 +54,12 @@ end
 function wget(pdb_id::String; only=all, format::Union{AbstractString,Nothing}=nothing)
     atoms = if format == "PDB"
         _wget(pdb_id, "pdb", only)
-    elseif isnothing(format) || format == "mmCIF" 
+    elseif isnothing(format) || format == "mmCIF"
         _wget(pdb_id, "cif", only)
     else
         throw(ArgumentError("""\n
             format must be either "PDB" or "mmCIF"
-        
+
         """))
     end
     return atoms
@@ -67,11 +67,11 @@ end
 
 @testitem "wget" begin
     using PDBTools
-    protein = wget("1LBD","chain A")
+    protein = wget("1LBD", "chain A")
     @test length(protein) == 1870
-    protein = wget("1LBD","chain A"; format="PDB")
+    protein = wget("1LBD", "chain A"; format="PDB")
     @test length(protein) == 1870
-    protein = wget("1LBD","chain A"; format="mmCIF")
+    protein = wget("1LBD", "chain A"; format="mmCIF")
     @test length(protein) == 1870
-    @test_throws ArgumentError wget("1LBD","chain A"; format="mmcif")
+    @test_throws ArgumentError wget("1LBD", "chain A"; format="mmcif")
 end

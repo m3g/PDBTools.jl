@@ -130,7 +130,7 @@ function oneletter(residue::Union{AbstractString,Char})
             "X"
         end
     end
-    return one_letter_code 
+    return one_letter_code
 end
 
 @testitem "oneletter" begin
@@ -310,7 +310,7 @@ function add_protein_residue!(resname::String, reference_residue::PDBTools.Prote
         @warn """\n
             Residue $resname already exists in the list of protein residues. Overwriting.
 
-        """ _file=nothing _line=nothing
+        """ _file = nothing _line = nothing
     end
     PDBTools.protein_residues[resname] = PDBTools.ProteinResidue(
         resname,

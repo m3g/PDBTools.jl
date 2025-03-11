@@ -55,7 +55,7 @@ function formula(atoms::AbstractVector{<:AtomType}) where {AtomType<:Atom}
         end
     end
     # Sort by atomic number
-    sort!(f.formula, by = el -> atomic_number(first(el)))
+    sort!(f.formula, by=el -> atomic_number(first(el)))
     return f
 end
 function Base.show(io::IO, f::Formula)
@@ -97,7 +97,7 @@ end
 
 @testitem "Formula" begin
     using PDBTools
-    pdb  = read_pdb(PDBTools.TESTPDB, "resname GLY")
+    pdb = read_pdb(PDBTools.TESTPDB, "resname GLY")
     f = formula(pdb)
     buff = IOBuffer()
     show(buff, f)

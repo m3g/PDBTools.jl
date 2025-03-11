@@ -40,7 +40,7 @@ end
     using PDBTools
     using DelimitedFiles
     pdb = read_pdb(PDBTools.SMALLPDB)
-    tmpfile = tempname()*".pdb"
+    tmpfile = tempname() * ".pdb"
     write_pdb(tmpfile, pdb)
     @test isfile(tmpfile)
     f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
@@ -111,23 +111,23 @@ function write_pdb_atom(atom::Atom)
     end
 
     atom_data = (
-            "ATOM",
-            mod(atom.index,1048576),
-            " ",
-            _align_name(name),
-            " ",
-            _align_resname(atom.resname),
-            atom.chain,
-            mod(atom.resnum, 65535), 
-            "    ",
-            atom.x,
-            atom.y,
-            atom.z,
-            atom.occup,
-            atom.beta,
-            "      ",
-            segname(atom),
-            element(atom) === nothing ? "  " : element_symbol_string(atom),
+        "ATOM",
+        mod(atom.index, 1048576),
+        " ",
+        _align_name(name),
+        " ",
+        _align_resname(atom.resname),
+        atom.chain,
+        mod(atom.resnum, 65535),
+        "    ",
+        atom.x,
+        atom.y,
+        atom.z,
+        atom.occup,
+        atom.beta,
+        "      ",
+        segname(atom),
+        element(atom) === nothing ? "  " : element_symbol_string(atom),
     )
 
     line = if atom.index <= 99999 && atom.resnum <= 9999 # standard integer printing
@@ -146,15 +146,15 @@ end
 @testitem "write_pdb_atom" begin
     using PDBTools
     pdb = read_pdb(PDBTools.SMALLPDB)
-    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
     @test PDBTools.write_pdb_atom(pdb[2]) == "ATOM      2 1HT1 ALA A   1     -10.048 -15.427  -5.569  0.00  0.00      PROT H"
     pdb[1].index = 1000000
-    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
     pdb[1].index = 1
     pdb[1].resnum = 1000000
-    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM      1  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
     pdb[1].index = 1000000
-    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
     pdb[1].resname = "ALAX"
-    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALAXA424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N" 
+    @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALAXA424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
 end
