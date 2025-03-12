@@ -39,22 +39,13 @@ struct Segment{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     name::String7
 end
 
-# Necessary for the interface: define the _same function
-_same(::Type{Segment}, at1::Atom, at2::Atom) = at1.segname == at2.segname && at1.model == at2.model
+# Necessary for the interface: define the same_struct_element function
+same_struct_element(::Type{Segment}, at1::Atom, at2::Atom) = at1.segname == at2.segname && at1.model == at2.model
 
 # Constructors 
 function Segment(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
-    i = range[begin]
-    # Check if the range effectively corresponds to a single residue (unsafe check)
-    for j = range[begin]+1:range[end]
-        if !(_same(Segment, atoms[i], atoms[j]))
-            throw(ArgumentError("""\n 
-                Range $range does not correspond to a single segment.
-
-            """))
-        end
-    end
-    return Segment(atoms, UnitRange{Int}(range), atoms[i].segname)
+    _check_unique(Segment, atoms, range)
+    return Segment(atoms, UnitRange{Int}(range), segname(first(atoms[range])))
 end
 Segment(atoms::AbstractVector{<:Atom}) = Segment(atoms, eachindex(atoms))
 
@@ -101,6 +92,8 @@ mass(segment::Segment) = mass(@view segment.atoms[segment.range])
     @test length(segments) == 2
     @test firstindex(segments) == 1
     @test lastindex(segments) == 2
+    @test length(last(segments)) == 92
+    @test segname(last(segments)) == "B"
     @test_throws ArgumentError Segment(atoms, 1904:1910)
     @test_throws ArgumentError segments[1]
     s = collect(segments)

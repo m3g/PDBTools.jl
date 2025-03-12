@@ -105,23 +105,23 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> chain.(eachchain(ats))              # Retrieve the names of all chains in the structure
+julia> chain.(eachchain(ats)) # Retrieve the names of all chains in the structure
 4-element Vector{InlineStrings.String3}:
  "A"
  "B"
- "C"
  "A"
+ "D"
 
-julia> model.(eachchain(ats))          # Retrieve the model numbers associated with each chain
+julia> model.(eachchain(ats)) # Retrieve the model numbers associated with each chain
 4-element Vector{Int32}:
  1
  1
  1
  2
 
-julia> chain_A1 = first(eachchain(ats));   # Access the first chain in the iterator
+julia> chain_A1 = first(eachchain(ats)); # Access the first chain in the iterator
 
-julia> resname.(eachresidue(chain_A1))     # Retrieve residue names for chain A in model 1
+julia> resname.(eachresidue(chain_A1)) # Retrieve residue names for chain A in model 1
 3-element Vector{InlineStrings.String7}:
  "ASP"
  "GLN"
@@ -132,7 +132,7 @@ In the example above, the `chain.` command retrieves the names of all chains in 
 
 ### Accessing Chains by Index
 
-As seen in the previous example, The `first` command allow quick access to the first chain in the iterator. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.
+As seen in the previous example, The `first` and `last` commands allow quick access to the first an last elements in the iterator. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.
 
 ```jldoctest
 julia> using PDBTools
@@ -143,8 +143,8 @@ julia> chains = collect(eachchain(ats))
 4-element Vector{Chain}[
     Chain(A-48 atoms)
     Chain(B-48 atoms)
-    Chain(C-48 atoms)
-    Chain(A-45 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
 ]
 
 julia> chain_B = chains[2]

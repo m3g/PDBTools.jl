@@ -46,13 +46,13 @@ function getseq(atoms::AbstractVector{<:Atom}; only=isprotein, code::Int=1)
         end
         if consider
             if isprotein(residue)
-                code == 1 && push!(seq, oneletter(residue.name))
-                code == 2 && push!(seq, threeletter(residue.name))
-                code == 3 && push!(seq, residuename(residue.name))
+                code == 1 && push!(seq, oneletter(resname(residue)))
+                code == 2 && push!(seq, threeletter(resname(residue)))
+                code == 3 && push!(seq, residuename(resname(residue)))
             else
-                code == 1 && push!(seq, name(residue)[1:1])
-                code == 2 && push!(seq, name(residue))
-                code == 3 && push!(seq, name(residue))
+                code == 1 && push!(seq, resname(residue)[1:1])
+                code == 2 && push!(seq, resname(residue))
+                code == 3 && push!(seq, resname(residue))
             end
         end
     end

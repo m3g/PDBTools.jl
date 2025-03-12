@@ -45,7 +45,6 @@ julia> mass(residues[1])
 struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
-    name::String7
     resname::String7
     residue::Int32
     resnum::Int32
@@ -54,31 +53,14 @@ struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     segname::String7
 end
 
-# Necessary for the interface: define the _same function
-_same(::Type{Residue}, at1::Atom, at2::Atom) = same_residue(at1, at2)
+# Necessary for the interface: define the same_struct_element function
+same_struct_element(::Type{Residue}, at1::Atom, at2::Atom) = same_residue(at1, at2)
 
 # Constructors
 function Residue(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
-    i = range[begin]
-    # Check if the range effectively corresponds to a single residue (unsafe check)
-    for j = range[begin]+1:range[end]
-        if !(_same(Residue, atoms[j], atoms[i]))
-            throw(ArgumentError("""\n 
-                Range $range does not correspond to a single residue or molecule.
-
-            """))
-        end
-    end
-    Residue(atoms,
-        UnitRange{Int}(range),
-        atoms[i].resname,
-        atoms[i].resname,
-        atoms[i].residue,
-        atoms[i].resnum,
-        atoms[i].chain,
-        atoms[i].model,
-        atoms[i].segname,
-    )
+    _check_unique(Residue, atoms, range)
+    at1 = first(atoms[range])
+    Residue(atoms, UnitRange{Int}(range), resname(at1), residue(at1), resnum(at1), chain(at1), model(at1), segname(at1))
 end
 Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
@@ -111,7 +93,7 @@ julia> collect(eachresidue(atoms))
 eachresidue(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Residue}(atoms)
 
 # Specific getters for this type
-name(residue::Residue) = residue.name
+name(residue::Residue) = residue.resname
 resname(residue::Residue) = residue.resname
 residue(residue::Residue) = residue.residue
 resnum(residue::Residue) = residue.resnum
@@ -126,10 +108,14 @@ mass(residue::Residue) = mass(@view residue.atoms[residue.range])
     residues = eachresidue(atoms)
     @test length(residues) == 104
     @test name(Residue(atoms, 1:12)) == "ALA"
+    @test resname(Residue(atoms, 1:12)) == "ALA"
     @test Residue(atoms, 1:12).range == 1:12
     @test Residue(atoms[1:12]).range == 1:12
     @test firstindex(residues) == 1
     @test lastindex(residues) == 104
+    @test resname(last(residues)) == "THR"
+    @test residue(last(residues)) == 104
+    @test chain(last(residues)) == "A"
     @test_throws ArgumentError residues[1]
     residues = collect(eachresidue(atoms))
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
