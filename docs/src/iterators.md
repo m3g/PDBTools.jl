@@ -109,8 +109,8 @@ julia> chain.(eachchain(ats))              # Retrieve the names of all chains in
 4-element Vector{InlineStrings.String3}:
  "A"
  "B"
- "C"
  "A"
+ "D"
 
 julia> model.(eachchain(ats))          # Retrieve the model numbers associated with each chain
 4-element Vector{Int32}:
@@ -143,8 +143,8 @@ julia> chains = collect(eachchain(ats))
 4-element Vector{Chain}[
     Chain(A-48 atoms)
     Chain(B-48 atoms)
-    Chain(C-48 atoms)
-    Chain(A-45 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
 ]
 
 julia> chain_B = chains[2]
