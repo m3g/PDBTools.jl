@@ -1,12 +1,21 @@
 abstract type AbstractStructuralElement{T} <: AbstractVector{T} end
 
-mass(s::AbstractStructuralElement) = mass(@view s.atoms[s.range])
-
 function Base.getindex(s::AbstractStructuralElement, i::Integer)
     i >= 0 || throw(ArgumentError("Index must be in 1:$(length(s))"))
     (i <= length(s)) || throw(ArgumentError("$(typeof(s)) has $(length(s)) atoms, tried to fetch index $i."))
     i = first(s.range) + i - 1
     s.atoms[i]
+end
+
+# Function that performs checks on the range
+function _check_unique(::Type{T}, atoms, range) where {T<:AbstractStructuralElement}
+    at1 = first(atoms[range])
+    if any(!same_struct_element(T, at1, at2) for at2 in @view(atoms[range]))
+        throw(ArgumentError("""\n 
+                Range $range does not correspond to a single $T structural elements. 
+                
+        """))
+    end
 end
 
 #
@@ -33,18 +42,24 @@ Base.size(s::AbstractStructuralElement) = (length(s.range),)
 Base.length(s::AbstractStructuralElement) = length(s.range)
 Base.eltype(::AbstractStructuralElement) = Atom
 
+# Necessary for the interface: define the same_struct_element function
+same_struct_element(type::Type{AbstractStructuralElement}, ::Atom, ::Atom) =
+    error("same_struct_element internal interface not implemented for $(type)")
+
 #
 # Iterate, lazily, over the iterator
 #
-_same(type::Type{AbstractStructuralElement}, ::Atom, ::Atom) = error("_same internal interface not implemented for $(type)")
 function Base.iterate(sit::EachStructuralElement{STYPE}, current_atom=firstindex(sit.atoms)) where {STYPE}
     current_atom > length(sit.atoms) && return nothing
     next_atom = current_atom + 1
-    while next_atom <= length(sit.atoms) && _same(STYPE, sit.atoms[current_atom], sit.atoms[next_atom])
+    while next_atom <= length(sit.atoms) && same_struct_element(STYPE, sit.atoms[current_atom], sit.atoms[next_atom])
         next_atom += 1
     end
     return (STYPE(sit.atoms, current_atom:next_atom-1), next_atom)
 end
+
+# Properties
+mass(s::AbstractStructuralElement) = mass(@view s.atoms[s.range])
 
 #
 # Iterate over the structural element

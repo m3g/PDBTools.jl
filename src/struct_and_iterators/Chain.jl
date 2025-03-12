@@ -51,26 +51,16 @@ julia> segname(chains[2])
     segname::String7
 end
 
-# Necessary for the interface: define the _same function
-_same(::Type{Chain}, at1::Atom, at2::Atom) =
+# Necessary for the interface: define the same_struct_element function
+same_struct_element(::Type{Chain}, at1::Atom, at2::Atom) =
     at1.chain == at2.chain && at1.model == at2.model && at1.segname == at2.segname
+
 
 # Constructors
 function Chain(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
-    i = first(range)
-    if any(!(_same(Chain, atoms[j], atoms[i])) for j in range)
-        throw(ArgumentError("""\n 
-                Range $range does not correspond to a single protein chain.
-                
-        """))
-    end
-    Chain(
-        atoms=atoms,
-        range=UnitRange{Int}(range),
-        chain=chain(atoms[i]),
-        model=model(atoms[i]),
-        segname=segname(atoms[i]),
-    )
+    _check_unique(Chain, atoms, range)
+    at1 = first(atoms[range])
+    Chain(atoms=atoms, range=UnitRange{Int}(range), chain=chain(at1), model=model(at1), segname=segname(at1))
 end
 Chain(atoms::AbstractVector{<:Atom}) = Chain(atoms, eachindex(atoms))
 

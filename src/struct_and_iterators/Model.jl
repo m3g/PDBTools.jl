@@ -46,22 +46,13 @@ struct Model{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     number::Int32
 end
 
-# Necessary for the interface: define the _same function
-_same(::Type{Model}, at1::Atom, at2::Atom) = at1.model == at2.model
+# Necessary for the interface: define the same_struct_element function
+same_struct_element(::Type{Model}, at1::Atom, at2::Atom) = at1.model == at2.model
 
 # Constructors
 function Model(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
-    i = range[begin]
-    # Check if the range effectively corresponds to a single residue (unsafe check)
-    for j = range[begin]+1:range[end]
-        if !(_same(Model, atoms[i], atoms[j]))
-            throw(ArgumentError("""\n 
-                Range $range does not correspond to a single model.
-
-            """))
-        end
-    end
-    return Model(atoms, UnitRange{Int}(range), atoms[i].model)
+    _check_unique(Model, atoms, range)
+    return Model(atoms, UnitRange{Int}(range), model(first(atoms[range])))
 end
 Model(atoms::AbstractVector{<:Atom}) = Model(atoms, eachindex(atoms))
 
