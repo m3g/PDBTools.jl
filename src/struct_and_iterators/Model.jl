@@ -110,6 +110,7 @@ model(model::Model) = model.number
     @test length(models) == 11
     @test firstindex(models) == 1
     @test lastindex(models) == 11
+    @test length(last(models)) == 234
     @test_throws ArgumentError Model(atoms, 230:240)
     @test_throws ArgumentError models[1]
     m = collect(models)

@@ -113,6 +113,9 @@ mass(residue::Residue) = mass(@view residue.atoms[residue.range])
     @test Residue(atoms[1:12]).range == 1:12
     @test firstindex(residues) == 1
     @test lastindex(residues) == 104
+    @test resname(last(residues)) == "THR"
+    @test residue(last(residues)) == 104
+    @test chain(last(residues)) == "A"
     @test_throws ArgumentError residues[1]
     residues = collect(eachresidue(atoms))
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]

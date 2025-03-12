@@ -92,6 +92,8 @@ mass(segment::Segment) = mass(@view segment.atoms[segment.range])
     @test length(segments) == 2
     @test firstindex(segments) == 1
     @test lastindex(segments) == 2
+    @test length(last(segments)) == 92
+    @test segname(last(segments)) == "B"
     @test_throws ArgumentError Segment(atoms, 1904:1910)
     @test_throws ArgumentError segments[1]
     s = collect(segments)

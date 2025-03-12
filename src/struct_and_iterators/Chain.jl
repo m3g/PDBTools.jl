@@ -19,8 +19,8 @@ julia> chains = collect(eachchain(ats))
 4-element Vector{Chain}[
     Chain(A-48 atoms)
     Chain(B-48 atoms)
-    Chain(C-48 atoms)
-    Chain(A-45 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
 ]
 
 julia> chains[1]
@@ -83,8 +83,8 @@ julia> chains = collect(eachchain(ats))
 4-element Vector{Chain}[
     Chain(A-48 atoms)
     Chain(B-48 atoms)
-    Chain(C-48 atoms)
-    Chain(A-45 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
 ]
 ```
 
@@ -108,15 +108,17 @@ mass(chain::Chain) = mass(@view chain.atoms[chain.range])
     @test length(ichains) == 4
     @test firstindex(ichains) == 1
     @test lastindex(ichains) == 4
+    @test length(last(ichains)) == 45
+    @test name(last(ichains)) == "D"
     @test_throws ArgumentError ichains[1]
     chains = collect(eachchain(pdb))
-    @test name(chains[3]) == "C"
+    @test name(chains[3]) == "A"
     @test index.(filter(at -> resname(at) == "ASP" && name(at) == "CA", chains[1])) == [2]
     @test length(findall(at -> resname(at) == "GLN", chains[1])) == 17
     @test mass(chains[1]) ≈ 353.37881000000016
     @test segname(chains[3]) == "ASYN"
     @test model(chains[4]) == 2
-    @test chain(chains[4]) == "A"
+    @test chain(chains[4]) == "D"
     @test_throws ArgumentError chains[1][49]
 end
 
@@ -146,8 +148,8 @@ end
     4-element Vector{Chain}[ 
         Chain(A-48 atoms)
         Chain(B-48 atoms)
-        Chain(C-48 atoms)
-        Chain(A-45 atoms)
+        Chain(A-48 atoms)
+        Chain(D-45 atoms)
     ]
     """
     @test parse_show(cc[1]; repl=Dict(r"^((?:[^\n]*\n){3}).*"s => s"\1")) ≈ """

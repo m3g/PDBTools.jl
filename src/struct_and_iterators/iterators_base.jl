@@ -7,6 +7,10 @@ function Base.getindex(s::AbstractStructuralElement, i::Integer)
     s.atoms[i]
 end
 
+# Necessary for the interface: define the same_struct_element function
+same_struct_element(type::Type{AbstractStructuralElement}, ::Atom, ::Atom) =
+    error("same_struct_element internal interface not implemented for $(type)")
+
 # Function that performs checks on the range
 function _check_unique(::Type{T}, atoms, range) where {T<:AbstractStructuralElement}
     at1 = first(atoms[range])
@@ -27,9 +31,20 @@ end
 EachStructuralElement{STYPE}(atoms) where {STYPE} = EachStructuralElement{STYPE,typeof(atoms)}(atoms)
 
 Base.collect(sit::EachStructuralElement{STYPE}) where {STYPE} = collect(STYPE, sit)
-Base.length(sit::EachStructuralElement) = sum(1 for s in sit)
+Base.length(sit::EachStructuralElement) = count(el -> true, sit)
 Base.firstindex(sit::EachStructuralElement) = 1
 Base.lastindex(sit::EachStructuralElement) = length(sit)
+function Base.last(sit::EachStructuralElement{STYPE}) where {STYPE}
+    atoms = sit.atoms
+    ilast = lastindex(atoms)
+    iprev = ilast - 1
+    while iprev >= firstindex(atoms) && same_struct_element(STYPE, atoms[ilast], atoms[iprev])
+        iprev -= 1
+    end
+    ifirst = iprev + 1
+    return STYPE(atoms, ifirst:ilast)
+end
+
 function Base.getindex(::EachStructuralElement, ::Int)
     throw(ArgumentError("""\n
         The iterator does not support indexing. 
@@ -41,10 +56,6 @@ end
 Base.size(s::AbstractStructuralElement) = (length(s.range),)
 Base.length(s::AbstractStructuralElement) = length(s.range)
 Base.eltype(::AbstractStructuralElement) = Atom
-
-# Necessary for the interface: define the same_struct_element function
-same_struct_element(type::Type{AbstractStructuralElement}, ::Atom, ::Atom) =
-    error("same_struct_element internal interface not implemented for $(type)")
 
 #
 # Iterate, lazily, over the iterator
