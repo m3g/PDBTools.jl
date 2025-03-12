@@ -132,7 +132,7 @@ In the example above, the `chain.` command retrieves the names of all chains in 
 
 ### Accessing Chains by Index
 
-As seen in the previous example, The `first` command allow quick access to the first chain in the iterator. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.
+As seen in the previous example, The `first` and `last` commands allow quick access to the first an last elements in the iterator. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.
 
 ```jldoctest
 julia> using PDBTools
