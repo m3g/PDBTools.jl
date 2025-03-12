@@ -105,23 +105,23 @@ julia> using PDBTools
 
 julia> ats = read_pdb(PDBTools.CHAINSPDB);
 
-julia> chain.(eachchain(ats))              # Retrieve the names of all chains in the structure
+julia> chain.(eachchain(ats)) # Retrieve the names of all chains in the structure
 4-element Vector{InlineStrings.String3}:
  "A"
  "B"
  "A"
  "D"
 
-julia> model.(eachchain(ats))          # Retrieve the model numbers associated with each chain
+julia> model.(eachchain(ats)) # Retrieve the model numbers associated with each chain
 4-element Vector{Int32}:
  1
  1
  1
  2
 
-julia> chain_A1 = first(eachchain(ats));   # Access the first chain in the iterator
+julia> chain_A1 = first(eachchain(ats)); # Access the first chain in the iterator
 
-julia> resname.(eachresidue(chain_A1))     # Retrieve residue names for chain A in model 1
+julia> resname.(eachresidue(chain_A1)) # Retrieve residue names for chain A in model 1
 3-element Vector{InlineStrings.String7}:
  "ASP"
  "GLN"
