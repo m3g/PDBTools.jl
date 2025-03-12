@@ -1,15 +1,14 @@
 abstract type AbstractStructuralElement{T} <: AbstractVector{T} end
 
 function Base.getindex(s::AbstractStructuralElement, i::Integer)
-    i >= 0 || throw(ArgumentError("Index must be in 1:$(length(s))"))
-    (i <= length(s)) || throw(ArgumentError("$(typeof(s)) has $(length(s)) atoms, tried to fetch index $i."))
+    (1 <= i <= length(s)) || throw(ArgumentError("$(typeof(s)) has $(length(s)) atoms, tried to fetch index $i."))
     i = first(s.range) + i - 1
     s.atoms[i]
 end
 
 # Necessary for the interface: define the same_struct_element function
-same_struct_element(type::Type{AbstractStructuralElement}, ::Atom, ::Atom) =
-    error("same_struct_element internal interface not implemented for $(type)")
+same_struct_element(type::Type{<:AbstractStructuralElement}, ::Atom, ::Atom) =
+    throw(ArgumentError("same_struct_element internal interface not implemented for $(type)"))
 
 # Function that performs checks on the range
 function _check_unique(::Type{T}, atoms, range) where {T<:AbstractStructuralElement}
@@ -85,4 +84,18 @@ end
 #
 function Base.show(io::IO, sit::EachStructuralElement{STYPE}) where {STYPE}
     print(io, " $STYPE iterator with length = $(length(sit))")
+end
+
+@testitem "AbstractStructuralElement interface" begin
+    using PDBTools
+    struct Incomplete{T} <: PDBTools.AbstractStructuralElement{T} 
+        atoms::Vector{T}
+        range::UnitRange{Int}
+    end
+    function Incomplete(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
+        PDBTools._check_unique(Incomplete, atoms, range)
+    end
+    Incomplete(atoms::AbstractVector{<:Atom}) = Incomplete(atoms, eachindex(atoms))
+    ats = read_pdb(PDBTools.SMALLPDB)
+    @test_throws ArgumentError Incomplete(ats)
 end
