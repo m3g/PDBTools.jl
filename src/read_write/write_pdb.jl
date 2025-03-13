@@ -73,6 +73,16 @@ end
     f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
     f2 = readdlm(tmpfile, '\n', header=true)
     @test f1[1] == f2[1]
+    # test selection
+    write_pdb(tmpfile, pdb, "name CA")
+    f3 = read_pdb(tmpfile)
+    @test length(f3) == 3
+    # test header and footer
+    write_pdb(tmpfile, pdb, "name CA"; header="HEADER test", footer="END test")
+    s = split(String(read(tmpfile)))
+    @test (s[begin],s[begin+1]) == ("HEADER", "test")
+    @test (s[end-1],s[end]) == ("END", "test")
+    # test append
     append_pdb = tempname() * ".pdb"
     write_pdb(append_pdb, pdb; append=true)
     pdb1 = read_pdb(append_pdb)
