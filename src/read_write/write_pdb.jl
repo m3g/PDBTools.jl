@@ -1,39 +1,66 @@
 """
-    write_pdb(filename::String, atoms::AbstractVector{<:Atom}, selection; header=:auto, footer=:auto)
+    write_pdb(filename::String, atoms::AbstractVector{<:Atom}, [selection]; header=:auto, footer=:auto, append=false)
 
 Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string
 that can be used to select a subset of the atoms in `atoms`. For example, `write_pdb("test.pdb", atoms, "name CA")`.
 
-The `header` and `footer` arguments can be used to add a header and footer to the PDB file. If `header` is `:auto`,
-then a header will be added with the number of atoms in `atoms`. If `footer` is `:auto`, then a footer will be added
-with the "END" keyword. Either can be set to `nothing` if no header or footer is desired.
+# Arguments
+
+- `filename::String`: The name of the file to write.
+- `atoms::AbstractVector{<:Atom}`: The atoms to write to the file.
+
+# Optional positional argument 
+
+- `selection::String`: A selection string to select a subset of the atoms in `atoms`.
+
+# Keyword arguments
+
+- `header::Union{String, Nothing}=:auto`: The header to add to the PDB file. If `:auto`, a header will be added with the number of atoms in `atoms`.
+- `footer::Union{String, Nothing}=:auto`: The footer to add to the PDB file. If `:auto`, a footer will be added with the "END" keyword.
+- `append::Bool=false`: If `true`, the atoms will be appended to the file instead of overwriting it.
+
+!!! compat
+    The `append` keyword argument is available in PDBTools.jl v2.7.0 and later.
 
 """
-function write_pdb(filename::String, atoms::AbstractVector{<:Atom}, selection::String; header=:auto, footer=:auto)
+function write_pdb(
+    filename::String, 
+    atoms::AbstractVector{<:Atom}, 
+    selection::String; 
+    header=:auto, 
+    footer=:auto,
+    append=false,
+)
     query = parse_query(selection)
-    write_pdb(filename, atoms, only=atom -> apply_query(query, atom); header, footer)
+    write_pdb(filename, atoms, only=atom -> apply_query(query, atom); header, footer, append)
 end
 
-function write_pdb(filename::String, atoms::AbstractVector{<:Atom}; only::Function=all, header=:auto, footer=:auto)
-    file = open(expanduser(filename), "w")
-    if header == :auto
-        curr_date = Dates.format(Dates.today(), "dd-u-yy")
-        header = "PDBTools.jl - $(length(atoms)) atoms"
-        println(file, @sprintf "%-10s%-40s%9s" "HEADER" header curr_date)
-    elseif header !== nothing
-        println(file, header)
-    end
-    for atom in atoms
-        if only(atom)
-            println(file, write_pdb_atom(atom))
+function write_pdb(
+    filename::String, atoms::AbstractVector{<:Atom}; 
+    only::Function=all, 
+    append=false,
+    header=:auto, 
+    footer=:auto,
+)
+    open(expanduser(filename), append ? "a" : "w") do io 
+        if header == :auto
+            curr_date = Dates.format(Dates.today(), "dd-u-yy")
+            header = "PDBTools.jl - $(length(atoms)) atoms"
+            println(io, @sprintf "%-10s%-40s%9s" "HEADER" header curr_date)
+        elseif header !== nothing
+            println(io, header)
+        end
+        for atom in atoms
+            if only(atom)
+                println(io, write_pdb_atom(atom))
+            end
+        end
+        if footer == :auto
+            println(io, "END")
+        elseif footer !== nothing
+            println(io, footer)
         end
     end
-    if footer == :auto
-        println(file, "END")
-    elseif footer !== nothing
-        println(file, footer)
-    end
-    close(file)
 end
 
 @testitem "write_pdb" begin
@@ -46,6 +73,25 @@ end
     f1 = readdlm(PDBTools.SMALLPDB, '\n', header=true)
     f2 = readdlm(tmpfile, '\n', header=true)
     @test f1[1] == f2[1]
+    # test selection
+    write_pdb(tmpfile, pdb, "name CA")
+    f3 = read_pdb(tmpfile)
+    @test length(f3) == 3
+    # test header and footer
+    write_pdb(tmpfile, pdb, "name CA"; header="HEADER test", footer="END test")
+    s = split(String(read(tmpfile)))
+    @test (s[begin],s[begin+1]) == ("HEADER", "test")
+    @test (s[end-1],s[end]) == ("END", "test")
+    # test append
+    append_pdb = tempname() * ".pdb"
+    write_pdb(append_pdb, pdb; append=true)
+    pdb1 = read_pdb(append_pdb)
+    @test length(eachmodel(pdb1)) == 1
+    @test length(pdb1) == 35
+    write_pdb(append_pdb, pdb; append=true)
+    pdb2 = read_pdb(append_pdb)
+    @test length(eachmodel(pdb2)) == 2
+    @test length(pdb2) == 70
 end
 
 #
