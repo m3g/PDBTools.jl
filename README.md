@@ -49,7 +49,7 @@ atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
 
 ### Not indicated for:
 
-The purpose of PDBTools.jl is mostly to provide support for atomic structure manipulations in the context of Molecular Dynamics Simulations. Thus, it allows reading and writing flexibilities and limitations that deviating from standard PDB directives. For more standard support of the PDB and CIF formats use the packages of
+The purpose of PDBTools.jl is mostly to provide support for atomic structure manipulations in the context of Molecular Dynamics Simulations. Thus, it allows reading and writing flexibilities and limitations deviating from standard PDB directives (as VMD and other MD visualization packages do). For more standard support of the PDB and CIF formats use the packages of
 [BioJulia](https://github.com/BioJulia), 
 [BioStructures](https://github.com/BioJulia/BioStructures.jl) in
 particular.
