@@ -4,9 +4,9 @@
 [![codecov](https://codecov.io/gh/m3g/PDBTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/PDBTools.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-# PDBTools
+# PDBTools.jl
 
-Simple structures and functions to read and write PDB files
+Read, write and manipulate atomic systems in PDB and mmCIF formats in Julia.
 
 ## Documentation
 
@@ -49,9 +49,7 @@ atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
 
 ### Not indicated for:
 
-We do not aim to provide the fastest PDB parsing methods. If
-speed in reading files, returning subsets of the structures, etc., is
-critical to you, probably you will do better with some packages of 
+The purpose of PDBTools.jl is mostly to provide support for atomic structure manipulations in the context of Molecular Dynamics Simulations. Thus, it allows reading and writing flexibilities and limitations that deviating from standard PDB directives. For more standard support of the PDB and CIF formats use the packages of
 [BioJulia](https://github.com/BioJulia), 
 [BioStructures](https://github.com/BioJulia/BioStructures.jl) in
 particular.
