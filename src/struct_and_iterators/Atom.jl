@@ -491,6 +491,9 @@ Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVecOrMat{<
         [   ] 
     ]
     """
+    @test parse_show([ at for _ in 1:20 ]; mime=nothing, context = :compact => true) ≈ """
+    [ Atom( 0 X-XXX 0 X), Atom( 0 X-XXX 0 X), Atom( 0 X-XXX 0 X), Atom( 0 X-XXX 0 X)…
+    """
 end
 
 #
