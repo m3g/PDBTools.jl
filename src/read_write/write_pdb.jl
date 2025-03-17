@@ -24,10 +24,10 @@ that can be used to select a subset of the atoms in `atoms`. For example, `write
 
 """
 function write_pdb(
-    filename::String, 
-    atoms::AbstractVector{<:Atom}, 
-    selection::String; 
-    header=:auto, 
+    filename::String,
+    atoms::AbstractVector{<:Atom},
+    selection::String;
+    header=:auto,
     footer=:auto,
     append=false,
 )
@@ -36,13 +36,13 @@ function write_pdb(
 end
 
 function write_pdb(
-    filename::String, atoms::AbstractVector{<:Atom}; 
-    only::Function=all, 
+    filename::String, atoms::AbstractVector{<:Atom};
+    only::Function=all,
     append=false,
-    header=:auto, 
+    header=:auto,
     footer=:auto,
 )
-    open(expanduser(filename), append ? "a" : "w") do io 
+    open(expanduser(filename), append ? "a" : "w") do io
         if header == :auto
             curr_date = Dates.format(Dates.today(), "dd-u-yy")
             header = "PDBTools.jl - $(length(atoms)) atoms"
@@ -80,8 +80,8 @@ end
     # test header and footer
     write_pdb(tmpfile, pdb, "name CA"; header="HEADER test", footer="END test")
     s = split(String(read(tmpfile)))
-    @test (s[begin],s[begin+1]) == ("HEADER", "test")
-    @test (s[end-1],s[end]) == ("END", "test")
+    @test (s[begin], s[begin+1]) == ("HEADER", "test")
+    @test (s[end-1], s[end]) == ("END", "test")
     # test append
     append_pdb = tempname() * ".pdb"
     write_pdb(append_pdb, pdb; append=true)
@@ -93,15 +93,15 @@ end
     @test length(eachmodel(pdb2)) == 2
     @test length(pdb2) == 70
     pdb_with_hetatm = read_pdb(PDBTools.HETATMPDB)
-    @test length(pdb_with_hetatm) == 19 
+    @test length(pdb_with_hetatm) == 19
     @test length(eachresidue(pdb_with_hetatm)) == 3
-    @test getfield.(pdb_with_hetatm, :flag) == [ i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm) ]
+    @test getfield.(pdb_with_hetatm, :flag) == [i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm)]
     tmpfile = tempname() * ".pdb"
     write_pdb(tmpfile, pdb_with_hetatm)
     pdb_with_hetatm = read_pdb(tmpfile)
-    @test length(pdb_with_hetatm) == 19 
+    @test length(pdb_with_hetatm) == 19
     @test length(eachresidue(pdb_with_hetatm)) == 3
-    @test getfield.(pdb_with_hetatm, :flag) == [ i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm) ]
+    @test getfield.(pdb_with_hetatm, :flag) == [i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm)]
 end
 
 #
