@@ -93,11 +93,10 @@ function _parse_pdb(
     return atoms
 end
 
-
-
 # read atom from PDB file
 function read_atom_pdb(record::String, lastatom::Atom=Atom{Nothing}(), imodel::Int=1)
-    atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom), model=imodel)
+    atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom), model=imodel, flag=0)
+    record[1:6] == "HETATM" && (atom.flag = 1)
     inds_and_names = (
         (1, Val(:name)),
         (2, Val(:resname)),

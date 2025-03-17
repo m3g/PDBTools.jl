@@ -92,6 +92,16 @@ end
     pdb2 = read_pdb(append_pdb)
     @test length(eachmodel(pdb2)) == 2
     @test length(pdb2) == 70
+    pdb_with_hetatm = read_pdb(PDBTools.HETATMPDB)
+    @test length(pdb_with_hetatm) == 19 
+    @test length(eachresidue(pdb_with_hetatm)) == 3
+    @test getfield.(pdb_with_hetatm, :flag) == [ i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm) ]
+    tmpfile = tempname() * ".pdb"
+    write_pdb(tmpfile, pdb_with_hetatm)
+    pdb_with_hetatm = read_pdb(tmpfile)
+    @test length(pdb_with_hetatm) == 19 
+    @test length(eachresidue(pdb_with_hetatm)) == 3
+    @test getfield.(pdb_with_hetatm, :flag) == [ i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm) ]
 end
 
 #
@@ -157,7 +167,7 @@ function write_pdb_atom(atom::Atom)
     end
 
     atom_data = (
-        "ATOM",
+        atom.flag == 0 ? "ATOM" : "HETATM",
         mod(atom.index, 1048576),
         " ",
         _align_name(name),
@@ -203,4 +213,6 @@ end
     @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALA A424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
     pdb[1].resname = "ALAX"
     @test PDBTools.write_pdb_atom(pdb[1]) == "ATOM  f4240  N   ALAXA424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
+    pdb[1].flag = 1
+    @test PDBTools.write_pdb_atom(pdb[1]) == "HETATMf4240  N   ALAXA424f      -9.229 -14.861  -5.481  0.00  0.00      PROT N"
 end

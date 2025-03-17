@@ -1,0 +1,21 @@
+HEADER    PDBTools.jl - 35 atoms                  04-Apr-24
+ATOM      1  N   ALA A   1      -9.229 -14.861  -5.481  0.00  0.00      PROT N
+ATOM      5  CA  ALA A   1      -8.483 -14.912  -6.726  1.00  0.00      PROT C
+ATOM      7  CB  ALA A   1      -9.383 -14.465  -7.880  1.00  0.00      PROT C
+ATOM     11  C   ALA A   1      -7.227 -14.047  -6.599  1.00  0.00      PROT C
+ATOM     12  O   ALA A   1      -7.083 -13.048  -7.303  1.00  0.00      PROT O
+ATOM     13  N   CYS A   2      -6.351 -14.461  -5.695  1.00  0.00      PROT N
+ATOM     15  CA  CYS A   2      -5.113 -13.737  -5.466  1.00  0.00      PROT C
+ATOM     17  CB  CYS A   2      -4.067 -14.610  -4.769  1.00  0.00      PROT C
+ATOM     20  SG  CYS A   2      -4.542 -16.366  -4.572  1.00  0.00      PROT S
+ATOM     22  C   CYS A   2      -4.610 -13.207  -6.811  1.00  0.00      PROT C
+ATOM     23  O   CYS A   2      -4.443 -13.972  -7.759  1.00  0.00      PROT O
+HETATM   24  N   HET A   3      -4.383 -11.903  -6.849  1.00  0.00      PROT N
+HETATM   26  CA  HET A   3      -3.903 -11.262  -8.062  1.00  0.00      PROT C
+HETATM   28  CB  HET A   3      -4.938 -10.279  -8.612  1.00  0.00      PROT C
+HETATM   31  CG  HET A   3      -5.867 -10.850  -9.684  1.00  0.00      PROT C
+HETATM   32  OD1 HET A   3      -5.451 -10.837 -10.863  1.00  0.00      PROT O
+HETATM   33  OD2 HET A   3      -6.974 -11.289  -9.300  1.00  0.00      PROT O
+HETATM   34  C   HET A   3      -2.626 -10.480  -7.749  1.00  0.00      PROT C
+HETATM   35  O   HET A   3      -1.940 -10.014  -8.658  1.00  0.00      PROT O
+END
