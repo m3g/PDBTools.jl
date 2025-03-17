@@ -23,6 +23,7 @@ Fields:
         pdb_element::String3 # Element symbol string (cols 77:78)
         charge::Float32 # Charge (cols: 79:80)
         custom::CustomType # Custom fields
+        flag::Int8 # Flag for internal use
     end
 
 ### Example
@@ -102,13 +103,14 @@ mutable struct Atom{CustomType}
     pdb_element::String3
     charge::Float32
     custom::CustomType
+    flag::Int8
 end
 
 #
 # Default constructor
 #
 function Atom(; custom::CustomType=nothing, kargs...) where {CustomType}
-    atom = Atom{CustomType}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, custom)
+    atom = Atom{CustomType}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, custom, Int8(0))
     kargs_values = values(kargs)
     kargs_keys = keys(kargs_values)
     ntuple(length(kargs_values)) do i
@@ -126,9 +128,9 @@ end
 Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
 
 @testitem "Atom constructors" begin
-    atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing)
+    atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
     at = Atom()
-    @test Base.summarysize(at) == 80
+    @test Base.summarysize(at) == 88
     @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
     at1 = Atom{Nothing}(; index=1, name="CA")
     at2 = Atom(; custom=nothing, index=1, name="CA")
@@ -463,6 +465,22 @@ Base.show(io::IO, ::MIME"text/plain", vecat::AbstractVector{<:AbstractVecOrMat{<
     Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
     Atom{Nothing}[Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X); Atom(0X-XXX0X) Atom(0X-XXX0X) Atom(0X-XXX0X)]
     ]
+    """
+    @test parse_show([ at, add_custom_field(at, 1) ]; repl=Dict("PDBTools." => "")) ≈ """
+       Vector{Atom} with 2 atoms with fields:
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    @test parse_show([ add_custom_field(at, 1), add_custom_field(at, 1) ]; repl=Dict("PDBTools." => "")) ≈ """
+       Vector{Atom{Int64}} with 2 atoms with fields:
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+       0    X     XXX     X        0        0    0.000    0.000    0.000  0.00  0.00     0       X         0
+    """
+    @test parse_show(Atom{Nothing}[]; repl=Dict("PDBTools." => "")) ≈ """
+       Vector{Atom{Nothing}} with 0 atoms with fields:
+    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
     """
     @test parse_show(Atom[]; repl=Dict("PDBTools." => "")) ≈ """
        Vector{Atom} with 0 atoms with fields:

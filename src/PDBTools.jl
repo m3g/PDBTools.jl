@@ -53,6 +53,7 @@ const TESTCIF = joinpath(@__DIR__, "../test/small.cif")
 const CHAINSPDB = joinpath(@__DIR__, "../test/chains.pdb")
 const BROKENCIF = joinpath(@__DIR__, "../test/broken.cif")
 const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
+const HETATMPDB = joinpath(@__DIR__, "../test/hetatm.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")
