@@ -101,6 +101,14 @@ chain(residue::Residue) = residue.chain
 model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
+function charge(residue::Residue)  
+    if residue.resname in keys(protein_residues)
+        return protein_residues[residue.resname].charge
+    else
+        @warn "Residue $(residue.resname) not found in protein residues. Assuming residue charge = 0"
+        return 0
+    end
+end
 
 @testitem "Residue iterator" begin
     using PDBTools
@@ -225,6 +233,7 @@ end
     pdb = read_pdb(PDBTools.TESTPDB)
     glu_atoms = select(pdb, "resname GLU")
     glu = collect(eachresidue(glu_atoms))
+    @test charge(glu[1]) == -1
     @test isacidic(glu[1])
     @test !isaliphatic(glu[1])
     @test !isaromatic(glu[1])
@@ -241,6 +250,7 @@ end
     @test segname(glu[end]) == "PROT"
     phe_atoms = select(pdb, "resname PHE")
     phe = collect(eachresidue(phe_atoms))
+    @test charge(phe[1]) == 0
     @test !isacidic(phe[1])
     @test !isaliphatic(phe[1])
     @test isaromatic(phe[1])
@@ -255,6 +265,7 @@ end
     watresiter = eachresidue(water)
     watres = collect(eachresidue(water))
     @test iswater(watres[1])
+    @test charge(watres[1]) == 0
 end
 
 """
