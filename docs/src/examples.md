@@ -36,12 +36,10 @@ julia> resname.(eachresidue(active_site_atoms))
 ```
 
 !!! note
-   - The `Atom[]` creates an empty vector of `PDBTools.Atom` objects, and we
-     append to this array the list of atoms of each residue. 
-   - We opt here to download the file in the `"PDB"` format, because the chain
-     identifier in the `mmCIF` deposited file does not include the ligand in chain A.
-
-
+    - The `Atom[]` creates an empty vector of `PDBTools.Atom` objects, and we
+      append to this array the list of atoms of each residue. 
+    - We opt here to download the file in the `"PDB"` format, because the chain
+      identifier in the `mmCIF` deposited file does not include the ligand in chain A.
 
 ## Storing partial charges
 
