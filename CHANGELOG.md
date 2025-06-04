@@ -9,6 +9,7 @@ Version 3.0.0
 - ![BREAKING][badge-breaking] In all functions that accepted the `only` keyword parameter to define selections with a Julia function, the keyword parameter was dropped and now the function can be provided as a positional second argument, or third argument for `write_pdb` and `write_mmcif` functions.
 - ![BREAKING][badge-breaking] `get_seq` functions do not support anymore the input of the file name. An array of `Atom`s must be provided. This is because internally it would be required to recognize PDB of mmCIF functions.
 - ![INFO][badge-info] Dropped Julia 1.9 support (minimum requirement is 1.10)
+- ![INFO][badge-info] Set version to 3.0.0 
   
 [badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
 [badge-deprecation]: https://img.shields.io/badge/Deprecation-orange.svg
