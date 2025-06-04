@@ -10,7 +10,9 @@ To obtain a list of the residue names of the protein with three- and one-letter 
 ```jldoctest
 julia> using PDBTools
 
-julia> getseq(PDBTools.SMALLPDB)
+julia> pdb = read_pdb(PDBTools.SMALLPDB);
+
+julia> getseq(pdb)
 3-element Vector{String}:
  "A"
  "C"
@@ -23,13 +25,15 @@ full natural-aminoacid names, like "Alanine", "Proline", etc:
 ```jldoctest
 julia> using PDBTools
 
-julia> getseq(PDBTools.SMALLPDB, code=2)
+julia> pdb = read_pdb(PDBTools.SMALLPDB);
+
+julia> getseq(pdb; code=2)
 3-element Vector{String}:
  "ALA"
  "CYS"
  "ASP"
 
-julia> getseq(PDBTools.SMALLPDB, code=3)
+julia> getseq(pdb; code=3)
 3-element Vector{String}:
  "Alanine"
  "Cysteine"

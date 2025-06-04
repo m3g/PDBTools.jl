@@ -219,6 +219,9 @@ julia> selected_atoms = select_with_vmd(pdbfile,"resname ALA and name HT2 HT3";v
 ([3, 4], ["HT2", "HT3"])
 ```
 
+Note that in the above examples we use `name HT2 HT3` which is not currently supported by the 
+internal PDBTools `select` function, which would require `name HT2 or name HT3`. 
+
 Here, the output will contain two lists, one of atom indices (one-based) and atom names.
 The indices correspond to sequential indices in the input, *not* the indices written in the PDB file, for example.
 
