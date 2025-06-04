@@ -10,17 +10,17 @@ julia> using PDBTools
 
 julia> protein = read_pdb(PDBTools.TESTPDB);
 
-julia> getseq(protein,"residue < 3")
+julia> getseq(protein, "residue < 3")
 2-element Vector{String}:
  "A"
  "C"
 
-julia> getseq(protein,"residue < 3", code=2)
+julia> getseq(protein, "residue < 3"; code=2)
 2-element Vector{String}:
  "ALA"
  "CYS"
 
-julia> getseq(protein,"residue < 3",code=3)
+julia> getseq(protein, "residue < 3"; code=3)
 2-element Vector{String}:
  "Alanine"
  "Cysteine"
@@ -30,16 +30,16 @@ julia> getseq(protein,"residue < 3",code=3)
 """
 function getseq(atoms::AbstractVector{<:Atom}, selection::String; code::Int=1)
     query = parse_query(selection)
-    return getseq(atoms, only=atom -> apply_query(query, atom), code=code)
+    return getseq(atoms, atom -> apply_query(query, atom); code)
 end
 
-function getseq(atoms::AbstractVector{<:Atom}; only=isprotein, code::Int=1)
+function getseq(atoms::AbstractVector{<:Atom}, selection_function::Function=isprotein; code::Int=1)
     seq = String[]
     for residue in eachresidue(atoms)
         # If any atom of this residue is in the selection, add it
         consider = false
         for at in residue
-            if only(at)
+            if selection_function(at)
                 consider = true
                 break
             end
@@ -59,14 +59,6 @@ function getseq(atoms::AbstractVector{<:Atom}; only=isprotein, code::Int=1)
     return seq
 end
 
-# From the file name
-function getseq(file::String, selection::String; code::Int=1)
-    atoms = read_pdb(file)
-    return getseq(atoms, selection, code=code)
-end
-
-getseq(file::String; only=all, code::Int=1) = getseq(read_pdb(file), only=only, code=code)
-
 @testitem "getseq" begin
     using PDBTools
     ats = read_pdb(PDBTools.TESTPDB)
@@ -83,9 +75,4 @@ getseq(file::String; only=all, code::Int=1) = getseq(read_pdb(file), only=only, 
     @test s == ["TIP3", "TIP3", "TIP3", "TIP3"]
     s = getseq(wat, "resnum < 3"; code=3)
     @test s == ["TIP3", "TIP3", "TIP3", "TIP3"]
-    s = getseq(PDBTools.TESTPDB, "residue < 3")
-    s = getseq(ats, "residue < 3")
-    @test s == ["A", "C"]
-    s = getseq(PDBTools.TESTPDB; only=at -> resnum(at) == 1)
-    @test s == ["A", "C", "S", "T", "T", "T"]
 end

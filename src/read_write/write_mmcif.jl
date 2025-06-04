@@ -74,10 +74,12 @@ function _get_mmcif_field(atom, field_name)
 end
 
 """
-    write_mmcif(filename, atoms::AbstractVector{<:Atom}, [selection])
+    write_mmcif(filename, atoms::AbstractVector{<:Atom}, [selection]; field_assignment=nothing)
 
-Write a mmCIF file with the atoms in `atoms` to `filename`. The optional `selection` argument is a string
+Write a mmCIF file with the atoms in `atoms` to `filename`. The optional `selection` argument is a string or function
 that can be used to select a subset of the atoms in `atoms`. For example, `write_mmcif(atoms, "test.cif", "name CA")`.
+
+The optional `field_assignment` argument is a dictionary that can be used to assign custom fields to the mmCIF file.
 
 """
 function write_mmcif(
@@ -87,12 +89,13 @@ function write_mmcif(
     field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
     query = parse_query(selection)
-    write_mmcif(filename, atoms; only=atom -> apply_query(query, atom), field_assignment)
+    write_mmcif(filename, atoms, atom -> apply_query(query, atom); field_assignment)
 end
 
 function write_mmcif(
-    filename::AbstractString, atoms::AbstractVector{<:Atom};
-    only::Function=all,
+    filename::AbstractString, 
+    atoms::AbstractVector{<:Atom},
+    selection_function::Function=all;
     field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
     _cif_fields = _supported_write_cif_fields(field_assignment)
@@ -107,7 +110,7 @@ function write_mmcif(
         end
         index = 0
         for atom in atoms
-            !only(atom) && continue
+            !selection_function(atom) && continue
             index += 1
             buff = IOBuffer(; append=true)
             write(buff, "ATOM $(@sprintf("%9i", index))")
@@ -148,4 +151,15 @@ end
     @test all(name(at1) == name(at2) for (at1, at2) in zip(ats, ats1))
     field_assignment = Dict("test" => :abc)
     @test_throws ArgumentError write_mmcif(tmpfile, ats; field_assignment)
+
+    cA = select(ats, at -> name(at) == "CA")
+    write_mmcif(tmpfile, ats, "name CA")
+    @test isfile(tmpfile)
+    ats_cif = read_mmcif(tmpfile)
+    @test all(position(at1) ≈ position(at2) for (at1, at2) in zip(cA, ats_cif))
+
+    write_mmcif(tmpfile, ats, at -> name(at) == "CA")
+    @test isfile(tmpfile)
+    ats_cif = read_mmcif(tmpfile)
+    @test all(position(at1) ≈ position(at2) for (at1, at2) in zip(cA, ats_cif))
 end

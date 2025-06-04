@@ -24,38 +24,38 @@ julia> protein = wget("1LBD","chain A")
 """
 function wget(pdb_id::String, selection::String; format::AbstractString="mmCIF")
     query = parse_query(selection)
-    return wget(pdb_id, only=atom -> apply_query(query, atom); format)
+    return wget(pdb_id, atom -> apply_query(query, atom); format)
 end
 
-function _wget(pdb_id, format, only)
+function _wget(pdb_id, selection_function::Function; format)
     buf = IOBuffer()
     atoms = try
         Downloads.download("https://files.rcsb.org/download/$(uppercase(pdb_id)).$format", buf)
         seekstart(buf)
         if format == "pdb"
-            read_pdb(buf, only=only)
+            read_pdb(buf, selection_function)
         else
-            read_mmcif(buf, only=only)
+            read_mmcif(buf, selection_function)
         end
     catch
         @info "Failed downloading from `download` PDB repository, trying `view` repository ..."
         Downloads.download("https://files.rcsb.org/view/$(uppercase(pdb_id)).$format", buf)
         seekstart(buf)
         if format == "pdb"
-            read_pdb(buf, only=only)
+            read_pdb(buf, selection_function)
         else
-            read_mmcif(buf, only=only)
+            read_mmcif(buf, selection_function)
         end
     end
     return atoms
 end
 
 
-function wget(pdb_id::String; only=all, format::Union{AbstractString,Nothing}=nothing)
+function wget(pdb_id::String, selection_function::Function=all; format::Union{AbstractString,Nothing}=nothing)
     atoms = if format == "PDB"
-        _wget(pdb_id, "pdb", only)
+        _wget(pdb_id, selection_function; format="pdb")
     elseif isnothing(format) || format == "mmCIF"
-        _wget(pdb_id, "cif", only)
+        _wget(pdb_id, selection_function; format="cif")
     else
         throw(ArgumentError("""\n
             format must be either "PDB" or "mmCIF"
@@ -72,6 +72,8 @@ end
     protein = wget("1LBD", "chain A"; format="PDB")
     @test length(protein) == 1870
     protein = wget("1LBD", "chain A"; format="mmCIF")
+    @test length(protein) == 1870
+    protein = wget("1LBD", at -> chain(at) == "A"; format="mmCIF")
     @test length(protein) == 1870
     @test_throws ArgumentError wget("1LBD", "chain A"; format="mmcif")
 end

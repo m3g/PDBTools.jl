@@ -29,7 +29,7 @@ julia> coor(protein, "index <= 2")
  [45.228, 84.358, 70.638]
  [46.08, 83.165, 70.327]
 
-julia> coor(protein, only = at -> at.resname == "ALA")
+julia> coor(protein, at -> at.resname == "ALA")
 110-element Vector{SVector{3, Float64}}:
  [43.94, 81.982, 70.474]
  [43.02, 80.825, 70.455]
@@ -57,13 +57,13 @@ coor(atom::Atom) = SVector{3,Float32}(atom.x, atom.y, atom.z)
 
 function coor(atoms::AbstractVector{<:Atom}, selection::String)
     query = parse_query(selection)
-    return coor(atoms, only=atom -> apply_query(query, atom))
+    return coor(atoms, atom -> apply_query(query, atom))
 end
 
-function coor(atoms::AbstractVector{<:Atom}; only=all)
+function coor(atoms::AbstractVector{<:Atom}, selection_function::Function=all)
     x = SVector{3,Float32}[]
     for atom in atoms
-        !only(atom) && continue
+        !selection_function(atom) && continue
         push!(x, coor(atom))
     end
     return x
@@ -72,7 +72,7 @@ end
 #
 # Coordinates of the atoms of a residue/molecule
 #
-coor(residue::Residue; only=all) = coor(residue.atoms[residue.range], only=only)
+coor(residue::Residue, selection_function::Function=all) = coor(residue.atoms[residue.range], selection_function)
 coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], selection)
 
 @testitem "coor" begin
@@ -89,6 +89,6 @@ coor(residue::Residue, selection::String) = coor(residue.atoms[residue.range], s
     @test coor(select(atoms, "residue = 3")) == coor(residues[3])
     @test coor(atoms, "residue = 3") == coor(s)
     @test coor(residues[1]) == coor(select(atoms, "residue = 1"))
-    @test all(isapprox.(coor(residues[1]; only=at -> name(at) == "N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
+    @test all(isapprox.(coor(residues[1], at -> name(at) == "N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
     @test all(isapprox.(coor(residues[1], "name N")[1], [-9.229, -14.861, -5.481]; atol=1e-3))
 end

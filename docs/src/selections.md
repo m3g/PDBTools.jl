@@ -189,20 +189,41 @@ versatile library to read topologies and trajectory files, and a
 powerful selection syntax. We provide here a wrapper to VMD which enables
 using its capabilities.  
 
-For example, the solute can be defined with: 
-```julia
-indices, names = select_with_vmd("./system.gro","protein",vmd="/usr/bin/vmd")
-```
-The output will contain two lists, one of atom indices (one-based) and atom names.
-The indices correspond to sequential indices in the input, *not* the indices
-written in the PDB file, for example.
+The `select_with_vmd` input can be a vector of `PDBTools.Atom`s, or a filename.
+If the input is a vector of `Atom`s, the output will be the corresponding atoms
+matching the selection. If the input is a filename, two lists are returned:
+the list of indices and names of the corresponding atoms. This is because some
+input files supported by VMD (e. g. `GRO`, `PSF`, etc.) do not contain full atom
+information. 
 
-The input may also be a vector of atoms of type `PDBTools.Atom`:
+For example, here some atoms are selected from a previously loaded vector of atoms:
 
-```julia
-atoms = read_pdb("mypdbfile.pdb")
-indices, names = select_with_vmd(atoms,"protein",vmd="/usr/bin/vmd")
+```julia-repl
+julia> using PDBTools
+
+julia> pdbfile = PDBTools.SMALLPDB
+
+julia> atoms = read_pdb(pdbfile);
+
+julia> selected_atoms = select_with_vmd(atoms,"resname ALA and name HT2 HT3";vmd="/usr/bin/vmd")
+   Vector{Atom{Nothing}} with 2 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       3  HT2     ALA     A        1        1   -9.488  -13.913   -5.295  0.00  0.00     1    PROT         3
+       4  HT3     ALA     A        1        1   -8.652  -15.208   -4.741  0.00  0.00     1    PROT         4
 ```
+
+And, now, we provide the filename as input:
+
+```julia-repl
+julia> selected_atoms = select_with_vmd(pdbfile,"resname ALA and name HT2 HT3";vmd="/usr/bin/vmd")
+([3, 4], ["HT2", "HT3"])
+```
+
+Note that in the above examples we use `name HT2 HT3` which is not currently supported by the 
+internal PDBTools `select` function, which would require `name HT2 or name HT3`. 
+
+Here, the output will contain two lists, one of atom indices (one-based) and atom names.
+The indices correspond to sequential indices in the input, *not* the indices written in the PDB file, for example.
 
 !!! tip
     If `vmd` is available in your path, there is no need to pass it as a keyword parameter.
