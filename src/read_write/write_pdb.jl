@@ -1,7 +1,7 @@
 """
     write_pdb(filename::String, atoms::AbstractVector{<:Atom}, [selection]; header=:auto, footer=:auto, append=false)
 
-Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string
+Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string or function
 that can be used to select a subset of the atoms in `atoms`. For example, `write_pdb("test.pdb", atoms, "name CA")`.
 
 # Arguments
@@ -19,9 +19,6 @@ that can be used to select a subset of the atoms in `atoms`. For example, `write
 - `footer::Union{String, Nothing}=:auto`: The footer to add to the PDB file. If `:auto`, a footer will be added with the "END" keyword.
 - `append::Bool=false`: If `true`, the atoms will be appended to the file instead of overwriting it.
 
-!!! compat
-    The `append` keyword argument is available in PDBTools.jl v2.7.0 and later.
-
 """
 function write_pdb(
     filename::String,
@@ -32,12 +29,13 @@ function write_pdb(
     append=false,
 )
     query = parse_query(selection)
-    write_pdb(filename, atoms, only=atom -> apply_query(query, atom); header, footer, append)
+    write_pdb(filename, atoms, atom -> apply_query(query, atom); header, footer, append)
 end
 
 function write_pdb(
-    filename::String, atoms::AbstractVector{<:Atom};
-    only::Function=all,
+    filename::String, 
+    atoms::AbstractVector{<:Atom},
+    selection_function::Function=all;
     append=false,
     header=:auto,
     footer=:auto,
@@ -51,7 +49,7 @@ function write_pdb(
             println(io, header)
         end
         for atom in atoms
-            if only(atom)
+            if selection_function(atom)
                 println(io, write_pdb_atom(atom))
             end
         end
@@ -102,6 +100,18 @@ end
     @test length(pdb_with_hetatm) == 19
     @test length(eachresidue(pdb_with_hetatm)) == 3
     @test getfield.(pdb_with_hetatm, :flag) == [i < 12 ? 0 : 1 for i in 1:length(pdb_with_hetatm)]
+
+    pdb = read_pdb(PDBTools.SMALLPDB)
+    tmpfile = tempname() * ".pdb"
+    write_pdb(tmpfile, pdb, "name CA")
+    @test isfile(tmpfile)
+    ats = read_pdb(tmpfile)
+    @test length(ats) == 3
+    write_pdb(tmpfile, pdb, at -> name(at) == "CA")
+    @test isfile(tmpfile)
+    ats = read_pdb(tmpfile)
+    @test length(ats) == 3
+
 end
 
 #

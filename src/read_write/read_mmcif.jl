@@ -1,9 +1,9 @@
 """
     read_mmcif(mmCIF_file::String, selection::String; field_assignment)
-    read_mmcif(mmCIF_file::String; only::Function = all, field_assignment)
+    read_mmcif(mmCIF_file::String, selection_function::Function = all, field_assignment)
 
     read_mmcif(mmCIF_data::IOBuffer, selection::String; field_assignment)
-    read_mmcif(mmCIF_data::IOBuffer; only::Function = all, field_assignment)
+    read_mmcif(mmCIF_data::IOBuffer, selection_function::Function = all, field_assignment)
 
 Reads a mmCIF file and stores the data in a vector of type `Atom`. 
 
@@ -12,7 +12,7 @@ All fields except the file name are optional.
 If a selection is provided, only the atoms matching the selection will be read. 
 For example, `resname ALA` will select all the atoms in the residue ALA.
 
-If the `only` function keyword is provided, only the atoms for which `only(atom)` is true will be returned.
+If a selection function is provided, only the atoms for which `selection_function(atom)` is true will be returned.
 
 The `field_assignment` keyword is `nothing` (default) or a `Dict{String,Symbol}` and can be used to specify which fields in the mmCIF file should be read into the `Atom` type.
 For example `field_assignment = Dict("type_symbol" => :name)` will read the `_atom_site.type_symbol` field in the mmCIF 
@@ -60,7 +60,7 @@ julia> ats = read_mmcif(PDBTools.TESTCIF, "index < 3")
        1    N     GLY     A        1        1   -4.564   25.503   24.113  1.00 24.33     1                 1
        2   CA     GLY     A        1        1   -4.990   26.813   24.706  1.00 24.29     1                 2
 
-julia> ats = read_mmcif(PDBTools.TESTCIF; only = at -> name(at) == "CA")
+julia> ats = read_mmcif(PDBTools.TESTCIF, at -> name(at) == "CA")
    Vector{Atom{Nothing}} with 11 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        2   CA     GLY     A        1        1   -4.990   26.813   24.706  1.00 24.29     1                 2
@@ -76,17 +76,17 @@ function read_mmcif end
 
 function read_mmcif(file::Union{String,IOBuffer}, selection::String; kargs...)
     query = parse_query(selection)
-    return read_mmcif(file, only=atom -> apply_query(query, atom); kargs...)
+    return read_mmcif(file, atom -> apply_query(query, atom); kargs...)
 end
 
-function read_mmcif(cifdata::IOBuffer; only::Function=all, kargs...)
-    atoms = _parse_mmCIF(cifdata; only, kargs...)
+function read_mmcif(cifdata::IOBuffer, selection_function::Function=all; kargs...)
+    atoms = _parse_mmCIF(cifdata, selection_function; kargs...)
     return atoms
 end
 
-function read_mmcif(filename::String; only=all, kargs...)
+function read_mmcif(filename::String, selection_function::Function=all; kargs...)
     atoms = open(expanduser(filename), "r") do f
-        _parse_mmCIF(f; only, kargs...)
+        _parse_mmCIF(f, selection_function; kargs...)
     end
     return atoms
 end
@@ -238,8 +238,7 @@ end
 end
 
 function _parse_mmCIF(
-    cifdata::Union{IOStream,IOBuffer};
-    only::Function,
+    cifdata::Union{IOStream,IOBuffer}, selection_function::Function;
     memory_available::Real=0.8,
     stop_at=nothing,
     field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
@@ -290,7 +289,7 @@ function _parse_mmCIF(
     for line in eachline(cifdata)
         if startswith(line, r"ATOM|HETATM")
             atom = read_atom_mmcif(Val(NCOLS), line, inds_and_names, lastatom)
-            only(atom) && push!(atoms, atom)
+            selection_function(atom) && push!(atoms, atom)
             _maximum_read(atoms, stop_at, memory_available) && break
             lastatom = atom
         end
