@@ -4,13 +4,17 @@
 
 Select atoms using vmd selection syntax, with vmd in background. The input can be a file or a list of atoms.
 
-Returns a tuple with list of index (one-based) and atom names of the selection.
+Returns a vector of PDBTools.Atom objects that match the selection.
 
 Function to return the selection from a input file (topology, coordinates, etc), 
 by calling VMD in the background.
 
 The `srcload` argument can be used to load a list of scripts before loading the input file,
 for example with macros to define custom selection keywords.
+
+!!! warning
+    VMD uses 0-based indexing, be careful to account for this when using indices in the selection string.
+    If you want to suppress this warning, set `index_warning=false` in the function call.
 
 """
 function select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing, index_warning=true)
@@ -102,7 +106,7 @@ function select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcloa
         selection_names[i] = strip(name_split[i])
     end
 
-    return selection_indices, selection_names
+    return read_pdb(inputfile, only = at -> index(at) in selection_indices)
 end
 
 function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
@@ -114,14 +118,12 @@ end
 @testitem "select_with_vmd" begin
     pdbfile = PDBTools.TESTPDB
     if !isnothing(Sys.which("vmd"))
-        @test select_with_vmd(pdbfile, "protein and residue 1") == (
-            [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
-            ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],
-        )
+        sel = select_with_vmd(pdbfile, "protein and residue 1")
+        @test index.(sel) == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        @test name.(sel) = ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"]
         atoms = read_pdb(pdbfile)
-        @test select_with_vmd(atoms, "protein and residue 1") == (
-            [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
-            ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"],
-        )
+        sel = select_with_vmd(atoms, "protein and residue 1")
+        @test index.(sel) == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        @test name.(sel) = ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"]
     end
 end
