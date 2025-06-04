@@ -1,16 +1,26 @@
 """ 
-    select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing)
     select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
+    select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing)
 
 Select atoms using vmd selection syntax, with vmd in background. The input can be a file or a list of atoms.
 
-Returns a vector of PDBTools.Atom objects that match the selection.
+# Input structure and output format:
 
-Function to return the selection from a input file (topology, coordinates, etc), 
-by calling VMD in the background.
+- `atoms::AbstractVector{<:Atom}`: A vector of `PDBTools.Atom` objects to select from. In this case, the
+  output will be a vector of `PDBTools.Atom` objects that match the selection.
+  
+- `inputfile::String`: Path to the input file (e.g., PDB, PSF, GRO, etc.) or a temporary file containing atom data.
+  In this case, two vectors will be returned: one with the indices of the selected atoms and another with their names.
 
-The `srcload` argument can be used to load a list of scripts before loading the input file,
-for example with macros to define custom selection keywords.
+*The outputs are different in each case because `VMD` supports selections on files like PSF, GRO, etc., which do not 
+carry the full atom information like PDB files do.*
+
+# Additional arguments:
+
+- `selection::String`: A string containing the selection criteria in VMD syntax, e.g., `"protein and residue 1"`.
+- `vmd::String`: The command to run VMD. Default is `"vmd"`, but can be set to the full path if VMD is not in the system PATH.
+- `srcload::Union{Nothing, AbstractString, Vector{AbstractString}}`: A script or a list of VMD scripts to load before executing the selection,
+  for example with macros to define custom selection keywords.
 
 !!! warning
     VMD uses 0-based indexing, be careful to account for this when using indices in the selection string.
@@ -106,24 +116,25 @@ function select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcloa
         selection_names[i] = strip(name_split[i])
     end
 
-    return read_pdb(inputfile, only = at -> index(at) in selection_indices)
+    return selection_indices, selection_names
 end
 
 function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
     tmp_file = tempname()
     write_pdb(tmp_file, atoms)
-    return select_with_vmd(tmp_file, selection; vmd=vmd, srcload=srcload)
+    inds, _ = select_with_vmd(tmp_file, selection; vmd=vmd, srcload=srcload)
+    return select(atoms, at -> index(at) in inds)
 end
 
 @testitem "select_with_vmd" begin
     pdbfile = PDBTools.TESTPDB
     if !isnothing(Sys.which("vmd"))
-        sel = select_with_vmd(pdbfile, "protein and residue 1")
-        @test index.(sel) == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-        @test name.(sel) = ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"]
+        inds, names = select_with_vmd(pdbfile, "protein and residue 1")
+        @test inds == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        @test names == ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"]
         atoms = read_pdb(pdbfile)
         sel = select_with_vmd(atoms, "protein and residue 1")
         @test index.(sel) == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-        @test name.(sel) = ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"]
+        @test name.(sel) == ["N", "HN", "CA", "HA", "CB", "HB1", "HB2", "SG", "HG1", "C", "O"]
     end
 end
