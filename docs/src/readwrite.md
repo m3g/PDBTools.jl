@@ -50,10 +50,9 @@ Atom
     ```julia
     arginines = read_pdb("file.pdb","resname ARG")
     ```
-    The only difference is that, if using Julia anonymous functions, the
-    keyword is `only`:
+    Instead of the selection strings, a Julia function can be provided, for greater flexibility: 
     ```julia
-    arginines = read_pdb("file.pdb", only = atom -> atom.resname == "ARG")
+    arginines = read_pdb("file.pdb", atom -> atom.resname == "ARG")
     ```
     The same is valid for the `write` function, below. 
 

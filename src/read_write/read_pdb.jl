@@ -1,16 +1,16 @@
 """
     read_pdb(pdbfile::String, selection::String)
-    read_pdb(pdbfile::String; only::Function = all)
+    read_pdb(pdbfile::String, selection_function::Function = all)
 
     read_pdb(pdbdata::IOBuffer, selection::String)
-    read_pdb(pdbdata::IOBuffer; only::Function = all)
+    read_pdb(pdbdata::IOBuffer, selection_function::Function = all)
 
 Reads a PDB file and stores the data in a vector of type `Atom`. 
 
 If a selection is provided, only the atoms matching the selection will be read. 
 For example, `resname ALA` will select all the atoms in the residue ALA.
 
-If the `only` function keyword is provided, only the atoms for which `only(atom)` is true will be read.
+If a selection function keyword is provided, only the atoms for which `selection_function(atom)` is true will be read.
 
 ### Examples
 
@@ -35,7 +35,7 @@ julia> ALA = read_pdb(PDBTools.TESTPDB,"resname ALA")
     1339    C     ALA     A       95       95   14.815   -3.057   -5.633  1.00  0.00     1    PROT      1339
     1340    O     ALA     A       95       95   14.862   -2.204   -6.518  1.00  0.00     1    PROT      1340
 
-julia> ALA = read_pdb(PDBTools.TESTPDB, only = atom -> atom.resname == "ALA")
+julia> ALA = read_pdb(PDBTools.TESTPDB, atom -> atom.resname == "ALA")
    Vector{Atom{Nothing}} with 72 atoms with fields:
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
@@ -50,25 +50,22 @@ function read_pdb end
 
 function read_pdb(file::Union{String,IOBuffer}, selection::String)
     query = parse_query(selection)
-    return read_pdb(file, only=atom -> apply_query(query, atom))
+    return read_pdb(file, atom -> apply_query(query, atom))
 end
 
-function read_pdb(pdbdata::IOBuffer; only::Function=all)
-    atoms = _parse_pdb(pdbdata, only)
+function read_pdb(pdbdata::IOBuffer, selection_function::Function=all)
+    atoms = _parse_pdb(pdbdata, selection_function)
     return atoms
 end
 
-function read_pdb(filename::String; only=all)
+function read_pdb(filename::String, selection_function::Function=all)
     atoms = open(expanduser(filename), "r") do f
-        _parse_pdb(f, only)
+        _parse_pdb(f, selection_function)
     end
     return atoms
 end
 
-function _parse_pdb(
-    pdbdata::Union{IOStream,IOBuffer},
-    only::Function,
-)
+function _parse_pdb(pdbdata::Union{IOStream,IOBuffer}, selection_function::Function)
     imodel = 1
     atoms = Atom{Nothing}[]
     lastatom = Atom{Nothing}()
@@ -79,7 +76,7 @@ function _parse_pdb(
         if startswith(line, r"ATOM|HETATM")
             atom = read_atom_pdb(line, lastatom, imodel)
             atom.model = imodel
-            only(atom) && push!(atoms, atom)
+            selection_function(atom) && push!(atoms, atom)
             lastatom = atom
         end
     end
@@ -140,6 +137,8 @@ end
     @test length(atoms) == 104
     pdbdata = read(pdb_file, String)
     atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
+    @test length(atoms) == 104
+    atoms = read_pdb(pdb_file, at -> isprotein(at) && name(at) == "CA")
     @test length(atoms) == 104
 end
 
