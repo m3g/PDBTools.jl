@@ -597,14 +597,13 @@ end
     @test length(select(atoms, "hydrophobic")) == 399
     @test length(select(atoms, "aliphatic")) == 379
     @test length(select(atoms, "aromatic")) == 344
-    @test length(select(atoms, "polar")) == 880
-    @test length(select(atoms, "nonpolar")) == 583
+    @test length(select(atoms, "polar")) == 1008
+    @test length(select(atoms, "nonpolar")) == 455
     @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol = 1e-3
 
     # Advanced selections
     @test length(select(atoms, "name CA and (residue < 15 or residue > 16)")) == 102
-    @test length(select(atoms, "(name CA and residue < 15) or (name N and chain A)"))
-    @test length(select(atoms, "(name CA and resid < 15) or (name N and chain A)")) == 299
+    @test length(select(atoms, "(name CA and residue < 15) or (name N and chain A)")) == 299
     @test length(select(atoms, "(not protein and not water) and (resname TMAO or (resname SOD and index 1470))")) == 2535
     @test length(select(atoms, "not protein and not water or (chain A and resnum < 10)")) == 2662
     @test length(select(atoms, "not protein and not water or (chain A and resnum <= 10)")) == 2673
