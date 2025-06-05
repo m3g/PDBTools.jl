@@ -529,10 +529,12 @@ function same_residue(atom1::Atom, atom2::Atom)
     !(atom1.model == atom2.model) && return false
     !(atom1.chain == atom2.chain) && return false
     !(atom1.segname == atom2.segname) && return false
-    !(atom1.resname == atom2.resname) && return false
     # Check if the residue names are the same, or if they are both 4-letter names and alternate conformations
-    !(length(atom1.resname) == 4 && length(atom2.resname) == 4) && return false
-    !(@view(atom1.resname[2:4]) == @view(atom2.resname[2:4])) && return false
+    if !(atom1.resname == atom2.resname) 
+        !(isprotein(atom1) && isprotein(atom2)) && return false
+        !(length(atom1.resname) == 4 && length(atom2.resname) == 4) && return false
+        !(@view(atom1.resname[2:4]) == @view(atom2.resname[2:4])) && return false
+    end
     return true
 end
 
