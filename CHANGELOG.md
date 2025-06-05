@@ -6,6 +6,7 @@ Version 3.1.0
 - ![FEATURE][badge-feature] Selection syntax now supports parenthesis and the shortcut for `or`, as in `resname ARG CYS ALA`. 
 - ![INFO][badge-info] CYS is now classified as a polar residue, following the definition of VMD.
 - ![INFO][badge-info] GLY is now classified as a polar residue, following the definition of VMD.
+- ![INFO][badge-info] Set version to 3.1.0
 
 Version 3.0.0
 -------------
