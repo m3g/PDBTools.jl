@@ -2,8 +2,6 @@
 # Function to perform the most important selections that are used in solute-solvent
 # analysis
 #
-
-using Parameters
 export select, selindex
 export Select, @sel_str
 
