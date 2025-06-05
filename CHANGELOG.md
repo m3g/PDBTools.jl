@@ -1,6 +1,11 @@
 PDBTools.jl Changelog
 ===========================
 
+Version 3.1.0
+-------------
+- ![FEATURE][badge-feature] Selection syntax now supports parenthesis and the shortcut for `or`, as in `resname ARG CYS ALA`. 
+- ![FIX][badge-fix] CYS is now classified as a polar residue, following the definition of VMD.
+
 Version 3.0.0
 -------------
 - ![FEATURE][badge-feature] `write_mmcif` and `write_pdb` support a third positional argument, `String` or `Function`, to write a selection of the atoms.
