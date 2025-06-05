@@ -353,9 +353,6 @@ function is_operator(token::AbstractString)
 end
 
 function is_fully_enclosed(tokens::AbstractVector{<:AbstractString})
-    if length(tokens) < 2 || !(tokens[begin] == "(" && tokens[end] == ")")
-        return false
-    end
     level = 0
     # Check if the first '(' matches the last ')' without level becoming zero in between
     # for any token except the last one.
