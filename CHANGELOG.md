@@ -1,6 +1,10 @@
 PDBTools.jl Changelog
 ===========================
 
+Version 3.1.1
+-------------
+- ![ENHANCEMENT][badge-enhancement] better handling of alternate conformations of protein residues. 
+
 Version 3.1.0
 -------------
 - ![FEATURE][badge-feature] Selection syntax now supports parenthesis and the shortcut for `or`, as in `resname ARG CYS ALA`. 
