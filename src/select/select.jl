@@ -188,14 +188,10 @@ end
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
 =#
-function parse_to_type(key::Union{Keyword}, val)
-    if key.ValueType == String
-        return val
-    end
-    try
-        val = parse(key.ValueType, val)
-        return val
-    catch
+function parse_to_type(key::Keyword, val)
+    key.ValueType == String && return val
+    val = tryparse(key.ValueType, val)
+    if isnothing(val)
         parse_error(
             """\n
                 Could not parse $val for keyword $(key.name), expected $(key.ValueType)
@@ -203,6 +199,7 @@ function parse_to_type(key::Union{Keyword}, val)
             """,
         )
     end
+    return val
 end
 
 #
