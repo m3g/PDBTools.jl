@@ -2,8 +2,6 @@
 # Function to perform the most important selections that are used in solute-solvent
 # analysis
 #
-
-using Parameters
 export select, selindex
 export Select, @sel_str
 
@@ -84,9 +82,32 @@ all(atoms) = true
 end
 
 """
-    select(atoms::AbstractVector{<:Atom}, by::String)
+    select(atoms::AbstractVector{<:Atom}, selection_string::String)
+    select(atoms::AbstractVector{<:Atom}, selection_function::Function)
 
 Selects atoms from a vector of atoms using a string query, or a function.
+
+The string query can be a simple selection like `"name CA"` or a more complex one like `"name CA or (residue 1 2 3)"`.
+The function can be any function that takes an atom and returns a boolean value.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+
+julia> select(atoms, "name CA and (residue > 1 and residue < 3)")
+   Vector{Atom{Nothing}} with 1 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+
+julia> select(atoms, at -> name(at) == "CA" && 1 < residue(at) < 3)
+   Vector{Atom{Nothing}} with 1 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15  
+
+```
 
 """
 function select end
@@ -134,75 +155,32 @@ const operators = (
 #
 # Keywords
 #
-
-struct Keyword
+struct Keyword{F<:Function}
     ValueType::Type
     name::String
-    field::Symbol
+    getter::F
     operators::Tuple
 end
 
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
-    @unpack name, field, operators = key
+    (; getter, operators) = key
     for op in operators
         if (i = has_key(op.first, s)) > 0
-            return el -> op.second(getfield(el, field), parse_to_type(key, s[i+1]))
+            return el -> op.second(getter(el), parse_to_type(key, s[i+1]))
         end
     end
     # If no operator was found, assume that `=` was intended
-    i = has_key(name, s)
-    return el -> isequal(getfield(el, field), parse_to_type(key, s[i+1]))
-end
-
-#=
-    FunctionalKeyword{T}
-
-This is a structure that will store a keyword that depends on an external function
-requiring an operator and an argument. 
-
-## Example:
-
-```
-element_keyword = FunctionalKeyword(String,      
-                                    "element",
-                                    element,
-                                    ("=",isequal))
-
-```
-will define a keyword "element" to be used as `element C`, which will return
-`true` if there is an `element` function such that `element(atom) == C`.
-
-=#
-struct FunctionalKeyword{FunctionType}
-    ValueType::Type
-    name::String
-    by::FunctionType
-    operators::Tuple
-end
-
-function (key::FunctionalKeyword)(s::AbstractVector{<:AbstractString})
-    @unpack name, by, operators = key
-    for op in operators
-        if (i = has_key(op.first, s)) > 0
-            return el -> op.second(by(el), parse_to_type(key, s[i+1]))
-        end
-    end
-    # If no operator was found, assume that `=` was intended
-    i = has_key(name, s)
-    return el -> isequal(by(el), parse_to_type(key, s[i+1]))
+    return el -> isequal(getter(el), parse_to_type(key, s[1]))
 end
 
 #
 # Macro keywords (functions without parameters)
 #
-struct MacroKeyword{FunctionType}
+struct MacroKeyword{F<:Function}
     name::String
-    by::FunctionType
+    getter::F
 end
-
-function (key::MacroKeyword)(s::AbstractVector{<:AbstractString})
-    return key.by
-end
+(key::MacroKeyword)(s::AbstractVector{<:AbstractString}) = key.getter
 
 #=
     parse_to_type(key::Keyword, val::String)
@@ -210,14 +188,10 @@ end
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
 =#
-function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
-    if key.ValueType == String
-        return val
-    end
-    try
-        val = parse(key.ValueType, val)
-        return val
-    catch
+function parse_to_type(key::Keyword, val)
+    key.ValueType == String && return val
+    val = tryparse(key.ValueType, val)
+    if isnothing(val)
         parse_error(
             """\n
                 Could not parse $val for keyword $(key.name), expected $(key.ValueType)
@@ -225,26 +199,28 @@ function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
             """,
         )
     end
+    return val
 end
 
 #
 # Keywords for PDBTools
 #
-keywords = [
-    Keyword(Int, "index", :index, operators),
-    Keyword(Int, "index_pdb", :index_pdb, operators),
-    Keyword(Int, "resnum", :resnum, operators),
-    Keyword(Int, "residue", :residue, operators),
-    Keyword(Float64, "beta", :beta, operators),
-    Keyword(Float64, "occup", :occup, operators),
-    Keyword(Int, "model", :model, operators),
-    Keyword(String, "name", :name, operators),
-    Keyword(String, "segname", :segname, operators),
-    Keyword(String, "resname", :resname, operators),
-    Keyword(String, "chain", :chain, operators),
+const keywords = [
+    Keyword(Int, "index", index, operators),
+    Keyword(Int, "index_pdb", index_pdb, operators),
+    Keyword(Int, "resnum", resnum, operators),
+    Keyword(Int, "residue", residue, operators),
+    Keyword(Float64, "beta", beta, operators),
+    Keyword(Float64, "occup", occup, operators),
+    Keyword(Int, "model", model, operators),
+    Keyword(String, "name", name, operators),
+    Keyword(String, "segname", segname, operators),
+    Keyword(String, "resname", resname, operators),
+    Keyword(String, "chain", chain, operators),
+    Keyword(String, "element", element, operators),
 ]
 
-macro_keywords = [
+const macro_keywords = [
     MacroKeyword("water", iswater),
     MacroKeyword("protein", isprotein),
     MacroKeyword("polar", ispolar),
@@ -260,8 +236,6 @@ macro_keywords = [
     MacroKeyword("sidechain", issidechain),
     MacroKeyword("all", all),
 ]
-
-functional_keywords = [FunctionalKeyword(String, "element", element, operators)]
 
 #
 # parse_query and apply_query are a very gentle contribution given by 
@@ -301,46 +275,9 @@ end
 Calls `parse_query_vector` after splitting the selection string.
 
 =#
-parse_query(selection::String) = parse_query_vector(split(selection))
-
-#=
-
-    parse_query_vector(s::AbstractVector{<:AbstractString})
-
-=#
-function parse_query_vector(s)
-    if (i = has_key("or", s)) > 0
-        deleteat!(s, i)
-        (|, parse_query_vector.((s[1:i-1], s[i:end]))...)
-    elseif (i = has_key("and", s)) > 0
-        deleteat!(s, i)
-        (&, parse_query_vector.((s[1:i-1], s[i:end]))...)
-    elseif (i = has_key("not", s)) > 0
-        deleteat!(s, i)
-        (!, parse_query_vector(s[i:end]))
-
-        # keywords 
-    else
-        for key in keywords
-            if (i = has_key(key.name, s)) > 0
-                deleteat!(s, i)
-                return key(s)
-            end
-        end
-        for key in macro_keywords
-            if (i = has_key(key.name, s)) > 0
-                deleteat!(s, i)
-                return key(s)
-            end
-        end
-        for key in functional_keywords
-            if (i = has_key(key.name, s)) > 0
-                deleteat!(s, i)
-                return key(s)
-            end
-        end
-        parse_error("Unable to parse selection string.")
-    end
+function parse_query(selection::String) 
+    s = replace(selection, "(" => " ( ", ")" => " ) ")
+    return parse_query_vector(split(s))
 end
 
 function apply_query(q, a)
@@ -354,6 +291,202 @@ end
 
 parse_error(str) = throw(ArgumentError(str))
 
+#
+# Obs: the following code were generated by Gemini 2.5-Pro, with modifications, 
+# and then tested. 
+#
+
+# New helper functions
+function is_operator(token::AbstractString)
+    return token == "and" || token == "or" || token == "not"
+end
+
+function is_fully_enclosed(tokens::AbstractVector{<:AbstractString})
+    level = 0
+    # Check if the first '(' matches the last ')' without level becoming zero in between
+    # for any token except the last one.
+    for i in firstindex(tokens):(lastindex(tokens)-1)
+        if tokens[i] == "("
+            level += 1
+        elseif tokens[i] == ")"
+            level -= 1
+            if level == 0 # Closed too early, means not fully enclosed by the outermost pair
+                 return false
+            end
+        end
+    end
+    # After iterating up to tokens[end-1], level should be 1 if tokens[begin] was '('
+    # and it correctly matches tokens[end]. If level is not 1, it means mismatched parentheses within.
+    return level == 1
+end
+
+function find_operator_at_level_zero(op_str::String, tokens::AbstractVector{<:AbstractString})
+    level = 0
+    # Find first occurrence from left to right (maintaining current style)
+    for i in eachindex(tokens)
+        if tokens[i] == "("
+            level += 1
+        elseif tokens[i] == ")"
+            level -= 1
+            if level < 0
+                parse_error("Mismatched parentheses: too many closing parentheses.")
+            end
+        elseif tokens[i] == op_str && level == 0
+            return i
+        end
+    end
+    if level != 0
+        parse_error("Mismatched parentheses: not enough closing parentheses.")
+    end
+    return 0 # Not found at level zero
+end
+
+# Modified parse_query_vector
+function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
+    s_vec = s_vec_const # Operate on slices or copies, not modifying original array passed around
+
+    if isempty(s_vec)
+        parse_error("Empty query segment.")
+    end
+
+    # Handle expressions fully enclosed in matching parentheses
+    # e.g. "(A and B)" should be parsed by parsing "A and B"
+    temp_s_vec = s_vec # Use a temporary variable for iterative stripping
+    while length(temp_s_vec) > 1 && temp_s_vec[begin] == "(" && temp_s_vec[end] == ")" && is_fully_enclosed(temp_s_vec)
+        temp_s_vec = temp_s_vec[begin+1:end-1]
+        if isempty(temp_s_vec)
+            parse_error("Empty parentheses in query: '()'")
+        end
+    end
+    s_vec = temp_s_vec # Assign the stripped version back
+
+    # Operator precedence: OR, then AND, then NOT (as in original code for splitting)
+    # Find 'or' not within parentheses
+    if (i = find_operator_at_level_zero("or", s_vec)) > 0
+        left_tokens = s_vec[begin:i-1]
+        right_tokens = s_vec[i+1:end]
+        if isempty(left_tokens) || isempty(right_tokens)
+            parse_error("Syntax error near 'or'. Missing operand.")
+        end
+        return (|, parse_query_vector(left_tokens), parse_query_vector(right_tokens))
+
+    elseif (i = find_operator_at_level_zero("and", s_vec)) > 0
+        left_tokens = s_vec[begin:i-1]
+        right_tokens = s_vec[i+1:end]
+        if isempty(left_tokens) || isempty(right_tokens)
+            parse_error("Syntax error near 'and'. Missing operand.")
+        end
+        return (&, parse_query_vector(left_tokens), parse_query_vector(right_tokens))
+
+    elseif s_vec[begin] == "not"
+        if length(s_vec) == 1
+            parse_error("Syntax error near 'not'. Missing operand.")
+        end
+        remaining_tokens = s_vec[begin+1:end]
+        if isempty(remaining_tokens) # Should be caught by length check, but defensive
+            parse_error("Syntax error near 'not'. Missing operand.")
+        end
+        # Prevent "not and", "not or", "not not" if "not" is not a general prefix operator in this DSL
+        if is_operator(remaining_tokens[begin]) && remaining_tokens[begin] != "not" # allow "not not" if desired, though unusual
+             parse_error("Operator '$(remaining_tokens[begin])' cannot directly follow 'not'.")
+        end
+        return (!, parse_query_vector(remaining_tokens))
+
+    # Base case: No top-level logical operators. Must be a keyword phrase.
+    else
+        #if isempty(s_vec) # Should not happen if initial checks are correct
+        #    parse_error("Unexpected empty query segment.")
+        #end
+        token_keyword_name = s_vec[begin]
+
+        # Standard Keywords (e.g., "name", "resnum", "index")
+        for key_obj in keywords # key_obj is of type Keyword
+            if token_keyword_name == key_obj.name
+                if length(s_vec) == 1 # Keyword name token only, no arguments
+                    parse_error("Keyword '$(key_obj.name)' requires at least one argument.")
+                end
+                
+                keyword_args = s_vec[begin+1:end] # Arguments following the keyword name
+        
+                is_operator_syntax_match = false
+                if !isempty(keyword_args)
+                    first_arg = keyword_args[1]
+                    for op_tuple in key_obj.operators # e.g., ("<", isless)
+                        operator_string = op_tuple[1]
+                        if first_arg == operator_string
+                            # Expected form: "keyword operator value", so keyword_args should be ["operator", "value"] (length 2)
+                            if length(keyword_args) == 2
+                                is_operator_syntax_match = true
+                            else
+                                parse_error(
+                                    "Malformed operator expression for keyword '$(key_obj.name)'. "*
+                                    "Expected 'keyword $operator_string value'. Got: $(join(s_vec, " "))"
+                                )
+                            end
+                            break # Operator string found and processed
+                        end
+                    end
+                end
+        
+                if is_operator_syntax_match
+                    # Case: "keyword operator value", e.g., "resnum < 13"
+                    # keyword_args will be ["<", "13"]. The Keyword functor handles this structure.
+                    return key_obj(keyword_args)
+                else
+                    # Case: Not a recognized "keyword operator value" structure.
+                    # This implies implicit equality: "keyword value" or "keyword value1 value2 ..." (for OR expansion).
+        
+                    #if isempty(keyword_args) # Should have been caught by length(s_vec) == 1
+                    #     parse_error("No arguments provided for keyword '$(key_obj.name)'.") # Should be unreachable
+                    #end
+        
+                    # Sanity check for multi-value: ensure no operators are present in the value list.
+                    # E.g. "resnum 10 < 20" is an error here because "10" is not an operator,
+                    # but "<" appears later in a context expecting only values.
+                    for arg_val in keyword_args
+                        for op_tuple in key_obj.operators
+                            if arg_val == op_tuple[1] # op_tuple[1] is the operator string
+                                parse_error(
+                                    "Syntax error for keyword '$(key_obj.name)'. Operator '$(op_tuple[1])' found in an unexpected position. "*
+                                    "Arguments: $(join(keyword_args, " ")). Operator expressions must be 'keyword $(op_tuple[1]) value'."
+                                )
+                            end
+                        end
+                    end
+        
+                    # Proceed with implicit equality (single value or multi-value OR).
+                    if length(keyword_args) == 1
+                        # e.g., "name CA" -> keyword_args = ["CA"]
+                        # The Keyword functor handles this as implicit equality.
+                        return key_obj(keyword_args)
+                    else
+                        # Multi-value implicit OR case, e.g., "resname ARG GLU ASP"
+                        # keyword_args = ["ARG", "GLU", "ASP"]
+                        current_expr_tree = key_obj([keyword_args[end]]) # Process the last value
+                        for k_idx in (length(keyword_args)-1):-1:firstindex(keyword_args) # Iterate remaining values
+                            current_expr_tree = (|, key_obj([keyword_args[k_idx]]), current_expr_tree)
+                        end
+                        return current_expr_tree
+                    end
+                end
+            end
+        end
+        
+        # Macro Keywords (e.g., "protein", "water")
+        for key_obj in macro_keywords
+            if token_keyword_name == key_obj.name
+                if length(s_vec) > 1
+                    parse_error("Macro keyword '$(key_obj.name)' does not take arguments. Unexpected tokens: $(join(s_vec[begin+1:end], " "))")
+                end
+                # MacroKeyword functor expects an argument list (empty for macros)
+                return key_obj(String[]) 
+            end
+        end
+        
+        parse_error("Unknown keyword or invalid syntax at: '$(join(s_vec, " "))'")
+    end
+end
+
 @testitem "Selections" begin
 
     atoms = read_pdb(PDBTools.TESTPDB)
@@ -366,41 +499,61 @@ parse_error(str) = throw(ArgumentError(str))
 
     @test length(select(atoms, "index > 1 and index < 13")) == 11
     @test length(select(atoms, at -> at.index > 1 && at.index < 13)) == 11
-
     @test length(select(atoms, "protein")) == 1463
     @test length(select(atoms, isprotein)) == 1463
-
     @test length(select(atoms, "water")) == 58014
     @test length(select(atoms, iswater)) == 58014
-
     @test length(select(atoms, "resname GLY")) == 84
     @test length(select(atoms, at -> resname(at) == "GLY")) == 84
-
     @test length(select(atoms, "segname PROT")) == 1463
-
     @test length(select(atoms, "residue = 2")) == 11
-
     @test length(select(atoms, "neutral")) == 1233
-
     @test length(select(atoms, "charged")) == 230
-
     @test length(select(atoms, "sidechain")) == 854
-
     @test length(select(atoms, "acidic")) == 162
-
     @test length(select(atoms, "basic")) == 68
-
     @test length(select(atoms, "hydrophobic")) == 399
-
     @test length(select(atoms, "aliphatic")) == 379
-
     @test length(select(atoms, "aromatic")) == 344
-
-    @test length(select(atoms, "polar")) == 880
-
-    @test length(select(atoms, "nonpolar")) == 583
-
+    @test length(select(atoms, "polar")) == 1008
+    @test length(select(atoms, "nonpolar")) == 455
     @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7] atol = 1e-3
+
+    # Advanced selections
+    @test length(select(atoms, "name CA and (residue < 15 or residue > 16)")) == 102
+    @test length(select(atoms, "(name CA and residue < 15) or (name N and chain A)")) == 299
+    @test length(select(atoms, "(not protein and not water) and (resname TMAO or (resname SOD and index 1470))")) == 2535
+    @test length(select(atoms, "not protein and not water or (chain A and resnum < 10)")) == 2662
+    @test length(select(atoms, "not protein and not water or (chain A and resnum <= 10)")) == 2673
+    @test length(select(atoms, "name CA and resname ALA ARG GLU")) == 14
+    @test length(select(atoms, "resname ALA ARG GLU and name N")) == 14
+    @test length(select(atoms, "(resname ALA ARG GLU) and (name N or name CA)")) == 28
+    @test length(select(atoms, "index 2 3 4 5")) == 4
+    @test length(select(atoms, "element C")) == 1023
+    @test length(select(atoms, "element C N")) == 1331
+    @test length(select(atoms, "(element C N)")) == 1331
+    @test length(select(atoms, "not protein and element C N")) == 724
+
+    # malformed expression
+    @test_throws ArgumentError select(atoms, "name CA and (residue 1")
+    @test_throws ArgumentError select(atoms, "name CA and (residue 1))")
+    @test_throws ArgumentError select(atoms, "index <")
+    @test_throws ArgumentError select(atoms, "index < 1.0")
+    @test_throws ArgumentError select(atoms, "indes 1")
+    @test_throws ArgumentError select(atoms, "element")
+    @test_throws ArgumentError select(atoms, "index 1 element")
+    @test_throws ArgumentError select(atoms, "protein 1")
+    @test_throws ArgumentError select(atoms, "protein = 1")
+    @test_throws ArgumentError select(atoms, "residue 1 < 5")
+    @test_throws ArgumentError select(atoms, "residue A")
+    @test_throws ArgumentError select(atoms, "residue 1 and ()")
+    @test_throws ArgumentError select(atoms, "not (protein) and ()")
+    @test_throws ArgumentError select(atoms, "residue 1 or")
+    @test_throws ArgumentError select(atoms, "residue 1 and")
+    @test_throws ArgumentError select(atoms, "residue 1 not")
+    @test_throws ArgumentError select(atoms, "residue")
+    @test_throws ArgumentError select(atoms, "element")
+    @test_throws ArgumentError select(atoms, "not")
 
     # test string interpolation
     t = "protein"

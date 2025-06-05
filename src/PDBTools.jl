@@ -6,7 +6,6 @@ import InteractiveUtils
 import PrecompileTools
 using Format: format
 using LinearAlgebra: norm
-using Parameters: @unpack
 using Printf: @printf, @sprintf
 using StaticArrays: SVector
 using TestItems: @testitem, @testmodule
