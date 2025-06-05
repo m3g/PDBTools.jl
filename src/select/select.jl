@@ -634,11 +634,14 @@ end
     @test length(select(atoms, "resname ALA ARG GLU and name N")) == 14
     @test length(select(atoms, "(resname ALA ARG GLU) and (name N or name CA)")) == 28
     @test length(select(atoms, "index 2 3 4 5")) == 4
+    @test length(select(atoms, "element C")) == 1023
     @test length(select(atoms, "element C N")) == 1331
+    @test length(select(atoms, "(element C N)")) == 1331
     @test length(select(atoms, "not protein and element C N")) == 724
 
     # malformed expression
     @test_throws ArgumentError select(atoms, "name CA and (residue 1")
+    @test_throws ArgumentError select(atoms, "name CA and (residue 1))")
     @test_throws ArgumentError select(atoms, "index <")
     @test_throws ArgumentError select(atoms, "index < 1.0")
     @test_throws ArgumentError select(atoms, "indes 1")
@@ -649,6 +652,12 @@ end
     @test_throws ArgumentError select(atoms, "residue 1 < 5")
     @test_throws ArgumentError select(atoms, "residue A")
     @test_throws ArgumentError select(atoms, "residue 1 and ()")
+    @test_throws ArgumentError select(atoms, "not (protein) and ()")
+    @test_throws ArgumentError select(atoms, "residue 1 or")
+    @test_throws ArgumentError select(atoms, "residue 1 and")
+    @test_throws ArgumentError select(atoms, "residue 1 not")
+    @test_throws ArgumentError select(atoms, "residue")
+    @test_throws ArgumentError select(atoms, "element")
 
     # test string interpolation
     t = "protein"
