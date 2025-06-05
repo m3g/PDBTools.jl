@@ -157,75 +157,32 @@ const operators = (
 #
 # Keywords
 #
-
-struct Keyword
+struct Keyword{F<:Function}
     ValueType::Type
     name::String
-    field::Symbol
+    getter::F
     operators::Tuple
 end
 
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
-    @unpack name, field, operators = key
+    (; getter, operators) = key
     for op in operators
         if (i = has_key(op.first, s)) > 0
-            return el -> op.second(getfield(el, field), parse_to_type(key, s[i+1]))
+            return el -> op.second(getter(el), parse_to_type(key, s[i+1]))
         end
     end
     # If no operator was found, assume that `=` was intended
-    i = has_key(name, s)
-    return el -> isequal(getfield(el, field), parse_to_type(key, s[i+1]))
-end
-
-#=
-    FunctionalKeyword{T}
-
-This is a structure that will store a keyword that depends on an external function
-requiring an operator and an argument. 
-
-## Example:
-
-```
-element_keyword = FunctionalKeyword(String,      
-                                    "element",
-                                    element,
-                                    ("=",isequal))
-
-```
-will define a keyword "element" to be used as `element C`, which will return
-`true` if there is an `element` function such that `element(atom) == C`.
-
-=#
-struct FunctionalKeyword{FunctionType}
-    ValueType::Type
-    name::String
-    by::FunctionType
-    operators::Tuple
-end
-
-function (key::FunctionalKeyword)(s::AbstractVector{<:AbstractString})
-    @unpack name, by, operators = key
-    for op in operators
-        if (i = has_key(op.first, s)) > 0
-            return el -> op.second(by(el), parse_to_type(key, s[i+1]))
-        end
-    end
-    # If no operator was found, assume that `=` was intended
-    i = has_key(name, s)
-    return el -> isequal(by(el), parse_to_type(key, s[i+1]))
+    return el -> isequal(getter(el), parse_to_type(key, s[1]))
 end
 
 #
 # Macro keywords (functions without parameters)
 #
-struct MacroKeyword{FunctionType}
+struct MacroKeyword{F<:Function}
     name::String
-    by::FunctionType
+    getter::F
 end
-
-function (key::MacroKeyword)(s::AbstractVector{<:AbstractString})
-    return key.by
-end
+(key::MacroKeyword)(s::AbstractVector{<:AbstractString}) = key.getter
 
 #=
     parse_to_type(key::Keyword, val::String)
@@ -233,7 +190,7 @@ end
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
 =#
-function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
+function parse_to_type(key::Union{Keyword}, val)
     if key.ValueType == String
         return val
     end
@@ -253,21 +210,22 @@ end
 #
 # Keywords for PDBTools
 #
-keywords = [
-    Keyword(Int, "index", :index, operators),
-    Keyword(Int, "index_pdb", :index_pdb, operators),
-    Keyword(Int, "resnum", :resnum, operators),
-    Keyword(Int, "residue", :residue, operators),
-    Keyword(Float64, "beta", :beta, operators),
-    Keyword(Float64, "occup", :occup, operators),
-    Keyword(Int, "model", :model, operators),
-    Keyword(String, "name", :name, operators),
-    Keyword(String, "segname", :segname, operators),
-    Keyword(String, "resname", :resname, operators),
-    Keyword(String, "chain", :chain, operators),
+const keywords = [
+    Keyword(Int, "index", index, operators),
+    Keyword(Int, "index_pdb", index_pdb, operators),
+    Keyword(Int, "resnum", resnum, operators),
+    Keyword(Int, "residue", residue, operators),
+    Keyword(Float64, "beta", beta, operators),
+    Keyword(Float64, "occup", occup, operators),
+    Keyword(Int, "model", model, operators),
+    Keyword(String, "name", name, operators),
+    Keyword(String, "segname", segname, operators),
+    Keyword(String, "resname", resname, operators),
+    Keyword(String, "chain", chain, operators),
+    Keyword(String, "element", element, operators),
 ]
 
-macro_keywords = [
+const macro_keywords = [
     MacroKeyword("water", iswater),
     MacroKeyword("protein", isprotein),
     MacroKeyword("polar", ispolar),
@@ -282,10 +240,6 @@ macro_keywords = [
     MacroKeyword("backbone", isbackbone),
     MacroKeyword("sidechain", issidechain),
     MacroKeyword("all", all),
-]
-
-functional_keywords = [
-    FunctionalKeyword(String, "element", element, operators)
 ]
 
 #
@@ -523,37 +477,6 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
             end
         end
         
-        # Functional Keywords (e.g., "element")
-        for key_obj in functional_keywords # key_obj is of type FunctionalKeyword
-            if token_keyword_name == key_obj.name
-                if length(s_vec) == 1
-                     parse_error("Functional keyword '$(key_obj.name)' requires at least one argument.")
-                end
-                
-                keyword_args = s_vec[begin+1:end]
-        
-                #if isempty(keyword_args) # Should be caught by length(s_vec) == 1
-                #    parse_error("No arguments provided for functional keyword '$(key_obj.name)'.") # Should be unreachable
-                #end
-                
-                # FunctionalKeywords, as defined, don't have an 'operators' field for infix ops.
-                # They generally take a list of values.
-                # "element C" or "element C N O" (interpreted as OR).
-        
-                if length(keyword_args) == 1
-                    # e.g., key_obj(["C"])
-                    return key_obj(keyword_args)
-                else
-                    # Multi-value OR case, e.g., "element C N O"
-                    current_expr_tree = key_obj([keyword_args[end]])
-                    for k_idx in (length(keyword_args)-1):-1:firstindex(keyword_args)
-                        current_expr_tree = (|, key_obj([keyword_args[k_idx]]), current_expr_tree)
-                    end
-                    return current_expr_tree
-                end
-            end
-        end
-
         # Macro Keywords (e.g., "protein", "water")
         for key_obj in macro_keywords
             if token_keyword_name == key_obj.name
@@ -562,26 +485,6 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
                 end
                 # MacroKeyword functor expects an argument list (empty for macros)
                 return key_obj(String[]) 
-            end
-        end
-        
-        # Functional Keywords (e.g., "element")
-        for key_obj in functional_keywords
-            if token_keyword_name == key_obj.name
-                if length(s_vec) == 1
-                     parse_error("Functional keyword '$(key_obj.name)' requires at least one argument.")
-                end
-                values = s_vec[begin+1:end]
-
-                if length(values) == 1
-                    return key_obj(values)
-                else # Multiple values, similar to standard Keyword
-                    current_expr_tree = key_obj([values[end]])
-                    for k in length(values)-1:-1:firstindex(values)
-                        current_expr_tree = (|, key_obj([values[k]]), current_expr_tree)
-                    end
-                    return current_expr_tree
-                end
             end
         end
         
