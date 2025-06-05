@@ -520,11 +520,6 @@ issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(a
     @test issidechain(phe[8])
 end
 
-function _protein_alternate_conformations(r1, r2)
-
-
-end
-
 #
 # Function that checks if two atoms belong to the same residue
 # without, of course, checking the residue counter
@@ -533,7 +528,7 @@ function same_residue(atom1::Atom, atom2::Atom)
     return (atom1.resnum == atom2.resnum) &
            (atom1.model == atom2.model) &
            (atom1.chain == atom2.chain) &
-           ((atom1.resname == atom2.resname) | ((length(atom1.resname) == 4) & (atom1.resname[2:end] == atom2.resname[2:end]))) &
+           ((atom1.resname == atom2.resname) | ((length(atom1.resname) == 4) & (@view(atom1.resname[2:4]) == @view(atom2.resname[2:4])))) &
            (atom1.segname == atom2.segname)
 end
 

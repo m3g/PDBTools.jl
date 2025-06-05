@@ -174,7 +174,7 @@ end
 #
 isprotein(residue::Residue) = 
     haskey(protein_residues, resname(residue)) || 
-    (length(resname(residue)) == 4 && haskey(protein_residues, @view(resname(residue)[2:end])))
+    (length(resname(residue)) == 4 && haskey(protein_residues, @view(resname(residue)[2:4])))
 
 export isprotein
 export isacidic, isaliphatic, isaromatic, isbasic, ischarged
