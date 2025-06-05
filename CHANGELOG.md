@@ -4,6 +4,7 @@ PDBTools.jl Changelog
 Version 3.1.1
 -------------
 - ![ENHANCEMENT][badge-enhancement] better handling of alternate conformations of protein residues. 
+- ![INFO][badge-info] Set version to 3.1.1
 
 Version 3.1.0
 -------------
