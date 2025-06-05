@@ -525,11 +525,15 @@ end
 # without, of course, checking the residue counter
 #
 function same_residue(atom1::Atom, atom2::Atom)
-    return (atom1.resnum == atom2.resnum) &
-           (atom1.model == atom2.model) &
-           (atom1.chain == atom2.chain) &
-           ((atom1.resname == atom2.resname) | ((length(atom1.resname) == 4) & (@view(atom1.resname[2:4]) == @view(atom2.resname[2:4])))) &
-           (atom1.segname == atom2.segname)
+    !(atom1.resnum == atom2.resnum) && return false
+    !(atom1.model == atom2.model) && return false
+    !(atom1.chain == atom2.chain) && return false
+    !(atom1.segname == atom2.segname) && return false
+    !(atom1.resname == atom2.resname) && return false
+    # Check if the residue names are the same, or if they are both 4-letter names and alternate conformations
+    !(length(atom1.resname) == 4 && length(atom2.resname) == 4) && return false
+    !(@view(atom1.resname[2:4]) == @view(atom2.resname[2:4])) && return false
+    return true
 end
 
 @testitem "same_residue" begin
