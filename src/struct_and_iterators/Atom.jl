@@ -500,7 +500,8 @@ end
 # atom properties on the structure
 #
 export isprotein, isbackbone, issidechain
-isprotein(atom::Atom) = haskey(protein_residues, atom.resname)
+isprotein(atom::Atom) = 
+    haskey(protein_residues, atom.resname) || haskey(protein_residues, atom.resname[2:end])
 
 const backbone_atoms = ["N", "CA", "C", "O"]
 isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms
@@ -519,6 +520,11 @@ issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(a
     @test issidechain(phe[8])
 end
 
+function _protein_alternate_conformations(r1, r2)
+
+
+end
+
 #
 # Function that checks if two atoms belong to the same residue
 # without, of course, checking the residue counter
@@ -527,7 +533,7 @@ function same_residue(atom1::Atom, atom2::Atom)
     return (atom1.resnum == atom2.resnum) &
            (atom1.model == atom2.model) &
            (atom1.chain == atom2.chain) &
-           (atom1.resname == atom2.resname) &
+           ((atom1.resname == atom2.resname) | ((length(atom1.resname) == 4) & (atom1.resname[2:end] == atom2.resname[2:end]))) &
            (atom1.segname == atom2.segname)
 end
 
@@ -541,6 +547,9 @@ end
     @test same_residue(at1, at2)
     at2.segname = "B"
     @test !same_residue(at1, at2)
+    at1 = Atom(resname="AALA", resnum=1, chain="A", model=1, segname="PROT")
+    at2 = Atom(resname="BALA", resnum=1, chain="A", model=1, segname="PROT")
+    @test PDBTools.same_residue(at1, at2) 
 end
 
 #
