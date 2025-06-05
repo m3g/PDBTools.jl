@@ -17,9 +17,20 @@ or standard Julia function can be provided as the second argument:
 atoms = select(atoms, at -> isprotein(at) && resnum(at) < 30)
 ```
 
+```@docs
+select
+Select
+```
+
 ## General selection syntax 
 
-Accepted Boolean operators: `and`, `or`, and `not`. 
+- Accepted Boolean operators: `and`, `or`, and `not`. 
+- Accepted comparison operators: `<`, `>`, `<=`, `=>`, `==`
+- Support for parenthesis. 
+- Support for multiple keys as a shorcut for multiple `or` (i. e. `residue 1 3 5`)
+
+!!! compat
+    Support for selection strings supporting parenthesis and multiple keys was introduced in v3.1.0
 
 The accepted keywords for the selection are: 
 
@@ -79,11 +90,6 @@ Available keywords:
     The properties refer to protein residues and will return `false`
     to every non-protein residue. Thus, be careful with the use of `not`
     with these selections, as they might retrieve non-protein atoms.
-
-```@docs
-select
-Select
-```
 
 ## Retrieving indices, filtering, etc
 
@@ -189,6 +195,16 @@ versatile library to read topologies and trajectory files, and a
 powerful selection syntax. We provide here a wrapper to VMD which enables
 using its capabilities.  
 
+!!! warning
+    Some notable differences of the `PDBTools.select` function relative to the
+    selection syntax of VMD are:
+    - VMD uses 0-based indexing. Thus, the first atom is atom 0 for VMD, and 
+      atom 1 for PDBTools. Same for residue numbering. Be careful.
+    - VMD uses `resid` for the residue number as written in the PDB file,
+      while PDBTools uses `residue`. 
+    - VMD uses `residue` for the sequential number of the residue in the 
+      PDB file, while PDBTools uses `resnum`.
+
 The `select_with_vmd` input can be a vector of `PDBTools.Atom`s, or a filename.
 If the input is a vector of `Atom`s, the output will be the corresponding atoms
 matching the selection. If the input is a filename, two lists are returned:
@@ -247,20 +263,3 @@ sel = select_with_vmd("file.pdb", "resname MYRES"; srcload = [ "mymacros1.tcl", 
 ```
 Which corresponds to `source`ing each of the macro files in VMD before defining the 
 selection with the custom `MYRES` name.
-
-!!! warning
-    VMD uses 0-based indexing and `select_with_vmd` adjusts that. However, if
-    a selection is performed by index, as with `index 1`, VMD will
-    select the second atom, and the output will be `[2]`. Selections by
-    type, name, segment, residue name, etc, will be consistent with one-based
-    indexing.
-
-
-
-
-
-
-
-
-
-

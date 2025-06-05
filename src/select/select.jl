@@ -84,9 +84,32 @@ all(atoms) = true
 end
 
 """
-    select(atoms::AbstractVector{<:Atom}, by::String)
+    select(atoms::AbstractVector{<:Atom}, selection_string::String)
+    select(atoms::AbstractVector{<:Atom}, selection_function::Function)
 
 Selects atoms from a vector of atoms using a string query, or a function.
+
+The string query can be a simple selection like `"name CA"` or a more complex one like `"name CA or (residue 1 2 3)"`.
+The function can be any function that takes an atom and returns a boolean value.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+
+julia> select(atoms, "name CA and (residue > 1 and residue < 3)")
+   Vector{Atom{Nothing}} with 1 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+
+julia> select(atoms, at -> name(at) == "CA" && 1 < residue(at) < 3)
+   Vector{Atom{Nothing}} with 1 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15  
+
+```
 
 """
 function select end
