@@ -170,7 +170,11 @@ end
 #
 # Properties of residues
 #
-isprotein(residue::Residue) = haskey(protein_residues, resname(residue))
+# Deal with alternate conformers with the second test
+#
+isprotein(residue::Residue) = 
+    haskey(protein_residues, resname(residue)) || 
+    (length(resname(residue)) == 4 && haskey(protein_residues, @view(resname(residue)[2:4])))
 
 export isprotein
 export isacidic, isaliphatic, isaromatic, isbasic, ischarged
@@ -227,6 +231,9 @@ iswater(atom::Atom; water_residues=water_residues) = atom.resname in water_resid
     @test !iswater(glu[1])
     wat = select(pdb, "water")
     @test iswater(wat[1])
+    pdb = [ Atom(resname="AGLY"), Atom(resname="BGLY")]
+    @test length(eachresidue(pdb)) == 1
+    @test resname.(eachresidue(pdb)) == ["AGLY"] 
 end
 
 @testitem "full residue" begin
