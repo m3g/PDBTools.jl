@@ -1,6 +1,16 @@
 PDBTools.jl Changelog
 ===========================
 
+  
+[badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
+[badge-deprecation]: https://img.shields.io/badge/Deprecation-orange.svg
+[badge-feature]: https://img.shields.io/badge/Feature-green.svg
+[badge-experimental]: https://img.shields.io/badge/Experimental-yellow.svg
+[badge-enhancement]: https://img.shields.io/badge/Enhancement-blue.svg
+[badge-bugfix]: https://img.shields.io/badge/Bugfix-purple.svg
+[badge-fix]: https://img.shields.io/badge/Fix-purple.svg
+[badge-info]: https://img.shields.io/badge/Info-gray.svg
+
 Version 3.1.1
 -------------
 - ![ENHANCEMENT][badge-enhancement] better handling of alternate conformations of protein residues. 
@@ -22,12 +32,3 @@ Version 3.0.0
 - ![BREAKING][badge-breaking] `get_seq` functions do not support anymore the input of the file name. An array of `Atom`s must be provided. This is because internally it would be required to recognize PDB of mmCIF functions.
 - ![INFO][badge-info] Dropped Julia 1.9 support (minimum requirement is 1.10)
 - ![INFO][badge-info] Set version to 3.0.0 
-  
-[badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
-[badge-deprecation]: https://img.shields.io/badge/Deprecation-orange.svg
-[badge-feature]: https://img.shields.io/badge/Feature-green.svg
-[badge-experimental]: https://img.shields.io/badge/Experimental-yellow.svg
-[badge-enhancement]: https://img.shields.io/badge/Enhancement-blue.svg
-[badge-bugfix]: https://img.shields.io/badge/Bugfix-purple.svg
-[badge-fix]: https://img.shields.io/badge/Fix-purple.svg
-[badge-info]: https://img.shields.io/badge/Info-gray.svg
