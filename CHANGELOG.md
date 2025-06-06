@@ -1,6 +1,5 @@
 PDBTools.jl Changelog
 ===========================
-
   
 [badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
 [badge-deprecation]: https://img.shields.io/badge/Deprecation-orange.svg
