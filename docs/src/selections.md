@@ -30,7 +30,8 @@ Select
 - Support for multiple keys as a shorcut for multiple `or` (i. e. `residue 1 3 5`)
 
 !!! compat
-    Support for selection strings supporting parenthesis and multiple keys was introduced in v3.1.0
+    - Support for selection strings supporting parenthesis and multiple keys was introduced in v3.1.0
+    - Support for selection by coordinates, `x`, `y`, and `z` was introduced in v3.2.0
 
 The accepted keywords for the selection are: 
 
@@ -48,6 +49,9 @@ The accepted keywords for the selection are:
 | `beta`     | `=`,`>`,`<`,`<=`,`>=` | Real        | `beta > 0.5`  |
 | `occup`    | `=`,`>`,`<`,`<=`,`>=` | Real        | `occup >= 0.3`|
 | `segname`  |                       | String      | `segname PROT`|
+| `x`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `x >= 3.0`    |
+| `y`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `y < 0.0`     |
+| `z`        | `=`,`>`,`<`,`<=`,`>=` | Real        | `z >= 1.0`|
 |            |                       |             |               |
 
 !!! note
