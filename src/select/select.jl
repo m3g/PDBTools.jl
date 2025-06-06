@@ -212,6 +212,9 @@ const keywords = [
     Keyword(Int, "residue", residue, operators),
     Keyword(Float64, "beta", beta, operators),
     Keyword(Float64, "occup", occup, operators),
+    Keyword(Float64, "x", at -> getfield(at, :x), operators),
+    Keyword(Float64, "y", at -> getfield(at, :y), operators),
+    Keyword(Float64, "z", at -> getfield(at, :z), operators),
     Keyword(Int, "model", model, operators),
     Keyword(String, "name", name, operators),
     Keyword(String, "segname", segname, operators),
@@ -533,6 +536,7 @@ end
     @test length(select(atoms, "element C N")) == 1331
     @test length(select(atoms, "(element C N)")) == 1331
     @test length(select(atoms, "not protein and element C N")) == 724
+    @test length(select(atoms, "x > 2 and y > 0 and z < 0")) == 7134
 
     # malformed expression
     @test_throws ArgumentError select(atoms, "name CA and (residue 1")

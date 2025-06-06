@@ -1,6 +1,5 @@
 PDBTools.jl Changelog
 ===========================
-
   
 [badge-breaking]: https://img.shields.io/badge/BREAKING-red.svg
 [badge-deprecation]: https://img.shields.io/badge/Deprecation-orange.svg
@@ -10,6 +9,10 @@ PDBTools.jl Changelog
 [badge-bugfix]: https://img.shields.io/badge/Bugfix-purple.svg
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
+
+Version 3.2.0
+-------------
+- ![FEATURE][badge-feature] Selection by coordinate values (e. g. `select(atoms,"x > 0")`) 
 
 Version 3.1.1
 -------------
