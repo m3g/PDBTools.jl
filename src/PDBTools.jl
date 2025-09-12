@@ -5,13 +5,13 @@ import Downloads
 import InteractiveUtils
 import PrecompileTools
 using Format: format
-using LinearAlgebra: norm
+using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
 using StaticArrays: SVector
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: String1, String3, String7
-import MolSimToolkitShared: center_of_mass, wrap
+import MolSimToolkitShared: center_of_mass, wrap, dihedral
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
@@ -24,7 +24,7 @@ export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residue
 export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
 export add_custom_field
-export Residue, eachresidue, resname, residue, resnum, model, segname
+export Residue, eachresidue, resname, residue, resnum, model, segname, zeta, zeta_check
 export Chain, eachchain, chain
 export residue_ticks
 export Segment, eachsegment
