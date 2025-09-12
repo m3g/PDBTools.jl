@@ -7,6 +7,13 @@ CollapsedDocStrings = true
 These tools may call external programs to perform each task. Please verify the installation of 
 the necessary tool for each case. 
 
+## Check the stereochemistry of protein residues
+
+```@docs
+zeta
+zeta_check
+```
+
 ## Add hydrogens with OpenBabel
 
 ```@docs

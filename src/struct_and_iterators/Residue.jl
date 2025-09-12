@@ -65,6 +65,89 @@ end
 Residue(atoms::AbstractVector{<:Atom}) = Residue(atoms, 1:length(atoms))
 
 """
+    zeta(r::Residue)
+
+Computes the Cα chirality (zeta "virtual" torsion angle - Cα-N-C-Cβ).
+
+Returns the torsion angle or NaN if the residue is not recognized a protein residue or if its a Gly residue.
+Expected values are 33.9 ± 3.5 degrees (for one standard deviation). Also see the `zeta_check` function.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> protein = select(read_pdb(PDBTools.TESTPDB), "protein");
+
+julia> residues = collect(eachresidue(protein));
+
+julia> zeta(residues[1])
+33.672016f0
+```
+
+"""
+function zeta(r::Residue)
+    if isprotein(r) && resname(r) != "GLY"
+        iCA = findfirst(at -> name(at) == "CA", r)
+        iN = findfirst(at -> name(at) == "N", r)
+        iC = findfirst(at -> name(at) == "C", r)
+        iCB = findfirst(at -> name(at) == "CB", r)
+        zeta = dihedral(coor(r[iCA]), coor(r[iN]), coor(r[iC]), coor(r[iCB]))
+        return zeta
+    else
+        return NaN
+    end
+end
+
+"""
+    zeta_check(r::Residue; nsigma=2)
+
+Checks if the Cα chirality falls into expected ranges. See the `zeta` function for further
+information. The expected mean is 33.9 degrees with a standard deviation of 3.5 degrees.
+By default, `nsigma=2`, implying that the function returns `true` if the torsion falls 
+within two standard deviations from the mean.
+
+See: https://www.ebi.ac.uk/thornton-srv/software/PROCHECK/manual/manappa.html
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> protein = select(read_pdb(PDBTools.TESTPDB), "protein");
+
+julia> residues = collect(eachresidue(protein));
+
+julia> zeta_check(residues[1])
+true
+```
+
+"""
+function zeta_check(r::Residue; nsigma=2)
+    # data from: https://www.ebi.ac.uk/thornton-srv/software/PROCHECK/manual/manappa.html
+    mean = 33.9 # degrees 
+    margin = nsigma * 3.5 # std
+    if isprotein(r) && resname(r) != "GLY"
+        return mean - margin < zeta(r) < mean + margin
+    else
+        return true
+    end
+end
+
+@testitem "zeta" begin
+    using PDBTools
+    protein = select(read_pdb(PDBTools.TESTPDB), "protein");
+    residues = collect(eachresidue(protein));
+    @test zeta(residues[1]) ≈ 33.672016f0
+    @test zeta(residues[4]) ≈ 38.015102f0
+    @test isnan(zeta(residues[7]))
+    @test zeta_check(residues[1]) 
+    @test !zeta_check(residues[4]; nsigma=1)
+    @test zeta_check(residues[7]) 
+end
+
+
+"""
     eachresidue(atoms::AbstractVector{<:Atom})
 
 Iterator for the residues (or molecules) of a selection. 
