@@ -7,7 +7,7 @@ CollapsedDocStrings = true
 These tools may call external programs to perform each task. Please verify the installation of 
 the necessary tool for each case. 
 
-## Evaluate the sterechemistry of protein residues
+## Check the stereochemistry of protein residues
 
 ```@docs
 zeta
