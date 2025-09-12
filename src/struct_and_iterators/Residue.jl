@@ -132,6 +132,18 @@ function zeta_check(r::Residue; nsigma=2)
     end
 end
 
+@testitem "zeta" begin
+    using PDBTools
+    protein = select(read_pdb(PDBTools.TESTPDB), "protein");
+    residues = collect(eachresidue(protein));
+    @test zeta(residues[1]) ≈ 33.672016f0
+    @test zeta(residues[4]) ≈ 38.015102f0
+    @test isnan(zeta(residues[7]))
+    @test zeta_check(residues[1]) 
+    @test !zeta_check(residues[4]; nsigma=1)
+    @test zeta_check(residues[7]) 
+end
+
 
 """
     eachresidue(atoms::AbstractVector{<:Atom})
