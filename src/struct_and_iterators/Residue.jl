@@ -107,6 +107,8 @@ information. The expected mean is 33.9 degrees with a standard deviation of 3.5 
 By default, `nsigma=2`, implying that the function returns `true` if the torsion falls 
 within two standard deviations from the mean.
 
+See: https://www.ebi.ac.uk/thornton-srv/software/PROCHECK/manual/manappa.html
+
 # Example
 
 ```jldoctest
