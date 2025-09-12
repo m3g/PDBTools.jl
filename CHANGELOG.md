@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.3.0-DEV
+Version 3.3.0
 -------------
 - ![FEATURE][badge-feature] `zeta` and `zeta_check` functions to check for Calpha chirality of protein residues. 
 
