@@ -31,7 +31,7 @@ The `Ramachandran` function and object are used to compute and plot Ramachandran
 
 ```@example ramachandran
 using PDBTools
-prot = read_pdb(PDBTools.TESTPDB);
+prot = read_pdb(PDBTools.TESTPDB, "protein");
 ram = Ramachandran(prot)
 ```
 

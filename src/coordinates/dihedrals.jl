@@ -66,7 +66,7 @@ Ramachandran data: phi, psi vectors with 102 angles.
 end
 
 function Base.show(io::IO, ram::Ramachandran)
-    print(chomp("""
+    print(io, chomp("""
     Ramachandran data: phi, psi vectors with $(length(ram.phi)) angles.
     """))
 end
