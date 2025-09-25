@@ -110,6 +110,7 @@ end
 
 @testitem "Ramachandran" begin
     using PDBTools
+    using ShowMethodTesting
     pdb = read_pdb(PDBTools.TESTPDB)
     @test_throws ArgumentError Ramachandran(pdb)
     prot = filter(isprotein, pdb)
@@ -119,4 +120,5 @@ end
     ram = Ramachandran(prot)
     @test sum(ram.phi) ≈ -7024.354f0
     @test sum(ram.psi) ≈ 3501.747f0
+    @test parse_show(ram) ≈ "Ramachandran data: phi, psi vectors with 102 angles."
 end
