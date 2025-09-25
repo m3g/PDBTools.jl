@@ -29,7 +29,7 @@ export Chain, eachchain, chain
 export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
-export coor, maxmin, distance, closest
+export coor, maxmin, distance, closest, dihedral, Ramachandran
 export element, mass, element_name, element_symbol, element_symbol_string
 export formula, stoichiometry
 export Sequence
@@ -91,6 +91,7 @@ include("./coordinates/coor.jl")
 include("./coordinates/distance.jl")
 include("./coordinates/maxmin.jl")
 include("./coordinates/contacts.jl")
+include("./coordinates/dihedrals.jl")
 
 # Miscellaneous tools
 include("./tools/tools.jl")

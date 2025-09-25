@@ -10,8 +10,11 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.3.1-DEV
+Version 3.4.0-DEV
 -------------
+- ![FEATURE][badge-feature] `Plots.scatter(::Ramachandran)` to plot Ramachandran objects.
+- ![FEATURE][badge-feature] `Ramachandran` method and struct, to compute Ramachandran plots.
+- ![FEATURE][badge-feature] `dihedral` method to compute directly dihedral given four Atom objects.
 
 Version 3.3.0
 -------------

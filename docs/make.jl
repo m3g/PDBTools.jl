@@ -19,6 +19,7 @@ makedocs(
         "Iterators" => "iterators.md",
         "Element properties" => "elements.md",
         "Contact maps" => "contacts.md",
+        "Dihderals and Ramachandran" => "dihedrals.md",
         "Auxiliary functions" => "auxiliary.md",
         "Examples" => "examples.md",
         "Tools" => "tools.md",
