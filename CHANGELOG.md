@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.4.1-DEV
 -------------
+- ![FEATURE][badge-feature] Add `vdw_radius` as element property, and `element_vdw_radius` function to fetch them.
 
 Version 3.4.0
 -------------
