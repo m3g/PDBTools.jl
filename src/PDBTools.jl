@@ -30,7 +30,7 @@ export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
 export coor, maxmin, distance, closest, dihedral, Ramachandran
-export element, mass, element_name, element_symbol, element_symbol_string
+export element, mass, element_name, element_symbol, element_symbol_string, element_vdw_radius
 export formula, stoichiometry
 export Sequence
 export select_with_vmd

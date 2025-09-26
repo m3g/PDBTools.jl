@@ -712,6 +712,25 @@ julia> element_symbol_string(at)
 element_symbol_string(at::Atom) = get_element_property(at, :symbol_string)
 
 """
+    element_vdw_radius(atom::Atom)
+
+Returns the vdW radius of the element of the atom, in Å, or NaN if the data is not available.
+
+### Example
+
+```jldoctest
+julia> using PDBTools 
+
+julia> at = Atom(name="NT3");
+
+julia> element_vdw_radius(at)
+1.55f0
+```
+
+"""
+element_vdw_radius(at::Atom) = get_element_property(at, :vdw_radius)
+
+"""
     mass(atom::Atom)
     mass(atoms::AbstractVector{<:Atoms})
 
@@ -763,6 +782,7 @@ end
     @test atomic_number(at) == 7
     @test element(at) == "N"
     @test element_name(at) == "Nitrogen"
+    @test element_vdw_radius(at) == 1.55f0
     @test mass(at) == 14.0067
     @test mass([at, at]) == 28.0134
     atoms = read_pdb(PDBTools.TESTPDB, "protein")
