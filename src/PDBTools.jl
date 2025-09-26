@@ -38,6 +38,7 @@ export select_with_vmd
 # Tools
 export center_of_mass
 export moveto!
+export sasa
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -95,6 +96,7 @@ include("./coordinates/dihedrals.jl")
 
 # Miscellaneous tools
 include("./tools/tools.jl")
+include("./tools/sasa.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
