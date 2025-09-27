@@ -1,5 +1,7 @@
 using LinearAlgebra
 
+struct SASA sasa::Float32 end
+
 """
     generate_dots(radius, n_grid_points)
 
@@ -48,6 +50,27 @@ function generate_dots(radius::Real, n_grid_points::Int)
     return unique!(dots)
 end
 
+function update_dot_oclusion!(i, j, x, y, atoms, dot_cache, system)
+    el_i = element(atoms[i])
+    R_j_sq = element_vdw_radius(atoms[j])^2
+    for idot in enumerate(system.ocluded_atom_dots[i])
+        if !ocluded_atom_dots[i]
+            # Position the dot on the atom's surface in the molecule's coordinate system
+            dot_on_surface = x + dot_cache[el_i][idot]
+            # Check if the dot is inside the neighboring atom j
+            if sum((dot_on_surface - y).^2) < R_j_sq
+                system.ocluded_atom_dots[i] = true
+            end
+        end
+    end
+    return nothing
+end
+
+function pair_dot_oclusion!(x, y, i, j, ocluded_atom_dots; atoms, dot_cache, system)
+    update_dot_oclusion!(i, j, x, y, atoms, dot_cache, system)
+    update_dot_oculsion!(j, i, y, x, atoms, dot_cache, system)
+    return ocluded_atom_dots
+end
 
 """
     sasa(atoms; probe_radius, n_grid_points)
@@ -60,60 +83,49 @@ Calculates the Solvent Accessible Surface Area (SASA) for a vector of `Atom`s.
 - `n_grid_points::Int=20`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
 """
-function sasa(atoms::AbstractVector{<:Atom}; probe_radius::Real = 1.4, n_grid_points::Int = 20)
-    total_sasa = 0.0f0
+function compute_sasa(atoms::AbstractVector{<:Atom}; probe_radius::Real = 1.4, n_grid_points::Int = 20)
+
+    elms = unique(element, atoms)
+    radius = [ elements[el].vdw_radius for el in elms ]
     
     # Memoization for dot generation to avoid recomputing for same radii
     dot_cache = Dict{String, Vector{Vector{Float32}}}()
-
-    for (i, atom_i) in enumerate(atoms)
-        el_i = element(atom_i)
-        R_i = element_vdw_radius(atom_i) + probe_radius
-        center_i = SVector{3,Float32}(atom_i.x, atom_i.y, atom_i.z)
-        
-        # Generate or retrieve the dots for this atom's extended radius
-        if !haskey(dot_cache, el_i)
-            dot_cache[el_i] = generate_dots(R_i, n_grid_points)
-        end
-        dots_template = dot_cache[el_i]
-        
-        n_total_dots = length(dots_template)
-        if n_total_dots == 0
-            continue
-        end
-        
-        n_accessible_dots = 0
-        for dot in dots_template
-            # Position the dot on the atom's surface in the molecule's coordinate system
-            dot_on_surface = center_i + dot
-            
-            is_occluded = false
-            for (j, atom_j) in enumerate(atoms)
-                if i == j
-                    continue
-                end
-                
-                center_j = SVector{3,Float32}(atom_j.x, atom_j.y, atom_j.z)
-                R_j = element_vdw_radius(atom_j)
-                
-                # Check if the dot is inside the neighboring atom j
-                if sum((dot_on_surface - center_j).^2) < R_j^2
-                    is_occluded = true
-                    break # Dot is buried, move to the next dot
-                end
-            end
-            
-            if !is_occluded
-                n_accessible_dots += 1
-            end
-        end
-        
-        # Calculate and add this atom's contribution to the total SASA
-        atom_sasa = 4 * π * R_i^2 * (n_accessible_dots / n_total_dots) 
-        total_sasa += atom_sasa
+    for (iel, el) in enumerate(elms)
+        dot_cache[el] = generate_dots(radius[iel], n_grid_points)
     end
+
+    sys = ParticleSystem(
+        xpositions = coor.(atoms),
+        unitcell = nothing,
+        cutoff = maximum(radius) + probe_radius,
+        output = [ zeros(Bool, length(dot_cache[element(at)])) for at in atoms ],
+        output_name = :ocluded_atom_dots
+        parallel=false,
+    )
+
+    map_pairwise(
+        (x, y, i, j, d2, ocluded_atom_dots) -> 
+            pair_dot_oclusion!(x, y, i, j, ocluded_atom_dots; atoms, dot_cache, system),
+        sys
+    )
+
+    ats_with_sasa = [
+        add_custom_field(
+            atoms[i], 
+            SASA(4*π*element_vdw_radius(atoms[i])^2*(count(==(false), system.ocluded_atom_dots)/n_grid_points))
+        )
+    ]
     
-    return total_sasa
+    return ats_with_sasa
+end
+
+function sasa(atoms::AbstractVector{<:Atom{SASA}})
+    return sum(at.custom.sasa for at in atoms)
+end
+
+function sasa(atoms::AbstractVector{<:Atom{SASA}}, selection::Union{Function,String})
+    isel = index.(select(atoms, selection))
+    return sum(atoms[i].custom.sasa for i in isel)
 end
 
 @testitem "sasa" begin
