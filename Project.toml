@@ -4,6 +4,7 @@ authors = ["Leandro Martinez <lmartine@unicamp.br>"]
 version = "3.4.1-DEV"
 
 [deps]
+CellListMap = "69e1c6dd-3888-40e6-b3c8-31ac5f578864"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 Format = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
@@ -26,6 +27,7 @@ Plotting = "Plots"
 [compat]
 Aqua = "0.8.9"
 BenchmarkTools = "1.5"
+CellListMap = "0.9.11"
 Dates = "1.10"
 DelimitedFiles = "1.9"
 Documenter = "1.3"

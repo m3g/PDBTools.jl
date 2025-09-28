@@ -1,3 +1,4 @@
+using CellListMap: ParticleSystem, map_pairwise
 using LinearAlgebra
 
 struct SASA sasa::Float32 end
@@ -53,13 +54,13 @@ end
 function update_dot_oclusion!(i, j, x, y, atoms, dot_cache, system)
     el_i = element(atoms[i])
     R_j_sq = element_vdw_radius(atoms[j])^2
-    for idot in enumerate(system.ocluded_atom_dots[i])
-        if !ocluded_atom_dots[i]
+    for (idot, dot_ocluded) in enumerate(system.ocluded_atom_dots[i])
+        if !dot_ocluded
             # Position the dot on the atom's surface in the molecule's coordinate system
             dot_on_surface = x + dot_cache[el_i][idot]
             # Check if the dot is inside the neighboring atom j
             if sum((dot_on_surface - y).^2) < R_j_sq
-                system.ocluded_atom_dots[i] = true
+                system.ocluded_atom_dots[i][idot] = true
             end
         end
     end
@@ -68,7 +69,7 @@ end
 
 function pair_dot_oclusion!(x, y, i, j, ocluded_atom_dots; atoms, dot_cache, system)
     update_dot_oclusion!(i, j, x, y, atoms, dot_cache, system)
-    update_dot_oculsion!(j, i, y, x, atoms, dot_cache, system)
+    update_dot_oclusion!(j, i, y, x, atoms, dot_cache, system)
     return ocluded_atom_dots
 end
 
@@ -85,7 +86,7 @@ Calculates the Solvent Accessible Surface Area (SASA) for a vector of `Atom`s.
 """
 function compute_sasa(atoms::AbstractVector{<:Atom}; probe_radius::Real = 1.4, n_grid_points::Int = 20)
 
-    elms = unique(element, atoms)
+    elms = element.(unique(element, atoms))
     radius = [ elements[el].vdw_radius for el in elms ]
     
     # Memoization for dot generation to avoid recomputing for same radii
@@ -94,30 +95,32 @@ function compute_sasa(atoms::AbstractVector{<:Atom}; probe_radius::Real = 1.4, n
         dot_cache[el] = generate_dots(radius[iel], n_grid_points)
     end
 
-    sys = ParticleSystem(
+    system = ParticleSystem(
         xpositions = coor.(atoms),
         unitcell = nothing,
         cutoff = maximum(radius) + probe_radius,
         output = [ zeros(Bool, length(dot_cache[element(at)])) for at in atoms ],
-        output_name = :ocluded_atom_dots
+        output_name = :ocluded_atom_dots,
         parallel=false,
     )
 
     map_pairwise(
         (x, y, i, j, d2, ocluded_atom_dots) -> 
             pair_dot_oclusion!(x, y, i, j, ocluded_atom_dots; atoms, dot_cache, system),
-        sys
+        system,
     )
 
     ats_with_sasa = [
         add_custom_field(
             atoms[i], 
-            SASA(4*π*element_vdw_radius(atoms[i])^2*(count(==(false), system.ocluded_atom_dots)/n_grid_points))
-        )
+            SASA(4*π*element_vdw_radius(atoms[i])^2*(count(==(false), system.ocluded_atom_dots[i])/n_grid_points))
+        ) for i in eachindex(atoms)
     ]
     
     return ats_with_sasa
 end
+
+export compute_sasa, sasa
 
 function sasa(atoms::AbstractVector{<:Atom{SASA}})
     return sum(at.custom.sasa for at in atoms)
@@ -129,6 +132,16 @@ function sasa(atoms::AbstractVector{<:Atom{SASA}}, selection::Union{Function,Str
 end
 
 @testitem "sasa" begin
+
+    # gmx sasa -s prot.pdb -probe 1.4 -ndots 20 -n index.ndx -surface CYSTHR -output CYSTHR
+
+    sasa_gmx = Dict(
+        "total" => 115.384,
+        "first_atom" => 0.0,
+        "CYS and THR" => 7.734,
+        "first atom (isolated)" => 30.386,
+        "CYS and THR (isolated)" => 80.959,
+    )
 
     sasa_value = calculate_sasa(molecule, probe_radius=1.4, n_grid_points=25)
 
