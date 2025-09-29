@@ -609,8 +609,8 @@ end
     using PDBTools
     atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2")
     @test element(atoms[1]) == "N"
-    @test element(Atom()) === "X"
-    @test element(Atom(pdb_element="")) === "X"
+    @test element(Atom()) == "X"
+    @test element(Atom(pdb_element="")) == "X"
     @test element(Atom(pdb_element="N")) == "N"
     @test element(Atom(name="N", pdb_element="X")) == "N"
     @test element(Atom(name="X", pdb_element="A")) == "A"
@@ -783,8 +783,8 @@ end
     @test element(at) == "N"
     @test element_name(at) == "Nitrogen"
     @test element_vdw_radius(at) == 1.55f0
-    @test mass(at) == 14.0067
-    @test mass([at, at]) == 28.0134
+    @test mass(at) == 14.0067f0
+    @test mass([at, at]) == 28.0134f0
     atoms = read_pdb(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
     @test mass(Atom(name="X")) === nothing
