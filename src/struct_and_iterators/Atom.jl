@@ -50,7 +50,7 @@ julia> element(atoms[1])
 "N"
 
 julia> mass(atoms[1])
-14.0067
+14.0067f0
 
 julia> position(atoms[1])
 3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
@@ -579,7 +579,7 @@ function element(atom::Atom)
     # First, check if it was defined in pdb_element
     element_name = pdb_element(atom)
     if !isempty(element_name) && element_name != "X"
-        return element_name
+        return String3(element_name)
     end
     # if there is match, just return the name
     element_name = name(atom)
@@ -599,7 +599,7 @@ function element(atom::Atom)
     for iel in imatch:lmatch
         el = element_names[iel]
         if lastindex(element_name) >= i0 + length(el) - 1 && el == @view(element_name[i0:i0+length(el)-1])
-            return el == "X" ? nothing : el
+            return el == "X" ? nothing : String3(el)
         end
     end
     return nothing
@@ -609,8 +609,8 @@ end
     using PDBTools
     atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 2")
     @test element(atoms[1]) == "N"
-    @test element(Atom()) === "X"
-    @test element(Atom(pdb_element="")) === "X"
+    @test element(Atom()) == "X"
+    @test element(Atom(pdb_element="")) == "X"
     @test element(Atom(pdb_element="N")) == "N"
     @test element(Atom(name="N", pdb_element="X")) == "N"
     @test element(Atom(name="X", pdb_element="A")) == "A"
@@ -712,6 +712,25 @@ julia> element_symbol_string(at)
 element_symbol_string(at::Atom) = get_element_property(at, :symbol_string)
 
 """
+    element_vdw_radius(atom::Atom)
+
+Returns the vdW radius of the element of the atom, in Å, or NaN if the data is not available.
+
+### Example
+
+```jldoctest
+julia> using PDBTools 
+
+julia> at = Atom(name="NT3");
+
+julia> element_vdw_radius(at)
+1.55f0
+```
+
+"""
+element_vdw_radius(at::Atom) = get_element_property(at, :vdw_radius)
+
+"""
     mass(atom::Atom)
     mass(atoms::AbstractVector{<:Atoms})
 
@@ -728,10 +747,10 @@ julia> using PDBTools
 julia> atoms = [ Atom(name="NT3"), Atom(name="CA") ];
 
 julia> mass(atoms[1])
-14.0067
+14.0067f0
 
 julia> mass(atoms)
-26.017699999999998
+26.0177f0
 ```
 
 """
@@ -744,7 +763,7 @@ function mass(at::Atom)
     return mass
 end
 function mass(atoms::AbstractVector{<:Atom})
-    totmass = 0.0
+    totmass = 0.0f0
     for at in atoms
         if isnothing(mass(at))
             throw(ArgumentError("Atom $(name(at)) does not have a mass defined"))
@@ -763,8 +782,9 @@ end
     @test atomic_number(at) == 7
     @test element(at) == "N"
     @test element_name(at) == "Nitrogen"
-    @test mass(at) == 14.0067
-    @test mass([at, at]) == 28.0134
+    @test element_vdw_radius(at) == 1.55f0
+    @test mass(at) == 14.0067f0
+    @test mass([at, at]) == 28.0134f0
     atoms = read_pdb(PDBTools.TESTPDB, "protein")
     @test mass(atoms) ≈ 11079.704440000156
     @test mass(Atom(name="X")) === nothing

@@ -30,7 +30,7 @@ export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
 export coor, maxmin, distance, closest, dihedral, Ramachandran
-export element, mass, element_name, element_symbol, element_symbol_string
+export element, mass, element_name, element_symbol, element_symbol_string, element_vdw_radius
 export formula, stoichiometry
 export Sequence
 export select_with_vmd
@@ -38,6 +38,7 @@ export select_with_vmd
 # Tools
 export center_of_mass
 export moveto!
+export atomic_sasa, sasa
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -95,6 +96,7 @@ include("./coordinates/dihedrals.jl")
 
 # Miscellaneous tools
 include("./tools/tools.jl")
+include("./tools/sasa.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")

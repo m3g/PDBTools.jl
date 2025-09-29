@@ -26,3 +26,10 @@ docs/site/
 Manifest.toml
 
 .vscode/settings.json
+src/tools/index.ndx
+src/tools/prot.pdb
+src/tools/*area.xvg*
+src/tools/cysthr.dat
+.gitignore
+.gitignore
+src/tools/sasa.vmd

@@ -10,8 +10,12 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.4.1-DEV
+Version 3.5.0-DEV
 -------------
+- ![FEATURE][badge-feature] `atomic_sasa` and `sasa` functions to compute solvent accessible surface area.
+- ![FEATURE][badge-feature] Add `vdw_radius` as element property, and `element_vdw_radius` function to fetch them.
+- ![INFO][badge-info] The element symbol is returned as a `InlineStrings.String3`. 
+- ![INFO][badge-info] Masses are returned as `Float32` values instead of `Float64`.
 
 Version 3.4.0
 -------------

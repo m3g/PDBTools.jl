@@ -46,6 +46,7 @@ element
 element_name
 element_symbol
 element_symbol_string
+element_vdw_radius
 formula
 stoichiometry
 printatom
