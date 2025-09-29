@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.5.0-DEV
+Version 3.5.0
 -------------
 - ![FEATURE][badge-feature] `atomic_sasa` and `sasa` functions to compute solvent accessible surface area.
 - ![FEATURE][badge-feature] Add `vdw_radius` as element property, and `element_vdw_radius` function to fetch them.
