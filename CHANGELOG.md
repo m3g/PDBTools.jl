@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.5.2-DEV
+-------------
+
 Version 3.5.1
 -------------
 - ![ENHANCEMENT][badge-enhancement] improve selection syntax for non-contiguous indexing in `sasa`. 
