@@ -265,9 +265,9 @@ julia> s = collect(eachsegment(ats))
 ]
 
 julia> mass.(s)
-2-element Vector{Float64}:
- 25222.339099999943
-  1210.7300999999993
+2-element Vector{Float32}:
+ 25222.553
+  1210.7296
 
 julia> for (iseg, seg) in enumerate(eachsegment(ats))
            for at in seg
