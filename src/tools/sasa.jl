@@ -4,7 +4,9 @@ using LinearAlgebra
 using Statistics: mean
 
 # Container for the custom atom filed that will carry the atom SASA
-struct SASA sasa::Float32 end
+struct SASA
+    sasa::Float32
+end
 
 #=
     generate_dots(atomi_radius, probe_radius, n_dots)
@@ -16,7 +18,7 @@ per sphere.
 =#
 function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
     radius = atomic_radius + probe_radius
-    n_grid_points = round(Int, (3/(4 * π * ((1/2)^3)) * n_dots)^(1/3))
+    n_grid_points = round(Int, (3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
     if radius <= 0 || n_grid_points <= 0
         throw(ArgumentError("""\n
             Too small or incorrect probe_radius ($probe_radius) or number of dots ($n_dots).
@@ -34,7 +36,7 @@ function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
         y = -radius + j * step
         z = -radius + k * step
         dist_sq = x^2 + y^2 + z^2
-        
+
         # Project internal points onto the surface
         if 0 < dist_sq < radius_sq
             norm_factor = radius / sqrt(dist_sq)
@@ -49,14 +51,14 @@ function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
         y = -radius + offset + j * step
         z = -radius + offset + k * step
         dist_sq = x^2 + y^2 + z^2
-        
+
         # Project internal points onto the surface
         if dist_sq < radius_sq
             norm_factor = radius / sqrt(dist_sq)
             push!(dots, norm_factor * SVector{3,Float32}(x, y, z))
         end
     end
-    
+
     # Return unique points to avoid redundancy
     return unique!(dots)
 end
@@ -68,18 +70,18 @@ end
 struct AtomDots
     exposed::Vector{Bool}
 end
-function CellListMap.reset_output!(x::AtomDots) 
+function CellListMap.reset_output!(x::AtomDots)
     x.exposed .= true
     return x
 end
 CellListMap.copy_output(x::AtomDots) = AtomDots(copy(x.exposed))
-function CellListMap.reducer(x::AtomDots, y::AtomDots) 
+function CellListMap.reducer(x::AtomDots, y::AtomDots)
     x.exposed .= x.exposed .& y.exposed
     return x
 end
 
 function update_dot_exposure!(
-    i, j, x, y, atoms, dot_cache, surface_dots; 
+    i, j, x, y, atoms, dot_cache, surface_dots;
     atom_type::Function,
     atom_radius_from_type::Function,
     probe_radius,
@@ -101,7 +103,7 @@ function update_dot_exposure!(
 end
 
 function update_pair_dot_exposure!(
-    x, y, i, j, surface_dots; 
+    x, y, i, j, surface_dots;
     atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
 ) where {F1,F2}
     update_dot_exposure!(i, j, x, y, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
@@ -169,19 +171,19 @@ values.
 
 """
 function atomic_sasa(
-    atoms::AbstractVector{<:Atom}; 
-    probe_radius::Real=1.4, 
+    atoms::AbstractVector{<:Atom};
+    probe_radius::Real=1.4,
     n_dots::Int=500,
-    atom_type::Function = element,
-    atom_radius_from_type::Function = type -> getproperty(elements[type], :vdw_radius),
+    atom_type::Function=element,
+    atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
 )
 
     # Unique list of atom types
     atom_types = atom_type.(unique(atom_type, atoms))
-    
+
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types), Vector{SVector{3,Float32}}}()
+    dot_cache = Dict{eltype(atom_types),Vector{SVector{3,Float32}}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -192,20 +194,20 @@ function atomic_sasa(
         end
         dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
     end
-        
+
     system = ParticleSystem(
-        xpositions = coor.(atoms),
-        unitcell = nothing,
-        cutoff = 2*(maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output = [ AtomDots(ones(Bool, length(dot_cache[atom_type(at)]))) for at in atoms ],
-        output_name = :surface_dots,
+        xpositions=coor.(atoms),
+        unitcell=nothing,
+        cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
+        output=[AtomDots(ones(Bool, length(dot_cache[atom_type(at)]))) for at in atoms],
+        output_name=:surface_dots,
         parallel=parallel,
     )
 
     map_pairwise!(
-        (x, y, i, j, d2, surface_dots) -> 
+        (x, y, i, j, d2, surface_dots) ->
             update_pair_dot_exposure!(
-                x, y, i, j, surface_dots; 
+                x, y, i, j, surface_dots;
                 atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
             ),
         system,
@@ -213,14 +215,14 @@ function atomic_sasa(
 
     ats_with_sasa = [
         add_custom_field(
-            atoms[i], 
-            SASA( 
-                4*π*(atom_radius_from_type(atom_type(atoms[i])) + probe_radius)^2 *
+            atoms[i],
+            SASA(
+                4 * π * (atom_radius_from_type(atom_type(atoms[i])) + probe_radius)^2 *
                 mean(system.surface_dots[i].exposed)
             )
         ) for i in eachindex(atoms)
     ]
-    
+
     return ats_with_sasa
 end
 
@@ -279,22 +281,22 @@ end
         "O" => 1.52,
         "S" => 1.80,
     )
-    at_sasa = atomic_sasa(prot; atom_radius_from_type = type -> vmd_radii[type])
+    at_sasa = atomic_sasa(prot; atom_radius_from_type=type -> vmd_radii[type])
     @test sasa(at_sasa) ≈ 5364.78515625 rtol = 0.1
     # Accessiblity of groups within the structure
-    @test sasa(at_sasa, "backbone") ≈ 1128.9261474609375 rtol=0.05
-    @test sasa(at_sasa, "resname GLU LYS") ≈ 796.6279296875 rtol=0.05
-    @test sasa(at_sasa, "residue 1") ≈ 124.51239776611328 rtol=0.05
-    @test sasa(at_sasa, "residue 104") ≈ 122.6167221069336 rtol=0.05
+    @test sasa(at_sasa, "backbone") ≈ 1128.9261474609375 rtol = 0.05
+    @test sasa(at_sasa, "resname GLU LYS") ≈ 796.6279296875 rtol = 0.05
+    @test sasa(at_sasa, "residue 1") ≈ 124.51239776611328 rtol = 0.05
+    @test sasa(at_sasa, "residue 104") ≈ 122.6167221069336 rtol = 0.05
 
     # Compare with Gromacs output
     at_sasa = atomic_sasa(prot)
     # Isolated groups
-    @test sasa(atomic_sasa(select(prot, "backbone and not name O"))) ≈ 100 * 55.245 rtol=0.05
-    @test sasa(atomic_sasa(select(prot, "name CA"))) ≈ 100 * 58.642 rtol=0.05
-    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"))) ≈ 100 * 69.029 rtol=0.05
+    @test sasa(atomic_sasa(select(prot, "backbone and not name O"))) ≈ 100 * 55.245 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "name CA"))) ≈ 100 * 58.642 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"))) ≈ 100 * 69.029 rtol = 0.05
 
-    
+
     # Test parallelization
     @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
 
