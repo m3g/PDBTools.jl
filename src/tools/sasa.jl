@@ -19,7 +19,7 @@ function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
     n_grid_points = round(Int, (3/(4 * π * ((1/2)^3)) * n_dots)^(1/3))
     if radius <= 0 || n_grid_points <= 0
         throw(ArgumentError("""\n
-            The probe_radius ($probe_radius) or number of dots ($n_dots) are too small, or incorrectly provided.
+            Too small or incorrect probe_radius ($probe_radius) or number of dots ($n_dots).
 
         """))
     end
@@ -165,7 +165,7 @@ By default, `atom_type = PDBTools.element`, a function that just returns the ele
 and `atom_radius_from_type` obtains the vdW radius from the `PDBTools.elements` list, in which
 the atomc radii of https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page) are See the documentation for further information.
 used. Atoms with missing radius have a `NaN` value, and the computation will not return meaningful
-values. See the documentation for further information.
+values. 
 
 """
 function atomic_sasa(
@@ -183,6 +183,13 @@ function atomic_sasa(
     # Memoization for dot generation to avoid recomputing for same radii
     dot_cache = Dict{eltype(atom_types), Vector{SVector{3,Float32}}}()
     for type in atom_types
+        atom_radius = atom_radius_from_type(type)
+        if isnan(atom_radius)
+            throw(ArgumentError("""\n
+                Atom of type $type does not have a vdW radius defined.
+                Use custom `atom_type` and `atom_radius_from_type` input parameters if needed. 
+            """))
+        end
         dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
     end
         
@@ -261,30 +268,41 @@ end
 
 @testitem "sasa" begin
 
-    # Using VMD radii
-    vmd_radii = Dict(
+    using PDBTools
+    prot = read_pdb(PDBTools.TESTPDB, "protein")
+
+    # Compare with the output of VMD: the difference is that VMD uses a vdW radius for H of 1.00, and we use 1.10.
+    const vmd_radii = Dict(
         "N" => 1.55,
         "C" => 1.70,
         "H" => 1.00,
         "O" => 1.52,
         "S" => 1.80,
     )
+    at_sasa = atomic_sasa(prot; atom_radius_from_type = type -> vmd_radii[type])
+    @test sasa(at_sasa) ≈ 5364.78515625 rtol = 0.1
+    # Accessiblity of groups within the structure
+    @test sasa(at_sasa, "backbone") ≈ 1128.9261474609375 rtol=0.05
+    @test sasa(at_sasa, "resname GLU LYS") ≈ 796.6279296875 rtol=0.05
+    @test sasa(at_sasa, "residue 1") ≈ 124.51239776611328 rtol=0.05
+    @test sasa(at_sasa, "residue 104") ≈ 122.6167221069336 rtol=0.05
 
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    # Compare with Gromacs output
+    at_sasa = atomic_sasa(prot)
+    # Isolated groups
+    @test sasa(atomic_sasa(select(prot, "backbone and not name O"))) ≈ 100 * 55.245 rtol=0.05
+    @test sasa(atomic_sasa(select(prot, "name CA"))) ≈ 100 * 58.642 rtol=0.05
+    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"))) ≈ 100 * 69.029 rtol=0.05
 
-    @test sasa(atomic_sasa([prot[1]])) ≈ sasa_gmx["first atom (isolated)"] rtol = 1e-3
-    @test sasa(atomic_sasa([prot[20]])) ≈ sasa_gmx["S atom (isolated)"] rtol = 1e-3
-    @test sasa(atomic_sasa([prot[5]])) ≈ sasa_gmx["C atom (isolated)"] rtol = 1e-3
-    @test sasa(atomic_sasa([prot[12]])) ≈ sasa_gmx["C atom (isolated)"] rtol = 1e-3
-    @test sasa(atomic_sasa([prot[2]])) ≈ sasa_gmx["H atom (isolated)"] rtol = 1e-3
-
-
-    # For comparison, the SASA of a single, isolated atom
-    isolated_atom_sasa = atomic_sasa([atom1], probe_radius=1.4)
     
-    
-    println("SASA of the two-atom molecule: ", round(sasa_value, digits=2), " Å²")
-    println("SASA of a single isolated atom: ", round(isolated_atom_sasa, digits=2), " Å²")
-    println("Expected sum for two isolated atoms: ", round(2 * isolated_atom_sasa, digits=2), " Å²")
+    # Test parallelization
+    @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
+
+    # Test errors
+    @test_throws ArgumentError atomic_sasa(prot; probe_radius=-2.0)
+    @test_throws ArgumentError atomic_sasa(prot; n_dots=0)
+    prot[1].name = "Ti"
+    prot[1].pdb_element = "Ti"
+    @test_throws ArgumentError atomic_sasa(prot)
 
 end
