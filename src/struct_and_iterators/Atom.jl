@@ -763,7 +763,7 @@ function mass(at::Atom)
     return mass
 end
 function mass(atoms::AbstractVector{<:Atom})
-    totmass = 0.0
+    totmass = 0.0f0
     for at in atoms
         if isnothing(mass(at))
             throw(ArgumentError("Atom $(name(at)) does not have a mass defined"))
