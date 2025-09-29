@@ -169,6 +169,8 @@ Here, the atomc radii of https://en.wikipedia.org/wiki/Atomic_radii_of_the_eleme
 Atoms with missing radius have a `NaN` value, and the computation will not return meaningful
 values. 
 
+*Algorithm:* Eisenhaber F, Lijnzaad P, Argos P, Sander C, & Scharf M (1995) J. Comput. Chem. 16, 273-284.
+
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
@@ -235,6 +237,8 @@ Given the output of `atomic_sasa`, sums up contributions of atoms to compute the
 of the full structure, an atom, or a subset of atoms. The function can called with a 
 single `Atom{SASA}` atom, a vector of atoms (in which case the full SASA is returned),
 or a vector of atoms and a selection, given by a function or selection string. 
+
+*Algorithm:* Eisenhaber F, Lijnzaad P, Argos P, Sander C, & Scharf M (1995) J. Comput. Chem. 16, 273-284
 
 # Example
 
