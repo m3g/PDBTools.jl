@@ -303,7 +303,7 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
     # Test non-contiguous indexing with general selections
     at_sasa = atomic_sasa(select(prot, "name CA"))
     @test sasa(at_sasa) ≈ 5856.476f0
-    @test sasa(at_sasa) ≈ 325.33087f0
+    @test sasa(at_sasa, "resname THR") ≈ 325.33087f0
     @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 325.33087f0
 
     # Test parallelization
