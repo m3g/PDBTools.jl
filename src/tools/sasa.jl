@@ -70,9 +70,10 @@ function update_dot_oclusion!(
     i, j, x, y, atoms, dot_cache, surface_dots; 
     atom_type::Function,
     atom_radius_from_type::Function,
+    probe_radius,
 )
     type_i = atom_type(atoms[i])
-    R_j_sq = atom_radius_from_type(atom_type(atoms[j]))^2
+    R_j_sq = (atom_radius_from_type(atom_type(atoms[j])) + probe_radius)^2
     for (idot, dot_exposed) in enumerate(surface_dots[i].exposed)
         if dot_exposed
             # Position the dot on the atom's surface in the molecule's coordinate system
@@ -88,10 +89,10 @@ end
 
 function pair_dot_oclusion!(
     x, y, i, j, surface_dots; 
-    atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2,
+    atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
 ) where {F1,F2}
-    update_dot_oclusion!(i, j, x, y, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type)
-    update_dot_oclusion!(j, i, y, x, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type)
+    update_dot_oclusion!(i, j, x, y, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
+    update_dot_oclusion!(j, i, y, x, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
     return surface_dots
 end
 
@@ -123,7 +124,7 @@ function compute_sasa(
     # Memoization for dot generation to avoid recomputing for same radii
     dot_cache = Dict{eltype(atom_types), Vector{SVector{3,Float32}}}()
     for type in atom_types
-        dot_cache[type] = generate_dots(atom_radius_from_type(type), n_grid_points)
+        dot_cache[type] = generate_dots(atom_radius_from_type(type) + probe_radius, n_grid_points)
     end
         
     system = ParticleSystem(
@@ -139,7 +140,7 @@ function compute_sasa(
         (x, y, i, j, d2, surface_dots) -> 
             pair_dot_oclusion!(
                 x, y, i, j, surface_dots; 
-                atoms, dot_cache, atom_type, atom_radius_from_type,
+                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
             ),
         system,
     )
