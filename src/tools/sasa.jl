@@ -68,7 +68,7 @@ end
 # they are exposed or found to be occluded by other atoms.
 #
 struct AtomDots
-    exposed::Vector{Bool}
+    exposed::BitVector
 end
 function CellListMap.reset_output!(x::AtomDots)
     x.exposed .= true
@@ -203,7 +203,7 @@ function atomic_sasa(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots(ones(Bool, length(dot_cache[atom_type(at)]))) for at in atoms],
+        output=[AtomDots(trues(length(dot_cache[atom_type(at)]))) for at in atoms],
         output_name=:surface_dots,
         parallel=parallel,
     )
