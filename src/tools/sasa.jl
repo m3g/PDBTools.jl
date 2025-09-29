@@ -112,18 +112,20 @@ function update_pair_dot_exposure!(
 end
 
 """
-    atomic_sasa(atoms; probe_radius, n_dots)::Vector{PDBTools.Atom{SASA}}
+    atomic_sasa(atoms; probe_radius, n_dots)
 
 Calculates the Solvent Accessible Surface Area (SASA) for a vector of `Atom`s. 
-Returns a vector of `PDBToools.Atom`s, with a custom fiels with `PDBTools.SASA` 
-structure, which contains the solvent accessible surface area for that atom.
-
-The `sasa` function computes the total SASA or the SASA of a subset of the atoms
-in the structure. The output value is provided in Å^2. 
 
 # Main argument
 
 - `atoms::Vector{PDBTools.Atom}`: A vector of atoms in the molecule.
+
+# Returns
+
+Vector of `PDBToools.Atom`s, with custom fields of type `PDBTools.SASA`, 
+which contain the solvent accessible surface area for each atom, in Å².
+The `sasa` function computes the total SASA or the SASA of a subset of the atoms
+in the structure.
 
 # Optional arguments 
 
