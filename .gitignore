@@ -29,3 +29,7 @@ Manifest.toml
 src/tools/index.ndx
 src/tools/prot.pdb
 src/tools/*area.xvg*
+src/tools/cysthr.dat
+.gitignore
+.gitignore
+src/tools/sasa.vmd
