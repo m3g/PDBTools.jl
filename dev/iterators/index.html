@@ -69,8 +69,8 @@ julia&gt; residues[8].range
 52:58
 
 julia&gt; mass(residues[1])
-82.0385
-</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Residue.jl#L1-L44">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachresidue" href="#PDBTools.eachresidue"><code>PDBTools.eachresidue</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachresidue(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the residues (or molecules) of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+82.0385f0
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Residue.jl#L1-L44">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachresidue" href="#PDBTools.eachresidue"><code>PDBTools.eachresidue</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachresidue(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the residues (or molecules) of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; atoms = wget(&quot;1LBD&quot;);
 
@@ -84,16 +84,16 @@ julia&gt; collect(eachresidue(atoms))
     ⋮
     MET461A
     THR462A
-]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Residue.jl#L150-L175">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.resname" href="#PDBTools.resname"><code>PDBTools.resname</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">resname(residue::Union{AbstractString,Char})</code></pre><p>Returns the residue name, given the one-letter code or residue name. Differently from <code>threeletter</code>, this function will return the force-field name if available in the list of protein residues.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; resname(&quot;ALA&quot;)
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Residue.jl#L150-L175">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.resname" href="#PDBTools.resname"><code>PDBTools.resname</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">resname(residue::Union{AbstractString,Char})</code></pre><p>Returns the residue name, given the one-letter code or residue name. Differently from <code>threeletter</code>, this function will return the force-field name if available in the list of protein residues.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; resname(&quot;ALA&quot;)
 &quot;ALA&quot;
 
 julia&gt; resname(&quot;GLUP&quot;)
-&quot;GLUP&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/properties/protein_residues.jl#L147-L162">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.residuename" href="#PDBTools.residuename"><code>PDBTools.residuename</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">residuename(residue::Union{AbstractString,Char})</code></pre><p>Function to return the long residue name from other residue codes. The function is case-insensitive.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; residuename(&quot;A&quot;)
+&quot;GLUP&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/properties/protein_residues.jl#L147-L162">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.residuename" href="#PDBTools.residuename"><code>PDBTools.residuename</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">residuename(residue::Union{AbstractString,Char})</code></pre><p>Function to return the long residue name from other residue codes. The function is case-insensitive.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; residuename(&quot;A&quot;)
 &quot;Alanine&quot;
 
 julia&gt; residuename(&quot;Glu&quot;)
 &quot;Glutamic Acid&quot;
-</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/properties/protein_residues.jl#L182-L198">source</a></section></article><h2 id="Iterate-over-chains"><a class="docs-heading-anchor" href="#Iterate-over-chains">Iterate over chains</a><a id="Iterate-over-chains-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-chains" title="Permalink"></a></h2><p>The <code>eachchain</code> iterator in PDBTools enables users to iterate over the chains in a PDB structure. A PDB file may contain multiple protein chains. This iterator simplifies operations involving individual chains.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/properties/protein_residues.jl#L182-L198">source</a></section></article><h2 id="Iterate-over-chains"><a class="docs-heading-anchor" href="#Iterate-over-chains">Iterate over chains</a><a id="Iterate-over-chains-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-chains" title="Permalink"></a></h2><p>The <code>eachchain</code> iterator in PDBTools enables users to iterate over the chains in a PDB structure. A PDB file may contain multiple protein chains. This iterator simplifies operations involving individual chains.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = read_pdb(PDBTools.CHAINSPDB);
 
@@ -191,13 +191,13 @@ julia&gt; chains[1]
       48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
 
 julia&gt; mass(chains[1])
-353.37881000000016 
+353.3787f0 
 
 julia&gt; model(chains[4])
 2
 
 julia&gt; segname(chains[2])
-&quot;ASYN&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Chain.jl#L1-L45">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachchain" href="#PDBTools.eachchain"><code>PDBTools.eachchain</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachchain(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the chains of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+&quot;ASYN&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Chain.jl#L1-L45">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachchain" href="#PDBTools.eachchain"><code>PDBTools.eachchain</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachchain(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the chains of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = read_pdb(PDBTools.CHAINSPDB);
 
@@ -210,7 +210,7 @@ julia&gt; chains = collect(eachchain(ats))
     Chain(B-48 atoms)
     Chain(A-48 atoms)
     Chain(D-45 atoms)
-]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Chain.jl#L67-L91">source</a></section></article><h2 id="Iterate-over-segments"><a class="docs-heading-anchor" href="#Iterate-over-segments">Iterate over segments</a><a id="Iterate-over-segments-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-segments" title="Permalink"></a></h2><p>The <code>eachsegment</code> iterator enables iteration over the segments of a structure. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Chain.jl#L67-L91">source</a></section></article><h2 id="Iterate-over-segments"><a class="docs-heading-anchor" href="#Iterate-over-segments">Iterate over segments</a><a id="Iterate-over-segments-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-segments" title="Permalink"></a></h2><p>The <code>eachsegment</code> iterator enables iteration over the segments of a structure. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
 
@@ -248,9 +248,9 @@ julia&gt; s = collect(eachsegment(ats))
 ]
 
 julia&gt; mass.(s)
-2-element Vector{Float64}:
- 25222.339099999943
-  1210.7300999999993
+2-element Vector{Float32}:
+ 25222.553
+  1210.7296
 
 julia&gt; for (iseg, seg) in enumerate(eachsegment(ats))
            for at in seg
@@ -279,7 +279,7 @@ julia&gt; segname.(segments[1:2])
 
 julia&gt; length(segments[2])
 92
-</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Segment.jl#L1-L35">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachsegment" href="#PDBTools.eachsegment"><code>PDBTools.eachsegment</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachsegment(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the segments of a selection.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Segment.jl#L1-L35">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachsegment" href="#PDBTools.eachsegment"><code>PDBTools.eachsegment</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachsegment(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the segments of a selection.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
 
@@ -296,7 +296,7 @@ julia&gt; collect(sit)
 2-element Vector{Segment}[ 
     A-(1905 atoms))
     B-(92 atoms))
-]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Segment.jl#L52-L80">source</a></section></article><h2 id="Iterate-over-models"><a class="docs-heading-anchor" href="#Iterate-over-models">Iterate over models</a><a id="Iterate-over-models-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-models" title="Permalink"></a></h2><p>The <code>eachmodel</code> iterator enables iteration over the segments of a structure. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Segment.jl#L52-L80">source</a></section></article><h2 id="Iterate-over-models"><a class="docs-heading-anchor" href="#Iterate-over-models">Iterate over models</a><a id="Iterate-over-models-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-models" title="Permalink"></a></h2><p>The <code>eachmodel</code> iterator enables iteration over the segments of a structure. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = wget(&quot;8S8N&quot;);
 
@@ -335,13 +335,13 @@ julia&gt; m[1]
 julia&gt; ats = wget(&quot;8S8N&quot;);
 
 julia&gt; center_of_mass.(eachmodel(ats))
-11-element Vector{StaticArraysCore.SVector{3, Float64}}:
- [0.633762128213737, -0.1413050285597195, -0.21796044955626692]
- [0.560772763043067, -0.15154922049365185, 0.1354801245061217]
- [0.506559232784597, -0.09771757024270422, 0.030405317843908077]
+11-element Vector{StaticArraysCore.SVector{3, Float32}}:
+ [0.6337627, -0.14130484, -0.2179606]
+ [0.56077266, -0.15154965, 0.1354806]
+ [0.5065595, -0.0977174, 0.030405657]
  ⋮
- [0.3889973654414868, -0.2110381926238272, 0.21802466991599198]
- [0.6995386823110438, -0.1537225338789714, 0.21793134264425737]
+ [0.38899764, -0.21103837, 0.2180245]
+ [0.69953984, -0.15372278, 0.21793146]
 </code></pre><h3 id="Reference-documentation-4"><a class="docs-heading-anchor" href="#Reference-documentation-4">Reference documentation</a><a class="docs-heading-anchor-permalink" href="#Reference-documentation-4" title="Permalink"></a></h3><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.Model" href="#PDBTools.Model"><code>PDBTools.Model</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Model</code></pre><p>Model data structure. It carries the data of a model in a PDB file. Models must be consecutive in the <code>atoms</code> vector, and are identified by having the same <code>model</code> field.</p><p>The Model structure carries the properties of the model it contains, but it does not copy the original vector of atoms, only the model meta data and the reference to the original vector. Thus, changes in the model atoms will be reflected in the original vector of atoms.</p><p><strong>Example</strong></p><p>In the example below, 8S8N is PDB entry with 11 models.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = wget(&quot;8S8N&quot;);
@@ -363,7 +363,7 @@ julia&gt; models[1]
 ⋮
      233  HT2   A1H5T     B      101       13   -5.695    5.959   -3.901  1.00  0.00     1               233
      234  HT1   A1H5T     B      101       13   -4.693    4.974   -2.743  1.00  0.00     1               234
-</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Model.jl#L1-L42">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachmodel" href="#PDBTools.eachmodel"><code>PDBTools.eachmodel</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachmodel(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the models of a selection.</p><p><strong>Example</strong></p><p>Here we show how to iterate over the models of a PDB file, annotate  the index of the first atom of each model, and collect all models.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Model.jl#L1-L42">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="PDBTools.eachmodel" href="#PDBTools.eachmodel"><code>PDBTools.eachmodel</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">eachmodel(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the models of a selection.</p><p><strong>Example</strong></p><p>Here we show how to iterate over the models of a PDB file, annotate  the index of the first atom of each model, and collect all models.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
 
 julia&gt; ats = wget(&quot;8S8N&quot;);
 
@@ -384,4 +384,4 @@ julia&gt; collect(models)
     ⋮
     10-(234 atoms))
     11-(234 atoms))
-]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/7934d8b36a2919b695780f2ac1a1c2ba191b9bf6/src/struct_and_iterators/Model.jl#L62-L97">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../selections/">« Selections</a><a class="docs-footer-nextpage" href="../elements/">Element properties »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 25 September 2025 19:48">Thursday 25 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/a9e2b73c9d35cc3a163bb94031749b142cf4b26c/src/struct_and_iterators/Model.jl#L62-L97">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../selections/">« Selections</a><a class="docs-footer-nextpage" href="../elements/">Element properties »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 29 September 2025 15:28">Monday 29 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
