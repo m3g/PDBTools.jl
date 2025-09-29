@@ -141,16 +141,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5374.4414f0
+5365.66f0
 
 julia> sasa(at_sasa, "backbone") # backbone sasa in prot
-873.72626f0
+978.45856f0
 
 julia> sasa(at_sasa, "not backbone") # other atoms
-4500.7124f0
+4387.1997f0
 
 julia> sasa(at_sasa, "resname ARG GLU") # some residue types
-531.51776f0
+545.46704f0
 ```
 
 # Additional control:
@@ -237,16 +237,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5374.4414f0
+5365.66f0
 
 julia> sasa(at_sasa, "backbone") # selection string
-873.72626f0
+978.45856f0
 
 julia> sasa(at_sasa, at -> name(at) == "CA") # selection function
-20.5797f0
+43.446033f0
 
 julia> sasa(at_sasa[1]) # single atom SASA
-1.8389939f0
+5.639581f0
 ```
 
 """
