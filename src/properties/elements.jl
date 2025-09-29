@@ -19,7 +19,7 @@ broadcastable(element::Element) = Ref(element)
 #! format: off
 const elements = Dict{String,Element}([
     ["X" , "NotFound" ]              .=> Element(:X  ,"X" , "NotFound", 0,  0.00000, false, NaN);
-    ["H" , "Hydrogen" ]              .=> Element(:H  ,"H" , "Hydrogen", 1,  1.00797, false, 1.2);
+    ["H" , "Hydrogen" ]              .=> Element(:H  ,"H" , "Hydrogen", 1,  1.00797, false, 1.1);
     ["He", "HEL", "Helium" ]         .=> Element(:He ,"He", "Helium", 2,  4.00260, false, 1.4);
     ["Li", "LI" , "Lithium" ]        .=> Element(:Li ,"Li", "Lithium", 3,  6.941, false, 1.82);
     ["Be", "BE" , "Beryllium" ]      .=> Element(:Be ,"Be", "Beryllium", 4,  9.01218, false, 1.53);
