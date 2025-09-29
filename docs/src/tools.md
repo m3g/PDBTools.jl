@@ -7,6 +7,14 @@ CollapsedDocStrings = true
 These tools may call external programs to perform each task. Please verify the installation of 
 the necessary tool for each case. 
 
+## Solvent Accessible Surface Area (SASA)
+
+```@docs
+atomic_sasa
+sasa
+```
+
+
 ## Check the stereochemistry of protein residues
 
 ```@docs
