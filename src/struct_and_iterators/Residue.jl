@@ -37,7 +37,7 @@ julia> residues[8].range
 52:58
 
 julia> mass(residues[1])
-82.0385
+82.0385f0
 
 ```
 

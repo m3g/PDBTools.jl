@@ -33,7 +33,7 @@ julia> chains[1]
       48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
 
 julia> mass(chains[1])
-353.37881000000016 
+353.3787f0 
 
 julia> model(chains[4])
 2

@@ -134,10 +134,10 @@ julia> remove_custom_elements!(); # if any
 julia> atoms = [ Atom(name="A1"), Atom(name="A2") ];
 
 julia> add_element!("A1", PDBTools.elements["C"])
-PDBTools.Element(:C, "C", "Carbon", 6, 12.011, true)
+PDBTools.Element(:C, InlineStrings.String3("C"), "Carbon", 6, 12.011f0, true, 1.7f0)
 
 julia> add_element!("A2", PDBTools.elements["N"])
-PDBTools.Element(:N, "N", "Nitrogen", 7, 14.0067, true)
+PDBTools.Element(:N, InlineStrings.String3("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
 
 julia> element(atoms[1])
 "C"
@@ -146,7 +146,7 @@ julia> element(atoms[2])
 "N"
 
 julia> mass(atoms)
-26.017699999999998
+26.0177f0
 
 julia> remove_custom_elements!(); 
 ```
@@ -168,8 +168,8 @@ function add_element!(symbol::String, reference_element::Element; elements=eleme
         reference_element.name,
         reference_element.atomic_number,
         reference_element.mass,
-        reference_element.vdw_radius,
         true,
+        reference_element.vdw_radius,
     )
     push!(element_names, symbol)
     sort!(element_names)
@@ -189,7 +189,7 @@ julia> using PDBTools
 julia> remove_custom_elements!();
 
 julia> add_element!("GN", PDBTools.elements["N"])
-PDBTools.Element(:N, "N", "Nitrogen", 7, 14.0067, true)
+PDBTools.Element(:N, InlineStrings.String3("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
 
 julia> element(Atom(name="GN"))
 "N"

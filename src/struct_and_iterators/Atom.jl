@@ -50,7 +50,7 @@ julia> element(atoms[1])
 "N"
 
 julia> mass(atoms[1])
-14.0067
+14.0067f0
 
 julia> position(atoms[1])
 3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
@@ -747,10 +747,10 @@ julia> using PDBTools
 julia> atoms = [ Atom(name="NT3"), Atom(name="CA") ];
 
 julia> mass(atoms[1])
-14.0067
+14.0067f0
 
 julia> mass(atoms)
-26.017699999999998
+26.0177f0
 ```
 
 """
