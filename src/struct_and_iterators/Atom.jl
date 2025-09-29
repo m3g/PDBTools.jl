@@ -579,7 +579,7 @@ function element(atom::Atom)
     # First, check if it was defined in pdb_element
     element_name = pdb_element(atom)
     if !isempty(element_name) && element_name != "X"
-        return element_name
+        return String3(element_name)
     end
     # if there is match, just return the name
     element_name = name(atom)
@@ -599,7 +599,7 @@ function element(atom::Atom)
     for iel in imatch:lmatch
         el = element_names[iel]
         if lastindex(element_name) >= i0 + length(el) - 1 && el == @view(element_name[i0:i0+length(el)-1])
-            return el == "X" ? nothing : el
+            return el == "X" ? nothing : String3(el)
         end
     end
     return nothing

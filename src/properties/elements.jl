@@ -5,7 +5,7 @@
 #
 struct Element
     symbol::Symbol
-    symbol_string::String
+    symbol_string::String3
     name::String
     atomic_number::Int
     mass::Float32

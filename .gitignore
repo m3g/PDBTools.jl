@@ -28,3 +28,4 @@ Manifest.toml
 .vscode/settings.json
 src/tools/index.ndx
 src/tools/prot.pdb
+src/tools/*area.xvg*
