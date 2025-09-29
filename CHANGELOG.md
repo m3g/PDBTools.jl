@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.1-DEV
 -------------
+- ![ENHANCEMENT][badge-enhancement] improve selection syntax for non-contiguous indexing in `sasa`. 
 
 Version 3.5.0
 -------------

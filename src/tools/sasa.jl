@@ -269,10 +269,8 @@ function sasa end
 
 sasa(atom::Atom{SASA}) = atom.custom.sasa
 sasa(atoms::AbstractVector{<:Atom{SASA}}) = sum(sasa, atoms)
-function sasa(atoms::AbstractVector{<:Atom{SASA}}, selection::Union{Function,String})
-    isel = index.(select(atoms, selection))
-    return sum(sasa(atoms[i]) for i in isel)
-end
+sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::String) = sasa(atoms, Select(sel))
+sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at in atoms if sel(at))
 
 @testitem "sasa" begin
 
@@ -302,6 +300,11 @@ end
     @test sasa(atomic_sasa(select(prot, "name CA"))) ≈ 100 * 58.642 rtol = 0.05
     @test sasa(atomic_sasa(select(prot, "sidechain and not element H"))) ≈ 100 * 69.029 rtol = 0.05
 
+    # Test non-contiguous indexing with general selections
+    at_sasa = atomic_sasa(select(prot, "name CA"))
+    @test sasa(at_sasa) ≈ 5856.476f0
+    @test sasa(at_sasa) ≈ 325.33087f0
+    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 325.33087f0
 
     # Test parallelization
     @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
