@@ -80,23 +80,13 @@ function CellListMap.reducer(x::AtomDots, y::AtomDots)
     return x
 end
 
-function update_dot_exposure!(
-    i, j, x, y, atoms, dot_cache, surface_dots;
-    atom_type::Function,
-    atom_radius_from_type::Function,
-    probe_radius,
-)
-    type_i = atom_type(atoms[i])
-    type_j = atom_type(atoms[j])
-    R_j_sq = (atom_radius_from_type(type_j) + probe_radius)^2
-    dot_cache_i = dot_cache[type_i]
-    surface_dots_i = surface_dots[i]
+function update_dot_exposure!(x, y, dot_cache_i, surface_dots_i, rj_sq)
     for idot in eachindex(surface_dots_i.exposed)
         if surface_dots_i.exposed[idot]
             dot_on_surface = x + dot_cache_i[idot]
             # Position the dot on the atom's surface in the molecule's coordinate system
             # Check if the dot is inside the neighboring atom j
-            if sum(abs2, dot_on_surface - y) < R_j_sq
+            if sum(abs2, dot_on_surface - y) < rj_sq
                 surface_dots_i.exposed[idot] = false
             end
         end
@@ -105,11 +95,23 @@ function update_dot_exposure!(
 end
 
 function update_pair_dot_exposure!(
-    x, y, i, j, surface_dots;
+    x, y, i, j, d2, surface_dots;
     atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
 ) where {F1,F2}
-    update_dot_exposure!(i, j, x, y, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
-    update_dot_exposure!(j, i, y, x, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
+    type_i = atom_type(atoms[i])
+    type_j = atom_type(atoms[j])
+    ri = atom_radius_from_type(type_i) + probe_radius
+    rj = atom_radius_from_type(type_j) + probe_radius
+    ri_sq = ri^2
+    rj_sq = rj^2
+    if d2 < (ri_sq + rj_sq + 2*ri*rj)
+        dot_cache_i = dot_cache[type_i]
+        dot_cache_j = dot_cache[type_j]
+        surface_dots_i = surface_dots[i]
+        surface_dots_j = surface_dots[j]
+        update_dot_exposure!(x, y, dot_cache_i, surface_dots_i, rj_sq)
+        update_dot_exposure!(y, x, dot_cache_j, surface_dots_j, ri_sq)
+    end
     return surface_dots
 end
 
@@ -213,7 +215,7 @@ function atomic_sasa(
     map_pairwise!(
         (x, y, i, j, d2, surface_dots) ->
             update_pair_dot_exposure!(
-                x, y, i, j, surface_dots;
+                x, y, i, j, d2, surface_dots;
                 atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
             ),
         system,
