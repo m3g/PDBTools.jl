@@ -89,13 +89,15 @@ function update_dot_exposure!(
     type_i = atom_type(atoms[i])
     type_j = atom_type(atoms[j])
     R_j_sq = (atom_radius_from_type(type_j) + probe_radius)^2
-    for (idot, dot_exposed) in enumerate(surface_dots[i].exposed)
+    dot_cache_i = dot_cache[type_i]
+    surface_dots_i = surface_dots[i]
+    for (idot, dot_exposed) in enumerate(surface_dots_i.exposed)
         if dot_exposed
-            dot_on_surface = x + dot_cache[type_i][idot]
+            dot_on_surface = x + dot_cache_i[idot]
             # Position the dot on the atom's surface in the molecule's coordinate system
             # Check if the dot is inside the neighboring atom j
             if sum(abs2, dot_on_surface - y) < R_j_sq
-                surface_dots[i].exposed[idot] = false
+                surface_dots_i.exposed[idot] = false
             end
         end
     end
