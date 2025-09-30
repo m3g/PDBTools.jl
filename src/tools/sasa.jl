@@ -180,7 +180,7 @@ values.
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
-    probe_radius::Real=1.4,
+    probe_radius::Real=1.4f0,
     n_dots::Int=100,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
