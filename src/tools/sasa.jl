@@ -80,14 +80,14 @@ function CellListMap.reducer(x::AtomDots, y::AtomDots)
     return x
 end
 
-function update_dot_exposure!(x, y, dot_cache_i, surface_dots_i, rj_sq)
-    for idot in eachindex(surface_dots_i.exposed)
-        if surface_dots_i.exposed[idot]
+function update_dot_exposure!(x, y, dot_cache_i, exposed_i, rj_sq)
+    for idot in eachindex(exposed_i)
+        if exposed_i[idot]
             dot_on_surface = x + dot_cache_i[idot]
             # Position the dot on the atom's surface in the molecule's coordinate system
             # Check if the dot is inside the neighboring atom j
             if sum(abs2, dot_on_surface - y) < rj_sq
-                surface_dots_i.exposed[idot] = false
+                exposed_i[idot] = false
             end
         end
     end
@@ -107,10 +107,10 @@ function update_pair_dot_exposure!(
     if d2 < (ri_sq + rj_sq + 2*ri*rj)
         dot_cache_i = dot_cache[type_i]
         dot_cache_j = dot_cache[type_j]
-        surface_dots_i = surface_dots[i]
-        surface_dots_j = surface_dots[j]
-        update_dot_exposure!(x, y, dot_cache_i, surface_dots_i, rj_sq)
-        update_dot_exposure!(y, x, dot_cache_j, surface_dots_j, ri_sq)
+        exposed_i = surface_dots[i].exposed
+        exposed_j = surface_dots[j].exposed
+        update_dot_exposure!(x, y, dot_cache_i, exposed_i, rj_sq)
+        update_dot_exposure!(y, x, dot_cache_j, exposed_j, ri_sq)
     end
     return surface_dots
 end
