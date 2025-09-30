@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.2-DEV
 -------------
+- ![ENHANCEMENT][badge-enhancement] improve performance of `atomic_sasa` function.
 
 Version 3.5.1
 -------------
