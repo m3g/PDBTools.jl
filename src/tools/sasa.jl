@@ -8,6 +8,12 @@ struct SASA
     sasa::Float32
 end
 
+struct DotCache{T}
+    x::Vector{T}
+    y::Vector{T}
+    z::Vector{T}
+end
+
 #=
     generate_dots(atomi_radius, probe_radius, n_dots)
 
@@ -16,7 +22,7 @@ using the double cubic lattice method. `n_dots` controls the maximum number of d
 per sphere.
 
 =#
-function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
+function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
     radius = atomic_radius + probe_radius
     n_grid_points = round(Int, (3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
     if radius <= 0 || n_grid_points <= 0
@@ -60,7 +66,10 @@ function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
     end
 
     # Return unique points to avoid redundancy
-    return unique!(dots)
+    unique!(dots)
+
+    # Return linear arrays for manual SIMD
+    return DotCache([dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots])
 end
 
 #
@@ -68,7 +77,7 @@ end
 # they are exposed or found to be occluded by other atoms.
 #
 struct AtomDots
-    exposed::BitVector
+    exposed::Vector{Bool}
 end
 function CellListMap.reset_output!(x::AtomDots)
     x.exposed .= true
@@ -80,34 +89,50 @@ function CellListMap.reducer(x::AtomDots, y::AtomDots)
     return x
 end
 
-function update_dot_exposure!(
-    i, j, x, y, atoms, dot_cache, surface_dots;
-    atom_type::Function,
-    atom_radius_from_type::Function,
-    probe_radius,
-)
-    type_i = atom_type(atoms[i])
-    type_j = atom_type(atoms[j])
-    R_j_sq = (atom_radius_from_type(type_j) + probe_radius)^2
-    for (idot, dot_exposed) in enumerate(surface_dots[i].exposed)
-        if dot_exposed
-            dot_on_surface = x + dot_cache[type_i][idot]
-            # Position the dot on the atom's surface in the molecule's coordinate system
-            # Check if the dot is inside the neighboring atom j
-            if sum(abs2, dot_on_surface - y) < R_j_sq
-                surface_dots[i].exposed[idot] = false
-            end
+#
+# Contribution by Zentrik at:
+#
+# https://discourse.julialang.org/t/nerd-sniping-can-you-make-this-faster/132793/5?u=lmiq
+#
+using SIMD: VecRange
+
+function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) where {N}
+    lastN = N * (length(exposed_i) ÷ N)
+    lane = VecRange{N}(0)
+    @inbounds for i in 1:N:lastN
+        if any(exposed_i[lane + i])
+            pos_x = dot_cache.x[lane + i] + deltaxy[1]
+            pos_y = dot_cache.y[lane + i] + deltaxy[2]
+            pos_z = dot_cache.z[lane + i] + deltaxy[3]
+            exposed_i[lane + i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
         end
     end
-    return nothing
+    # Remaining 
+    @inbounds for i in lastN+1:length(exposed_i)
+        pos_x = dot_cache.x[i] + deltaxy[1]
+        pos_y = dot_cache.y[i] + deltaxy[2]
+        pos_z = dot_cache.z[i] + deltaxy[3]
+        exposed_i[i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
+    end
+    return exposed_i
 end
 
 function update_pair_dot_exposure!(
-    x, y, i, j, surface_dots;
+    x, y, i, j, d2, surface_dots;
     atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
-) where {F1,F2}
-    update_dot_exposure!(i, j, x, y, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
-    update_dot_exposure!(j, i, y, x, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
+    N_SIMD::Val{N}=Val(16),
+) where {F1,F2,N}
+    type_i = atom_type(atoms[i])
+    type_j = atom_type(atoms[j])
+    r_i = atom_radius_from_type(type_i) + probe_radius
+    r_j = atom_radius_from_type(type_j) + probe_radius
+    if d2 <= (r_i + r_j)^2
+        R_i_sq = r_i^2
+        R_j_sq = r_j^2
+        deltaxy = x - y
+        update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, N_SIMD)
+        update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, N_SIMD)
+    end
     return surface_dots
 end
 
@@ -129,7 +154,7 @@ in the structure.
 
 # Optional arguments 
 
-- `probe_radius::Real=1.4`: The radius of the solvent probe in Angstroms.
+- `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
 - `n_dots::Int=100`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires 
@@ -145,16 +170,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5352.8564f0
+5350.348f0
 
 julia> sasa(at_sasa, "backbone") # backbone sasa in prot
-982.7195f0
+984.40125f0
 
 julia> sasa(at_sasa, "not backbone") # other atoms
-4370.136f0
+4365.9478f0
 
 julia> sasa(at_sasa, "resname ARG GLU") # some residue types
-546.56476f0
+542.877f0
 ```
 
 # Additional control:
@@ -176,18 +201,20 @@ values.
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
-    probe_radius::Real=1.4,
+    probe_radius::Real=1.4f0,
     n_dots::Int=100,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
-)
+    N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
+) where {N}
+    probe_radius = Float32(probe_radius)
 
     # Unique list of atom types
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types),Vector{SVector{3,Float32}}}()
+    dot_cache = Dict{eltype(atom_types),DotCache{Float32}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -203,7 +230,7 @@ function atomic_sasa(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots(trues(length(dot_cache[atom_type(at)]))) for at in atoms],
+        output=[AtomDots(trues(length(dot_cache[atom_type(at)].x))) for at in atoms],
         output_name=:surface_dots,
         parallel=parallel,
     )
@@ -211,8 +238,8 @@ function atomic_sasa(
     map_pairwise!(
         (x, y, i, j, d2, surface_dots) ->
             update_pair_dot_exposure!(
-                x, y, i, j, surface_dots;
-                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
+                x, y, i, j, d2, surface_dots;
+                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius, N_SIMD,
             ),
         system,
     )
@@ -252,16 +279,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5352.8564f0
+5350.348f0
 
 julia> sasa(at_sasa, "backbone") # selection string
-982.7195f0
+984.40125f0
 
 julia> sasa(at_sasa, at -> name(at) == "CA") # selection function
-41.121826f0
+43.04417f0
 
 julia> sasa(at_sasa[1]) # single atom SASA
-5.806664f0
+6.2490754f0
 ```
 
 """
@@ -303,8 +330,8 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
     # Test non-contiguous indexing with general selections
     at_sasa = atomic_sasa(select(prot, "name CA"))
     @test sasa(at_sasa) ≈ 5856.476f0
-    @test sasa(at_sasa, "resname THR") ≈ 325.33087f0
-    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 325.33087f0
+    @test sasa(at_sasa, "resname THR") ≈ 321.03778f0
+    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 321.0378f0
 
     # Test parallelization
     @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
