@@ -206,7 +206,7 @@ function atomic_sasa(
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
-    N_SIMD::Val{N}=Val(16),
+    N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
 ) where {N}
 
     # Unique list of atom types
