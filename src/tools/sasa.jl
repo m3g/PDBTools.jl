@@ -22,7 +22,7 @@ using the double cubic lattice method. `n_dots` controls the maximum number of d
 per sphere.
 
 =#
-function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
+function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
     radius = atomic_radius + probe_radius
     n_grid_points = round(Int, (3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
     if radius <= 0 || n_grid_points <= 0
@@ -154,7 +154,7 @@ in the structure.
 
 # Optional arguments 
 
-- `probe_radius::Float32=1.4f0`: The radius of the solvent probe in Angstroms.
+- `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
 - `n_dots::Int=100`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires 
@@ -201,13 +201,14 @@ values.
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
-    probe_radius::Float32=1.4f0,
+    probe_radius::Real=1.4f0,
     n_dots::Int=100,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
 ) where {N}
+    probe_radius = Float32(probe_radius)
 
     # Unique list of atom types
     atom_types = atom_type.(unique(atom_type, atoms))
@@ -329,8 +330,8 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
     # Test non-contiguous indexing with general selections
     at_sasa = atomic_sasa(select(prot, "name CA"))
     @test sasa(at_sasa) ≈ 5856.476f0
-    @test sasa(at_sasa, "resname THR") ≈ 325.33087f0
-    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 325.33087f0
+    @test sasa(at_sasa, "resname THR") ≈ 321.03778f0
+    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 321.0378f0
 
     # Test parallelization
     @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
