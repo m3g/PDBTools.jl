@@ -118,19 +118,21 @@ function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) wh
 end
 
 function update_pair_dot_exposure!(
-    x, y, i, j, surface_dots;
+    x, y, i, j, d2, surface_dots;
     atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
 ) where {F1,F2}
     N = 16
     type_i = atom_type(atoms[i])
     type_j = atom_type(atoms[j])
-    r_i = atom_radius_from_type(type_i)
-    r_j = atom_radius_from_type(type_j)
-    R_i_sq = (r_i + probe_radius)^2
-    R_j_sq = (r_j + probe_radius)^2
+    r_i = atom_radius_from_type(type_i) + probe_radius
+    r_j = atom_radius_from_type(type_j) + probe_radius
+    R_i_sq = r_i^2
+    R_j_sq = r_j^2
     deltaxy = x - y
-    update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, Val(N))
-    update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, Val(N))
+    if d2 <= (r_i + r_j)^2
+        update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, Val(N))
+        update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, Val(N))
+    end
     return surface_dots
 end
 
@@ -234,7 +236,7 @@ function atomic_sasa(
     map_pairwise!(
         (x, y, i, j, d2, surface_dots) ->
             update_pair_dot_exposure!(
-                x, y, i, j, surface_dots;
+                x, y, i, j, d2, surface_dots;
                 atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
             ),
         system,
