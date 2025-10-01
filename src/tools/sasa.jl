@@ -60,26 +60,16 @@ function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
     end
 
     # Return unique points to avoid redundancy
-    return unique!(dots)
+    unique!(dots)
+
+    # Return linear arrays for manual SIMD
+    return [dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots]
 end
 
 #
 # Structure that carries the information about dots of each atom, if 
 # they are exposed or found to be occluded by other atoms.
 #
-struct AtomDots
-    exposed::BitVector
-end
-function CellListMap.reset_output!(x::AtomDots)
-    x.exposed .= true
-    return x
-end
-CellListMap.copy_output(x::AtomDots) = AtomDots(copy(x.exposed))
-function CellListMap.reducer(x::AtomDots, y::AtomDots)
-    x.exposed .= x.exposed .& y.exposed
-    return x
-end
-
 struct AtomDots1
     exposed::Vector{Bool}
 end
@@ -93,123 +83,29 @@ function CellListMap.reducer(x::AtomDots1, y::AtomDots1)
     return x
 end
 
-function update_dot_exposure!(deltaxy, dot_cache_i, exposed_i, rj_sq)
-    N = 8
-    lastN = N * (length(exposed_i) ÷ N)
-    @inbounds for idot in 1:N:lastN 
-        range = idot:idot+N-1
-        if any(@view(exposed_i[range]))
-            for i in range
-                exposed_i[i] = sum(abs2, dot_cache_i[i] + deltaxy) < rj_sq
-            end
-        end
-    end
-    @inbounds for idot in lastN+1:length(exposed_i)
-        range = idot:length(exposed_i)
-        if any(@view(exposed_i[range]))
-            for i in idot:length(exposed_i)
-                exposed_i[i] = sum(abs2, dot_cache_i[i] + deltaxy) < rj_sq
-            end
-        end
-    end
-    return nothing
-end
+using SIMD: VecRange
 
-function update_dot_exposure!(
-    i, j, x, y, atoms, dot_cache, surface_dots;
-    atom_type::Function,
-    atom_radius_from_type::Function,
-    probe_radius,
-)
-    type_i = atom_type(atoms[i])
-    type_j = atom_type(atoms[j])
-    R_j_sq = (atom_radius_from_type(type_j) + probe_radius)^2
-    for (idot, dot_exposed) in enumerate(surface_dots[i].exposed)
-        if dot_exposed
-            dot_on_surface = x + dot_cache[type_i][idot]
-            # Position the dot on the atom's surface in the molecule's coordinate system
-            # Check if the dot is inside the neighboring atom j
-            if sum(abs2, dot_on_surface - y) < R_j_sq
-                surface_dots[i].exposed[idot] = false
-            end
+@fastmath function update_dot_exposure!(deltaxy, dot_cache_x, dot_cache_y, dot_cache_z, exposed_i, rj_sq)
+    N = 8
+    # Assume length(exposed_i) is multiple of N
+    lane = VecRange{N}(0)
+    @inbounds @fastmath for i in 1:N:length(exposed_i)
+        if any(exposed_i[lane + i])
+            pos_x = dot_cache_x[lane + i] + deltaxy[1]
+            pos_y = dot_cache_y[lane + i] + deltaxy[2]
+            pos_z = dot_cache_z[lane + i] + deltaxy[3]
+            dist_sq = pos_x*pos_x + pos_y*pos_y
+            dist_sq += pos_z*pos_z
+            outside = dist_sq >= rj_sq
+            exposed_i[lane + i] &= outside
         end
     end
-    return nothing
+    return exposed_i
 end
 
 function update_pair_dot_exposure!(
     x, y, i, j, surface_dots;
-    atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
-) where {F1,F2}
-    update_dot_exposure!(i, j, x, y, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
-    update_dot_exposure!(j, i, y, x, atoms, dot_cache, surface_dots; atom_type, atom_radius_from_type, probe_radius)
-    return surface_dots
-end
-
-#function update_dot_exposure!(deltaxy, dot_cache_i, exposed_i, rj_sq)
-#    N = 8
-#    lastN = N * (length(exposed_i) ÷ N)
-#    @inbounds for idot in 1:N:lastN 
-#        range = idot:idot+N-1
-#        if any(@view(exposed_i[range]))
-#            for i in range
-#                exposed_i[i] = sum(abs2, dot_cache_i[i] + deltaxy) < rj_sq
-#            end
-#        end
-#    end
-#    @inbounds for idot in lastN+1:length(exposed_i)
-#        range = idot:length(exposed_i)
-#        if any(@view(exposed_i[range]))
-#            for i in idot:length(exposed_i)
-#                exposed_i[i] = sum(abs2, dot_cache_i[i] + deltaxy) < rj_sq
-#            end
-#        end
-#    end
-#    return nothing
-#end
-
-#using SIMD: VecRange
-#
-#function update_dot_exposure_fast0!(deltaxy, dot_cache_i, exposed_i, R_j_sq, lane::VecRange{N}) where {N}
-#    lastN = N * (length(exposed_i) ÷ N)
-#    for idot_block in 1:N:lastN
-#        range = idot_block:idot_block+N-1
-#        if any(@view(exposed_i[range]))
-#            for idot in range
-#                exposed_i[idot] = exposed_i[idot] & (sum(abs2, dot_cache_i[idot] + deltaxy) > R_j_sq)
-#            end
-#        end
-#    end
-#    range = lastN+1:length(exposed_i)
-#    if any(@view(exposed_i[range]))
-#        for idot in range
-#            exposed_i[idot] = exposed_i[idot] & (sum(abs2, dot_cache_i[idot] + deltaxy) > R_j_sq)
-#        end
-#    end
-#    return nothing
-#end
-
-#function update_dot_exposure_fast1!(deltaxy, dot_cache_i, exposed_i, R_j_sq, lane::VecRange{N}) where {N}
-#    @inbounds for i in eachindex(exposed_i.chunks)
-#        if exposed_i.chunks[i] != 0
-#            first = (i-1)*64 + 1
-#            last = min(first + 63, length(exposed_i))
-#            for idot in first:last
-#                exposed_i[idot] = exposed_i[idot] & (sum(abs2, dot_cache_i[idot] + deltaxy) > R_j_sq)
-#            end
-#        end
-#    end
-#    return nothing
-#end
-
-function update_dot_exposure_fast!(deltaxy, dot_cache_i, exposed_i, rj_sq)
-    exposed_i .&= sum.(abs2, Ref(deltaxy) .+ dot_cache_i) .> rj_sq
-    return nothing
-end
-
-function update_pair_dot_exposure_fast!(
-    x, y, i, j, surface_dots;
-    atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
+    atoms, dot_cache_x, dot_cache_y, dot_cache_z, atom_type::F1, atom_radius_from_type::F2, probe_radius,
 ) where {F1,F2}
     type_i = atom_type(atoms[i])
     type_j = atom_type(atoms[j])
@@ -218,8 +114,18 @@ function update_pair_dot_exposure_fast!(
     R_i_sq = (r_i + probe_radius)^2
     R_j_sq = (r_j + probe_radius)^2
     deltaxy = x - y
-    update_dot_exposure_fast!(deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq)
-    update_dot_exposure_fast!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq)
+    update_dot_exposure!(
+        deltaxy, 
+        dot_cache_x[type_i], dot_cache_y[type_i], dot_cache_z[type_i],
+        surface_dots[i].exposed, 
+        R_j_sq
+    )
+    update_dot_exposure!(
+        -deltaxy, 
+        dot_cache_x[type_j], dot_cache_y[type_j], dot_cache_z[type_j],
+        surface_dots[j].exposed, 
+        R_i_sq
+    )
     return surface_dots
 end
 
@@ -299,7 +205,9 @@ function atomic_sasa(
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types),Vector{SVector{3,Float32}}}()
+    dot_cache_x = Dict{eltype(atom_types),Vector{Float32}}()
+    dot_cache_y = Dict{eltype(atom_types),Vector{Float32}}()
+    dot_cache_z = Dict{eltype(atom_types),Vector{Float32}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -308,23 +216,23 @@ function atomic_sasa(
                 Use custom `atom_type` and `atom_radius_from_type` input parameters if needed. 
             """))
         end
-        dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
+        dot_cache_x[type], dot_cache_y[type], dot_cache_z[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
     end
 
     system = ParticleSystem(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots1(trues(length(dot_cache[atom_type(at)]))) for at in atoms],
+        output=[AtomDots1(trues(length(dot_cache_x[atom_type(at)]))) for at in atoms],
         output_name=:surface_dots,
         parallel=parallel,
     )
 
     map_pairwise!(
         (x, y, i, j, d2, surface_dots) ->
-            update_pair_dot_exposure_fast!(
+            update_pair_dot_exposure!(
                 x, y, i, j, surface_dots;
-                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
+                atoms, dot_cache_x, dot_cache_y, dot_cache_z, atom_type, atom_radius_from_type, probe_radius,
             ),
         system,
     )
