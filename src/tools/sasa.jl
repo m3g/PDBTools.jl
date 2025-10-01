@@ -120,8 +120,8 @@ end
 function update_pair_dot_exposure!(
     x, y, i, j, d2, surface_dots;
     atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
-) where {F1,F2}
-    N = 16
+    N_SIMD::Val{N}=Val(16),
+) where {F1,F2,N}
     type_i = atom_type(atoms[i])
     type_j = atom_type(atoms[j])
     r_i = atom_radius_from_type(type_i) + probe_radius
@@ -130,8 +130,8 @@ function update_pair_dot_exposure!(
     R_j_sq = r_j^2
     deltaxy = x - y
     if d2 <= (r_i + r_j)^2
-        update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, Val(N))
-        update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, Val(N))
+        update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, N_SIMD)
+        update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, N_SIMD)
     end
     return surface_dots
 end
@@ -154,7 +154,7 @@ in the structure.
 
 # Optional arguments 
 
-- `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
+- `probe_radius::Float32=1.4f0`: The radius of the solvent probe in Angstroms.
 - `n_dots::Int=100`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires 
@@ -201,12 +201,13 @@ values.
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
-    probe_radius::Real=1.4f0,
+    probe_radius::Float32=1.4f0,
     n_dots::Int=100,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
-)
+    N_SIMD::Val{N}=Val(16),
+) where {N}
 
     # Unique list of atom types
     atom_types = atom_type.(unique(atom_type, atoms))
@@ -237,7 +238,7 @@ function atomic_sasa(
         (x, y, i, j, d2, surface_dots) ->
             update_pair_dot_exposure!(
                 x, y, i, j, d2, surface_dots;
-                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
+                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius, N_SIMD,
             ),
         system,
     )
