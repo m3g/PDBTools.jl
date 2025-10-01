@@ -126,10 +126,10 @@ function update_pair_dot_exposure!(
     type_j = atom_type(atoms[j])
     r_i = atom_radius_from_type(type_i) + probe_radius
     r_j = atom_radius_from_type(type_j) + probe_radius
-    R_i_sq = r_i^2
-    R_j_sq = r_j^2
-    deltaxy = x - y
     if d2 <= (r_i + r_j)^2
+        R_i_sq = r_i^2
+        R_j_sq = r_j^2
+        deltaxy = x - y
         update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, N_SIMD)
         update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, N_SIMD)
     end
