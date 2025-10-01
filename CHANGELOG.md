@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.2-DEV
 -------------
+- ![ENHANCEMENT][badge-enhancement] faster SASA calculation.
 
 Version 3.5.1
 -------------
