@@ -104,10 +104,7 @@ function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) wh
             pos_x = dot_cache.x[lane + i] + deltaxy[1]
             pos_y = dot_cache.y[lane + i] + deltaxy[2]
             pos_z = dot_cache.z[lane + i] + deltaxy[3]
-            dist_sq = pos_x*pos_x + pos_y*pos_y
-            dist_sq += pos_z*pos_z
-            outside = dist_sq >= rj_sq
-            exposed_i[lane + i] &= outside
+            exposed_i[lane + i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
         end
     end
     # Remaining 
@@ -115,10 +112,7 @@ function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) wh
         pos_x = dot_cache.x[i] + deltaxy[1]
         pos_y = dot_cache.y[i] + deltaxy[2]
         pos_z = dot_cache.z[i] + deltaxy[3]
-        dist_sq = pos_x*pos_x + pos_y*pos_y
-        dist_sq += pos_z*pos_z
-        outside = dist_sq >= rj_sq
-        exposed_i[i] &= outside
+        exposed_i[i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
     end
     return exposed_i
 end
