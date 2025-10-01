@@ -8,6 +8,12 @@ struct SASA
     sasa::Float32
 end
 
+struct DotCache{T}
+    x::Vector{T}
+    y::Vector{T}
+    z::Vector{T}
+end
+
 #=
     generate_dots(atomi_radius, probe_radius, n_dots)
 
@@ -63,7 +69,7 @@ function generate_dots(atomic_radius, probe_radius::Real, n_dots::Int)
     unique!(dots)
 
     # Return linear arrays for manual SIMD
-    return [dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots]
+    return DotCache([dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots])
 end
 
 #
@@ -83,30 +89,45 @@ function CellListMap.reducer(x::AtomDots1, y::AtomDots1)
     return x
 end
 
+#
+# Contribution by Zentrik at:
+#
+# https://discourse.julialang.org/t/nerd-sniping-can-you-make-this-faster/132793/5?u=lmiq
+#
 using SIMD: VecRange
 
-@fastmath function update_dot_exposure!(deltaxy, dot_cache_x, dot_cache_y, dot_cache_z, exposed_i, rj_sq)
-    N = 8
-    # Assume length(exposed_i) is multiple of N
+function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) where {N}
+    lastN = N * (length(exposed_i) ÷ N)
     lane = VecRange{N}(0)
-    @inbounds @fastmath for i in 1:N:length(exposed_i)
+    @inbounds for i in 1:N:lastN
         if any(exposed_i[lane + i])
-            pos_x = dot_cache_x[lane + i] + deltaxy[1]
-            pos_y = dot_cache_y[lane + i] + deltaxy[2]
-            pos_z = dot_cache_z[lane + i] + deltaxy[3]
+            pos_x = dot_cache.x[lane + i] + deltaxy[1]
+            pos_y = dot_cache.y[lane + i] + deltaxy[2]
+            pos_z = dot_cache.z[lane + i] + deltaxy[3]
             dist_sq = pos_x*pos_x + pos_y*pos_y
             dist_sq += pos_z*pos_z
             outside = dist_sq >= rj_sq
             exposed_i[lane + i] &= outside
         end
     end
+    # Remaining 
+    @inbounds for i in lastN+1:length(exposed_i)
+        pos_x = dot_cache.x[i] + deltaxy[1]
+        pos_y = dot_cache.y[i] + deltaxy[2]
+        pos_z = dot_cache.z[i] + deltaxy[3]
+        dist_sq = pos_x*pos_x + pos_y*pos_y
+        dist_sq += pos_z*pos_z
+        outside = dist_sq >= rj_sq
+        exposed_i[i] &= outside
+    end
     return exposed_i
 end
 
 function update_pair_dot_exposure!(
     x, y, i, j, surface_dots;
-    atoms, dot_cache_x, dot_cache_y, dot_cache_z, atom_type::F1, atom_radius_from_type::F2, probe_radius,
+    atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
 ) where {F1,F2}
+    N = 16
     type_i = atom_type(atoms[i])
     type_j = atom_type(atoms[j])
     r_i = atom_radius_from_type(type_i)
@@ -114,18 +135,8 @@ function update_pair_dot_exposure!(
     R_i_sq = (r_i + probe_radius)^2
     R_j_sq = (r_j + probe_radius)^2
     deltaxy = x - y
-    update_dot_exposure!(
-        deltaxy, 
-        dot_cache_x[type_i], dot_cache_y[type_i], dot_cache_z[type_i],
-        surface_dots[i].exposed, 
-        R_j_sq
-    )
-    update_dot_exposure!(
-        -deltaxy, 
-        dot_cache_x[type_j], dot_cache_y[type_j], dot_cache_z[type_j],
-        surface_dots[j].exposed, 
-        R_i_sq
-    )
+    update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, Val(N))
+    update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, Val(N))
     return surface_dots
 end
 
@@ -205,9 +216,7 @@ function atomic_sasa(
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache_x = Dict{eltype(atom_types),Vector{Float32}}()
-    dot_cache_y = Dict{eltype(atom_types),Vector{Float32}}()
-    dot_cache_z = Dict{eltype(atom_types),Vector{Float32}}()
+    dot_cache = Dict{eltype(atom_types),DotCache{Float32}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -216,14 +225,14 @@ function atomic_sasa(
                 Use custom `atom_type` and `atom_radius_from_type` input parameters if needed. 
             """))
         end
-        dot_cache_x[type], dot_cache_y[type], dot_cache_z[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
+        dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
     end
 
     system = ParticleSystem(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots1(trues(length(dot_cache_x[atom_type(at)]))) for at in atoms],
+        output=[AtomDots1(trues(length(dot_cache[atom_type(at)].x))) for at in atoms],
         output_name=:surface_dots,
         parallel=parallel,
     )
@@ -232,7 +241,7 @@ function atomic_sasa(
         (x, y, i, j, d2, surface_dots) ->
             update_pair_dot_exposure!(
                 x, y, i, j, surface_dots;
-                atoms, dot_cache_x, dot_cache_y, dot_cache_z, atom_type, atom_radius_from_type, probe_radius,
+                atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius,
             ),
         system,
     )
