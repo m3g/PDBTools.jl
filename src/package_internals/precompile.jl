@@ -16,5 +16,6 @@ PrecompileTools.@setup_workload begin
         write_mmcif(tempname(), ats)
         residue_ticks(ats)
         moveto!(ats; center=[0.0, 0.0, 0.0])
+        sasa(atomic_sasa(ats))
     end
 end
