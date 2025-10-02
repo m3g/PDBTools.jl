@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.5-DEV
 -------------
+- ![ENHANCEMENT][badge-enhancement] use random sphere dot generation in SASA, avoding odd regularities in errors.
 
 Version 3.5.4
 -------------
