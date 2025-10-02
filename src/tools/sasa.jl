@@ -1,6 +1,6 @@
 import CellListMap
 using CellListMap: ParticleSystem, map_pairwise!
-using LinearAlgebra
+using LinearAlgebra: norm
 using Statistics: mean
 
 # Container for the custom atom filed that will carry the atom SASA
@@ -8,10 +8,10 @@ struct SASA
     sasa::Float32
 end
 
-struct DotCache{T}
-    x::Vector{T}
-    y::Vector{T}
-    z::Vector{T}
+struct DotCache{V}
+    x::V
+    y::V
+    z::V
 end
 
 #=
@@ -24,52 +24,26 @@ per sphere.
 =#
 function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
     radius = atomic_radius + probe_radius
-    n_grid_points = round(Int, (3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
-    if radius <= 0 || n_grid_points <= 0
+    if radius <= 0 
         throw(ArgumentError("""\n
-            Too small or incorrect probe_radius ($probe_radius) or number of dots ($n_dots).
+            probe_radius too small or incorrectly provided: ($probe_radius).
 
         """))
     end
 
-    dots = SVector{3,Float32}[]
-    step = 2 * radius / n_grid_points
-    radius_sq = radius^2
-
-    # --- First Lattice ---
-    for i in 0:n_grid_points, j in 0:n_grid_points, k in 0:n_grid_points
-        x = -radius + i * step
-        y = -radius + j * step
-        z = -radius + k * step
-        dist_sq = x^2 + y^2 + z^2
-
-        # Project internal points onto the surface
-        if 0 < dist_sq < radius_sq
-            norm_factor = radius / sqrt(dist_sq)
-            push!(dots, norm_factor * SVector{3,Float32}(x, y, z))
-        end
+    xdot = zeros(Float32, n_dots)
+    ydot = zeros(Float32, n_dots)
+    zdot = zeros(Float32, n_dots)
+    for i in 1:n_dots
+        vdot = randn(SVector{3,Float32})
+        vdot = radius * vdot / norm(vdot)
+        xdot[i] = vdot[1]
+        ydot[i] = vdot[2]
+        zdot[i] = vdot[3]
     end
-
-    # --- Second Lattice (shifted by half a step) ---
-    offset = step / 2
-    for i in 0:n_grid_points, j in 0:n_grid_points, k in 0:n_grid_points
-        x = -radius + offset + i * step
-        y = -radius + offset + j * step
-        z = -radius + offset + k * step
-        dist_sq = x^2 + y^2 + z^2
-
-        # Project internal points onto the surface
-        if dist_sq < radius_sq
-            norm_factor = radius / sqrt(dist_sq)
-            push!(dots, norm_factor * SVector{3,Float32}(x, y, z))
-        end
-    end
-
-    # Return unique points to avoid redundancy
-    unique!(dots)
 
     # Return linear arrays for manual SIMD
-    return DotCache([dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots])
+    return DotCache(xdot, ydot, zdot)
 end
 
 #
@@ -214,7 +188,7 @@ function atomic_sasa(
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types),DotCache{Float32}}()
+    dot_cache = Dict{eltype(atom_types),DotCache{Vector{Float32}}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
