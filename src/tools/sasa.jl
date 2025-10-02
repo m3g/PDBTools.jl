@@ -2,16 +2,18 @@ import CellListMap
 using CellListMap: ParticleSystem, map_pairwise!
 using LinearAlgebra
 using Statistics: mean
+using SmallCollections: FixedVector, MutableFixedVector
+using ChunkSplitters: index_chunks
 
 # Container for the custom atom filed that will carry the atom SASA
 struct SASA
     sasa::Float32
 end
 
-struct DotCache{T}
-    x::Vector{T}
-    y::Vector{T}
-    z::Vector{T}
+struct DotCache{V}
+    x::V
+    y::V
+    z::V
 end
 
 #=
@@ -65,19 +67,24 @@ function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
         end
     end
 
-    # Return unique points to avoid redundancy
-    unique!(dots)
+    # Filter to get exactly n_dots dots
+    dot_inds = first.(index_chunks(1:length(dots); n=n_dots))
 
     # Return linear arrays for manual SIMD
-    return DotCache([dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots])
+    return DotCache(
+        FixedVector{n_dots}([dots[i][1] for i in dot_inds]), 
+        FixedVector{n_dots}([dots[i][2] for i in dot_inds]), 
+        FixedVector{n_dots}([dots[i][3] for i in dot_inds])
+    )
 end
+
 
 #
 # Structure that carries the information about dots of each atom, if 
 # they are exposed or found to be occluded by other atoms.
 #
-struct AtomDots
-    exposed::Vector{Bool}
+struct AtomDots{NDOTS}
+    exposed::MutableFixedVector{NDOTS}
 end
 function CellListMap.reset_output!(x::AtomDots)
     x.exposed .= true
@@ -89,32 +96,10 @@ function CellListMap.reducer(x::AtomDots, y::AtomDots)
     return x
 end
 
-#
-# Contribution by Zentrik at:
-#
-# https://discourse.julialang.org/t/nerd-sniping-can-you-make-this-faster/132793/5?u=lmiq
-#
-using SIMD: VecRange
-
-function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) where {N}
-    lastN = N * (length(exposed_i) ÷ N)
-    lane = VecRange{N}(0)
-    @inbounds for i in 1:N:lastN
-        if any(exposed_i[lane + i])
-            pos_x = dot_cache.x[lane + i] + deltaxy[1]
-            pos_y = dot_cache.y[lane + i] + deltaxy[2]
-            pos_z = dot_cache.z[lane + i] + deltaxy[3]
-            exposed_i[lane + i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
-        end
-    end
-    # Remaining 
-    @inbounds for i in lastN+1:length(exposed_i)
-        pos_x = dot_cache.x[i] + deltaxy[1]
-        pos_y = dot_cache.y[i] + deltaxy[2]
-        pos_z = dot_cache.z[i] + deltaxy[3]
-        exposed_i[i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
-    end
-    return exposed_i
+sumabs2(x, y, z) = @fastmath abs2(x) + abs2(y) + abs2(z)
+function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq)
+    @fastmath exposed_i .&= sumabs2.(deltaxy[1] .+ dot_cache.x, deltaxy[2] .+ dot_cache.y, deltaxy[3] .+ dot_cache.z) .>= rj_sq
+    return nothing
 end
 
 function update_pair_dot_exposure!(
@@ -130,8 +115,8 @@ function update_pair_dot_exposure!(
         R_i_sq = r_i^2
         R_j_sq = r_j^2
         deltaxy = x - y
-        update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq, N_SIMD)
-        update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq, N_SIMD)
+        update_dot_exposure!(+deltaxy, dot_cache[type_i], surface_dots[i].exposed, R_j_sq)
+        update_dot_exposure!(-deltaxy, dot_cache[type_j], surface_dots[j].exposed, R_i_sq)
     end
     return surface_dots
 end
@@ -214,7 +199,7 @@ function atomic_sasa(
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types),DotCache{Float32}}()
+    dot_cache = Dict{eltype(atom_types),DotCache{FixedVector{n_dots, Float32}}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -230,7 +215,7 @@ function atomic_sasa(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots(trues(length(dot_cache[atom_type(at)].x))) for at in atoms],
+        output=[AtomDots{n_dots}(trues(length(dot_cache[atom_type(at)].x))) for at in atoms],
         output_name=:surface_dots,
         parallel=parallel,
     )
