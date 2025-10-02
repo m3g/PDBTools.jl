@@ -52,6 +52,8 @@ const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
 const TESTCIF = joinpath(@__DIR__, "../test/small.cif")
 const CHAINSPDB = joinpath(@__DIR__, "../test/chains.pdb")
 const BROKENCIF = joinpath(@__DIR__, "../test/broken.cif")
+const LONG_CHAIN_STRING_CIF = joinpath(@__DIR__, "../test/long_chain_string.cif")
+const LONG_NAME_STRING_CIF = joinpath(@__DIR__, "../test/long_name_string.cif")
 const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
 const HETATMPDB = joinpath(@__DIR__, "../test/hetatm.pdb")
 
