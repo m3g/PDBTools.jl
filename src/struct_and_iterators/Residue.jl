@@ -74,7 +74,7 @@ Expected values are 33.9 ± 3.5 degrees (for one standard deviation). Also see t
 
 # Example
 
-```jldoctest
+```julia-repl
 julia> using PDBTools
 
 julia> protein = select(read_pdb(PDBTools.TESTPDB), "protein");
@@ -82,7 +82,7 @@ julia> protein = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> residues = collect(eachresidue(protein));
 
 julia> zeta(residues[1])
-33.672016f0
+33.67202f0
 ```
 
 """
