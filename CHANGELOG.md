@@ -13,6 +13,7 @@ PDBTools.jl Changelog
 Version 3.5.5-DEV
 -------------
 - ![ENHANCEMENT][badge-enhancement] use random sphere dot generation in SASA, avoding odd regularities in errors.
+- ![INFO][badge-info] Use StableRNGs for testing SASA results. 
 
 Version 3.5.4
 -------------
