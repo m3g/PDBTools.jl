@@ -2,16 +2,18 @@ import CellListMap
 using CellListMap: ParticleSystem, map_pairwise!
 using LinearAlgebra
 using Statistics: mean
+using ChunkSplitters: index_chunks
+using FixedSizeArrays: FixedSizeArray
 
 # Container for the custom atom filed that will carry the atom SASA
 struct SASA
     sasa::Float32
 end
 
-struct DotCache{T}
-    x::Vector{T}
-    y::Vector{T}
-    z::Vector{T}
+struct DotCache{V}
+    x::V
+    y::V
+    z::V
 end
 
 #=
@@ -24,7 +26,7 @@ per sphere.
 =#
 function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
     radius = atomic_radius + probe_radius
-    n_grid_points = round(Int, (3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
+    n_grid_points = round(Int, (0.6 * 3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
     if radius <= 0 || n_grid_points <= 0
         throw(ArgumentError("""\n
             Too small or incorrect probe_radius ($probe_radius) or number of dots ($n_dots).
@@ -68,16 +70,29 @@ function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
     # Return unique points to avoid redundancy
     unique!(dots)
 
+    # Keep exactly n_dots
+    dots = dots[first.(index_chunks(1:length(dots); n=n_dots))]
+    x = Memory{Float32}(undef, n_dots)
+    y = Memory{Float32}(undef, n_dots)
+    z = Memory{Float32}(undef, n_dots)
+    x .= (dot[1] for dot in dots)
+    y .= (dot[2] for dot in dots)
+    z .= (dot[3] for dot in dots)
+
     # Return linear arrays for manual SIMD
-    return DotCache([dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots])
+    return DotCache(
+        FixedSizeArray(x),
+        FixedSizeArray(y), 
+        FixedSizeArray(z),
+    )
 end
 
 #
 # Structure that carries the information about dots of each atom, if 
 # they are exposed or found to be occluded by other atoms.
 #
-struct AtomDots
-    exposed::Vector{Bool}
+struct AtomDots{V}
+    exposed::V
 end
 function CellListMap.reset_output!(x::AtomDots)
     x.exposed .= true
@@ -214,7 +229,7 @@ function atomic_sasa(
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types),DotCache{Float32}}()
+    dot_cache = Dict{eltype(atom_types),DotCache{FixedSizeArray{Float32,1,Memory{Float32}}}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -230,7 +245,7 @@ function atomic_sasa(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots(trues(length(dot_cache[atom_type(at)].x))) for at in atoms],
+        output=[AtomDots(trues(n_dots)) for at in atoms],
         output_name=:surface_dots,
         parallel=parallel,
     )

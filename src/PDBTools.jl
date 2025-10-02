@@ -109,6 +109,6 @@ include("./tools/custom_types.jl")
 include("./package_internals/legacy.jl")
 
 # Precompilation
-include("./package_internals/precompile.jl")
+#include("./package_internals/precompile.jl")
 
 end
