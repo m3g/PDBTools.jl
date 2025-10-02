@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.5.5-DEV
+-------------
+
 Version 3.5.4
 -------------
 - ![INFO][badge-info] Provide a better error message when a field in a CIF file does not fit in the fixed-size string to which it must be assigned.
