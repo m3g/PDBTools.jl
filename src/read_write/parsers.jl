@@ -25,6 +25,19 @@ function _parse(
     end
 end
 
+_length(::Type{String3}) = 3
+_length(::Type{String7}) = 7
+_length(::Type{<:AbstractString}) = typemax(Int)
+function _error_length(::Type{S},range,string) where {S}
+    _length(S) >= length(range) && return nothing
+    throw(ArgumentError("""\n
+        ATOM data $string has length $(length(range)) and cannot be stored in a string of fixed length $(_length(S)).
+        Suggestions: change the $string identifier to a string of length $(_length(S)).        
+
+    """
+    ))
+end
+
 function _parse(
     ::Type{S},
     string,
@@ -32,6 +45,7 @@ function _parse(
     alt::Union{S,Nothing}=nothing
 ) where {S<:AbstractString}
     isempty(range) && return alt
+    _error_length(S, range, string)
     first_char = if isspace(string[first(range)])
         findfirst(!isspace, string)
     else

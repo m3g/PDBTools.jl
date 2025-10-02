@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.4-DEV
 -------------
+- ![INFO][badge-info] Provide a better error message when a field in a CIF file does not fit in the fixed-size string to which it must be assigned.
 
 Version 3.5.3
 -------------

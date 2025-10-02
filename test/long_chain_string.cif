@@ -1,0 +1,35 @@
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_asym_id
+_atom_site.label_entity_id
+_atom_site.label_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.B_iso_or_equiv
+_atom_site.Cartn_x_esd
+_atom_site.Cartn_y_esd 
+_atom_site.Cartn_z_esd 
+_atom_site.occupancy_esd
+_atom_site.B_iso_or_equiv_esd
+_atom_site.pdbx_formal_charge
+_atom_site.auth_seq_id
+_atom_site.auth_comp_id
+_atom_site.auth_asym_id
+_atom_site.auth_atom_id
+_atom_site.pdbx_PDB_model_num
+ATOM   118477 N N   . ILE A-10 1 1   ? -76.093  -21.524  -199.305 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 N   1  
+ATOM   118478 C CA  . ILE A-10 1 1   ? -77.010  -21.356  -200.411 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 CA  1  
+ATOM   118479 C C   . ILE A-10 1 1   ? -78.383  -21.720  -199.891 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 C   1  
+ATOM   118480 O O   . ILE A-10 1 1   ? -78.570  -22.824  -199.400 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 O   1  
+ATOM   118481 C CB  . ILE A-10 1 1   ? -76.592  -22.190  -201.601 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 CB  1  
+ATOM   118482 C CG1 . ILE A-10 1 1   ? -75.172  -21.807  -201.999 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 CG1 1  
+ATOM   118483 C CG2 . ILE A-10 1 1   ? -77.475  -21.884  -202.755 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 CG2 1  
+ATOM   118484 C CD1 . ILE A-10 1 1   ? -74.524  -22.764  -202.947 1.00 49.12 ? ? ? ? ? ? 1   ILE A-10 CD1 1 
