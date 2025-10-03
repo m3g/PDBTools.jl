@@ -1,4 +1,3 @@
-import Random
 import CellListMap
 using CellListMap: ParticleSystem, map_pairwise!
 using LinearAlgebra: norm
