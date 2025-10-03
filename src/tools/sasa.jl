@@ -2,6 +2,7 @@ import CellListMap
 using CellListMap: ParticleSystem, map_pairwise!
 using LinearAlgebra: norm
 using Statistics: mean
+using SIMD: VecRange
 
 # Container for the custom atom filed that will carry the atom SASA
 struct SASA
@@ -25,7 +26,7 @@ coordinates.
 =#
 function generate_dots(atomic_radius::Real, probe_radius::T, n_dots::Int) where {T<:Real}
     radius = atomic_radius + probe_radius
-    if radius <= 0 
+    if radius <= 0
         throw(ArgumentError("""\n
             probe_radius too small or incorrectly provided: $probe_radius
 
@@ -40,10 +41,10 @@ function generate_dots(atomic_radius::Real, probe_radius::T, n_dots::Int) where 
     xdot = zeros(T, n_dots)
     ydot = zeros(T, n_dots)
     zdot = zeros(T, n_dots)
-    phi = (1 + sqrt(5)) / 2 
+    phi = (1 + sqrt(5)) / 2
     for i in 1:n_dots
-        theta = acos(1 - 2*i / n_dots)
-        phi_angle = 2*pi * i / phi
+        theta = acos(1 - 2 * i / n_dots)
+        phi_angle = 2 * pi * i / phi
         xdot[i] = radius * cos(phi_angle) * sin(theta)
         ydot[i] = radius * sin(phi_angle) * sin(theta)
         zdot[i] = radius * cos(theta)
@@ -73,17 +74,15 @@ end
 #
 # https://discourse.julialang.org/t/nerd-sniping-can-you-make-this-faster/132793/5?u=lmiq
 #
-using SIMD: VecRange
-
 function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) where {N}
     lastN = N * (length(exposed_i) ÷ N)
     lane = VecRange{N}(0)
     @inbounds for i in 1:N:lastN
-        if any(exposed_i[lane + i])
-            pos_x = dot_cache.x[lane + i] + deltaxy[1]
-            pos_y = dot_cache.y[lane + i] + deltaxy[2]
-            pos_z = dot_cache.z[lane + i] + deltaxy[3]
-            exposed_i[lane + i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
+        if any(exposed_i[lane+i])
+            pos_x = dot_cache.x[lane+i] + deltaxy[1]
+            pos_y = dot_cache.y[lane+i] + deltaxy[2]
+            pos_z = dot_cache.z[lane+i] + deltaxy[3]
+            exposed_i[lane+i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
         end
     end
     # Remaining 
@@ -291,16 +290,16 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
         "S" => 1.80,
     )
     at_sasa = atomic_sasa(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
-    @test sasa(at_sasa) ≈ 5365.55029296875 rtol=0.01
+    @test sasa(at_sasa) ≈ 5365.55029296875 rtol = 0.01
     # Accessiblity of groups within the structure
-    @test sasa(at_sasa, "backbone") ≈ 1130.37646484375 rtol=0.05
-    @test sasa(at_sasa, "resname GLU LYS") ≈ 797.8261108398438 rtol=0.05
-    @test sasa(at_sasa, "residue 1") ≈ 124.57905578613281 rtol=0.05
-    @test sasa(at_sasa, "residue 104") ≈ 122.50507354736328 rtol=0.05
+    @test sasa(at_sasa, "backbone") ≈ 1130.37646484375 rtol = 0.05
+    @test sasa(at_sasa, "resname GLU LYS") ≈ 797.8261108398438 rtol = 0.05
+    @test sasa(at_sasa, "residue 1") ≈ 124.57905578613281 rtol = 0.05
+    @test sasa(at_sasa, "residue 104") ≈ 122.50507354736328 rtol = 0.05
 
     # Compare with Gromacs - 2023.3 output
     # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000
-    @test sasa(atomic_sasa(prot; n_dots=N)) ≈ 100 * 53.754 rtol=0.01
+    @test sasa(atomic_sasa(prot; n_dots=N)) ≈ 100 * 53.754 rtol = 0.01
     # Isolated groups
     @test sasa(atomic_sasa(select(prot, "backbone and not name O"); n_dots=N)) ≈ 100 * 55.229 rtol = 0.05
     @test sasa(atomic_sasa(select(prot, "name CA"); n_dots=N)) ≈ 100 * 58.630 rtol = 0.05
@@ -308,7 +307,7 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
 
     # Test non-contiguous indexing with general selections
     at_sasa = atomic_sasa(select(prot, "name CA"); n_dots=N)
-    @test sasa(at_sasa) ≈ 5863.24f0 
+    @test sasa(at_sasa) ≈ 5863.24f0
     @test sasa(at_sasa, "resname THR") ≈ 322.17105f0
     @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 322.17105f0
 
