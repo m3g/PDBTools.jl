@@ -133,9 +133,9 @@ in the structure.
 # Optional arguments 
 
 - `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
-- `n_dots::Int=100`: The number of grid points along one axis for dot generation. 
+- `n_dots::Int=200`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
-- `parallel::Bool=false`: Control if the computation runs in parallel (requires 
+- `parallel::Bool=true`: Control if the computation runs in parallel (requires 
   running Julia with multiple threads).
 
 # Example
@@ -148,16 +148,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5342.639f0
+5389.0146f0
 
 julia> sasa(at_sasa, "backbone") # backbone sasa in prot
-974.42377f0
+988.7648f0
 
 julia> sasa(at_sasa, "not backbone") # other atoms
-4368.2124f0
+4400.246f0
 
 julia> sasa(at_sasa, "resname ARG GLU") # some residue types
-551.0506f0
+543.29846f0
 ```
 
 # Additional control:
@@ -178,10 +178,10 @@ values.
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
     probe_radius::Real=1.4f0,
-    n_dots::Int=100,
+    n_dots::Int=200,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
-    parallel=false,
+    parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
 ) where {N}
     probe_radius = Float32(probe_radius)
@@ -253,13 +253,13 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5342.639f0
+5389.0146f0
 
 julia> sasa(at_sasa, "backbone") # selection string
-974.42377f0
+988.7648f0
 
 julia> sasa(at_sasa, at -> name(at) == "CA") # selection function
-38.6441f0
+44.078426f0
 
 julia> sasa(at_sasa[1]) # single atom SASA
 5.467941f0
