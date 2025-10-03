@@ -133,7 +133,7 @@ in the structure.
 # Optional arguments 
 
 - `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
-- `n_dots::Int=200`: The number of grid points along one axis for dot generation. 
+- `n_dots::Int=500`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires 
   running Julia with multiple threads).
@@ -178,7 +178,7 @@ values.
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
     probe_radius::Real=1.4f0,
-    n_dots::Int=200,
+    n_dots::Int=500,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
