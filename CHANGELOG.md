@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.5.5-DEV
+Version 3.5.5
 -------------
 - ![ENHANCEMENT][badge-enhancement] use Fibonacci lattice to generate exactly `n_dots` the dots in the sphere. Use default `n_dots=500`.
 
