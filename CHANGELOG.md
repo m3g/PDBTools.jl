@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.5-DEV
 -------------
+- ![ENHANCEMENT][badge-enhancement] use Fibonacci lattice to generate exactly `n_dots` the dots in the sphere. Use default `n_dots=500`.
 
 Version 3.5.4
 -------------

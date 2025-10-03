@@ -1,75 +1,55 @@
 import CellListMap
 using CellListMap: ParticleSystem, map_pairwise!
-using LinearAlgebra
+using LinearAlgebra: norm
 using Statistics: mean
+using SIMD: VecRange
 
 # Container for the custom atom filed that will carry the atom SASA
 struct SASA
     sasa::Float32
 end
 
-struct DotCache{T}
-    x::Vector{T}
-    y::Vector{T}
-    z::Vector{T}
+# Structure with the dot cache per atom type
+struct DotCache{V}
+    x::V
+    y::V
+    z::V
 end
 
 #=
-    generate_dots(atomi_radius, probe_radius, n_dots)
+    generate_dots(atomic_radius::T, probe_radius::T, n_dots::Int) where {T<:Real}
 
 Generates points on the surface of a sphere of a given radius (atomic_radius + probe_radius) 
-using the double cubic lattice method. `n_dots` controls the maximum number of dots
-per sphere.
+using a Fibonacci lattice. The type of `probe_radius` defines the output type of the 
+coordinates.
 
 =#
-function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int)
+function generate_dots(atomic_radius::Real, probe_radius::T, n_dots::Int) where {T<:Real}
     radius = atomic_radius + probe_radius
-    n_grid_points = round(Int, (3 / (4 * π * ((1 / 2)^3)) * n_dots)^(1 / 3))
-    if radius <= 0 || n_grid_points <= 0
+    if radius <= 0
         throw(ArgumentError("""\n
-            Too small or incorrect probe_radius ($probe_radius) or number of dots ($n_dots).
+            probe_radius too small or incorrectly provided: $probe_radius
 
         """))
     end
-
-    dots = SVector{3,Float32}[]
-    step = 2 * radius / n_grid_points
-    radius_sq = radius^2
-
-    # --- First Lattice ---
-    for i in 0:n_grid_points, j in 0:n_grid_points, k in 0:n_grid_points
-        x = -radius + i * step
-        y = -radius + j * step
-        z = -radius + k * step
-        dist_sq = x^2 + y^2 + z^2
-
-        # Project internal points onto the surface
-        if 0 < dist_sq < radius_sq
-            norm_factor = radius / sqrt(dist_sq)
-            push!(dots, norm_factor * SVector{3,Float32}(x, y, z))
-        end
+    if n_dots < 1
+        throw(ArgumentError("""\n
+            n_dots incorrectly set to $n_dots
+        """))
     end
-
-    # --- Second Lattice (shifted by half a step) ---
-    offset = step / 2
-    for i in 0:n_grid_points, j in 0:n_grid_points, k in 0:n_grid_points
-        x = -radius + offset + i * step
-        y = -radius + offset + j * step
-        z = -radius + offset + k * step
-        dist_sq = x^2 + y^2 + z^2
-
-        # Project internal points onto the surface
-        if dist_sq < radius_sq
-            norm_factor = radius / sqrt(dist_sq)
-            push!(dots, norm_factor * SVector{3,Float32}(x, y, z))
-        end
-    end
-
-    # Return unique points to avoid redundancy
-    unique!(dots)
-
     # Return linear arrays for manual SIMD
-    return DotCache([dot[1] for dot in dots], [dot[2] for dot in dots], [dot[3] for dot in dots])
+    xdot = zeros(T, n_dots)
+    ydot = zeros(T, n_dots)
+    zdot = zeros(T, n_dots)
+    phi = (1 + sqrt(5)) / 2
+    for i in 1:n_dots
+        theta = acos(1 - 2 * i / n_dots)
+        phi_angle = 2 * pi * i / phi
+        xdot[i] = radius * cos(phi_angle) * sin(theta)
+        ydot[i] = radius * sin(phi_angle) * sin(theta)
+        zdot[i] = radius * cos(theta)
+    end
+    return DotCache(xdot, ydot, zdot)
 end
 
 #
@@ -94,17 +74,15 @@ end
 #
 # https://discourse.julialang.org/t/nerd-sniping-can-you-make-this-faster/132793/5?u=lmiq
 #
-using SIMD: VecRange
-
 function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) where {N}
     lastN = N * (length(exposed_i) ÷ N)
     lane = VecRange{N}(0)
     @inbounds for i in 1:N:lastN
-        if any(exposed_i[lane + i])
-            pos_x = dot_cache.x[lane + i] + deltaxy[1]
-            pos_y = dot_cache.y[lane + i] + deltaxy[2]
-            pos_z = dot_cache.z[lane + i] + deltaxy[3]
-            exposed_i[lane + i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
+        if any(exposed_i[lane+i])
+            pos_x = dot_cache.x[lane+i] + deltaxy[1]
+            pos_y = dot_cache.y[lane+i] + deltaxy[2]
+            pos_z = dot_cache.z[lane+i] + deltaxy[3]
+            exposed_i[lane+i] &= sum(abs2, (pos_x, pos_y, pos_z)) >= rj_sq
         end
     end
     # Remaining 
@@ -155,14 +133,14 @@ in the structure.
 # Optional arguments 
 
 - `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
-- `n_dots::Int=100`: The number of grid points along one axis for dot generation. 
+- `n_dots::Int=500`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires 
   running Julia with multiple threads).
 
 # Example
 
-```jldoctest
+```julia-repl
 julia> using PDBTools
 
 julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
@@ -170,16 +148,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5350.348f0
+5389.0146f0
 
 julia> sasa(at_sasa, "backbone") # backbone sasa in prot
-984.40125f0
+988.7648f0
 
 julia> sasa(at_sasa, "not backbone") # other atoms
-4365.9478f0
+4400.246f0
 
 julia> sasa(at_sasa, "resname ARG GLU") # some residue types
-542.877f0
+543.29846f0
 ```
 
 # Additional control:
@@ -196,13 +174,11 @@ Here, the atomc radii of https://en.wikipedia.org/wiki/Atomic_radii_of_the_eleme
 Atoms with missing radius have a `NaN` value, and the computation will not return meaningful
 values. 
 
-*Algorithm:* Eisenhaber F, Lijnzaad P, Argos P, Sander C, & Scharf M (1995) J. Comput. Chem. 16, 273-284.
-
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
     probe_radius::Real=1.4f0,
-    n_dots::Int=100,
+    n_dots::Int=500,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=true,
@@ -214,7 +190,7 @@ function atomic_sasa(
     atom_types = atom_type.(unique(atom_type, atoms))
 
     # Memoization for dot generation to avoid recomputing for same radii
-    dot_cache = Dict{eltype(atom_types),DotCache{Float32}}()
+    dot_cache = Dict{eltype(atom_types),DotCache{Vector{Float32}}}()
     for type in atom_types
         atom_radius = atom_radius_from_type(type)
         if isnan(atom_radius)
@@ -267,11 +243,9 @@ of the full structure, an atom, or a subset of atoms. The function can called wi
 single `Atom{SASA}` atom, a vector of atoms (in which case the full SASA is returned),
 or a vector of atoms and a selection, given by a function or selection string. 
 
-*Algorithm:* Eisenhaber F, Lijnzaad P, Argos P, Sander C, & Scharf M (1995) J. Comput. Chem. 16, 273-284
-
 # Example
 
-```jldoctest
+```julia-repl
 julia> using PDBTools
 
 julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
@@ -279,16 +253,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5350.348f0
+5389.0146f0
 
 julia> sasa(at_sasa, "backbone") # selection string
-984.40125f0
+988.7648f0
 
 julia> sasa(at_sasa, at -> name(at) == "CA") # selection function
-43.04417f0
+44.078426f0
 
 julia> sasa(at_sasa[1]) # single atom SASA
-6.2490754f0
+5.467941f0
 ```
 
 """
@@ -300,11 +274,14 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::String) = sasa(atoms, Select(sel)
 sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at in atoms if sel(at))
 
 @testitem "sasa" begin
-
     using PDBTools
     prot = read_pdb(PDBTools.TESTPDB, "protein")
+    N = 10_000 # number of dot samples
 
-    # Compare with the output of VMD: the difference is that VMD uses a vdW radius for H of 1.00, and we use 1.10.
+    # Compare with the output of VMD: the difference is that VMD uses a vdW radius for H 
+    # of 1.00, and we use 1.10.
+    # vmd version 2.0.0a5 was run with e. g.
+    # [ measure sasa 1.4 $protein -samples 100000 -restrict [ atomselect top "backbone" ] ]
     const vmd_radii = Dict(
         "N" => 1.55,
         "C" => 1.70,
@@ -312,26 +289,27 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
         "O" => 1.52,
         "S" => 1.80,
     )
-    at_sasa = atomic_sasa(prot; atom_radius_from_type=type -> vmd_radii[type])
-    @test sasa(at_sasa) ≈ 5364.78515625 rtol = 0.1
+    at_sasa = atomic_sasa(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
+    @test sasa(at_sasa) ≈ 5365.55029296875 rtol = 0.01
     # Accessiblity of groups within the structure
-    @test sasa(at_sasa, "backbone") ≈ 1128.9261474609375 rtol = 0.05
-    @test sasa(at_sasa, "resname GLU LYS") ≈ 796.6279296875 rtol = 0.05
-    @test sasa(at_sasa, "residue 1") ≈ 124.51239776611328 rtol = 0.05
-    @test sasa(at_sasa, "residue 104") ≈ 122.6167221069336 rtol = 0.05
+    @test sasa(at_sasa, "backbone") ≈ 1130.37646484375 rtol = 0.05
+    @test sasa(at_sasa, "resname GLU LYS") ≈ 797.8261108398438 rtol = 0.05
+    @test sasa(at_sasa, "residue 1") ≈ 124.57905578613281 rtol = 0.05
+    @test sasa(at_sasa, "residue 104") ≈ 122.50507354736328 rtol = 0.05
 
-    # Compare with Gromacs output
-    at_sasa = atomic_sasa(prot)
+    # Compare with Gromacs - 2023.3 output
+    # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000
+    @test sasa(atomic_sasa(prot; n_dots=N)) ≈ 100 * 53.754 rtol = 0.01
     # Isolated groups
-    @test sasa(atomic_sasa(select(prot, "backbone and not name O"))) ≈ 100 * 55.245 rtol = 0.05
-    @test sasa(atomic_sasa(select(prot, "name CA"))) ≈ 100 * 58.642 rtol = 0.05
-    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"))) ≈ 100 * 69.029 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "backbone and not name O"); n_dots=N)) ≈ 100 * 55.229 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "name CA"); n_dots=N)) ≈ 100 * 58.630 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"); n_dots=N)) ≈ 100 * 69.024 rtol = 0.05
 
     # Test non-contiguous indexing with general selections
-    at_sasa = atomic_sasa(select(prot, "name CA"))
-    @test sasa(at_sasa) ≈ 5856.476f0
-    @test sasa(at_sasa, "resname THR") ≈ 321.03778f0
-    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 321.0378f0
+    at_sasa = atomic_sasa(select(prot, "name CA"); n_dots=N)
+    @test sasa(at_sasa) ≈ 5863.24f0
+    @test sasa(at_sasa, "resname THR") ≈ 322.17105f0
+    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 322.17105f0
 
     # Test parallelization
     @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
