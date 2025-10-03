@@ -12,8 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.5-DEV
 -------------
-- ![ENHANCEMENT][badge-enhancement] use random sphere dot generation in SASA, avoding odd regularities in errors.
-- ![INFO][badge-info] Use StableRNGs for testing SASA results. 
+- ![ENHANCEMENT][badge-enhancement] use Fibonacci lattice to generate exactly `n_dots` the dots in the sphere.
 
 Version 3.5.4
 -------------

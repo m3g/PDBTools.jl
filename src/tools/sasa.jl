@@ -17,14 +17,14 @@ struct DotCache{V}
 end
 
 #=
-    generate_dots(atomi_radius, probe_radius, n_dots)
+    generate_dots(atomic_radius::T, probe_radius::T, n_dots::Int) where {T<:Real}
 
 Generates points on the surface of a sphere of a given radius (atomic_radius + probe_radius) 
-using the double cubic lattice method. `n_dots` controls the maximum number of dots
-per sphere.
+using a Fibonacci lattice. The type of `probe_radius` defines the output type of the 
+coordinates.
 
 =#
-function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int; RNG)
+function generate_dots(atomic_radius::Real, probe_radius::T, n_dots::Int) where {T<:Real}
     radius = atomic_radius + probe_radius
     if radius <= 0 
         throw(ArgumentError("""\n
@@ -37,19 +37,18 @@ function generate_dots(atomic_radius, probe_radius::Float32, n_dots::Int; RNG)
             n_dots incorrectly set to $n_dots
         """))
     end
-
-    xdot = zeros(Float32, n_dots)
-    ydot = zeros(Float32, n_dots)
-    zdot = zeros(Float32, n_dots)
-    for i in 1:n_dots
-        vdot = randn(RNG, SVector{3,Float32})
-        vdot = radius * vdot / norm(vdot)
-        xdot[i] = vdot[1]
-        ydot[i] = vdot[2]
-        zdot[i] = vdot[3]
-    end
-
     # Return linear arrays for manual SIMD
+    xdot = zeros(T, n_dots)
+    ydot = zeros(T, n_dots)
+    zdot = zeros(T, n_dots)
+    phi = (1 + sqrt(5)) / 2 
+    for i in 1:n_dots
+        theta = acos(1 - 2*i / n_dots)
+        phi_angle = 2*pi * i / phi
+        xdot[i] = radius * cos(phi_angle) * sin(theta)
+        ydot[i] = radius * sin(phi_angle) * sin(theta)
+        zdot[i] = radius * cos(theta)
+    end
     return DotCache(xdot, ydot, zdot)
 end
 
@@ -151,16 +150,16 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5323.4014f0
+5342.639f0
 
 julia> sasa(at_sasa, "backbone") # backbone sasa in prot
-983.07745f0
+974.42377f0
 
 julia> sasa(at_sasa, "not backbone") # other atoms
-4442.001f0
+4368.2124f0
 
 julia> sasa(at_sasa, "resname ARG GLU") # some residue types
-534.0886f0
+551.0506f0
 ```
 
 # Additional control:
@@ -177,8 +176,6 @@ Here, the atomc radii of https://en.wikipedia.org/wiki/Atomic_radii_of_the_eleme
 Atoms with missing radius have a `NaN` value, and the computation will not return meaningful
 values. 
 
-*Algorithm:* Eisenhaber F, Lijnzaad P, Argos P, Sander C, & Scharf M (1995) J. Comput. Chem. 16, 273-284.
-
 """
 function atomic_sasa(
     atoms::AbstractVector{<:Atom};
@@ -188,7 +185,6 @@ function atomic_sasa(
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     parallel=false,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
-    RNG=Random.default_rng(), # used for testing with StableRNGs
 ) where {N}
     probe_radius = Float32(probe_radius)
 
@@ -205,7 +201,7 @@ function atomic_sasa(
                 Use custom `atom_type` and `atom_radius_from_type` input parameters if needed. 
             """))
         end
-        dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots; RNG)
+        dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
     end
 
     system = ParticleSystem(
@@ -249,8 +245,6 @@ of the full structure, an atom, or a subset of atoms. The function can called wi
 single `Atom{SASA}` atom, a vector of atoms (in which case the full SASA is returned),
 or a vector of atoms and a selection, given by a function or selection string. 
 
-*Algorithm:* Eisenhaber F, Lijnzaad P, Argos P, Sander C, & Scharf M (1995) J. Comput. Chem. 16, 273-284
-
 # Example
 
 ```julia-repl
@@ -261,13 +255,13 @@ julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 julia> at_sasa = atomic_sasa(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
-5325.885f0
+5342.639f0
 
 julia> sasa(at_sasa, "backbone") # selection string
-971.95325f0
+974.42377f0
 
 julia> sasa(at_sasa, at -> name(at) == "CA") # selection function
-45.88987f0
+38.6441f0
 
 julia> sasa(at_sasa[1]) # single atom SASA
 5.467941f0
@@ -282,11 +276,9 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::String) = sasa(atoms, Select(sel)
 sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at in atoms if sel(at))
 
 @testitem "sasa" begin
-    using StableRNGs
     using PDBTools
     prot = read_pdb(PDBTools.TESTPDB, "protein")
     N = 10_000 # number of dot samples
-    RNG=StableRNG(123)
 
     # Compare with the output of VMD: the difference is that VMD uses a vdW radius for H 
     # of 1.00, and we use 1.10.
@@ -299,7 +291,7 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
         "O" => 1.52,
         "S" => 1.80,
     )
-    at_sasa = atomic_sasa(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type], RNG)
+    at_sasa = atomic_sasa(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
     @test sasa(at_sasa) ≈ 5365.55029296875 rtol=0.01
     # Accessiblity of groups within the structure
     @test sasa(at_sasa, "backbone") ≈ 1130.37646484375 rtol=0.05
@@ -309,20 +301,20 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
 
     # Compare with Gromacs - 2023.3 output
     # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000
-    @test sasa(atomic_sasa(prot; n_dots=N, RNG)) ≈ 100 * 53.754 rtol=0.01
+    @test sasa(atomic_sasa(prot; n_dots=N)) ≈ 100 * 53.754 rtol=0.01
     # Isolated groups
-    @test sasa(atomic_sasa(select(prot, "backbone and not name O"); n_dots=N, RNG)) ≈ 100 * 55.229 rtol = 0.05
-    @test sasa(atomic_sasa(select(prot, "name CA"); n_dots=N, RNG)) ≈ 100 * 58.630 rtol = 0.05
-    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"); n_dots=N, RNG)) ≈ 100 * 69.024 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "backbone and not name O"); n_dots=N)) ≈ 100 * 55.229 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "name CA"); n_dots=N)) ≈ 100 * 58.630 rtol = 0.05
+    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"); n_dots=N)) ≈ 100 * 69.024 rtol = 0.05
 
     # Test non-contiguous indexing with general selections
-    at_sasa = atomic_sasa(select(prot, "name CA"); n_dots=N, RNG)
-    @test sasa(at_sasa) ≈ 5860.0 rtol=0.05
-    @test sasa(at_sasa, "resname THR") ≈ 322.2 rtol=0.05
-    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 322.2 rtol=0.05
+    at_sasa = atomic_sasa(select(prot, "name CA"); n_dots=N)
+    @test sasa(at_sasa) ≈ 5863.24f0 
+    @test sasa(at_sasa, "resname THR") ≈ 322.17105f0
+    @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 322.17105f0
 
     # Test parallelization
-    @test sasa(atomic_sasa(prot; parallel=false, n_dots=N)) ≈ sasa(atomic_sasa(prot; parallel=true, n_dots=N)) rtol=0.05
+    @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
 
     # Test errors
     @test_throws ArgumentError atomic_sasa(prot; probe_radius=-2.0)
