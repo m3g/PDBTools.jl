@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.6-DEV
 -------------
+- ![INFO][badge-info] Set default `n_dots` of `atomic_sasa` computations to 512 instead of 500 such that it is a multiple of 16, the default `N_SIMD`.
 
 Version 3.5.5
 -------------
