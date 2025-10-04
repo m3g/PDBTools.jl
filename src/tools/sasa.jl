@@ -276,7 +276,7 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
 @testitem "sasa" begin
     using PDBTools
     prot = read_pdb(PDBTools.TESTPDB, "protein")
-    N = 10_000 # number of dot samples
+    N = 10_030 # number of dot samples: not multiple of 16 to have a SIMD remaining
 
     # Compare with the output of VMD: the difference is that VMD uses a vdW radius for H 
     # of 1.00, and we use 1.10.
