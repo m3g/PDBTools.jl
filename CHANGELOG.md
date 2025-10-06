@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.6.0
+Version 3.6.1-DEV
 -------------
 - ![FEATURE][badge-feature] `output_dots` option to `sasa_particles` to return the dots of the surface. 
 - ![ENHANCEMENT][badge-enhancement] return more compact SASA object. Rename `atomic_sasa` to `sasa_particles` (keep alias for compatibility).
