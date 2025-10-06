@@ -56,16 +56,21 @@ end
 # Structure that carries the information about dots of each atom, if 
 # they are exposed or found to be occluded by other atoms.
 #
-struct AtomDots
-    exposed::Vector{Bool}
+struct AtomDots{T<:AbstractVector{Bool}}
+    exposed::T
 end
-function CellListMap.reset_output!(x::AtomDots)
-    x.exposed .= true
-    return x
+# Make a contiguous chunk of memory for all exposed information
+struct AtomDotMatrix
+    all_dots::Matrix{Bool}
 end
-CellListMap.copy_output(x::AtomDots) = AtomDots(copy(x.exposed))
-function CellListMap.reducer(x::AtomDots, y::AtomDots)
-    x.exposed .= x.exposed .& y.exposed
+Base.getindex(m::AtomDotMatrix, i) = AtomDots(@view(m.all_dots[:,i]))
+CellListMap.copy_output(m::AtomDotMatrix) = AtomDotMatrix(copy(m.all_dots))
+function CellListMap.reset_output!(m::AtomDotMatrix)
+    m.all_dots .= true
+    return m
+end
+function CellListMap.reducer(x::AtomDotMatrix, y::AtomDotMatrix)
+    x.all_dots .= x.all_dots .& y.all_dots
     return x
 end
 
@@ -206,7 +211,7 @@ function atomic_sasa(
         xpositions=coor.(atoms),
         unitcell=nothing,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=[AtomDots(trues(length(dot_cache[atom_type(at)].x))) for at in atoms],
+        output=AtomDotMatrix(ones(Bool, n_dots, length(atoms))), 
         output_name=:surface_dots,
         parallel=parallel,
     )
