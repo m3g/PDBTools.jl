@@ -38,7 +38,7 @@ export select_with_vmd
 # Tools
 export center_of_mass
 export moveto!
-export atomic_sasa, sasa
+export sasa_particles, sasa
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -109,6 +109,6 @@ include("./tools/custom_types.jl")
 include("./package_internals/legacy.jl")
 
 # Precompilation
-include("./package_internals/precompile.jl")
+#include("./package_internals/precompile.jl")
 
 end

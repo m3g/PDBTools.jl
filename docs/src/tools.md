@@ -10,7 +10,7 @@ the necessary tool for each case.
 ## Solvent Accessible Surface Area (SASA)
 
 ```@docs
-atomic_sasa
+sasa_particles
 sasa
 ```
 

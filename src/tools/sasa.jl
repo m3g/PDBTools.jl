@@ -4,10 +4,15 @@ using LinearAlgebra: norm
 using Statistics: mean
 using SIMD: VecRange
 
-# Container for the custom atom filed that will carry the atom SASA
-struct SASA
-    sasa::Float32
+#
+# Container for the custom atom filed that will carry the resulting SASA information
+#
+struct SASA{N,V}
+    particles::V
+    sasa::Vector{Float32}
+    dots::Vector{SVector{N,Float32}}
 end
+Base.getindex(x::SASA, i) = x.sasa[i]
 
 # Structure with the dot cache per atom type
 struct DotCache{V}
@@ -120,7 +125,7 @@ function update_pair_dot_exposure!(
 end
 
 """
-    atomic_sasa(atoms; probe_radius, n_dots)
+    sasa_particles(atoms; probe_radius, n_dots)
 
 Calculates the Solvent Accessible Surface Area (SASA) for a vector of `Atom`s. 
 
@@ -130,8 +135,9 @@ Calculates the Solvent Accessible Surface Area (SASA) for a vector of `Atom`s.
 
 # Returns
 
-Vector of `PDBToools.Atom`s, with custom fields of type `PDBTools.SASA`, 
-which contain the solvent accessible surface area for each atom, in Å².
+`PDBTools.SASA` structure, containing the vector of atoms, the SASA of each atom (in Å²) and,
+optionally, the solvent accessible dots that define the surface. 
+
 The `sasa` function computes the total SASA or the SASA of a subset of the atoms
 in the structure.
 
@@ -150,7 +156,7 @@ julia> using PDBTools
 
 julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 
-julia> at_sasa = atomic_sasa(prot);
+julia> at_sasa = sasa_particles(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
 5389.0146f0
@@ -172,6 +178,8 @@ are functions:
 
 - `atom_type`: Function that given each atom of the array of atoms, returns the atom "type".
 - `atom_radius_from_type`: Given the atom "type", returns the vdW radius of the atom. 
+- `output_dots::Bool=false`: If true, the resulting `SASA` structure will contain the solvent accessible
+    dots per particle in the `dots` field.
 
 By default, `atom_type = PDBTools.element`, a function that just returns the element symbol of the atom,
 and `atom_radius_from_type` obtains the vdW radius from the `PDBTools.elements` list given the element symbol.
@@ -180,12 +188,13 @@ Atoms with missing radius have a `NaN` value, and the computation will not retur
 values. 
 
 """
-function atomic_sasa(
+function sasa_particles(
     atoms::AbstractVector{<:Atom};
     probe_radius::Real=1.4f0,
     n_dots::Int=512,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
+    output_dots::Bool=false,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
 ) where {N}
@@ -225,17 +234,25 @@ function atomic_sasa(
         system,
     )
 
-    ats_with_sasa = [
-        add_custom_field(
-            atoms[i],
-            SASA(
-                4 * π * (atom_radius_from_type(atom_type(atoms[i])) + probe_radius)^2 *
-                mean(system.surface_dots[i].exposed)
-            )
-        ) for i in eachindex(atoms)
-    ]
+    s = zeros(Float32, length(atoms))
+    dots = Vector{SVector{3,Float32}}[]
+    for i in eachindex(atoms)
+        type_i  = atom_type(atoms[i])
+        s[i] = 4π*(atom_radius_from_type(atom_type(atoms[i])) + probe_radius)^2 * sum(system.surface_dots[i].exposed)/n_dots
+        if output_dots
+            dot_cache_i = dot_cache[type_i]
+            exposed_i = system.surface_dots[i].exposed
+            dots_exposed_i = Vector{3,Float32}[]
+            for idot in 1:n_dots
+                if exposed_i[idot]
+                    push!(dots_exposed_i, SVector(atoms[i].x, atoms[i].y, atoms[i].z) + dot_cache_i[idot])
 
-    return ats_with_sasa
+                end
+            end
+            push!(dots, dots_exposed_i)
+        end
+    end
+    return SASA{3,typeof(atoms)}(atoms, s, dots)
 end
 
 """
@@ -243,7 +260,7 @@ end
     sasa(atoms::AbstractVector{PDBTools.SASA})
     sasa(atoms::AbstractVector{PDBTools.SASA}, selection::Union{Function,String})
 
-Given the output of `atomic_sasa`, sums up contributions of atoms to compute the SASA
+Given the output of `sasa_particles`, sums up contributions of atoms to compute the SASA
 of the full structure, an atom, or a subset of atoms. The function can called with a 
 single `Atom{SASA}` atom, a vector of atoms (in which case the full SASA is returned),
 or a vector of atoms and a selection, given by a function or selection string. 
@@ -255,7 +272,7 @@ julia> using PDBTools
 
 julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
 
-julia> at_sasa = atomic_sasa(prot);
+julia> at_sasa = sasa_particles(prot);
 
 julia> sasa(at_sasa) # total sasa of prot
 5389.0146f0
@@ -273,10 +290,9 @@ julia> sasa(at_sasa[1]) # single atom SASA
 """
 function sasa end
 
-sasa(atom::Atom{SASA}) = atom.custom.sasa
-sasa(atoms::AbstractVector{<:Atom{SASA}}) = sum(sasa, atoms)
-sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::String) = sasa(atoms, Select(sel))
-sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at in atoms if sel(at))
+sasa(p::SASA) = sum(i -> p.sasa[i], eachindex(p.sasa))
+sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {N} = sum(p.sasa[i] for i in eachindex(p.sasa) if sel(p.particles[i]))
+sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa(p, Select(sel))
 
 @testitem "sasa" begin
     using PDBTools
@@ -294,7 +310,7 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
         "O" => 1.52,
         "S" => 1.80,
     )
-    at_sasa = atomic_sasa(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
+    at_sasa = sasa_particles(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
     @test sasa(at_sasa) ≈ 5365.55029296875 rtol = 0.01
     # Accessiblity of groups within the structure
     @test sasa(at_sasa, "backbone") ≈ 1130.37646484375 rtol = 0.05
@@ -304,26 +320,26 @@ sasa(atoms::AbstractVector{<:Atom{SASA}}, sel::Function) = sum(sasa(at) for at i
 
     # Compare with Gromacs - 2023.3 output
     # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000
-    @test sasa(atomic_sasa(prot; n_dots=N)) ≈ 100 * 53.754 rtol = 0.01
+    @test sasa(sasa_particles(prot; n_dots=N)) ≈ 100 * 53.754 rtol = 0.01
     # Isolated groups
-    @test sasa(atomic_sasa(select(prot, "backbone and not name O"); n_dots=N)) ≈ 100 * 55.229 rtol = 0.05
-    @test sasa(atomic_sasa(select(prot, "name CA"); n_dots=N)) ≈ 100 * 58.630 rtol = 0.05
-    @test sasa(atomic_sasa(select(prot, "sidechain and not element H"); n_dots=N)) ≈ 100 * 69.024 rtol = 0.05
+    @test sasa(sasa_particles(select(prot, "backbone and not name O"); n_dots=N)) ≈ 100 * 55.229 rtol = 0.05
+    @test sasa(sasa_particles(select(prot, "name CA"); n_dots=N)) ≈ 100 * 58.630 rtol = 0.05
+    @test sasa(sasa_particles(select(prot, "sidechain and not element H"); n_dots=N)) ≈ 100 * 69.024 rtol = 0.05
 
     # Test non-contiguous indexing with general selections
-    at_sasa = atomic_sasa(select(prot, "name CA"); n_dots=N)
+    at_sasa = sasa_particles(select(prot, "name CA"); n_dots=N)
     @test sasa(at_sasa) ≈ 5863.24f0
     @test sasa(at_sasa, "resname THR") ≈ 322.17105f0
     @test sasa(at_sasa, at -> resname(at) == "THR") ≈ 322.17105f0
 
     # Test parallelization
-    @test sasa(atomic_sasa(prot; parallel=false)) ≈ sasa(atomic_sasa(prot; parallel=true))
+    @test sasa(sasa_particles(prot; parallel=false)) ≈ sasa(sasa_particles(prot; parallel=true))
 
     # Test errors
-    @test_throws ArgumentError atomic_sasa(prot; probe_radius=-2.0)
-    @test_throws ArgumentError atomic_sasa(prot; n_dots=0)
+    @test_throws ArgumentError sasa_particles(prot; probe_radius=-2.0)
+    @test_throws ArgumentError sasa_particles(prot; n_dots=0)
     prot[1].name = "Ti"
     prot[1].pdb_element = "Ti"
-    @test_throws ArgumentError atomic_sasa(prot)
+    @test_throws ArgumentError sasa_particles(prot)
 
 end
