@@ -352,7 +352,7 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
 
     # Test show method
     @test parse_show(at_sasa; repl=Dict(r"PDBTools." => "")) ≈ """
-            PDBTools.SASA{3, Vector{Atom{Nothing}}}
+            SASA{3, Vector{Atom{Nothing}}}
                 Number of particles: 104
                 Total SASA: 5856.9966
                 Output of dots: true 
