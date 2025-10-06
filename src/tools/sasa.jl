@@ -10,9 +10,10 @@ using SIMD: VecRange
 struct SASA{N,V}
     particles::V
     sasa::Vector{Float32}
-    dots::Vector{SVector{N,Float32}}
+    dots::Vector{Vector{SVector{N,Float32}}}
 end
-Base.getindex(x::SASA, i) = x.sasa[i]
+Base.getindex(x::SASA, i::Integer) = x.sasa[i]
+Base.eachindex(x::SASA) = eachindex(x.sasa)
 
 # Structure with the dot cache per atom type
 struct DotCache{V}
@@ -242,10 +243,12 @@ function sasa_particles(
         if output_dots
             dot_cache_i = dot_cache[type_i]
             exposed_i = system.surface_dots[i].exposed
-            dots_exposed_i = Vector{3,Float32}[]
+            dots_exposed_i = SVector{3,Float32}[]
             for idot in 1:n_dots
                 if exposed_i[idot]
-                    push!(dots_exposed_i, SVector(atoms[i].x, atoms[i].y, atoms[i].z) + dot_cache_i[idot])
+                    x = SVector(atoms[i].x, atoms[i].y, atoms[i].z)
+                    v = SVector(dot_cache_i.x[idot], dot_cache_i.y[idot], dot_cache_i.z[idot])
+                    push!(dots_exposed_i, x + v)
 
                 end
             end
@@ -289,9 +292,8 @@ julia> sasa(at_sasa[1]) # single atom SASA
 
 """
 function sasa end
-
-sasa(p::SASA) = sum(i -> p.sasa[i], eachindex(p.sasa))
-sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {N} = sum(p.sasa[i] for i in eachindex(p.sasa) if sel(p.particles[i]))
+sasa(p::SASA) = sum(i -> p[i], eachindex(p))
+sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]))
 sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa(p, Select(sel))
 
 @testitem "sasa" begin
@@ -334,6 +336,11 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
 
     # Test parallelization
     @test sasa(sasa_particles(prot; parallel=false)) ≈ sasa(sasa_particles(prot; parallel=true))
+
+    # Test the output of dots
+    at_sasa = sasa_particles(select(prot, "name CA"); n_dots=20, output_dots=true)
+    @test sasa(at_sasa) ≈ 5856.9966f0  
+    @test sum(length(v) for v in at_sasa.dots) == 970
 
     # Test errors
     @test_throws ArgumentError sasa_particles(prot; probe_radius=-2.0)
