@@ -5,3 +5,6 @@ export readPDB, writePDB
 const readPDB = read_pdb
 writePDB(atoms::AbstractVector{<:Atom}, filename::String, args...; kargs...) =
     write_pdb(filename, atoms, args...; kargs...)
+
+export atomic_sasa
+const atomic_sasa = sasa_particles

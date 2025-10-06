@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.5.6-DEV
 -------------
+- ![ENHANCEMENT][badge-enhancement] return more compact SASA object. Rename `atomic_sasa` to `sasa_particles` (keep alias for compatibility).
 - ![ENHANCEMENT][badge-enhancement] make the `AtomDots` of sasa calculation a continguous memory block, to reduce GC pressure.
 - ![INFO][badge-info] Set default `n_dots` of `atomic_sasa` computations to 512 instead of 500 such that it is a multiple of 16, the default `N_SIMD`.
 
