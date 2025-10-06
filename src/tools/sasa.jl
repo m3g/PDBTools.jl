@@ -14,6 +14,14 @@ struct SASA{N,V}
 end
 Base.getindex(x::SASA, i::Integer) = x.sasa[i]
 Base.eachindex(x::SASA) = eachindex(x.sasa)
+function Base.show(io::IO, ::MIME"text/plain", s::SASA) 
+    print(io, chomp("""
+    $(typeof(s))
+        Number of particles: $(length(s.particles))
+        Total SASA: $(sasa(s))
+        Output of dots: $(isempty(s.dots) ? false : true) 
+    """))
+end
 
 # Structure with the dot cache per atom type
 struct DotCache{V}
@@ -298,6 +306,7 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
 
 @testitem "sasa" begin
     using PDBTools
+    using ShowMethodTesting
     prot = read_pdb(PDBTools.TESTPDB, "protein")
     N = 10_030 # number of dot samples: not multiple of 16 to have a SIMD remaining
 
@@ -341,6 +350,14 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
     at_sasa = sasa_particles(select(prot, "name CA"); n_dots=20, output_dots=true)
     @test sasa(at_sasa) ≈ 5856.9966f0  
     @test sum(length(v) for v in at_sasa.dots) == 970
+
+    # Test show method
+    @test parse_show(at_sasa) ≈ """
+            PDBTools.SASA{3, Vector{Atom{Nothing}}}
+                Number of particles: 104
+                Total SASA: 5856.9966
+                Output of dots: true 
+        """
 
     # Test errors
     @test_throws ArgumentError sasa_particles(prot; probe_radius=-2.0)
