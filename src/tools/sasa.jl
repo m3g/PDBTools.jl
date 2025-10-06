@@ -266,14 +266,14 @@ function sasa_particles(
 end
 
 """
-    sasa(atom::Atom{PDBTools.SASA})
-    sasa(atoms::AbstractVector{PDBTools.SASA})
-    sasa(atoms::AbstractVector{PDBTools.SASA}, selection::Union{Function,String})
+    sasa(s::SASA)
+    sasa(s::SASA{<:AbstractVector{<:PDBTools.Atom}})
+    sasa(atoms::SASA{<:AbstractVector{PDBTools.Atom}}, selection::Union{Function,String})
 
 Given the output of `sasa_particles`, sums up contributions of atoms to compute the SASA
-of the full structure, an atom, or a subset of atoms. The function can called with a 
-single `Atom{SASA}` atom, a vector of atoms (in which case the full SASA is returned),
-or a vector of atoms and a selection, given by a function or selection string. 
+of the full structure, an atom, or a subset of atoms. The function can be called with only a 
+`SASA` object (in which case the full SASA is returned),
+or with the object and a selection, given by a function or selection string. 
 
 # Example
 
