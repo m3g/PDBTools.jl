@@ -56,6 +56,7 @@ const LONG_CHAIN_STRING_CIF = joinpath(@__DIR__, "../test/long_chain_string.cif"
 const LONG_NAME_STRING_CIF = joinpath(@__DIR__, "../test/long_name_string.cif")
 const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
 const HETATMPDB = joinpath(@__DIR__, "../test/hetatm.pdb")
+const TESTPBC = joinpath(@__DIR__, "../test/pbc.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")
