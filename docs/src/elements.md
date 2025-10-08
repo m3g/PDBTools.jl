@@ -99,7 +99,7 @@ add_element!
 remove_custom_elements!
 ```
 
-## Additional property-retrieving functions
+## Additional property-retrieving and set functions
 
 The following functions are supported as part of the API, as a intending to interface
 with `AtomsBase`. Nevertheless, currently these functions do not overload the exported
@@ -111,13 +111,14 @@ ones from `AtomsBase`, because that package is in a unstable state.
 |`atomic_symbol(::PDBTools.Atom)` |  `atomic_symbol(Atom(name="NE2"))` |  `:N` |
 |`atomic_mass(::PDBTools.Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
 |`position(::PDBTools.Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
-
+|`set_position!(::PDBTools.Atom, x::AbstractVector)`      |  `set_position!(at, [1,2,3])` |  `Atom` |
 
 ```@docs
 atomic_number
 atomic_symbol
 atomic_mass
 position
+set_position!
 ```
 
 

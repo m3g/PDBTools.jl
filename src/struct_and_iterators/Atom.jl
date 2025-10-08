@@ -252,6 +252,30 @@ Returns the position of an atom given the `Atom` structure.
 """
 Base.position(atom::Atom) = SVector(atom.x, atom.y, atom.z)
 
+"""
+    set_position!(atom::Atom, x::Union{Tuple,AbstractVector})
+
+Sets the position (x,y,z coordinates) of the atom, given a vector or tuple of coordinates.
+
+"""
+function set_position!(atom::Atom, x::Union{Tuple,AbstractVector})
+    length(x) == 3 || throw(ArgumentError("Vector of positions must have length 3, got: $x"))
+    atom.x = x[1]
+    atom.y = x[2]
+    atom.z = x[3]
+    return atom
+end
+
+@testitem "Atom positions" begin
+    using PDBTools
+    at = Atom(name="N", x=1.0, y=2.0, z=3.0)
+    @test position(at) == SVector(1.0, 2.0, 3.0)
+    set_position!(at,SVector(4.0, 5.0, 6.0))
+    @test position(at) == SVector(4.0, 5.0, 6.0)
+    set_position!(at,(7.0, 8.0, 9.0))
+    @test position(at) == SVector(7.0, 8.0, 9.0)
+end
+
 const atom_title = @sprintf(
     "%8s %4s %7s %5s %8s %8s %8s %8s %8s %5s %5s %5s %7s %9s",
     "index",

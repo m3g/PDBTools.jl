@@ -18,7 +18,7 @@ const VERSION = pkgversion(@__MODULE__)
 
 # AtomsBase interface compatibility: deprecated until AtomsBase becomes stable
 #import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
-export atomic_number, atomic_symbol, atomic_mass, position
+export atomic_number, atomic_symbol, atomic_mass, position, set_position!
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
 export read_mmcif, write_mmcif
