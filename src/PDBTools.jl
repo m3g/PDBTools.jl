@@ -7,7 +7,7 @@ import PrecompileTools
 using Format: format
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
-using StaticArrays: SVector
+using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: String1, String3, String7
@@ -39,6 +39,7 @@ export select_with_vmd
 export center_of_mass
 export moveto!
 export sasa_particles, sasa
+export read_unitcell, lattice_to_matrix, matrix_to_lattice
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -100,6 +101,7 @@ include("./coordinates/dihedrals.jl")
 # Miscellaneous tools
 include("./tools/tools.jl")
 include("./tools/sasa.jl")
+include("./tools/read_unitcell.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")

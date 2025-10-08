@@ -56,6 +56,18 @@ scatter!(Tuple.(dots); # surface dots
 )
 ```
 
+!!! note 
+    The `sasa_particles` function supports periodic boundary conditions if a unit cell is provided. 
+    See the `read_unitcell` and `cryst1_to_matrix` functions for further information.
+
+## Read and convert unit cells
+
+```@docs
+read_unitcell
+lattice_to_matrix
+matrix_to_lattice
+```
+
 ## Check the stereochemistry of protein residues
 
 ```@docs
