@@ -13,6 +13,9 @@ PDBTools.jl Changelog
 Version 3.7.0-DEV
 -------------
 - ![FEATURE][badge-feature] Support for periodic boundary conditions in `sasa_particles` with `unitcell` keyword argument.
+
+Version 3.6.0
+-------------
 - ![FEATURE][badge-feature] `output_dots` option to `sasa_particles` to return the dots of the surface. 
 - ![ENHANCEMENT][badge-enhancement] return more compact SASA object. Rename `atomic_sasa` to `sasa_particles` (keep alias for compatibility).
 - ![ENHANCEMENT][badge-enhancement] make the `AtomDots` of sasa calculation a continguous memory block, to reduce GC pressure.
