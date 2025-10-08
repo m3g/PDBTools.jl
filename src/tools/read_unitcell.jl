@@ -185,7 +185,7 @@ end
     @test eltype(triclinic_matrix) == Float64
     @test all(isapprox(v1,v2,atol=1e-5) for (v1,v2) in zip(values(matrix_to_lattice(triclinic_matrix)),values((a = 39.85, b = 54.449999999999996, c = 59.84, α = 72.01, β = 89.44, γ = 89.43))))
 
-    @test read_unitcell(PDBTools.TESTPBC) ≈ [85.0  -3.71547f-6  -3.71547f-6;  0.0  85.0 -3.71547f-6; 0.0 0.0 85.0]
+    @test read_unitcell(PDBTools.TESTPBC) ≈ [107.845 0 0;  0.0  107.845 0; 0.0 0.0 107.845]
     @test read_unitcell(PDBTools.TESTCIF) ≈ [74.449 -3.25427f-6 -3.25427f-6; 0.0 74.449 -3.25427f-6; 0.0 0.0 74.449]
     
     # Throw error if unitcel ldata is missing

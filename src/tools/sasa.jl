@@ -332,10 +332,10 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
     @test sasa(at_sasa, "residue 104") ≈ 122.50507354736328 rtol = 0.05
 
     # Test periodic boundary conditions
-    at_sasa_pbc = sasa_particles(read_pdb(PDBTools.TESTPBC, "protein"); unitcell=[85, 85, 85], n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
-    @test sasa(at_sasa_pbc) ≈ sasa(at_sasa)
-    at_sasa_pbc = sasa_particles(read_pdb(PDBTools.TESTPBC, "protein"); unitcell=[85 0 0; 0 85 0; 0 0 85], n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
-    @test sasa(at_sasa_pbc) ≈ sasa(at_sasa)
+    at_sasa_no_pbc = sasa_particles(read_pdb(PDBTools.TESTNOPBC, "protein"); n_dots=N)
+    uc = [107.845, 107.845, 107.845]
+    at_sasa_pbc = sasa_particles(read_pdb(PDBTools.TESTPBC, "protein"); unitcell=uc, n_dots=N)
+    @test sasa(at_sasa_pbc) ≈ sasa(at_sasa_no_pbc)
 
     # Compare with Gromacs - 2023.3 output
     # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000
