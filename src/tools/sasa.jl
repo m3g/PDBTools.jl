@@ -154,6 +154,8 @@ in the structure.
 - `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
 - `n_dots::Int=512`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
+- `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
+  the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires 
   running Julia with multiple threads).
 
@@ -203,6 +205,7 @@ function sasa_particles(
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     output_dots::Bool=false,
+    unitcell::Union{AbstractVector, AbstractMatrix, Nothing}=nothing,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
 ) where {N}
@@ -226,7 +229,7 @@ function sasa_particles(
 
     system = ParticleSystem(
         xpositions=coor.(atoms),
-        unitcell=nothing,
+        unitcell=unitcell,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
         output=AtomDotMatrix(ones(Bool, n_dots, length(atoms))), 
         output_name=:surface_dots,
@@ -327,6 +330,12 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
     @test sasa(at_sasa, "resname GLU LYS") ≈ 797.8261108398438 rtol = 0.05
     @test sasa(at_sasa, "residue 1") ≈ 124.57905578613281 rtol = 0.05
     @test sasa(at_sasa, "residue 104") ≈ 122.50507354736328 rtol = 0.05
+
+    # Test periodic boundary conditions
+    at_sasa_no_pbc = sasa_particles(read_pdb(PDBTools.TESTNOPBC, "protein"); n_dots=N)
+    uc = [107.845, 107.845, 107.845]
+    at_sasa_pbc = sasa_particles(read_pdb(PDBTools.TESTPBC, "protein"); unitcell=uc, n_dots=N)
+    @test sasa(at_sasa_pbc) ≈ sasa(at_sasa_no_pbc)
 
     # Compare with Gromacs - 2023.3 output
     # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000

@@ -17,7 +17,7 @@ makedocs(
         "Read and Write" => "readwrite.md",
         "Selections" => "selections.md",
         "Iterators" => "iterators.md",
-        "Element properties" => "elements.md",
+        "Atom and element properties" => "elements.md",
         "Contact maps" => "contacts.md",
         "Dihderals and Ramachandran" => "dihedrals.md",
         "Auxiliary functions" => "auxiliary.md",

@@ -7,7 +7,7 @@ import PrecompileTools
 using Format: format
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
-using StaticArrays: SVector
+using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: String1, String3, String7
@@ -18,7 +18,7 @@ const VERSION = pkgversion(@__MODULE__)
 
 # AtomsBase interface compatibility: deprecated until AtomsBase becomes stable
 #import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
-export atomic_number, atomic_symbol, atomic_mass, position
+export atomic_number, atomic_symbol, atomic_mass, position, set_position!
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
 export read_mmcif, write_mmcif
@@ -39,6 +39,7 @@ export select_with_vmd
 export center_of_mass
 export moveto!
 export sasa_particles, sasa
+export read_unitcell, lattice_to_matrix, matrix_to_lattice
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -56,6 +57,8 @@ const LONG_CHAIN_STRING_CIF = joinpath(@__DIR__, "../test/long_chain_string.cif"
 const LONG_NAME_STRING_CIF = joinpath(@__DIR__, "../test/long_name_string.cif")
 const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
 const HETATMPDB = joinpath(@__DIR__, "../test/hetatm.pdb")
+const TESTPBC = joinpath(@__DIR__, "../test/pbc.pdb")
+const TESTNOPBC = joinpath(@__DIR__, "../test/no_pbc.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")
@@ -99,6 +102,7 @@ include("./coordinates/dihedrals.jl")
 # Miscellaneous tools
 include("./tools/tools.jl")
 include("./tools/sasa.jl")
+include("./tools/read_unitcell.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")

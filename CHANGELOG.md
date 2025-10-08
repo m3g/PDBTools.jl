@@ -10,7 +10,13 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.6.1-DEV
+Version 3.7.0-DEV
+-------------
+- ![FEATURE][badge-feature] `set_position!(at, ::AbstractVector)` to conveniently set coordinates from a vector or tuple of coordinates.
+- ![FEATURE][badge-feature] Support for periodic boundary conditions in `sasa_particles` with `unitcell` keyword argument.
+- ![FEATURE][badge-feature] Add `read_unitcell`, `lattice_to_matrix`, and `lattice_to_matrix` functions to read and convert unitcells written in PDB or mmCIF files.
+
+Version 3.6.0
 -------------
 
 Version 3.6.0

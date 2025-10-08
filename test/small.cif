@@ -1,3 +1,9 @@
+_cell.length_a       74.4490
+_cell.length_b       74.4490
+_cell.length_c       74.4490
+_cell.angle_alpha    90.00
+_cell.angle_beta     90.00
+_cell.angle_gamma    90.00
 loop_
 _atom_type.symbol 
 C  
