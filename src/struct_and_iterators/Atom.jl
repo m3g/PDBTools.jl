@@ -268,6 +268,7 @@ end
 
 @testitem "Atom positions" begin
     using PDBTools
+    using StaticArrays
     at = Atom(name="N", x=1.0, y=2.0, z=3.0)
     @test position(at) == SVector(1.0, 2.0, 3.0)
     set_position!(at,SVector(4.0, 5.0, 6.0))
