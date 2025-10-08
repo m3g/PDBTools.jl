@@ -138,13 +138,13 @@ function matrix_to_lattice(M::AbstractMatrix)
     T = eltype(M)
     # Ensure the input is a 3x3 matrix
     if size(M) != (3, 3)
-        error("Input must be a 3x3 matrix.")
+        throw(ArgumentError("Input must be a 3x3 matrix."))
     end
 
     # Extract column vectors
-    a_vec = M[:, 1]
-    b_vec = M[:, 2]
-    c_vec = M[:, 3]
+    a_vec = @view(M[:, 1])
+    b_vec = @view(M[:, 2])
+    c_vec = @view(M[:, 3])
 
     # Calculate side lengths
     a = norm(a_vec)
@@ -191,5 +191,16 @@ end
     # Throw error if unitcel ldata is missing
     @test_throws ArgumentError read_unitcell(PDBTools.TESTPDB)
     @test_throws ArgumentError read_unitcell(PDBTools.BROKENCIF)
+    @test_throws ArgumentError matrix_to_lattice([1 0; 0 1])
+
+    # Test allocations of conversions
+    using Chairmarks
+    a, b, c = 39.850, 54.450, 59.840
+    α, β, γ = 72.01, 89.44, 89.43
+    t = @b lattice_to_matrix($a, $b, $c, $α, $β, $γ)
+    @test t.allocs == 0
+    l = lattice_to_matrix(a, b, c, α, β, γ)
+    t = @b matrix_to_lattice($l)
+    @test t.allocs == 0
 
 end
