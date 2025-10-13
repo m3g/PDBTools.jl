@@ -70,6 +70,20 @@ end
     @test residue_residue_distance(r1, r10) ≈ 5.6703672f0
     d = residue_residue_distance(r1, r10; positions=coor(ats))
     @test d ≈ 5.6703672f0
+
+    # Test with a PBC cell (protein broken by the PBCs)
+    pdb_pbc = read_pdb(PDBTools.TESTPBC, "protein")
+    uc = read_unitcell(PDBTools.TESTPBC)
+    pdb_nopbc = read_pdb(PDBTools.TESTNOPBC, "protein")
+    r_pbc = collect(eachresidue(pdb_pbc))
+    r_nopbc = collect(eachresidue(pdb_nopbc))
+    for i in eachindex(r_pbc, r_nopbc)
+        for j in eachindex(r_pbc, r_nopbc)
+            dpbc = residue_residue_distance(r_pbc[i], r_pbc[j]; unitcell=uc)
+            dnopbc = residue_residue_distance(r_nopbc[i], r_nopbc[j])
+            @test dpbc ≈ dnopbc rtol=1e-2
+        end
+    end
 end
 
 """
@@ -269,4 +283,16 @@ end
     @test count(map[:, 3]) == 3
     map = contact_map(cA, cB; discrete=false)
     @test sum(skipmissing(map.matrix)) ≈ 58.00371f0
+
+    # Test with and without periodic boundary conditions
+    pdb_pbc = read_pdb(PDBTools.TESTPBC, "protein")
+    uc = read_unitcell(PDBTools.TESTPBC)
+    pdb_nopbc = read_pdb(PDBTools.TESTNOPBC, "protein")
+    pbc = contact_map(pdb_pbc; discrete=true, unitcell=uc)
+    no_pbc = contact_map(pdb_nopbc; discrete=true)
+    @test pbc.matrix == no_pbc.matrix
+    pbc = contact_map(pdb_pbc; discrete=false, unitcell=uc)
+    no_pbc = contact_map(pdb_nopbc; discrete=false)
+    @test all(ismissing(pbc.matrix[i]) | isapprox(pbc.matrix[i], no_pbc.matrix[i]; rtol=1e-2) for i in eachindex(pbc.matrix))
+
 end
