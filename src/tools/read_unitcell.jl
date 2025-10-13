@@ -2,7 +2,7 @@
     read_unitcell(file::AbstractString)
 
 Reads the lattice parameters of unitcell from a PDB (`CRYST1` field) or mmCIF file, and converts it to a unitcell matrix
-with the `lattice_to_matrix` function.
+with the `lattice_to_matrix` function. The unitcell matrix contains the lattice vectors as the *columns* of the matrix. 
 
 # Example
 
@@ -70,7 +70,8 @@ end
     lattice_to_matrix(a, b, c, α, β, γ)
 
 Converts unit cell lattice parameters and convert them to a 3x3
-unit cell matrix (orthogonalization matrix).
+unit cell matrix (orthogonalization matrix), where the lattice vectors
+are the *columns* of the matrix.
 
 The resulting matrix has the lattice vectors as its columns, with
 vector 'a' aligned along the x-axis and vector 'b' in the xy-plane.
@@ -122,8 +123,8 @@ end
 """
     matrix_to_lattice(M::AbstractMatrix)
 
-Converts a 3x3 unit cell matrix back into the six lattice parameters 
-(sides a, b, c and angles α, β, γ).
+Converts a 3x3 unit cell matrix where the lattice vectors are the *columns*, back into the six 
+lattice parameters (sides a, b, c and angles α, β, γ).
 
 # Arguments
 - `M::AbstractMatrix`: A 3x3 matrix where columns are the lattice vectors.

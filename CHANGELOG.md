@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.7.1-DEV
 -------------
+- ![INFO][badge-info] Add tests to computing contact maps with PBCs.
 
 Version 3.7.0
 -------------
