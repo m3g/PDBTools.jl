@@ -86,7 +86,7 @@ julia> atom.custom[:c]
 
 """
 mutable struct Atom{CustomType}
-    index::Int64 # The sequential index of the atoms in the file
+    index::Int32 # The sequential index of the atoms in the file
     index_pdb::Int32 # The index as written in the PDB file (might be anything)
     name::String7
     resname::String7
