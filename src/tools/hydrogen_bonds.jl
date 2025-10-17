@@ -18,6 +18,13 @@ struct HBonds
 end
 Base.length(x::HBonds) = length(x.D)
 Base.getindex(x::HBonds, i::Integer) = (x.D[i], x.H[i], x.A[i])
+function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
+    print(io, chomp("""
+    HBonds data structure with $(length(hb)) bonds.
+        First hbond: (D-H---A) = $(hb[1])
+        Last hbond: (D-H---A) = $(hb[length(hb)])
+    """))
+end
 
 CellListMap.copy_output(x::HBonds) = HBonds(copy(x.D), copy(x.H), copy(x.A))
 function CellListMap.reset_output!(x::HBonds)
