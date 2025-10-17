@@ -9,7 +9,11 @@ function CellListMap.reset_output!(x::HPolarBonds)
     empty!(x.H)
     return x
 end
-CellListMap.reducer!(x::HPolarBonds, y::HPolarBonds) = append!(x,y)
+function CellListMap.reducer!(x::HPolarBonds, y::HPolarBonds)
+    append!(x.D,y.D)
+    append!(x.H,y.H)
+    return x
+end
 
 struct HBonds
     D::Vector{Int32} # Hydrogen bond donnor
@@ -23,8 +27,8 @@ Base.getindex(x::HBonds, i::Integer) = (D=x.D[i], H=x.H[i], A=x.A[i], r=x.r[i], 
 function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     print(io, chomp("""
     HBonds data structure with $(length(hb)) hydrogen-bonds.
-        First hbond: (D-H---A) = $(hb[1])
-        Last hbond: (D-H---A) = $(hb[length(hb)])
+        First hbond: (D-H---A) = $(length(hb) > 0 ? hb[1] : nothing)
+        Last hbond: (D-H---A) = $(length(hb) > 0 ? hb[length(hb)] : nothing)
         - r is the distance between Donnor and Acceptor atoms (D-A)
         - ang is the angle (degrees) between H-D and A-D.
     """))
@@ -39,7 +43,14 @@ function CellListMap.reset_output!(x::HBonds)
     empty!(x.ang)
     return x
 end 
-CellListMap.reducer!(x::HBonds, y::HBonds) = append!(x,y)
+function CellListMap.reducer!(x::HBonds, y::HBonds) 
+    append!(x.D,y.D)
+    append!(x.H,y.H)
+    append!(x.A,y.A)
+    append!(x.r,y.r)
+    append!(x.ang,y.ang)
+    return x
+end
 
 function hbond_angle(D,H,A)
     v1 = H - D
@@ -137,6 +148,10 @@ Function to find hydrogen bonds in a set of atoms.
 ### Returns
 
 - `HBonds`: A data structure containing the found hydrogen bonds.
+
+!!! note
+    This function does not use topology information. It identified polar hydrogens based on distance criteria only,
+    where `d_covalent_bond` is the criterium for identifying covalent bonds between donnor and hydrogen atoms.
 
 """
 function hydrogen_bonds(
@@ -256,4 +271,35 @@ function hydrogen_bonds2(
         sys_hbonds,
     )
     return sys_hbonds.hbonds
+end
+
+@testitem "Hydrogen Bonds" begin
+    using PDBTools
+    pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb")
+    models = collect(eachmodel(pdb))
+    #
+    # Single structure
+    #
+    nhb = [63, 62, 56, 57, 62] # checked with gmx hbond
+    for (i, m) in enumerate(models)
+        @test length(hydrogen_bonds(m, "protein")) == nhb[i]
+        @test length(hydrogen_bonds(m, "protein"; parallel=true)) == nhb[i]
+    end
+    uc = read_unitcell(PDBTools.test_dir*"/hbonds.pdb")
+    @test length(hydrogen_bonds(models[1], "protein"; unitcell=uc)) == 63
+
+    pbcs = [
+        [ 88.749199, 90.714630, 94.511879],
+        [ 88.838280, 90.805679, 94.606750],
+        [ 88.764839, 90.730606, 94.528542],
+        [ 88.883881, 90.852287, 94.655304],
+        [ 88.828445, 90.795631, 94.596283],
+    ]
+    nhb = [17964, 17915, 17945, 17977, 17852] # checked with gmx hbond
+    for (i, m) in enumerate(models)
+        uc = pbcs[i]
+        @test length(hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc)) == nhb[i]
+        @test length(hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc, parallel=true)) == nhb[i]
+    end
+
 end

@@ -48,6 +48,7 @@ export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
 # Test files
+const test_dir = joinpath(@__DIR__, "../test")
 const TESTPDB = joinpath(@__DIR__, "../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__, "../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
