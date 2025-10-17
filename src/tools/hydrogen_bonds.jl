@@ -60,33 +60,27 @@ function push_hbond!(i, j, x, y, polar_bonds, sys, ang, hbonds, ats_sel1)
     return nothing
 end
 
-function hydrogen_bonds(
-    ats::AbstractVector{<:PDBTools.Atom},
-    sel1::Union{Function, String}=at -> true;
-    donnor_acceptor_distance::Real=3.0f0,
-    angle_cutoff::Real=20,
-    electronegative_elements=("N", "O", "F", "S"),
-    unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
-    d_covalent_bond::Real=1.2f0,
-    parallel::Bool=false,
+function find_hbond_donnors(
+    ats_sel;
+    positions, 
+    unitcell, 
+    cutoff,
+    parallel,
+    electronegative_elements,
+    d_covalent_bond,
 )
-    # Select desired atoms
-    ats_sel1 = select(ats, sel1)
-    ats_sel1_positions = coor.(ats_sel1)
-    #
-    # Find all possible hydrogen-bonding donors
-    #
-    sys_polar_bonds = ParticleSystem(
-        positions=ats_sel1_positions,
-        unitcell=unitcell,
-        cutoff=donnor_acceptor_distance,
+    sys_polar_bonds = ParticleSystem(;
+        positions,
+        unitcell,
+        cutoff,
         output=HPolarBonds(Int32[], Int32[]),
-        parallel=parallel,
+        parallel,
+        output_name=:polar_bonds,
     )
     polar_bonds = map_pairwise!(
         (x,y,i,j,d2,polar_bonds) -> begin
-            at_i = ats_sel1[i]
-            at_j = ats_sel1[j]
+            at_i = ats_sel[i]
+            at_j = ats_sel[j]
             el_i = element(at_i)
             el_j = element(at_j)
             if (el_i in electronegative_elements) & (el_j == "H")
@@ -109,6 +103,125 @@ function hydrogen_bonds(
     iord = sortperm(polar_bonds.D)
     polar_bonds.D .= polar_bonds.D[iord]
     polar_bonds.H .= polar_bonds.H[iord]
+    return polar_bonds
+end
+
+"""
+    hydrogen_bonds(ats::AbstractVector{<:PDBTools.Atom}, sel::Union{Function, Strign}=at -> true)
+
+Function to find hydrogen bonds in a set of atoms.
+
+### Arguments
+
+- `ats::AbstractVector{<:PDBTools.Atom}`: Vector of atoms to analyze.
+- `sel::Union{Function, String}=at -> true`: Selection of atoms to consider. Can be a function or a selection string.
+
+### Keyword Arguments
+
+- `donnor_acceptor_distance::Real=3.0f0`: Maximum distance between donnor and acceptor to consider a hydrogen bond.
+- `angle_cutoff::Real=20`: Maximum angle (in degrees) between donnor-hydrogen-acceptor to consider a hydrogen bond.
+- `electronegative_elements=("N", "O", "F", "S")`: Elements considered electronegative for hydrogen bonding.
+- `unitcell::Union{Nothing,AbstractVecOrMat}=nothing`: Unit cell for periodic boundary conditions.
+- `d_covalent_bond::Real=1.2f0`: Maximum distance between donnor and hydrogen to consider a covalent bond.
+- `parallel::Bool=false`: Whether to use parallel computation.
+
+### Returns
+
+- `HBonds`: A data structure containing the found hydrogen bonds.
+
+"""
+function hydrogen_bonds(
+    ats::AbstractVector{<:PDBTools.Atom},
+    sel::Union{Function, String}=at -> true;
+    donnor_acceptor_distance::Real=3.0f0,
+    angle_cutoff::Real=20,
+    electronegative_elements=("N", "O", "F", "S"),
+    unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
+    d_covalent_bond::Real=1.2f0,
+    parallel::Bool=false,
+)
+    # Select desired atoms
+    ats_sel = select(ats, sel)
+    ats_sel_positions = coor.(ats_sel)
+
+    #
+    # Find all possible hydrogen-bonding donors
+    #
+    polar_bonds = find_hbond_donnors(
+        ats_sel;
+        positions=ats_sel_positions, 
+        unitcell, 
+        cutoff=donnor_acceptor_distance,
+        parallel,
+        electronegative_elements,
+        d_covalent_bond,
+    )
+
+    #
+    # Find all hydrogen bonds
+    #
+    sys_hbonds = ParticleSystem(
+        positions=ats_sel_positions,
+        unitcell=unitcell,
+        cutoff=donnor_acceptor_distance,
+        output=HBonds(Int32[], Int32[], Int32[]),
+        parallel=parallel,
+        output_name=:hbonds
+    )
+    map_pairwise!(
+        (x,y,i,j,d2,hbonds) -> begin
+            el_i = element(ats_sel[i])
+            el_j = element(ats_sel[j])
+            if (el_i in electronegative_elements) & (el_j in electronegative_elements) 
+                push_hbond!(i, j, x, y, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel)
+                push_hbond!(j, i, y, x, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel)
+            end
+            return hbonds
+        end,
+        sys_hbonds,
+    )
+    return sys_hbonds.hbonds
+end
+
+function hydrogen_bonds2(
+    ats::AbstractVector{<:PDBTools.Atom},
+    sel1::Union{Function, String}=at -> true,
+    sel2::Union{Function, String}=at -> true;
+    donnor_acceptor_distance::Real=3.0f0,
+    angle_cutoff::Real=20,
+    electronegative_elements=("N", "O", "F", "S"),
+    unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
+    d_covalent_bond::Real=1.2f0,
+    parallel::Bool=false,
+)
+    # Select desired atoms
+    ats_sel1 = select(ats, sel1)
+    ats_sel2 = select(ats, sel2)
+    ats_sel1_positions = coor.(ats_sel1)
+    ats_sel2_positions = coor.(ats_sel2)
+
+    #
+    # Find all possible hydrogen-bonding donors
+    #
+    polar_bonds1 = find_hbond_donnors(
+        ats_sel1;
+        positions=ats_sel1_positions, 
+        unitcell, 
+        cutoff=donnor_acceptor_distance,
+        parallel,
+        electronegative_elements,
+        d_covalent_bond,
+    )
+    polar_bonds2 = find_hbond_donnors(
+        ats_sel2;
+        positions=ats_sel2_positions,
+        unitcell,
+        cutoff=donnor_acceptor_distance,
+        parallel,
+        electronegative_elements,
+        d_covalent_bond,
+    )
+
 
     #
     # Now, find all hydrogen bonds
