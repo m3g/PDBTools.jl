@@ -15,33 +15,39 @@ struct HBonds
     D::Vector{Int32} # Hydrogen bond donnor
     H::Vector{Int32} # polar hydrogen
     A::Vector{Int32} # hydrogen bond acceptor
+    r::Vector{Float32} # distance D-A
+    ang::Vector{Float32} # angle H-D-A
 end
 Base.length(x::HBonds) = length(x.D)
-Base.getindex(x::HBonds, i::Integer) = (x.D[i], x.H[i], x.A[i])
+Base.getindex(x::HBonds, i::Integer) = (D=x.D[i], H=x.H[i], A=x.A[i], r=x.r[i], ang=x.ang[i])
 function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     print(io, chomp("""
-    HBonds data structure with $(length(hb)) bonds.
+    HBonds data structure with $(length(hb)) hydrogen-bonds.
         First hbond: (D-H---A) = $(hb[1])
         Last hbond: (D-H---A) = $(hb[length(hb)])
+        - r is the distance between Donnor and Acceptor atoms (D-A)
+        - ang is the angle (degrees) between H-D and A-D.
     """))
 end
 
-CellListMap.copy_output(x::HBonds) = HBonds(copy(x.D), copy(x.H), copy(x.A))
+CellListMap.copy_output(x::HBonds) = HBonds(copy(x.D), copy(x.H), copy(x.A), copy(x.r), copy(x.ang))
 function CellListMap.reset_output!(x::HBonds)
     empty!(x.D)
     empty!(x.H)
     empty!(x.A)
+    empty!(x.r)
+    empty!(x.ang)
     return x
 end 
 CellListMap.reducer!(x::HBonds, y::HBonds) = append!(x,y)
 
-function hbond_angle(n1,h,n2)
-    v1 = h - n1 
-    v2 = n2 - h
+function hbond_angle(D,H,A)
+    v1 = H - D
+    v2 = A - D 
     return acosd(dot(v1,v2) / (norm(v1)*norm(v2)))
 end
 
-function push_hbond!(i, j, x, y, polar_bonds, sys, ang, hbonds, ats_sel1)
+function push_hbond!(i, j, x, y, polar_bonds, sys, ang, hbonds, ats_sel1, d2)
     # Find if i is a donnor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
@@ -49,10 +55,13 @@ function push_hbond!(i, j, x, y, polar_bonds, sys, ang, hbonds, ats_sel1)
     while polar_bonds.D[ii] == i
         iH = polar_bonds.H[ii]
         xH = wrap(sys.positions[iH], x, sys.unitcell)
-        if hbond_angle(x, xH, y) <= ang
+        hbond_ang = hbond_angle(x, xH, y)
+        if hbond_ang <= ang
             push!(hbonds.D, index(ats_sel1[i]))
             push!(hbonds.H, index(ats_sel1[iH]))
             push!(hbonds.A, index(ats_sel1[j]))
+            push!(hbonds.r, sqrt(d2))
+            push!(hbonds.ang, hbond_ang)
         end
         ii += 1
         ii > length(polar_bonds.D) && break
@@ -118,8 +127,8 @@ Function to find hydrogen bonds in a set of atoms.
 
 ### Keyword Arguments
 
-- `donnor_acceptor_distance::Real=3.0f0`: Maximum distance between donnor and acceptor to consider a hydrogen bond.
-- `angle_cutoff::Real=20`: Maximum angle (in degrees) between donnor-hydrogen-acceptor to consider a hydrogen bond.
+- `donnor_acceptor_distance::Real=3.5f0`: Maximum distance between donnor and acceptor to consider a hydrogen bond.
+- `angle_cutoff::Real=30`: Maximum angle (in degrees) between donnor-hydrogen-acceptor to consider a hydrogen bond.
 - `electronegative_elements=("N", "O", "F", "S")`: Elements considered electronegative for hydrogen bonding.
 - `unitcell::Union{Nothing,AbstractVecOrMat}=nothing`: Unit cell for periodic boundary conditions.
 - `d_covalent_bond::Real=1.2f0`: Maximum distance between donnor and hydrogen to consider a covalent bond.
@@ -133,8 +142,8 @@ Function to find hydrogen bonds in a set of atoms.
 function hydrogen_bonds(
     ats::AbstractVector{<:PDBTools.Atom},
     sel::Union{Function, String}=at -> true;
-    donnor_acceptor_distance::Real=3.0f0,
-    angle_cutoff::Real=20,
+    donnor_acceptor_distance::Real=3.5f0,
+    angle_cutoff::Real=30,
     electronegative_elements=("N", "O", "F", "S"),
     unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
     d_covalent_bond::Real=1.2f0,
@@ -164,7 +173,7 @@ function hydrogen_bonds(
         positions=ats_sel_positions,
         unitcell=unitcell,
         cutoff=donnor_acceptor_distance,
-        output=HBonds(Int32[], Int32[], Int32[]),
+        output=HBonds(Int32[], Int32[], Int32[], Float32[], Float32[]),
         parallel=parallel,
         output_name=:hbonds
     )
@@ -173,8 +182,8 @@ function hydrogen_bonds(
             el_i = element(ats_sel[i])
             el_j = element(ats_sel[j])
             if (el_i in electronegative_elements) & (el_j in electronegative_elements) 
-                push_hbond!(i, j, x, y, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel)
-                push_hbond!(j, i, y, x, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel)
+                push_hbond!(i, j, x, y, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel, d2)
+                push_hbond!(j, i, y, x, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel, d2)
             end
             return hbonds
         end,
@@ -187,8 +196,8 @@ function hydrogen_bonds2(
     ats::AbstractVector{<:PDBTools.Atom},
     sel1::Union{Function, String}=at -> true,
     sel2::Union{Function, String}=at -> true;
-    donnor_acceptor_distance::Real=3.0f0,
-    angle_cutoff::Real=20,
+    donnor_acceptor_distance::Real=3.5f0,
+    angle_cutoff::Real=30,
     electronegative_elements=("N", "O", "F", "S"),
     unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
     d_covalent_bond::Real=1.2f0,
@@ -230,7 +239,7 @@ function hydrogen_bonds2(
         positions=ats_sel1_positions,
         unitcell=unitcell,
         cutoff=donnor_acceptor_distance,
-        output=HBonds(Int32[], Int32[], Int32[]),
+        output=HBonds(Int32[], Int32[], Int32[], Float32[], Float32[]),
         parallel=parallel,
         output_name=:hbonds
     )
@@ -239,8 +248,8 @@ function hydrogen_bonds2(
             el_i = element(ats_sel1[i])
             el_j = element(ats_sel1[j])
             if (el_i in electronegative_elements) & (el_j in electronegative_elements) 
-                push_hbond!(i, j, x, y, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel1)
-                push_hbond!(j, i, y, x, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel1)
+                push_hbond!(i, j, x, y, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel1, d2)
+                push_hbond!(j, i, y, x, polar_bonds, sys_hbonds, angle_cutoff, hbonds, ats_sel1, d2)
             end
             return hbonds
         end,
