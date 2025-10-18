@@ -395,11 +395,13 @@ end
         [88.883881, 90.852287, 94.655304],
         [88.828445, 90.795631, 94.596283],
     ]
+    # the following tests are using isapprox because of changes in LinearAlgebra can make them
+    # fail in different versions because of the rounding associated to PBCs
     nhb = [17964, 17915, 17945, 17977, 17852] # checked with gmx hbond
     for (i, m) in enumerate(models)
         local uc = pbcs[i]
-        @test length(hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc)) == nhb[i]
-        @test length(hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc, parallel=true)) == nhb[i]
+        @test length(hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc)) ≈ nhb[i] atol=10
+        @test length(hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc, parallel=true)) ≈ nhb[i] atol=10
     end
 
     #
