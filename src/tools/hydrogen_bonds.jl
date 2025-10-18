@@ -129,13 +129,13 @@ end
 """
     hydrogen_bonds(
         ats::AbstractVector{<:PDBTools.Atom}, 
-        sel::Union{Function, Strign}=at -> true,
+        sel::Union{Function, String}=at -> true,
         kargs...
     )
     hydrogen_bonds(
         ats::AbstractVector{<:PDBTools.Atom}, 
-        sel1::Union{Function, Strign},
-        sel2::Union{Function, Strign}; 
+        sel1::Union{Function, String},
+        sel2::Union{Function, String}; 
         kargs...
     )
 
