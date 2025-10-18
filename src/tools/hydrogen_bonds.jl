@@ -172,7 +172,7 @@ In the case of two sets, `sel1` and `sel2` must not overlap.
 
 # Example
 
-```jldoctest
+```jldoctest; filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using PDBTools
 
 julia> pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb", "model 1");
