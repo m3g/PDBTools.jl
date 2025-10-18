@@ -40,6 +40,7 @@ export center_of_mass
 export moveto!
 export sasa_particles, sasa
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
+export hydrogen_bonds
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -47,6 +48,7 @@ export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
 # Test files
+const test_dir = joinpath(@__DIR__, "../test")
 const TESTPDB = joinpath(@__DIR__, "../test/structure.pdb")
 const SMALLPDB = joinpath(@__DIR__, "../test/small.pdb")
 const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
@@ -102,6 +104,7 @@ include("./coordinates/dihedrals.jl")
 # Miscellaneous tools
 include("./tools/tools.jl")
 include("./tools/sasa.jl")
+include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
 
 # Custom element and residue definitions
