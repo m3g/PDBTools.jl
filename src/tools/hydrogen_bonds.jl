@@ -129,6 +129,9 @@ end
 """
     hydrogen_bonds(ats::AbstractVector{<:PDBTools.Atom}, sel::Union{Function, Strign}=at -> true)
 
+!!! warning
+    Experimental feature: interface changes can occur in non-breaking releases.
+
 Function to find hydrogen bonds in a set of atoms.
 
 ### Arguments
