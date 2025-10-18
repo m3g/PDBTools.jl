@@ -10,9 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.8.0-DEV
+Version 3.8.0
 -------------
-- ![FEATURE][badge-feature] `hydrogen_bonds` function to compute h-bonds in structures (with Hydrogen atoms added).
+- ![FEATURE][badge-experimental] `hydrogen_bonds` function to compute h-bonds in structures (with Hydrogen atoms added).
 - ![INFO][badge-info] Add tests to computing contact maps with PBCs.
 
 Version 3.7.0
