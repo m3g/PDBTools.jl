@@ -396,7 +396,8 @@ end
         [88.828445, 90.795631, 94.596283],
     ]
     # the following tests are using isapprox because of changes in LinearAlgebra can make them
-    # fail in different versions because of the rounding associated to PBCs
+    # fail in different versions because of the rounding associated to PBCs. In Julia 1.12 they
+    # provide exact results. 
     nhb = [17964, 17915, 17945, 17977, 17852] # checked with gmx hbond
     for (i, m) in enumerate(models)
         local uc = pbcs[i]
