@@ -142,7 +142,7 @@ end
 !!! warning
     Experimental feature: interface changes can occur in non-breaking releases.
 
-Function to find hydrogen bonds in a set of atoms.
+Function to find hydrogen bonds in a set of atoms, or among two sets of atoms.
 
 ### Arguments
 
@@ -167,7 +167,7 @@ In the case of two sets, `sel1` and `sel2` must not overlap.
 ### Returns
 
 - `HBonds`: A data structure containing the found hydrogen bonds, where each element is 
-  a named tuple `(D, H, A, r, ang)` where the fields correspond to the donner, hydrogen
+  a named tuple `(D, H, A, r, ang)` where the fields correspond to the donnor, hydrogen
   and acceptor atoms, the distance between donnor and acceptor atoms, and the angle. 
 
 # Example
