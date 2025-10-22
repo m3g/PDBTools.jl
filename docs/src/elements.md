@@ -52,7 +52,7 @@ stoichiometry
 printatom
 ```
 
-## Custom Atom fields
+## [Custom Atom fields](@id custom-atom-fields)
 
 Custom atom fields can be created in `Atom` objects by defining the `custom` keyword.
 By default, `custom == nothing`. The custom fields can be added on construction, or 
