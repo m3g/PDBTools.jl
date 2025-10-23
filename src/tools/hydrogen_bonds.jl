@@ -343,24 +343,37 @@ julia> pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb", "model 1");
 julia> uc = read_unitcell(PDBTools.test_dir*"/hbonds.pdb");
 
 julia> hbs = hydrogen_bonds(pdb, "protein"; unitcell=uc) # Single set of atoms: selection is optional
+OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
+  "protein => protein" => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877, 96…
+
+julia> hbs["protein => protein"] # Summary
 HBonds data structure with 63 hydrogen-bonds.
     First hbond: (D-H---A) = (D = 1, H = 2, A = 286, r = 2.6871147f0, ang = 10.643958f0)
     Last hbond: (D-H---A) = (D = 1014, H = 1017, A = 1032, r = 2.5816715f0, ang = 12.714139f0)
     - r is the distance between Donnor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
 
-julia> hbs[1]
+julia> hbs["protein => protein"][1] # first h-bond
 (D = 1, H = 2, A = 286, r = 2.6871147f0, ang = 10.643958f0)
 
-julia> hbs = hydrogen_bonds(pdb, "protein", "resname SOL"; unitcell=uc) # Two-sets of atoms: selection is mandatory
+julia> hbs = hydrogen_bonds(pdb, "protein", "protein" => "resname SOL"; unitcell=uc) # Multiple selections
+OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 2 entries:
+  "protein => protein"     => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877…
+  "protein => resname SOL" => HBonds(Int32[1406, 1583, 1799, 2027, 789, 3503, 1169, 184, 3914, 4304  …  1224, 38768, 12…
+
+julia> hbs["protein => protein"]
+HBonds data structure with 63 hydrogen-bonds.
+    First hbond: (D-H---A) = (D = 1, H = 2, A = 286, r = 2.6871147f0, ang = 10.643958f0)
+    Last hbond: (D-H---A) = (D = 1014, H = 1017, A = 1032, r = 2.5816715f0, ang = 12.714139f0)
+    - r is the distance between Donnor and Acceptor atoms (D-A)
+    - ang is the angle (degrees) between H-D and A-D.
+
+julia> hbs["protein => resname SOL"]
 HBonds data structure with 138 hydrogen-bonds.
     First hbond: (D-H---A) = (D = 1406, H = 1407, A = 160, r = 2.9361732f0, ang = 6.771988f0)
     Last hbond: (D-H---A) = (D = 41798, H = 41800, A = 395, r = 2.6894214f0, ang = 10.623453f0)
     - r is the distance between Donnor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
-
-julia> hbs[1]
-(D = 1406, H = 1407, A = 160, r = 2.9361732f0, ang = 6.771988f0)
 ```
 
 !!! note
