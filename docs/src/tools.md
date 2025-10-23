@@ -7,15 +7,6 @@ CollapsedDocStrings = true
 These tools may call external programs to perform each task. Please verify the installation of 
 the necessary tool for each case. 
 
-## Hydrogen-bond analysis
-
-!!! warning
-    Experimental feature: interface can be updated in non-breaking releases.
-
-```@docs
-hydrogen_bonds  
-```
-
 ## Add hydrogens with OpenBabel
 
 ```@docs

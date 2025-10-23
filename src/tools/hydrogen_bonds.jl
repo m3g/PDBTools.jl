@@ -303,14 +303,14 @@ function compute_hbonds!(sys::ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff,
 end
 
 """
-    hydrogen_bonds(ats::AbstractVector{<:PDBTools.Atom}, sel, sel1 => sel2, ... ; kargs...)
+    hydrogen_bonds(atoms, sel, sel1 => sel2, ... ; kargs...)
 
 Function to find hydrogen bonds in a set of atoms, or among two sets of atoms. The structure must 
 contain Hydrogen atoms.
 
 ### Arguments
 
-- `ats::AbstractVector{<:PDBTools.Atom}`: Vector of atoms to analyze.
+- `atoms`: Vector of atoms, or structure component (model, chain, segment, residue) to be analyzed.
 and, optionally, the selections or selection pairs for which the hydrogen bonds must be computed:
 - `sel::String`: Selection string, e. g. `"protein"`.
 - `sel1 => sel2::Pair{String,String}`: Pair of selection strings, e. g. `"resname ARG" => "resname GLU"`.
