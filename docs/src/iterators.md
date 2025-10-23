@@ -4,51 +4,32 @@ CollapsedDocStrings = true
 
 # Iterators
 
-PDBTools.jl provides lazy iterators over Residues, Chains, Segments, and Models of a structure file. The iterators behave similarly, and can be used bo computed properties of independent structural elements.
-The documentation bellow exemplifies in more detail the features associated to Residue and Chain interators, but the properties and valid for Segment and Model iterators similarly.
+PDBTools.jl provides lazy iterators over Residues, Chains, Segments, and Models of a structure file. The iterators behave similarly, and can be used bo computed properties of independent structural elements. The documentation bellow exemplifies in more detail the features associated to Residue and Chain interators, but the properties and valid for Segment and Model iterators similarly.
 
 ## Iterate over residues (or molecules)
 
 The `eachresidue` iterator enables iteration over the residues of a structure. In PDB files, distinct molecules are often treated as separate residues, so this iterator can be used to iterate over the molecules within a structure. For example:
 
-```jldoctest
-julia> using PDBTools
-
-julia> protein = read_pdb(PDBTools.SMALLPDB);
-
-julia> count(atom -> resname(atom) == "ALA", protein)
-12
-
-julia> count(res -> resname(res) == "ALA", eachresidue(protein))
-1
+```@example iterators
+using PDBTools
+protein = read_pdb(PDBTools.SMALLPDB);
+count(res -> resname(res) == "ALA", eachresidue(protein))
 ```
 
-Here, the first `count` counts the number of atoms with the residue name "ALA", while the second uses `eachresidue` to count the number of residues named "ALA". This highlights the distinction between residue-level and atom-level operations.
+Here, we use `eachresidue` to count the number of residues named "ALA". This highlights the distinction between residue-level and atom-level operations.
 
 ### Collecting Residues into a Vector
 
 Residues produced by `eachresidue` can be collected into a vector for further processing:
 
-```jldoctest
-julia> using PDBTools
+```@example iterators
+residues = collect(eachresidue(protein))
+```
 
-julia> protein = read_pdb(PDBTools.SMALLPDB);
+and the atoms of a specific residue can be seen by indexing the residue:
 
-julia> residues = collect(eachresidue(protein))
-3-element Vector{Residue}[
-    ALA1A
-    CYS2A
-    ASP3A
-]
-
-julia> residues[1]
- Residue of name ALA with 12 atoms.
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
-       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
-⋮
-      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
-      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12
+```@example iterators
+residues[1]
 ```
 
 !!! note
@@ -58,32 +39,28 @@ julia> residues[1]
 
 You can iterate over the atoms of one or more residues using nested loops. Here, we compute the total number of atoms of ALA residues: 
 
-```jldoctest
-julia> using PDBTools
-
-julia> protein = read_pdb(PDBTools.SMALLPDB);
-
-julia> n_ala_cys = 0
-       for residue in eachresidue(protein)
-            if name(residue) in ("ALA", "CYS")
-                for atom in residue
-                   n_ala_cys += 1
-                end
-            end
-       end
-       n_ala_cys
-23
+```@example iterators
+n_ala_cys = 0
+for residue in eachresidue(protein)
+     if name(residue) in ("ALA", "CYS")
+         for atom in residue
+            n_ala_cys += 1
+         end
+     end
+end
+n_ala_cys
 ```
 
 This method produces the same result as the more concise approach:
 
-```jldoctest 
-julia> using PDBTools
+```@example iterators
+sum(length(r) for r in eachresidue(protein) if name(r) in ("ALA", "CYS"))
+```
 
-julia> protein = read_pdb(PDBTools.SMALLPDB);
+Alternativelly, an image (not a copy!) of the atoms corresponding to a residue can be obtained with `get_atoms`:
 
-julia> sum(length(r) for r in eachresidue(protein) if name(r) in ("ALA", "CYS"))
-23
+```@example iterators
+r1_atoms = get_atoms(residue[1])
 ```
 
 ### Reference documentation
