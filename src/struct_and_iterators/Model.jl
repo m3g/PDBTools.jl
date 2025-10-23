@@ -99,6 +99,7 @@ eachmodel(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Model}(atoms)
 
 # Specific getters for this type
 model(model::Model) = model.number
+get_atoms(model::Model) = @view(model.atoms[model.range])
 
 #
 # Testing interface
@@ -117,6 +118,7 @@ model(model::Model) = model.number
     @test model(m[1]) == 1
     @test model(m[2]) == 2
     @test m[1].range == 1:234
+    @test length(get_atoms(m[1])) == 234
     @test m[2].range == 235:468
     @test length(m[1]) == 234
     @test mass(m[1]) ≈ 1561.8828799999928

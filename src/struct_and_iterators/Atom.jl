@@ -152,6 +152,8 @@ model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
 charge(atom::Atom) = atom.charge
 pdb_element(atom::Atom) = atom.pdb_element
+get_atoms(atom::Atom) = atom
+get_atoms(atoms::AbstractVector{<:Atom}) = atoms
 
 @testitem "Atom default fields" begin
     using PDBTools

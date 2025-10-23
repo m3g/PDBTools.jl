@@ -10,8 +10,11 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.8.1-DEV
+Version 3.9.0-DEV
 -------------
+- ![FEATURE][badge-experimental] add `get_atoms` getter for fetching the vector of atoms of residues, models, chains, segments.
+- ![FEATURE][badge-experimental] `hydrogen_bonds` accepts multiple pairs of selections, and is made stable.
+- ![INFO][badge-info] Documentation updates.
 
 Version 3.8.0
 -------------

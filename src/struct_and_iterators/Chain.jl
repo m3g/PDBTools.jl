@@ -97,6 +97,7 @@ chain(chain::Chain) = chain.chain
 model(chain::Chain) = chain.model
 segname(chain::Chain) = chain.segname
 mass(chain::Chain) = mass(@view chain.atoms[chain.range])
+get_atoms(chain::Chain) = @view(chain.atoms[chain.range])
 
 @testitem "Chain iterator" begin
     using PDBTools
@@ -119,6 +120,7 @@ mass(chain::Chain) = mass(@view chain.atoms[chain.range])
     @test segname(chains[3]) == "ASYN"
     @test model(chains[4]) == 2
     @test chain(chains[4]) == "D"
+    @test length(get_atoms(chains[1])) == 48
     @test_throws ArgumentError chains[1][49]
 end
 

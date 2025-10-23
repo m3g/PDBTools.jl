@@ -177,6 +177,22 @@ The coordinates are output as arrays of static arrays (more specifically, as a `
 coor
 ```
 
+## [Read and convert unit cells](@id read-unitcell)
+
+```@docs
+read_unitcell
+lattice_to_matrix
+matrix_to_lattice
+```
+
+
+## Check the stereochemistry of protein residues
+
+```@docs
+zeta
+zeta_check
+```
+
 ## Maximum and minimum coordinates of the atoms
 
 Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
