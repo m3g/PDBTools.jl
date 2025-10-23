@@ -254,15 +254,8 @@ end
 
 function compute_hbonds!(sys::ParticleSystem1, s1, angle_cutoff, electronegative_elements)
     map_pairwise!(sys) do x, y, i, j, d2, hbonds
-        at_i = s1.ats[i]
-        at_j = s1.ats[j]
-        if index(at_i) == index(at_j)
-            throw(ArgumentError("""\n
-                Different selections cannot overlap. Detected atom $(index(at_i)) in both selections \"$sel1\" and \"$sel2\".
-                """))
-        end
-        el_i = element(at_i)
-        el_j = element(at_j)
+        el_i = element(s1_ats[i])
+        el_j = element(s2.ats[j])
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             push_hbond!(hbonds,
                 i, j, x, y, s1.polar_bonds, sys.xpositions,
