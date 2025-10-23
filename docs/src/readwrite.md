@@ -19,19 +19,14 @@ read_mmcif
 
 To read a PDB file and return a vector of atoms of
 type `Atom`, do:
-```julia
-atoms = read_pdb("file.pdb")
+```@example read_write
+using PDBTools
+atoms = read_pdb(PDBTools.test_dir*"/structure.pdb")
 ```
 
-`Atom` is the structure of data containing the atom index, name,
-residue, coordinates, etc. For example, after reading a file (as shown
-bellow), a list of atoms with the following structure will be generated:
-
-```julia-repl
-julia> printatom(atoms[1])
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  1.00     1    PROT         1
-```
+`Atom{Nothing}` is the default structure of data containing the atom index, name,
+residue, coordinates, etc. The `Nothing` refers to the content of the 
+[custom atom fields](@ref custom-atom-fields). 
 
 The data in the `Atom` structure is organized as indicated in the following documentation:
 
@@ -55,6 +50,36 @@ Atom
     arginines = read_pdb("file.pdb", atom -> atom.resname == "ARG")
     ```
     The same is valid for the `write` function, below. 
+
+## Write a PDB/mmCIF file
+
+To write a PDB file use the `write_pdb` function, as:
+
+```julia
+write_pdb("file.pdb", atoms)
+```
+where `atoms` contain a list of atoms with the `Atom` structures.
+
+```@docs
+write_pdb
+write_mmcif
+```
+
+The use of the `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section
+is possible in the call to `write_mmcif`. 
+
+## Get structure from the Protein Data Bank
+
+```@docs
+wget
+```
+
+Use the `wget` function to retrieve the atom data directly from the PDB database,
+optionally filtering the atoms with a selection:
+
+```@example read_write
+atoms = wget("1LBD","name CA")
+```
 
 ## [Atom field assignment in mmCIF files](@id field_assignment)
 
@@ -83,31 +108,18 @@ This assignment can be customized by providing the `field_assignment` keyword pa
 In the following example, we exemplify the possibility of reading `_atom_site.type_symbol` field of the mmCIF file into the `name` field of the
 atom data structure:
 
-```jldoctest
-julia> using PDBTools
+```@example read_write
+atoms = read_mmcif(PDBTools.test_dir*"/small.cif", "index <= 5");
+name.(atoms)
+```
 
-julia> ats = read_mmcif(PDBTools.TESTCIF, "index <= 5");
+If, however, we attribute the `name` field to the `type_symbol` mmCIF field, which contains the element symbols, we get:
 
-julia> name.(ats)
-5-element Vector{InlineStrings.String7}:
- "N"
- "CA"
- "C"
- "O"
- "N"
-
-julia> ats = read_mmcif(PDBTools.TESTCIF, "index <= 5"; 
-           field_assignment=Dict("type_symbol" => :name)
-        );
-
-julia> name.(ats)
-5-element Vector{InlineStrings.String7}:
- "N"
- "C"
- "C"
- "O"
- "N"
-
+```@example read_write
+atoms = read_mmcif(PDBTools.TESTCIF, "index <= 5"; 
+   field_assignment=Dict("type_symbol" => :name)
+)
+name.(atoms)
 ```
 
 The custom entries set in the `field_assignment` keyword will overwrite the default 
@@ -115,63 +127,19 @@ assignments for entries sharing keys or fields. For instance, in the example abo
 the `label_atom_id` fields which is by default assigned to `:name` is not being read
 anymore.
 
-## Get structure from the Protein Data Bank
-
-Use the `wget` function to retrieve the atom data directly from the PDB database,
-optionally filtering the atoms with a selection:
-
-```julia-repl
-julia> atoms = wget("1LBD","name CA")
-   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-       2   CA     SER     A      225        1   46.080   83.165   70.327 68.73  1.00     1       -         2
-       8   CA     ALA     A      226        2   43.020   80.825   70.455 63.69  1.00     1       -         8
-      13   CA     ASN     A      227        3   41.052   82.178   67.504 53.45  1.00     1       -        13
-                                                       ⋮
-    1847   CA     GLN     A      460      236  -22.650   79.082   50.023 71.46  1.00     1       -      1847
-    1856   CA     MET     A      461      237  -25.561   77.191   51.710 78.41  1.00     1       -      1856
-    1864   CA     THR     A      462      238  -26.915   73.645   51.198 82.96  1.00     1       -      1864
-```
-
-```@docs
-wget
-```
-
-## Write a PDB/mmCIF file
-
-To write a PDB file use the `write_pdb` function, as:
-
-```julia
-write_pdb("file.pdb", atoms)
-```
-where `atoms` contain a list of atoms with the `Atom` structures.
-
-```@docs
-write_pdb
-write_mmcif
-```
-
-The use of the `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section
-is possible in the call to `write_mmcif`. 
-
 # Read from string buffer
 
 In some cases a PDB file data may be available as a string and not a regular file. For example,
 when reading the output of a zipped file. In these cases, it is possible to obtain the array
 of atoms by reading directly the string buffer with, for example:
 
-```jldoctest
-julia> using PDBTools
-
-julia> pdbdata = read(PDBTools.TESTPDB, String); # returns a string with the PDB data, to exemplify
-
-julia> atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
-   Vector{Atom{Nothing}} with 104 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
-      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
-⋮
-    1440   CA     CYS     A      103      103    4.134   -7.811   -6.344  1.00  0.00     1    PROT      1440
-    1454   CA     THR     A      104      104    3.244  -10.715   -8.603  1.00  0.00     1    PROT      1454
+The following `read` returns a string with the PDB file data, not parsed, to exemplify:
+```@example read_write
+pdbdata = read(PDBTools.test_dir*"/small.pdb", String);
+```
+This string can be passed to the `read_pdb` function wrapped in a `IOBuffer`:
+```@example read_write
+atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
 ```
 
 ## Edit a Vector{<:Atom} object
