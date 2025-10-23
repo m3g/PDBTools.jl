@@ -254,8 +254,8 @@ end
 
 function compute_hbonds!(sys::ParticleSystem1, s1, angle_cutoff, electronegative_elements)
     map_pairwise!(sys) do x, y, i, j, d2, hbonds
-        el_i = element(s1_ats[i])
-        el_j = element(s2.ats[j])
+        el_i = element(s1.ats[i])
+        el_j = element(s1.ats[j])
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             push_hbond!(hbonds,
                 i, j, x, y, s1.polar_bonds, sys.xpositions,
