@@ -446,6 +446,10 @@ end
     hbs = hydrogen_bonds(models[1], "protein"; unitcell=uc)
     @test length(hbs["protein => protein"]) == 63
 
+    prot = select(models[1], "protein")
+    hbs = hydrogen_bonds(prot)
+    @test length(hbs["all => all"]) == 63
+
     pbcs = [
         [88.749199, 90.714630, 94.511879],
         [88.838280, 90.805679, 94.606750],
