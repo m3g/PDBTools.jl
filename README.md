@@ -5,6 +5,7 @@
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 <img src="./docs/src/assets/logo.svg">
+
 # PDBTools.jl
 
 A lightweight and flexible Julia package for handling protein structure files with ease.
