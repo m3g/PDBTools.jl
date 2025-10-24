@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/m3g/PDBTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/PDBTools.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-<img src="./docs/src/assets/logo.svg">
+![]("./docs/src/assets/logo.svg")
 # PDBTools.jl
 
 A lightweight and flexible Julia package for handling protein structure files with ease.
