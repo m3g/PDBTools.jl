@@ -13,7 +13,6 @@ makedocs(
     sitename = "PDBTools.jl",
     pages = [
         "Home" => "index.md",
-        "Installation" => "installation.md",
         "Read and Write" => "readwrite.md",
         "Selections" => "selections.md",
         "Iterators" => "iterators.md",

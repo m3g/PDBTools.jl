@@ -1,41 +1,73 @@
-# PDBTools
+# PDBTools.jl
 
-PDBTools is a simple package to read and write Protein Data Bank files,
-select atoms, and work with their coordinates. It is aimed to provide support
-for the typical uses of structure files in the context of molecular dynamics
-simulations.
+A lightweight and flexible Julia package for handling protein structure files with ease.
 
-As of version 2.0, PDBTools is able to read and write the atomic data 
-from PDB and mmCIF structure files.
+## Installation
 
-## Features:
+Install the [Julia](https://julialang.org/) programming language, and do:
 
-Simple data structure: 
 ```julia-repl
-julia> printatom(atoms[1])
-  index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
-      1   OW     SOL     X        1        1   54.370   45.310   33.970  0.00  0.00     1       -         1
+julia> import Pkg; Pkg.add("PDBTools")
 ```
 
-Selection syntax:
-```julia
-resname ARG and name CA
+## Quick Start
+
+```@example index
+using PDBTools
+atoms = read_pdb(PDBTools.test_dir*"/small.pdb")
 ```
 
-Allows use of Julia (possibly user-defined) functions for selection:
-```julia
-atom -> ( atom.resname == "ARG" && atom.x < 10 ) || atom.name == "N"
+## What Makes it Special?
+
+- **Simple but Powerful**: Read and write PDB and mmCIF structure files with minimal overhead. 
+- **Flexible Atom Selection**: Use intuitive syntax or custom Julia functions.
+- **Perfect for MD**: Designed with molecular dynamics workflows in mind.
+- **Lightweight**: Focus on atomic data without the overhead of metadata parsing and compact data structures. Can handle very large structures.
+- **Performance**: Expect analysis functions to be *fast*. For instance, SASA and hydrogen bonds analyses are among the fastest available.
+
+## Key Features
+
+### Clean Data Structure
+Every atom is represented by a simple, accessible structure:
+
+```@example index
+atoms[1]
 ```
-### Not indicated for:
 
-PDBTools is not very strict in following the PDB or mmCIF formats. In particular,
-it does not read any of the meta-data of these files, only `ATOM` and `HETATM` fields
-are of interest. Also, it supports repeated atom entries, as each atom is read as 
-an independent object. This flexibility provides support for common structure formats
-occurring in the Molecular Dynamics Simulations field. 
+```@example index
+(name(atoms[1]), resname(atoms[1]), chain(atoms[1]))
+```
 
-If more comprehensive (and strict) support for these files is necessary, use the packages of 
-[BioJulia](https://github.com/BioJulia), 
-[BioStructures](https://github.com/BioJulia/BioStructures.jl) in
-particular.
+The use of `InlineStrings` makes the data structure compact, allowing handling millions of atoms is standard computers.
 
+### Intuitive Selection Syntax
+
+Select atoms using simple, readable syntax, similar to that of VMD:
+```@example index
+selection = select(atoms, "resname ALA and name N CA")
+```
+
+### Power of Julia Functions
+
+Leverage Julia's expressiveness for complex selections:
+```@example index
+selection = select(atoms, atom -> 
+    (atom.resname == "ARG" && atom.x < 10) || atom.name == "N"
+)
+```
+
+Use of Julia functions for selection can also improve performance if dynamic selections are used in critical code.
+
+## See also
+
+`PDBTools.jl` is integrated with [MolSimToolkit.jl](https://github.com/m3g/MolSimToolkit.jl) and [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl), providing novel and practical tools for molecular dynamics simulations analysis. 
+
+!!! note
+    PDBTools prioritizes flexibility over strict format adherence. It's designed for:
+
+    - Molecular dynamics workflows
+    - Quick structure analysis
+    - Basic PDB/mmCIF file manipulation
+
+    For comprehensive PDB/mmCIF format support, check out [BioStructures.jl](https://github.com/BioJulia/BioStructures.jl) from [BioJulia](https://github.com/BioJulia).
+  
