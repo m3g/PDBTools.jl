@@ -84,6 +84,7 @@ eachsegment(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Segment}(atom
 name(segment::Segment) = segment.name
 segname(segment::Segment) = segment.name
 mass(segment::Segment) = mass(@view segment.atoms[segment.range])
+get_atoms(segment::Segment) = @view(segment.atoms[segment.range])
 
 @testitem "Segment iterator" begin
     using PDBTools
@@ -100,6 +101,7 @@ mass(segment::Segment) = mass(@view segment.atoms[segment.range])
     @test name(s[1]) == "A"
     @test name(s[2]) == "B"
     @test s[1].range == 1:1905
+    @test length(get_atoms(s[1])) == 1905
     @test s[2].range == 1906:1997
     @test name(s[1]) == "A"
     @test segname(s[1]) == "A"

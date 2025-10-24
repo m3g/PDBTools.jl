@@ -152,6 +152,8 @@ model(atom::Atom) = atom.model
 segname(atom::Atom) = atom.segname
 charge(atom::Atom) = atom.charge
 pdb_element(atom::Atom) = atom.pdb_element
+get_atoms(atom::Atom) = atom
+get_atoms(atoms::AbstractVector{<:Atom}) = atoms
 
 @testitem "Atom default fields" begin
     using PDBTools
@@ -170,6 +172,8 @@ pdb_element(atom::Atom) = atom.pdb_element
     @test segname(atom) == "PROT"
     @test index_pdb(atom) == 13
     @test charge(atom) == 0.0f0
+    @test get_atoms(atom) == atom
+    @test get_atoms(atoms) == atoms
 end
 
 function Base.copy(atom::Atom{CustomType}) where {CustomType}

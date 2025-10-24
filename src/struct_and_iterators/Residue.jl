@@ -184,6 +184,7 @@ chain(residue::Residue) = residue.chain
 model(residue::Residue) = residue.model
 segname(residue::Residue) = residue.segname
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
+get_atoms(residue::Residue) = @view(residue.atoms[residue.range])
 function charge(residue::Residue)  
     if residue.resname in keys(protein_residues)
         return protein_residues[residue.resname].charge
@@ -210,6 +211,7 @@ end
     @test_throws ArgumentError residues[1]
     residues = collect(eachresidue(atoms))
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
+    @test length(get_atoms(residues[1])) == 12
     @test findall(at -> name(at) in ("N", "HG1"), residues[2]) == [1, 9]
     @test_throws ArgumentError Residue(atoms, 1:15)
 end

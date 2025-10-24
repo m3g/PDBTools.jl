@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "3.8.1-DEV"
+version = "3.9.0-DEV"
 
 [deps]
 CellListMap = "69e1c6dd-3888-40e6-b3c8-31ac5f578864"
@@ -45,7 +45,7 @@ PrecompileTools = "1.2.1"
 Printf = "1.10"
 SIMD = "3.7.1"
 ShowMethodTesting = "1.2"
-StaticArrays = "1.6"
+StaticArrays = "1.9.15"
 Test = "1.10"
 TestItemRunner = "1.1"
 TestItems = "1"
