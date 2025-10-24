@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/m3g/PDBTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/PDBTools.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-<img src="./docs/src/assets/logo.png">
+<img src="https://raw.githubusercontent.com/m3g/PDBTools.jl/refs/heads/main/docs/src/assets/logo.png">
 
 # PDBTools.jl
 
