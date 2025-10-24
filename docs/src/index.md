@@ -1,6 +1,6 @@
 # PDBTools.jl
 
-A lightweight and flexible Julia package for handling protein structure files with ease.
+A lightweight and flexible Julia package for handling structure files with ease.
 
 ## Installation
 
