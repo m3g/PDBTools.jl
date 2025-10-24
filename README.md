@@ -4,14 +4,17 @@
 [![codecov](https://codecov.io/gh/m3g/PDBTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/PDBTools.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-<img height="100px" src="https://raw.githubusercontent.com/m3g/PDBTools.jl/refs/heads/main/docs/src/assets/logo.png" style="float:right">
+
+<div>
+<img height="100px" src="https://raw.githubusercontent.com/m3g/PDBTools.jl/refs/heads/main/docs/src/assets/logo.png">
 
 # PDBTools.jl
 
-A lightweight and flexible Julia package for handling protein structure files with ease.
+A lightweight and flexible Julia package for handling structure files with ease.
 
 ## What Makes it Special?
 
+- **Molecular Dynamics**: Designed to provide support for MD simulation analysis. See also [MolSimToolkit.jl](https://m3g.github.io/MolSimToolkit.jl).
 - **Simple but Powerful**: Read and write PDB and mmCIF structure files with minimal overhead. 
 - **Flexible Atom Selection**: Use intuitive syntax or custom Julia functions.
 - **Perfect for MD**: Designed with molecular dynamics workflows in mind.
