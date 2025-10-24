@@ -1,7 +1,7 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
-version = "3.9.0"
+version = "3.9.1-DEV"
 
 [deps]
 CellListMap = "69e1c6dd-3888-40e6-b3c8-31ac5f578864"

@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.9.1-DEV
+-------------
+
 Version 3.9.0
 -------------
 - ![FEATURE][badge-feature] add `get_atoms` getter for fetching the vector of atoms of residues, models, chains, segments.
