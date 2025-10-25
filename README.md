@@ -17,7 +17,6 @@ A lightweight and flexible Julia package for handling structure files with ease.
 - **Molecular Dynamics**: Designed to provide support for MD simulation analysis. See also [MolSimToolkit.jl](https://m3g.github.io/MolSimToolkit.jl).
 - **Simple but Powerful**: Read and write PDB and mmCIF structure files with minimal overhead. 
 - **Flexible Atom Selection**: Use intuitive syntax or custom Julia functions.
-- **Perfect for MD**: Designed with molecular dynamics workflows in mind.
 - **Lightweight**: Focus on atomic data without the overhead of metadata parsing and compact data structures. Can handle very large structures.
 - **Performance**: Expect analysis functions to be *fast*. For instance, SASA and hydrogen bonds analyses are among the fastest available.
 
