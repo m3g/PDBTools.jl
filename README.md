@@ -22,6 +22,6 @@ A lightweight and flexible Julia package for handling structure files with ease.
 
 ## Documentation
 
-[https://m3g.github.com/PDBTools.jl](https://m3g.github.com/PDBTools.jl)
+[https://m3g.github.com/PDBTools.jl](https://m3g.github.io/PDBTools.jl)
 
 
