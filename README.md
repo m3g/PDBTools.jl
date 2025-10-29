@@ -6,7 +6,7 @@
 
 
 <div>
-<img height="100px" src="https://m3g.github.io/PDBTools.jl/stable/assets/logo.png">
+<img height="100px" src="https://m3g.github.io/PDBTools.jl/stable/assets/logo.svg">
 </div>
 
 # PDBTools.jl
