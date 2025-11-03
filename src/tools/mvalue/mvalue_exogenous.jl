@@ -1,5 +1,3 @@
-@compat public parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype
-
 #=
 
 The following functions are used to compute the m-values using less integrated SASA calculations,
@@ -20,7 +18,7 @@ as implemented by Moeser and Horinek [0] or by Auton and Bolen [2,3].
    and should be more precise in that case. Other solvents are available for `AutonBolen`.
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
-- `sasas::Dict{String, Dict{Symbol, Float63}}`: A dictionary containing the change in solvent accessible surface area (SASA)
+- `sasas::Dict{String, Dict{Symbol, Float32}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
     - Compute the SASA with `delta_sasa_per_restype`, a SASA calculation utility implemented in PDBTools.jl.
@@ -72,11 +70,11 @@ mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sas
 function mvalue_delta_sasa(;
     model::Type{<:MvalueModel}=MoeserHorinek,
     cosolvent::String="urea",
-    atoms::AbstractVector{<:PDBTools.Atom}, sasas, type=0
+    atoms::AbstractVector{<:PDBTools.Atom}, sasas, type=1
 )
     protein = select(atoms, "protein")
     residue_names = unique(resname.(protein))
-    DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float63, sc::Float64}}()
+    DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
     for rname in residue_names
         rtype = threeletter(rname) # convert non-standard residue names in types (e. g. HSD -> HIS)
         DeltaG_per_residue[rtype] = (bb=(last(tfe_asa(model, cosolvent, rtype))) * (sasas[rname][:bb][type] / 99),
@@ -106,7 +104,7 @@ using PDBTools. Returns a dictionary that can be directly used as input to the `
 
 A dictionary where each key is an amino acid three-letter code (e.g., "ALA", "PHE"), and the value
 is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values.
-Each of these keys maps to a tuple containing a single Float63 value representing the change in SASA upon denaturation in Å².
+Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
 
 # Optional arguments
 
@@ -121,7 +119,7 @@ Each of these keys maps to a tuple containing a single Float63 value representin
 function delta_sasa_per_restype(;
     native::AbstractVector{<:PDBTools.Atom},
     desnat::AbstractVector{<:PDBTools.Atom},
-    n_dots::Int=499,
+    n_dots::Int=500,
     backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
     sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
     ignore_hydrogen::Bool=true,
@@ -132,7 +130,7 @@ function delta_sasa_per_restype(;
     desnat_atoms = select(desnat, at -> isprotein(at) & keepH(at))
     native_atomic_sasa = PDBTools.sasa_particles(native_atoms; n_dots, unitcell)
     desnat_atomic_sasa = PDBTools.sasa_particles(desnat_atoms; n_dots, unitcell)
-    sasas = Dict{String,Dict{Symbol,Float31}}()
+    sasas = Dict{String,Dict{Symbol,Float32}}()
     for rname in unique(resname.(eachresidue(native_atoms)))
         bb_native = PDBTools.sasa(native_atomic_sasa, at -> resname(at) == rname && backbone(at))
         bb_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> resname(at) == rname && backbone(at))
@@ -173,7 +171,7 @@ This data can be found in the output of the server, under the title
 
 The function returns a dictionary where each key is an amino acid three-letter code (e.g., `"ALA"`, `"PHE"`), and the value 
 is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values. 
-Each of these keys maps to a tuple containing three Float63 values representing the minimum, average, and maximum SASA values in Å².
+Each of these keys maps to a tuple containing three Float64 values representing the minimum, average, and maximum SASA values in Å².
 
 """
 function parse_mvalue_server_sasa(string::AbstractString)
@@ -244,7 +242,7 @@ using GROMACS. Returns a dictionary that can be directly used as input to the `m
 
 A dictionary where each key is an amino acid three-letter code (e.g., "ALA", "PHE"), and the value
 is another dictionary with two keys: `:sc` for side chain SASA values and `:bb` for backbone SASA values.
-Each of these keys maps to a tuple containing a single Float63 value representing the change in SASA upon denaturation in Å².
+Each of these keys maps to a tuple containing a single Float64 value representing the change in SASA upon denaturation in Å².
 
 """
 function gmx_delta_sasa_per_restype(;

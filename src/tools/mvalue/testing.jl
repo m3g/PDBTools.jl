@@ -1,7 +1,23 @@
 @testitem "mvalue" begin
     using PDBTools
 
+    MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
+    MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
 
+    n_sasa = sasa_particles(select(MJC_native, "protein"))
+    d_sasa = sasa_particles(select(MJC_desnat, "protein"))
+    r_1MJC = mvalue(n_sasa, d_sasa)
+    @test isapprox(r_1MJC.tot, -1.02; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.398; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.621; rtol=1e-1)
+
+    # Without H
+    n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
+    d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
+    r_1MJC = mvalue(n_sasa, d_sasa)
+    @test isapprox(r_1MJC.tot, -1.23; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.772; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.462; rtol=1e-1)
 
 end
 
@@ -81,19 +97,19 @@ end
     MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
     MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
 
-    r_1MJC = mvalue(; atoms=MJC_native, sasas=sasa_1MJC_clean, type=2)
+    r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_clean, type=2)
     @test isapprox(r_1MJC.tot, references["1MJC"][1]; rtol=1e-1)
     @test isapprox(r_1MJC.bb, references["1MJC"][2]; rtol=1e-1)
     @test isapprox(r_1MJC.sc, references["1MJC"][3]; rtol=1e-1)
 
     # with PDBTools.sasa
     sasa_1MJC_julia = delta_sasa_per_restype(; native=MJC_native, desnat=MJC_desnat)
-    r_1MJC = mvalue(; atoms=MJC_native, sasas=sasa_1MJC_julia)
+    r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_julia)
     @test isapprox(r_1MJC.tot, -1.23; rtol=1e-1)
     @test isapprox(r_1MJC.bb, -0.772; rtol=1e-1)
     @test isapprox(r_1MJC.sc, -0.462; rtol=1e-1)
     sasa_1MJC_julia = delta_sasa_per_restype(; native=MJC_native, desnat=MJC_desnat, ignore_hydrogen=false)
-    r_1MJC = mvalue(; atoms=MJC_native, sasas=sasa_1MJC_julia)
+    r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_julia)
     @test isapprox(r_1MJC.tot, -1.02; rtol=1e-1)
     @test isapprox(r_1MJC.bb, -0.398; rtol=1e-1)
     @test isapprox(r_1MJC.sc, -0.621; rtol=1e-1)
@@ -103,7 +119,7 @@ end
             native_pdb=joinpath(dir, "1MJC_native.pdb"),
             desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
         )
-        r_1MJC = mvalue(; atoms=MJC_native, sasas=sasa_1MJC)
+        r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
         @test isapprox(r_1MJC.tot, -1.24; rtol=1e-1)
         @test isapprox(r_1MJC.bb, -0.777; rtol=1e-1)
         @test isapprox(r_1MJC.sc, -0.463; rtol=1e-1)
@@ -112,7 +128,7 @@ end
             desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
             ignore_hydrogen=false,
         )
-        r_1MJC = mvalue(; atoms=MJC_native, sasas=sasa_1MJC)
+        r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
         @test isapprox(r_1MJC.tot, -1.01; rtol=1e-1)
         @test isapprox(r_1MJC.bb, -0.342; rtol=1e-1)
         @test isapprox(r_1MJC.sc, -0.668; rtol=1e-1)
@@ -124,18 +140,18 @@ end
     RN2_native=read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
     RN2_desnat=read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein")
 
-    r_2RN2 = mvalue(; atoms=RN2_native, sasas=sasa_2RN2_clean, type=2)
+    r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_clean, type=2)
     @test isapprox(r_2RN2.tot, references["2RN2"][1]; rtol=1e-1)
     @test isapprox(r_2RN2.bb, references["2RN2"][2]; rtol=1e-1)
     @test isapprox(r_2RN2.sc, references["2RN2"][3]; rtol=1e-1)
 
     sasa_2RN2_julia = delta_sasa_per_restype(; native=RN2_native, desnat=RN2_desnat)
-    r_2RN2 = mvalue(; atoms=RN2_native, sasas=sasa_2RN2_julia)
+    r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_julia)
     @test isapprox(r_2RN2.tot, -3.13; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.89; rtol=1e-1)
     @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
     sasa_2RN2_julia = delta_sasa_per_restype(;native=RN2_native, desnat=RN2_desnat, ignore_hydrogen=false)
-    r_2RN2 = mvalue(; atoms=RN2_native, sasas=sasa_2RN2_julia)
+    r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_julia)
     @test isapprox(r_2RN2.tot, -2.59; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.03; rtol=1e-1)
     @test isapprox(r_2RN2.sc, -1.57; rtol=1e-1)
@@ -145,7 +161,7 @@ end
             native_pdb=joinpath(dir, "2RN2_native.pdb"),
             desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
         )
-        r_2RN2 = mvalue(; atoms=RN2_native, sasas=sasa_2RN2)
+        r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2)
         @test isapprox(r_2RN2.tot, -3.17; rtol=1e-1)
         @test isapprox(r_2RN2.bb, -1.94; rtol=1e-1)
         @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
@@ -154,7 +170,7 @@ end
             desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
             ignore_hydrogen=false,
         )
-        r_2RN2 = mvalue(; atoms=RN2_native, sasas=sasa_2RN2)
+        r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2)
         @test isapprox(r_2RN2.tot, -2.54; rtol=1e-1)
         @test isapprox(r_2RN2.bb, -0.88; rtol=1e-1)
         @test isapprox(r_2RN2.sc, -1.66; rtol=1e-1)
@@ -174,7 +190,7 @@ end
     MJC_clean = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
     for (cos, dg) in data_mvalue_server_auton_and_bolen_1MJC
         for ig in 1:3
-            m = mvalue(model=AutonBolen, cosolvent=cos, atoms=MJC_clean, sasas=sasa_1MJC_clean, type=ig)
+            m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=MJC_clean, sasas=sasa_1MJC_clean, type=ig)
             @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
         end
     end
@@ -192,7 +208,7 @@ end
     RN2_clean = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
     for (cos, dg) in data_mvalue_server_auton_and_bolen_2RN2
         for ig in 1:3
-            m = mvalue(model=AutonBolen, cosolvent=cos, atoms=RN2_clean, sasas=sasa_2RN2_clean, type=ig)
+            m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=RN2_clean, sasas=sasa_2RN2_clean, type=ig)
             @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
         end
     end
@@ -216,7 +232,7 @@ end
     no_pbc = read_pdb(joinpath(dir, "no_pbc.pdb"))
     uc=lattice_to_matrix(107.845413,107.845413,107.845413,90., 90., 90.)
     ss = delta_sasa_per_restype(;native=pbc, desnat=no_pbc, unitcell=uc) 
-    m = mvalue(model=AutonBolen, cosolvent="urea", atoms=pbc, sasas=ss)
+    m = mvalue_delta_sasa(model=AutonBolen, cosolvent="urea", atoms=pbc, sasas=ss)
     @test m.tot ≈ 0.0 atol=1e-3
 
 end
