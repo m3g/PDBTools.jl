@@ -20,7 +20,7 @@ makedocs(
         "Contact maps" => "contacts.md",
         "Dihderals and Ramachandran" => "dihedrals.md",
         "Hydrogen bonds" => "hydrogen_bonds.md",
-        "Solvent Accessible Area" => "sasa.md",
+        "Solvent Accessible Area / m-values" => "sasa.md",
         "Auxiliary functions" => "auxiliary.md",
         "Examples" => "examples.md",
         "Tools" => "tools.md",

@@ -4,6 +4,7 @@ import Dates
 import Downloads
 import InteractiveUtils
 import PrecompileTools
+using Compat: @compat
 using Format: format
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
@@ -42,6 +43,7 @@ export moveto!
 export sasa_particles, sasa
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
+export mvalue, delta_sasa_per_restype
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -107,6 +109,7 @@ include("./tools/tools.jl")
 include("./tools/sasa.jl")
 include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
+include("./tools/mvalue/mvalue.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
