@@ -39,6 +39,7 @@ function Select(query_string::AbstractString)
     query = parse_query(query_string)
     return Select(query_string, query)
 end
+Select(query_function::Function) = Select("custom function", query_function)
 (s::Select)(at) = apply_query(s.query, at)
 Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
@@ -79,6 +80,9 @@ all(atoms) = true
     @test String(take!(buff)) == """Select("name CA and residue 1")"""
     show(buff, MIME"text/plain"(), sel"name CA and residue 1")
     @test String(take!(buff)) == """Select("name CA and residue 1")"""
+    sel1 = Select("name CA N and resname GLN")
+    sel2 = Select(at -> name(at) == "CA" || name(at) == "N" && resname(at) == "GLN")
+    @test length(filter(sel1, atoms)) == length(filter(sel2, atoms))
 end
 
 """
