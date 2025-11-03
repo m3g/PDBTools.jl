@@ -81,7 +81,7 @@ all(atoms) = true
     show(buff, MIME"text/plain"(), sel"name CA and residue 1")
     @test String(take!(buff)) == """Select("name CA and residue 1")"""
     sel1 = Select("name CA N and resname GLN")
-    sel2 = Select(at -> name(at) == "CA" || name(at) == "N" && resname(at) == "GLN")
+    sel2 = Select(at -> (name(at) == "CA" || name(at) == "N") && resname(at) == "GLN")
     @test length(filter(sel1, atoms)) == length(filter(sel2, atoms))
 end
 

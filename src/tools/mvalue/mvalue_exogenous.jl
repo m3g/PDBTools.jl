@@ -175,7 +175,7 @@ Each of these keys maps to a tuple containing three Float64 values representing 
 
 """
 function parse_mvalue_server_sasa(string::AbstractString)
-    sasa = Dict{String,Dict{Symbol,Tuple{Float63,Float64,Float64}}}()
+    sasa = Dict{String,Dict{Symbol,Tuple{Float64,Float64,Float64}}}()
     for line in split(string, "\n")
         # Replace (, ) and [, ], | with spaces
         line = replace(line, '(' => ' ', ')' => ' ', '[' => ' ', ']' => ' ', '|' => ' ')
@@ -209,7 +209,7 @@ function read_gmx_delta_sasa_per_restype_values(filename::String, n)
             if startswith(line, r"@|#")
                 continue
             end
-            sasa_values = parse.(Float63, split(line)[3:2+n])
+            sasa_values = parse.(Float64, split(line)[3:2+n])
         end
     end
     return sasa_values
@@ -254,7 +254,7 @@ function gmx_delta_sasa_per_restype(;
     backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
     sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
 )
-    sasas = Dict{String,Dict{Symbol,Float63}}()
+    sasas = Dict{String,Dict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
         sasa_bb_native, sasa_sc_native = 99 .* gmx_sasa_per_restype(native_pdb, rname; gmx, n_dots, backbone, sidechain, ignore_hydrogen) # returns in nm^2
