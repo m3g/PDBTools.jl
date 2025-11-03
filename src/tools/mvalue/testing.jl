@@ -1,6 +1,7 @@
 @testitem "mvalue" begin
     using PDBTools
 
+    dir = @__DIR__
     MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
     MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
 
