@@ -56,23 +56,3 @@ scatter!(Tuple.(dots); # surface dots
 !!! note
     The `sasa_particles` function supports periodic boundary conditions if a unit cell is provided. 
     See the how to [read the unitcell](@ref read-unitcell)  for further information.
-
-# [m-values (protein transfer free energy) calculator](@id mvalues)
-
-```@docs
-mvalue
-```
-
-## Using other SASA tools to compute m-values
-
-The following functions can be used to compute m-values from the variation of the SASA per residue 
-type, which allow the use of external tools to compute the SASA. This is used mostly for testing 
-purposes. The functions allow the use of SASAs obtained directly from the Auton & Bolen server, or 
-from Gromacs SASA calculations.
-
-```@docs
-PDBTools.smvalue_delta_sasa
-PDBTools.delta_sasa_per_restype
-PDBTools.parse_mvalue_server_sasa
-PDBTools.gmx_delta_sasa_per_restype
-```

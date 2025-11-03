@@ -18,7 +18,7 @@ include("./data.jl")
         sidechain::Function = issidechain,
     )
 
-Calculates the m-value (transfer free energy of a protein in 1M solution) using the Tanford transfer model,
+Calculates the m-value (transfer free energy of a protein in 1M solution, in `kcal/mol`) using the Tanford transfer model,
 as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 # Positional Arguments

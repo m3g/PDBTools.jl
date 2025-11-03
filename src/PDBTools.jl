@@ -52,19 +52,20 @@ export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
 # Test files
-const test_dir = joinpath(@__DIR__, "../test")
-const TESTPDB = joinpath(@__DIR__, "../test/structure.pdb")
-const SMALLPDB = joinpath(@__DIR__, "../test/small.pdb")
-const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
-const TESTCIF = joinpath(@__DIR__, "../test/small.cif")
-const CHAINSPDB = joinpath(@__DIR__, "../test/chains.pdb")
-const BROKENCIF = joinpath(@__DIR__, "../test/broken.cif")
-const LONG_CHAIN_STRING_CIF = joinpath(@__DIR__, "../test/long_chain_string.cif")
-const LONG_NAME_STRING_CIF = joinpath(@__DIR__, "../test/long_name_string.cif")
-const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
-const HETATMPDB = joinpath(@__DIR__, "../test/hetatm.pdb")
-const TESTPBC = joinpath(@__DIR__, "../test/pbc.pdb")
-const TESTNOPBC = joinpath(@__DIR__, "../test/no_pbc.pdb")
+const src_dir = @__DIR__
+const test_dir = joinpath(src_dir, "../test")
+const TESTPDB = joinpath(src_dir, "../test/structure.pdb")
+const SMALLPDB = joinpath(src_dir, "../test/small.pdb")
+const SIRAHPDB = joinpath(src_dir, "../test/sirah.pdb")
+const TESTCIF = joinpath(src_dir, "../test/small.cif")
+const CHAINSPDB = joinpath(src_dir, "../test/chains.pdb")
+const BROKENCIF = joinpath(src_dir, "../test/broken.cif")
+const LONG_CHAIN_STRING_CIF = joinpath(src_dir, "../test/long_chain_string.cif")
+const LONG_NAME_STRING_CIF = joinpath(src_dir, "../test/long_name_string.cif")
+const DIMERPDB = joinpath(src_dir, "../test/dimer.pdb")
+const HETATMPDB = joinpath(src_dir, "../test/hetatm.pdb")
+const TESTPBC = joinpath(src_dir, "../test/pbc.pdb")
+const TESTNOPBC = joinpath(src_dir, "../test/no_pbc.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")
