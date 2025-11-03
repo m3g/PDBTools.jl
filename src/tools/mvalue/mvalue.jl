@@ -8,38 +8,42 @@ struct AutonBolen <: MvalueModel end
 include("./data.jl")
 
 """
-    mvalue(; model=MoeserHorinek, cosolvent="urea", atoms:AbstractVector{<:PDBTools.Atom}, sasas, type=1)
+    mvalue(
+        sasa_initial::SASA{3,<:AbstractVector{<:Atom}},    
+        sasa_final::SASA{3,<:AbstractVector{<:Atom}},
+        cosolvent::String;
+        sel::Union{String,Function}=all,
+        model::Type{<:MvalueModel}=AutonBolen,
+        backbone::Function = isbackbone,
+        sidechain::Function = issidechain,
+    )
 
 Calculates the m-value (transfer free energy of a protein in 1M solution) using the Tanford transfer model,
 as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
-# Arguments
+# Positional Arguments
 
-- `model`: The model to be used. Must be `MoeserHorinek` or `AutonBolen`. `MoeserHorinek` is only implemented for `cosolvent="urea"`,
-   and should be more precise in that case. Other solvents are available for `AutonBolen`.
-- `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
-- `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
-- `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
-  upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
-    - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
-    - Compute the SASA with `delta_sasa_per_restype`, a SASA calculation utility implemented in PDBTools.jl.
-    - SASA values can be calculated using GROMACS with the `gmx_delta_sasa_per_restype` function defined in this module.
+- `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
+- `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
+- `cosolvent::String`: The cosolvent used in the solution. One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) 
 
-- `type::Int`: Specifies which SASA value to use from the provided data, because the server provides minimum, average, and maximum values,
-    according to different denatured models for the protein. The recommended value is `2` for comparison with experimental data.
-    Normally, GROMACS calculations will provide a single value, so `type=1` should be used in that case.
+# Keyword Arguments
+
+- `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
+- `model::Type{<:MvalueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
+- `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
+- `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 
 # Returns
 
 A named tuple with the following fields:
-- `tot`: Total transfer free energy (kcal/mol).
-- `bb`: Contribution from the backbone (kcal/mol).
-- `sc`: Contribution from the side chains (kcal/mol).
-- `restype`: A dictionary with the transfer free energy contributions per residue type (kcal/mol).
 
-Each entry in the dictionary is a named tuple with `bb` and `sc` fields representing the backbone and side chain contributions, respectively.
+- `tot::Float64`: Total m-value (kcal/mol/M).
+- `bb::Float64`: Backbone contribution to the m-value (kcal/mol/M).
+- `sc::Float64`: Side chain contribution to the m-value (kcal/mol/M).
+- `restype::Dict{String,@NamedTuple{bb::Float64, sc::Float64}}`: Dictionary with per-residue type contributions to the m-value.
 
-# Example calls
+## Example
 
 ```julia
 using PDBTools
@@ -63,17 +67,15 @@ mvalue(sasa_initial, sasa_final, "chain A"; model=AutonBolen, cosolvent="TMAO")
 function mvalue(
     sasa_initial::SASA{3,<:AbstractVector{<:Atom}},
     sasa_final::SASA{3,<:AbstractVector{<:Atom}},
-    selection::Union{String,Function}=all;
-    model::Type{<:MvalueModel}=MoeserHorinek,
-    cosolvent::String="urea",
+    cosolvent::String;
+    sel::Union{String,Function}=all,
+    model::Type{<:MvalueModel}=AutonBolen,
+    backbone::Function = isbackbone,
+    sidechain::Function = issidechain,
 )
-    if selection isa String
-        sel_func = Select(selection)
-    else
-        sel_func = selection
-    end
-    ats_initial = select(sasa_initial.particles, sel_func)
-    ats_final = select(sasa_final.particles, sel_func)
+    selector = Select(sel)
+    ats_initial = filter(selector, sasa_initial.particles)
+    ats_final = filter(selector, sasa_final.particles)
     residue_names = unique(vcat(resname.(ats_initial), resname.(ats_final)))
 
     DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
@@ -86,10 +88,10 @@ function mvalue(
             
             """))
         end
-        bb_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & isbackbone(at) & sel_func(at) )
-        sc_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & issidechain(at) & sel_func(at) )
-        bb_final = sasa(sasa_final, at -> (resname(at) == rtype) & isbackbone(at) & sel_func(at) )
-        sc_final = sasa(sasa_final, at -> (resname(at) == rtype) & issidechain(at) & sel_func(at) )
+        bb_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & backbone(at) & selector(at) )
+        sc_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & sidechain(at) & selector(at) )
+        bb_final = sasa(sasa_final, at -> (resname(at) == rtype) & backbone(at) & selector(at) )
+        sc_final = sasa(sasa_final, at -> (resname(at) == rtype) & sidechain(at) & selector(at) )
         DeltaG_per_residue[rtype] = (
             bb=(last(tfe_asa(model, cosolvent, rtype)) * (bb_final - bb_initial) / 100),
             sc=(first(tfe_asa(model, cosolvent, rtype)) * (sc_final - sc_initial) / 100),
