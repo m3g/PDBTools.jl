@@ -70,8 +70,8 @@ function mvalue(
     cosolvent::String;
     sel::Union{String,Function}=all,
     model::Type{<:MvalueModel}=AutonBolen,
-    backbone::Function = isbackbone,
-    sidechain::Function = issidechain,
+    backbone::Function=isbackbone,
+    sidechain::Function=issidechain,
 )
     selector = Select(sel)
     ats_initial = filter(selector, sasa_initial.particles)
@@ -85,13 +85,13 @@ function mvalue(
             throw(ArgumentError("""\n
                 Found non-protein residue ($rname) in the selected atoms of SASA calculation.
                 m-value calculations are only defined for protein residues.
-            
+
             """))
         end
-        bb_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & backbone(at) & selector(at) )
-        sc_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & sidechain(at) & selector(at) )
-        bb_final = sasa(sasa_final, at -> (resname(at) == rtype) & backbone(at) & selector(at) )
-        sc_final = sasa(sasa_final, at -> (resname(at) == rtype) & sidechain(at) & selector(at) )
+        bb_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & backbone(at) & selector(at))
+        sc_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & sidechain(at) & selector(at))
+        bb_final = sasa(sasa_final, at -> (resname(at) == rtype) & backbone(at) & selector(at))
+        sc_final = sasa(sasa_final, at -> (resname(at) == rtype) & sidechain(at) & selector(at))
         DeltaG_per_residue[rtype] = (
             bb=(last(tfe_asa(model, cosolvent, rtype)) * (bb_final - bb_initial) / 100),
             sc=(first(tfe_asa(model, cosolvent, rtype)) * (sc_final - sc_initial) / 100),
