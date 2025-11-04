@@ -3,7 +3,7 @@ import MolSimToolkitShared: dihedral
 """
     dihedral(at1::Atom, at2::Atom, at3::Atom, at4::Atom)
 
-Computes the dihderal angle given four atoms of type PDBTools.Atom.
+Computes the dihedral angle given four atoms of type PDBTools.Atom.
 
 # Example
 

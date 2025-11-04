@@ -4,6 +4,7 @@ import Dates
 import Downloads
 import InteractiveUtils
 import PrecompileTools
+using Compat: @compat
 using Format: format
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
@@ -42,6 +43,8 @@ export moveto!
 export sasa_particles, sasa
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
+export mvalue
+@compat public parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
@@ -49,19 +52,20 @@ export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
 # Test files
-const test_dir = joinpath(@__DIR__, "../test")
-const TESTPDB = joinpath(@__DIR__, "../test/structure.pdb")
-const SMALLPDB = joinpath(@__DIR__, "../test/small.pdb")
-const SIRAHPDB = joinpath(@__DIR__, "../test/sirah.pdb")
-const TESTCIF = joinpath(@__DIR__, "../test/small.cif")
-const CHAINSPDB = joinpath(@__DIR__, "../test/chains.pdb")
-const BROKENCIF = joinpath(@__DIR__, "../test/broken.cif")
-const LONG_CHAIN_STRING_CIF = joinpath(@__DIR__, "../test/long_chain_string.cif")
-const LONG_NAME_STRING_CIF = joinpath(@__DIR__, "../test/long_name_string.cif")
-const DIMERPDB = joinpath(@__DIR__, "../test/dimer.pdb")
-const HETATMPDB = joinpath(@__DIR__, "../test/hetatm.pdb")
-const TESTPBC = joinpath(@__DIR__, "../test/pbc.pdb")
-const TESTNOPBC = joinpath(@__DIR__, "../test/no_pbc.pdb")
+const src_dir = @__DIR__
+const test_dir = joinpath(src_dir, "../test")
+const TESTPDB = joinpath(src_dir, "../test/structure.pdb")
+const SMALLPDB = joinpath(src_dir, "../test/small.pdb")
+const SIRAHPDB = joinpath(src_dir, "../test/sirah.pdb")
+const TESTCIF = joinpath(src_dir, "../test/small.cif")
+const CHAINSPDB = joinpath(src_dir, "../test/chains.pdb")
+const BROKENCIF = joinpath(src_dir, "../test/broken.cif")
+const LONG_CHAIN_STRING_CIF = joinpath(src_dir, "../test/long_chain_string.cif")
+const LONG_NAME_STRING_CIF = joinpath(src_dir, "../test/long_name_string.cif")
+const DIMERPDB = joinpath(src_dir, "../test/dimer.pdb")
+const HETATMPDB = joinpath(src_dir, "../test/hetatm.pdb")
+const TESTPBC = joinpath(src_dir, "../test/pbc.pdb")
+const TESTNOPBC = joinpath(src_dir, "../test/no_pbc.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")
@@ -107,6 +111,7 @@ include("./tools/tools.jl")
 include("./tools/sasa.jl")
 include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
+include("./tools/mvalue/mvalue.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")

@@ -98,6 +98,9 @@ get_atoms(segment::Segment) = @view(segment.atoms[segment.range])
     @test_throws ArgumentError Segment(atoms, 1904:1910)
     @test_throws ArgumentError segments[1]
     s = collect(segments)
+    @test atoms[1] in s[1]
+    @test !(atoms[1906] in s[1])
+    @test atoms[1906] in s[2]
     @test name(s[1]) == "A"
     @test name(s[2]) == "B"
     @test s[1].range == 1:1905

@@ -191,7 +191,7 @@ julia> cB = select(ats, "chain B");
 julia> map = contact_map(cA, cB) # contact map between chains A and B
 ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0 
 
-julia> # using Plots; heatmap(map); # uncoment to plot the contact map
+julia> # using Plots; heatmap(map); # uncomment to plot the contact map
 ```
 
 ## Contact map between residues in two different structures
@@ -208,7 +208,7 @@ julia> cB = select(ats, "chain B");
 julia> map = contact_map(cA, cB) # contact map between chains A and B
 ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0 
 
-julia> # using Plots; heatmap(map); # uncoment plot the contact map
+julia> # using Plots; heatmap(map); # uncomment plot the contact map
 ```
 
 """

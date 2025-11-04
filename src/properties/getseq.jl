@@ -1,7 +1,7 @@
 """
     getseq(AbstractVector{<:Atom} or filename; selection, code)
 
-Returns the sequence of aminoacids from the vector of atoms or file name. Selections may be applied. Code defines if the output will be a one-letter, three-letter or full-residue name array.
+Returns the sequence of amino acids from the vector of atoms or file name. Selections may be applied. Code defines if the output will be a one-letter, three-letter or full-residue name array.
 
 ### Example
 

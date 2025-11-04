@@ -113,6 +113,10 @@ get_atoms(chain::Chain) = @view(chain.atoms[chain.range])
     @test name(last(ichains)) == "D"
     @test_throws ArgumentError ichains[1]
     chains = collect(eachchain(pdb))
+    @test pdb[1] in chains[1]
+    @test pdb[48] in chains[1]
+    @test !(pdb[49] in chains[1])
+    @test pdb[49] in chains[2]
     @test name(chains[3]) == "A"
     @test index.(filter(at -> resname(at) == "ASP" && name(at) == "CA", chains[1])) == [2]
     @test length(findall(at -> resname(at) == "GLN", chains[1])) == 17

@@ -4,7 +4,7 @@ CollapsedDocStrings = true
 
 # Solvent Accessible Surface Area (SASA)
 
-These functions are used to compute the solvent accessible surface area (SASA) of structures or parts of a structure. They provide a very fast implementation of the [Shake-Rupley](https://doi.org/10.1016/0022-2836(73)90011-9) method, using a Fibbonacy lattice to construct the grid points.
+These functions are used to compute the solvent accessible surface area (SASA) of structures or parts of a structure. They provide a very fast implementation of the [Shake-Rupley](https://doi.org/10.1016/0022-2836(73)90011-9) method, using a Fibonacci lattice to construct the grid points.
 
 ```@docs
 sasa_particles

@@ -301,7 +301,7 @@ true
 julia> remove_custom_protein_residues!(); # clean up
 ```
 
-Here we repeteadly call `remove_custom_residues!()` to guarantee the proper execution of the
+Here we repeatedly call `remove_custom_residues!()` to guarantee the proper execution of the
 test codes, without any custom residues in the list of protein residues.
 
 """
@@ -351,7 +351,7 @@ julia> isprotein(Atom(resname="sA"))
 false
 ```
 
-Here we repeteadly call `remove_custom_residues!()` to guarantee the proper execution of the
+Here we repeatedly call `remove_custom_residues!()` to guarantee the proper execution of the
 test codes, without any custom residues in the list of protein residues.
 
 """

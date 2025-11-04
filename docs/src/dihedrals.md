@@ -3,7 +3,7 @@ CollapsedDocStrings = true
 ```
 # Dihedrals and Ramachandran plots
 
-Dihderal angles can be computed with the `dihedral` function, and an application 
+Dihedral angles can be computed with the `dihedral` function, and an application 
 of this function is the computation of Ramachandran plots. 
 
 ```@docs
@@ -14,7 +14,7 @@ scatter(::Ramachandran)
 
 ## Dihedral angles
 
-The dihderal function computes the dihderal angle given four atoms:
+The `dihedral` function computes the dihedral angle given four atoms:
 
 ```jldoctest
 julia> using PDBTools
@@ -43,4 +43,4 @@ using Plots
 scatter(ram)
 ```
 
-All `scatter` parametes can be customized using the `Plots` keyword syntax. 
+All `scatter` parameters can be customized using the `Plots` keyword syntax. 

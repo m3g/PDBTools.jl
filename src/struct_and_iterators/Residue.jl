@@ -210,6 +210,9 @@ end
     @test chain(last(residues)) == "A"
     @test_throws ArgumentError residues[1]
     residues = collect(eachresidue(atoms))
+    @test atoms[1] in residues[1]
+    @test !(atoms[1] in residues[2])
+    @test atoms[1458] in residues[104]
     @test index.(filter(at -> name(at) in ("N", "HG1"), residues[2])) == [13, 21]
     @test length(get_atoms(residues[1])) == 12
     @test findall(at -> name(at) in ("N", "HG1"), residues[2]) == [1, 9]
