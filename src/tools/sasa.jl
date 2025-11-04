@@ -193,7 +193,7 @@ are functions:
 
 By default, `atom_type = PDBTools.element`, a function that just returns the element symbol of the atom,
 and `atom_radius_from_type` obtains the vdW radius from the `PDBTools.elements` list given the element symbol.
-Here, the atomc radii of https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page) are used. 
+Here, the atomic radii of https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page) are used. 
 Atoms with missing radius have a `NaN` value, and the computation will not return meaningful
 values. 
 

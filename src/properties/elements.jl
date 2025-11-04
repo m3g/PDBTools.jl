@@ -200,7 +200,7 @@ julia> element(Atom(name="GN")) # returns `nothing`
 
 ```
 
-Here we repeteadly call `remove_custom_elements!()` to guarantee the proper execution of the
+Here we repeatedly call `remove_custom_elements!()` to guarantee the proper execution of the
 test codes, without any custom elements predefined.
 
 """
