@@ -7,6 +7,22 @@ struct AutonBolen <: MvalueModel end
 
 include("./data.jl")
 
+struct MValue
+    tot::Float32
+    bb::Float32
+    sc::Float32
+    residue_contributions_bb::Vector{Float32}
+    residue_contributions_sc::Vector{Float32}
+end
+function Base.show(io::IO, ::MIME"text/plain", m::MValue)
+    print(io, chomp("""
+    $(typeof(m))
+        Total m-value: $(m.tot) kcal mol⁻¹
+        Backbone contributions: $(m.bb) kcal mol⁻¹
+        Side-chain contributions: $(m.sc) kcal mol⁻¹
+    """))
+end
+
 """
     mvalue(
         sasa_initial::SASA{3,<:AbstractVector{<:Atom}},    
@@ -36,12 +52,13 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 # Returns
 
-A named tuple with the following fields:
+A `MValue` object, with fields:
 
-- `tot::Float64`: Total m-value (kcal/mol/M).
-- `bb::Float64`: Backbone contribution to the m-value (kcal/mol/M).
-- `sc::Float64`: Side chain contribution to the m-value (kcal/mol/M).
-- `restype::Dict{String,@NamedTuple{bb::Float64, sc::Float64}}`: Dictionary with per-residue type contributions to the m-value.
+- `tot::Float32`: Total m-value (kcal/mol/M).
+- `bb::Float32`: Backbone contribution to the m-value (kcal/mol/M).
+- `sc::Float32`: Side chain contribution to the m-value (kcal/mol/M).
+- `residue_contributions_bb::Vector{Float32}`: Backbone contributions of each residue to the m-value.
+- `residue_contributions_sc::Vector{Float32}`: Side-chain contributions of each residue to the m-value.
 
 ## Example
 
@@ -76,31 +93,48 @@ function mvalue(
     selector = Select(sel)
     ats_initial = filter(selector, sasa_initial.particles)
     ats_final = filter(selector, sasa_final.particles)
-    residue_names = unique(vcat(resname.(ats_initial), resname.(ats_final)))
-
-    DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
-    for rname in residue_names
-        rtype = threeletter(rname) # convert non-standard residue names in types (e. g. HSD -> HIS)
+    residues_initial = collect(eachresidue(ats_initial))
+    residues_final = collect(eachresidue(ats_final))
+    if length(residues_initial) != length(residues_final)
+        throw(ArgumentError("""\n
+            Initial and final states do not have the same number of residues.
+            Got $(length(residues_initial)) and $(length(residues_final)) residues.
+        
+        """
+        ))
+    end
+    residue_contributions_bb = zeros(Float32, length(residues_initial))
+    residue_contributions_sc = zeros(Float32, length(residues_initial))
+    for iresidue in eachindex(residues_initial)
+        rinit = residues_initial[iresidue]
+        rfinal = residues_final[iresidue]
+        rtype = threeletter(resname(rinit)) # convert non-standard residue names in types (e. g. HSD -> HIS)
         if !(haskey(protein_residues, rtype))
             throw(ArgumentError("""\n
-                Found non-protein residue ($rname) in the selected atoms of SASA calculation.
+                Found non-protein residue ($(resname(rinit))) in the selected atoms of SASA calculation.
                 m-value calculations are only defined for protein residues.
 
             """))
         end
-        bb_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & backbone(at) & selector(at))
-        sc_initial = sasa(sasa_initial, at -> (resname(at) == rtype) & sidechain(at) & selector(at))
-        bb_final = sasa(sasa_final, at -> (resname(at) == rtype) & backbone(at) & selector(at))
-        sc_final = sasa(sasa_final, at -> (resname(at) == rtype) & sidechain(at) & selector(at))
-        DeltaG_per_residue[rtype] = (
-            bb=(last(tfe_asa(model, cosolvent, rtype)) * (bb_final - bb_initial) / 100),
-            sc=(first(tfe_asa(model, cosolvent, rtype)) * (sc_final - sc_initial) / 100),
-        )
+        if rtype != threeletter(resname(rfinal))
+            throw(ArgumentError("""\n
+                The residues of the initial and final state must be of the same type.
+                Found residues at position $iresidue: $(resname(rinit)) and $(resname(rfinal))
+
+            """))
+        end
+        bb_initial = sasa(sasa_initial, at -> (at in rinit) & backbone(at) & selector(at))
+        sc_initial = sasa(sasa_initial, at -> (at in rinit) & sidechain(at) & selector(at))
+        bb_final = sasa(sasa_final, at -> (at in rfinal) & backbone(at) & selector(at))
+        sc_final = sasa(sasa_final, at -> (at in rfinal) & sidechain(at) & selector(at))
+        bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
+        residue_contributions_bb[iresidue] = bb_type * (bb_final - bb_initial)
+        residue_contributions_sc[iresidue] = sc_type * (sc_final - sc_initial)
     end
-    DeltaG_BB = sum(getfield(DeltaG_per_residue[key], :bb) for key in keys(DeltaG_per_residue); init=0.f0)
-    DeltaG_SC = sum(getfield(DeltaG_per_residue[key], :sc) for key in keys(DeltaG_per_residue); init=0.f0)
-    DeltaG = DeltaG_BB + DeltaG_SC
-    return (tot=DeltaG, bb=DeltaG_BB, sc=DeltaG_SC, restype=DeltaG_per_residue)
+    bb = sum(residue_contributions_bb)
+    sc = sum(residue_contributions_sc)
+    tot = bb + sc
+    return MValue(tot, bb, sc, residue_contributions_bb, residue_contributions_sc)
 end
 
 #=
@@ -136,7 +170,7 @@ function tfe_asa(
         error("model must be either MoeserHorinek or AutonBolen")
     end
     # convert to kcal / nm^2 and return
-    return sc_contribution / 10, bb_contribution / 10
+    return bb_contribution / 1000, sc_contribution / 1000
 end
 
 include("./mvalue_exogenous.jl")

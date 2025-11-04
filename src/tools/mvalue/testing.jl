@@ -1,5 +1,6 @@
 @testitem "mvalue" begin
     using PDBTools
+    using ShowMethodTesting
 
     dir = @__DIR__
     MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
@@ -11,22 +12,30 @@
     n_sasa = sasa_particles(MJC_native)
     d_sasa = sasa_particles(MJC_desnat)
     r_1MJC = mvalue(n_sasa, d_sasa, "urea") 
-    @test isapprox(r_1MJC.tot, -0.798; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.866; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.852; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.066; atol=1e-2)
+
+    # Test show method
+    @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
+        PDBTools.MValue
+            Total m-value: -1.5457937 kcal mol⁻¹
+            Backbone contributions: -1.5996567 kcal mol⁻¹
+            Side-chain contributions: 0.05386302 kcal mol⁻¹
+        """
 
     # Without H
     n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
     d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
     r_1MJC = mvalue(n_sasa, d_sasa, "urea")
-    @test isapprox(r_1MJC.tot, -1.583; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -1.642; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.0598; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.546; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -1.600; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.0539; atol=1e-2)
 
     r_1MJC = mvalue(n_sasa, d_sasa, "tmao") 
-    @test isapprox(r_1MJC.tot, 3.141; atol=1e-2)
-    @test isapprox(r_1MJC.bb, 3.790; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.649; atol=1e-2)
+    @test isapprox(r_1MJC.tot, 3.073; atol=1e-2)
+    @test isapprox(r_1MJC.bb, 3.692; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.619; atol=1e-2)
 
     #
     # MoeserHorinek model
@@ -34,17 +43,17 @@
     n_sasa = sasa_particles(MJC_native)
     d_sasa = sasa_particles(MJC_desnat)
     r_1MJC = mvalue(n_sasa, d_sasa, "urea"; model=MoeserHorinek) 
-    @test isapprox(r_1MJC.tot, -0.935; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.397; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.538; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.937; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.391; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.546; atol=1e-2)
 
     # Without H
     n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
     d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
     r_1MJC = mvalue(n_sasa, d_sasa, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -1.230; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.774; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.455; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.222; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.757; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.465; atol=1e-2)
 
     # Same definitions as Gromacs for side chain and backbone
     n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
@@ -54,27 +63,37 @@
         backbone=at -> name(at) in ("N", "CA", "C", "O"),
         sidechain=at -> !(name(at) in ("N", "CA", "C", "O")),
     )
-    @test isapprox(r_1MJC.tot, -1.236; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.774; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.461; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.227; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.757; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.470; atol=1e-2)
 
     # Provide a selection
     r_1MJC = mvalue(n_sasa, d_sasa, "urea"; sel="acidic")
-    @test isapprox(r_1MJC.tot, -0.020; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.105; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.085; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.037; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.104; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
 
     # Input file with non-protein atoms
-    pdb = read_pdb(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     s1 = sasa_particles(pdb)
     s2 = sasa_particles(select(pdb,"protein"))
     # This should work:
     m = mvalue(s1, s2, "urea"; sel="protein")
-    @test m.tot ≈ -0.108 atol=1e-2
+    @test m.tot ≈ 0.0 atol=1e-2
     m = mvalue(s2, s1, "urea"; sel="protein")
-    @test m.tot ≈ 0.108 atol=1e-2
-    # But this should error:
-    @test_throws ArgumentError mvalue(s2, s1, "urea")
+    @test m.tot ≈ 0.0 atol=1e-2
+    # But these should error:
+    @test_throws "same number of residues" mvalue(s2, s1, "urea") # different number of residues
+    s2 = sasa_particles(pdb)
+    @test_throws "non-protein residue" mvalue(s2, s1, "urea") # different number of residues
+    s1 = sasa_particles(select(pdb,"protein"))
+    pdb2 = copy.(pdb)
+    rs = collect(eachresidue(pdb2))
+    for at in rs[2]
+        at.resname = "ASP"
+    end
+    s2 = sasa_particles(select(pdb2,"protein"))
+    @test_throws "same type" mvalue(s2, s1, "urea") # different number of residues
 
 end
 
@@ -162,14 +181,14 @@ end
     # with PDBTools.sasa
     sasa_1MJC_julia = delta_sasa_per_restype(; native=MJC_native, desnat=MJC_desnat)
     r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_julia)
-    @test isapprox(r_1MJC.tot, -1.23; rtol=1e-1)
-    @test isapprox(r_1MJC.bb, -0.772; rtol=1e-1)
-    @test isapprox(r_1MJC.sc, -0.462; rtol=1e-1)
+    @test isapprox(r_1MJC.tot, -1.22; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.755; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.468; rtol=1e-1)
     sasa_1MJC_julia = delta_sasa_per_restype(; native=MJC_native, desnat=MJC_desnat, ignore_hydrogen=false)
     r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_julia)
     @test isapprox(r_1MJC.tot, -1.02; rtol=1e-1)
-    @test isapprox(r_1MJC.bb, -0.398; rtol=1e-1)
-    @test isapprox(r_1MJC.sc, -0.621; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.389; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.627; rtol=1e-1)
 
     if !isnothing(gmx)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
