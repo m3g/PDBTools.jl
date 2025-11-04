@@ -430,6 +430,7 @@ end
     #
     nhb = [63, 62, 56, 57, 62] # checked with gmx hbond
     for (i, m) in enumerate(models)
+        local hbs
         hbs = hydrogen_bonds(m, "protein")
         @test length(hbs["protein => protein"]) == nhb[i]
         hbs = hydrogen_bonds(m, "protein"; parallel=true)
@@ -455,6 +456,7 @@ end
     # provide exact results. 
     nhb = [17964, 17915, 17945, 17977, 17852] # checked with gmx hbond
     for (i, m) in enumerate(models)
+        local hbs
         local uc = pbcs[i]
         hbs = hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc)
         @test length(hbs["resname HOH SOL => resname HOH SOL"]) ≈ nhb[i] atol = 10
@@ -467,6 +469,7 @@ end
     #
     nhb = [140, 130, 142, 135, 143] # checked with gmx hbond
     for (i, m) in enumerate(models)
+        local hbs
         local uc = pbcs[i]
         hbs = hydrogen_bonds(m, "protein" => "resname HOH SOL")
         @test length(hbs["protein => resname HOH SOL"]) == nhb[i]
@@ -477,6 +480,7 @@ end
     end
     nhb = [156, 143, 150, 141, 156] # checked with gmx hbond
     for (i, m) in enumerate(models)
+        local hbs
         local uc = pbcs[i]
         hbs = hydrogen_bonds(m, "resname HOH" => "resname SOL"; unitcell=uc)
         @test length(hbs["resname HOH => resname SOL"]) == nhb[i]
