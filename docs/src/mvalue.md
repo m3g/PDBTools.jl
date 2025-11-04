@@ -44,8 +44,26 @@ denatured state. This is obtained with:
 m = mvalue(sasa_native, sasa_desnat, "urea"; model=MoeserHorinek)
 ```
 Where the `tot`, `bb` and `sc` fields contain, respectively, the total, backbone and side-chain contributions.
-The `m` named-tuple contains, additionally, the contribution of the side chain and backbone of 
-each aminoacid residue type for the *m*-value.
+The `MValue` object contains, additionally, the contribution of the side chain and backbone of 
+each aminoacid residue type for the *m*-value, in the `residue_contributions_bb` and `residue_conatributions_sc` fields.
+
+We can set the `beta` fields (for example) of the atoms as the residue contributions:
+```@example mvalue
+for (ir, r) in enumerate(eachresidue(native_state))
+    c_residue = m.residue_contributions_sc[ir] + m.residue_contributions_bb[ir]
+    for at in r
+        at.beta = c_residue
+    end
+end
+write_pdb("contrib.pdb", native_state)
+```
+
+And with that get an image (here produced with VMD) of the contributions of the residues
+to the transfer free energies:
+
+```@raw html
+<img src="../assets/mvalue.png" width=30%>
+```
 
 ## Cofactor binding
 

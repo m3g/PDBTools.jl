@@ -33,3 +33,4 @@ src/tools/cysthr.dat
 .gitignore
 .gitignore
 src/tools/sasa.vmd
+contrib.pdb
