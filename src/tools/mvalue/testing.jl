@@ -18,7 +18,7 @@
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
-        PDBTools.MValue
+        MValue
             Total m-value: -1.5457937 kcal mol⁻¹
             Backbone contributions: -1.5996567 kcal mol⁻¹
             Side-chain contributions: 0.05386302 kcal mol⁻¹
