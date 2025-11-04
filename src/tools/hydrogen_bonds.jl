@@ -1,7 +1,7 @@
 using CellListMap: CellListMap, map_pairwise!, ParticleSystem1, ParticleSystem2
 
 struct HPolarBonds
-    D::Vector{Int32} # Hydrogen-bond donnor
+    D::Vector{Int32} # Hydrogen-bond donor
     H::Vector{Int32} # polar hydrogen
 end
 CellListMap.copy_output(x::HPolarBonds) = HPolarBonds(copy(x.D), copy(x.H))
@@ -17,7 +17,7 @@ function CellListMap.reducer!(x::HPolarBonds, y::HPolarBonds)
 end
 
 @kwdef struct HBonds
-    D::Vector{Int32} = Int32[] # Hydrogen bond donnor
+    D::Vector{Int32} = Int32[] # Hydrogen bond donor
     H::Vector{Int32} = Int32[] # polar hydrogen
     A::Vector{Int32} = Int32[] # hydrogen bond acceptor
     r::Vector{Float32} = Float32[] # distance D-A
@@ -30,7 +30,7 @@ function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     HBonds data structure with $(length(hb)) hydrogen-bonds.
         First hbond: (D-H---A) = $(length(hb) > 0 ? hb[1] : nothing)
         Last hbond: (D-H---A) = $(length(hb) > 0 ? hb[length(hb)] : nothing)
-        - r is the distance between Donnor and Acceptor atoms (D-A)
+        - r is the distance between Donor and Acceptor atoms (D-A)
         - ang is the angle (degrees) between H-D and A-D.
     """))
 end
@@ -60,7 +60,7 @@ function hbond_angle(D, H, A)
 end
 
 function push_hbond!(hbonds, i, j, x, y, polar_bonds, positions, unitcell, ang, ats_sel1, d2)
-    # Find if i is a donnor
+    # Find if i is a donor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
     # Might have more than one polar hydrogen
@@ -85,7 +85,7 @@ function push_hbond2!(hbonds,
     i, j, x, y, polar_bonds, positions,
     unitcell, ang, ats_sel1, ats_sel2, d2
 )
-    # Find if i is a donnor
+    # Find if i is a donor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
     # Might have more than one polar hydrogen
@@ -106,7 +106,7 @@ function push_hbond2!(hbonds,
     return nothing
 end
 
-function find_hbond_donnors(
+function find_hbond_donors(
     ats_sel;
     positions,
     unitcell,
@@ -183,7 +183,7 @@ function initialize_hbonds_data(
     selection_pairs::Vector{Pair{String,String}};
     unitcell=nothing,
     parallel::Bool=true,
-    donnor_acceptor_distance::Real=3.5f0,
+    donor_acceptor_distance::Real=3.5f0,
     electronegative_elements=("N", "O", "F", "S"),
     d_covalent_bond::Real=1.2f0,
 )
@@ -193,11 +193,11 @@ function initialize_hbonds_data(
             if !haskey(selection_data, sel)
                 ats_sel = select(atoms, sel)
                 inds_sel = index.(ats_sel)
-                polar_bonds = find_hbond_donnors(
+                polar_bonds = find_hbond_donors(
                     ats_sel,
                     positions=coor(ats_sel),
                     unitcell=unitcell,
-                    cutoff=donnor_acceptor_distance,
+                    cutoff=donor_acceptor_distance,
                     parallel=parallel,
                     electronegative_elements=electronegative_elements,
                     d_covalent_bond=d_covalent_bond,
@@ -218,7 +218,7 @@ function setup_particle_systems(
     selection_pairs,
     selection_data,
     unitcell,
-    donnor_acceptor_distance,
+    donor_acceptor_distance,
     parallel
 )
     systems = Dict{String,Union{CellListMap.ParticleSystem1,CellListMap.ParticleSystem2}}()
@@ -230,7 +230,7 @@ function setup_particle_systems(
             systems[key] = ParticleSystem(
                 xpositions=coor.(s1.ats),
                 unitcell=unitcell,
-                cutoff=donnor_acceptor_distance,
+                cutoff=donor_acceptor_distance,
                 output=HBonds(),
                 parallel=parallel,
                 output_name=:hydrogen_bonds
@@ -242,7 +242,7 @@ function setup_particle_systems(
                 xpositions=coor.(s1.ats),
                 ypositions=coor.(s2.ats),
                 unitcell=unitcell,
-                cutoff=donnor_acceptor_distance,
+                cutoff=donor_acceptor_distance,
                 output=HBonds(),
                 parallel=parallel,
                 output_name=:hydrogen_bonds
@@ -308,23 +308,23 @@ and, optionally, the selections or selection pairs for which the hydrogen bonds 
 - `sel::String`: Selection string, e. g. `"protein"`.
 - `sel1 => sel2::Pair{String,String}`: Pair of selection strings, e. g. `"resname ARG" => "resname GLU"`.
 
-The two selections of each pair, if different, must not have overalpping atoms (and error will the thrown).
+The two selections of each pair, if different, must not have overlapping atoms (and error will the thrown).
 If no selection is provided, the hydrogen bonds of the complete structure will be computed.
 
 ### Optional keyword arguments
 
 - `unitcell::Union{Nothing,AbstractVecOrMat}=nothing`: Unit cell for periodic boundary conditions.
-- `donnor_acceptor_distance::Real=3.5f0`: Maximum distance between donnor and acceptor to consider a hydrogen bond.
-- `angle_cutoff::Real=30`: Maximum angle (in degrees) between donnor-hydrogen-acceptor to consider a hydrogen bond.
+- `donor_acceptor_distance::Real=3.5f0`: Maximum distance between donor and acceptor to consider a hydrogen bond.
+- `angle_cutoff::Real=30`: Maximum angle (in degrees) between donor-hydrogen-acceptor to consider a hydrogen bond.
 - `electronegative_elements=("N", "O", "F", "S")`: Elements considered electronegative for hydrogen bonding.
-- `d_covalent_bond::Real=1.2f0`: Maximum distance between donnor and hydrogen to consider a covalent bond.
+- `d_covalent_bond::Real=1.2f0`: Maximum distance between donor and hydrogen to consider a covalent bond.
 - `parallel::Bool=false`: Whether to use parallel computation.
 
 ### Returns
 
 - `HBonds`: A data structure containing the found hydrogen bonds, where each element is 
-  a named tuple `(D, H, A, r, ang)` where the fields correspond to the donnor, hydrogen
-  and acceptor atoms, the distance between donnor and acceptor atoms, and the angle. 
+  a named tuple `(D, H, A, r, ang)` where the fields correspond to the donor, hydrogen
+  and acceptor atoms, the distance between donor and acceptor atoms, and the angle. 
 
 # Example
 
@@ -343,7 +343,7 @@ julia> hbs["protein => protein"] # Summary
 HBonds data structure with 63 hydrogen-bonds.
     First hbond: (D-H---A) = (D = 1, H = 2, A = 286, r = 2.6871147f0, ang = 10.643958f0)
     Last hbond: (D-H---A) = (D = 1014, H = 1017, A = 1032, r = 2.5816715f0, ang = 12.714139f0)
-    - r is the distance between Donnor and Acceptor atoms (D-A)
+    - r is the distance between Donor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
 
 julia> hbs["protein => protein"][1] # first h-bond
@@ -358,26 +358,26 @@ julia> hbs["protein => protein"]
 HBonds data structure with 63 hydrogen-bonds.
     First hbond: (D-H---A) = (D = 1, H = 2, A = 286, r = 2.6871147f0, ang = 10.643958f0)
     Last hbond: (D-H---A) = (D = 1014, H = 1017, A = 1032, r = 2.5816715f0, ang = 12.714139f0)
-    - r is the distance between Donnor and Acceptor atoms (D-A)
+    - r is the distance between Donor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
 
 julia> hbs["protein => resname SOL"]
 HBonds data structure with 138 hydrogen-bonds.
     First hbond: (D-H---A) = (D = 1406, H = 1407, A = 160, r = 2.9361732f0, ang = 6.771988f0)
     Last hbond: (D-H---A) = (D = 41798, H = 41800, A = 395, r = 2.6894214f0, ang = 10.623453f0)
-    - r is the distance between Donnor and Acceptor atoms (D-A)
+    - r is the distance between Donor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
 ```
 
 !!! note
     This function does not use topology information. It identified polar hydrogens based on distance criteria only,
-    where `d_covalent_bond` is the criterium for identifying covalent bonds between donnor and hydrogen atoms.
+    where `d_covalent_bond` is the criterion for identifying covalent bonds between donor and hydrogen atoms.
 
 """
 function hydrogen_bonds(
     structure::Union{AbstractVector{<:Atom},AbstractStructuralElement},
     selections::Union{Nothing,String,Pair{String,String}}...=nothing;
-    donnor_acceptor_distance::Real=3.5f0,
+    donor_acceptor_distance::Real=3.5f0,
     angle_cutoff::Real=30,
     electronegative_elements=("N", "O", "F", "S"),
     unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
@@ -391,14 +391,14 @@ function hydrogen_bonds(
     selection_data = initialize_hbonds_data(
         ats, selection_pairs;
         parallel=parallel,
-        donnor_acceptor_distance=donnor_acceptor_distance,
+        donor_acceptor_distance=donor_acceptor_distance,
         electronegative_elements=electronegative_elements,
         d_covalent_bond=d_covalent_bond
     )
 
     systems = setup_particle_systems(
         selection_pairs, selection_data,
-        unitcell, donnor_acceptor_distance, parallel
+        unitcell, donor_acceptor_distance, parallel
     )
 
     hbonds = OrderedDict{String,HBonds}()
@@ -491,7 +491,7 @@ end
         HBonds data structure with 63 hydrogen-bonds.
             First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
             Last hbond: (D-H---A) = (D = 1169, H = 1170, A = 619, r = 2.6004055f0, ang = 9.524022f0)
-            - r is the distance between Donnor and Acceptor atoms (D-A)
+            - r is the distance between Donor and Acceptor atoms (D-A)
             - ang is the angle (degrees) between H-D and A-D.
         """
 

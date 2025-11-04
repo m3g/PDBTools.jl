@@ -11,9 +11,9 @@ to a 1M solution of a cosolvent.
 mvalue
 ```
 
-The *m*-values can be estimated by the Tanford transfer model, in which each aminoacid contributes
+The *m*-values can be estimated by the Tanford transfer model, in which each amino acid contributes
 to the transfer free energy according to the change in its solvent accessible surface area and 
-experimental values of individual aminoacid transfer energies, and a backbone contribution
+experimental values of individual amino acid transfer energies, and a backbone contribution
 (here we implement the Auton/Bolen and Moeser/Horinek models 
 [[1](https://doi.org/10.1021/acs.jpcb.7b02138), 
 [2](https://doi.org/10.1016/s0076-6879(07)28023-1), 
@@ -24,7 +24,7 @@ more general transformations, as described in the examples.
 
 ## Protein denaturation
 
-Consider these two states of a model protein, a native and a desnatured (straight chain) state, for
+Consider these two states of a model protein, a native and a denatured (straight chain) state, for
 which we compute the SASA:
 ```@example mvalue
 using PDBTools
@@ -45,7 +45,7 @@ m = mvalue(sasa_native, sasa_desnat, "urea"; model=MoeserHorinek)
 ```
 Where the `tot`, `bb` and `sc` fields contain, respectively, the total, backbone and side-chain contributions.
 The `MValue` object contains, additionally, the contribution of the side chain and backbone of 
-each aminoacid residue type for the *m*-value, in the `residue_contributions_bb` and `residue_conatributions_sc` fields.
+each amino acid residue type for the *m*-value, in the `residue_contributions_bb` and `residue_contributions_sc` fields.
 
 We can set the `beta` fields (for example) of the atoms as the residue contributions:
 ```@example mvalue
@@ -98,14 +98,14 @@ By contrast, in a cosolvent that tends to promote protein aggregation, we have:
 ```@example mvalue 
 mvalue(cAB, cA_free, "Sucrose"; sel="chain A")
 ```
-and thus Sucrose can stabilize corfactor binding. We remark that the values obtained here
+and thus Sucrose can stabilize cofactor binding. We remark that the values obtained here
 are very small, and this is intended to be only an illustrative example.
 
 ## Alternative SASA calculations
 
 The following functions can be used to compute *m*-values from the variation of the SASA per residue 
 type, which allow the use of external tools to compute the SASA. This is used mostly for testing 
-purposes. The functions allow the use of SASAs obtained directly from the Auton & Bolen server, or 
+purposes. The functions allow the use of SASAs obtained directly from the [Auton & Bolen server](http://best.bio.jhu.edu/mvalue/), or 
 from Gromacs SASA calculations.
 
 ```@docs
