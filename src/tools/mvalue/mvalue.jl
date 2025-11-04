@@ -166,8 +166,6 @@ function tfe_asa(
         else
             sc_contribution = tfe_sc_bb_auton_and_bolen[restype][col] / last(isolated_ASA[restype])
         end
-    else
-        error("model must be either MoeserHorinek or AutonBolen")
     end
     # convert to kcal / nm^2 and return
     return bb_contribution / 1000, sc_contribution / 1000
