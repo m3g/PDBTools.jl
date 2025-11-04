@@ -115,6 +115,9 @@ get_atoms(model::Model) = @view(model.atoms[model.range])
     @test_throws ArgumentError Model(atoms, 230:240)
     @test_throws ArgumentError models[1]
     m = collect(models)
+    @test atoms[1] in m[1]
+    @test !(atoms[235] in m[1])
+    @test atoms[236] in m[2]
     @test model(m[1]) == 1
     @test model(m[2]) == 2
     @test m[1].range == 1:234
