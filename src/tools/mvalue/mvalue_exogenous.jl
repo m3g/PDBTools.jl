@@ -9,7 +9,7 @@ These functions are considered public but are not exported.
 """
     mvalue_delta_sasa(; model=MoeserHorinek, cosolvent="urea", atoms:AbstractVector{<:PDBTools.Atom}, sasas, type=1)
 
-Calculates the m-value (transfer free energy of a protein in 1M solution, in `kcal/mol`) using the Tanford transfer model,
+Calculates the m-value (transfer free energy of a protein in 1M solution) using the Tanford transfer model,
 as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 # Arguments
@@ -18,7 +18,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
    and should be more precise in that case. Other solvents are available for `AutonBolen`.
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
-- `sasas::Dict{String, Dict{Symbol, Float32}}`: A dictionary containing the change in solvent accessible surface area (SASA)
+- `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
     - Compute the SASA with `delta_sasa_per_restype`, a SASA calculation utility implemented in PDBTools.jl.
@@ -41,10 +41,9 @@ Each entry in the dictionary is a named tuple with `bb` and `sc` fields represen
 # Example calls
 
 ```julia
+using PDBTools
 using PDBTools: mvalue_delta_sasa
-using PDBTools: delta_sasa_per_restype
-using PDBTools: parse_mvalue_server_sasa
-using PDBTools: gmx_delta_sasa_per_restype
+using PDBTools: delta_sasa_per_restype, parse_mvalue_server_sasa, gmx_delta_sasa_per_restype
 protein = read_pdb("protein.pdb")
 
 # Using SASA values calculated with PDBTools.jl
@@ -53,7 +52,7 @@ mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sas
 
 # Using SASA values from the m-value server
 sasas_from_server=parse_mvalue_server_sasa(server_output)
-mvalue_delta_sasa(; model=MoeserHorinek, cosolvent="urea", atoms=protein, sasas=sasas_from_server, type=1)
+mvalue_delta_sasa(; model=MoeserHorinek, cosolvent="urea", atoms=protein, sasas=sasas_from_server, type=2)
 
 # Using SASA values calculated with GROMACS
 sasas_gmx=gmx_delta_sasa_per_restype(native_pdb="native.pdb", desnat_pdb="desnat.pdb")
@@ -108,7 +107,7 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 
 # Optional arguments
 
-- `n_dots::Int=512`: Sets the precision of the SASA calculation (greater is better).
+- `n_dots::Int=500`: Sets the precision of the SASA calculation (greater is better).
 - `backbone::Function = at -> name(at) in ("N", "CA", "C", "O")`: Define what is a backbone atom.
 - `sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O"))`: Define what is a sidechain atom.
 - `ignore_hydrogen::Bool = true`: By default, ignore all Hydrogen atoms of the structure.
@@ -119,7 +118,7 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 function delta_sasa_per_restype(;
     native::AbstractVector{<:PDBTools.Atom},
     desnat::AbstractVector{<:PDBTools.Atom},
-    n_dots::Int=512,
+    n_dots::Int=500,
     backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
     sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
     ignore_hydrogen::Bool=true,
@@ -143,7 +142,7 @@ function delta_sasa_per_restype(;
         end
         sasas[rname] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
     end
-    return sasas # Å^1  
+    return sasas # Å^2  
 end
 
 """
@@ -156,13 +155,13 @@ The input string should contain lines formatted as follows, and correspond to th
 
 ```julia
 sasa_from_server = \"\"\"
-ALA 	7 	 (    11.1)     79.1 [   147.1] | (   -13.0)     51.4 [   115.8] 
-PHE 	2 	 (   166.9)    197.1 [   230.2] | (    29.4)     56.4 [    83.4] 
-LEU 	6 	 (   475.2)    532.2 [   589.3] | (    89.3)    145.3 [   201.3] 
+ALA 	8 	 (    11.1)     79.1 [   147.1] | (   -13.0)     51.4 [   115.8] 
+PHE 	3 	 (   166.9)    197.1 [   230.2] | (    29.4)     56.4 [    83.4] 
+LEU 	7 	 (   475.2)    532.2 [   589.3] | (    89.3)    145.3 [   201.3] 
 ...
-LYS 	5 	 (   171.5)    220.4 [   269.3] | (    -4.5)     42.0 [    88.5] 
-ARG 	0 	 (   110.2)    124.4 [   138.6] | (    17.1)     25.0 [    33.0] 
-CYS 	-1 	 (     0.0)      0.0 [     0.0] | (     0.0)      0.0 [     0.0] 
+LYS 	6 	 (   171.5)    220.4 [   269.3] | (    -4.5)     42.0 [    88.5] 
+ARG 	1 	 (   110.2)    124.4 [   138.6] | (    17.1)     25.0 [    33.0] 
+CYS 	0 	 (     0.0)      0.0 [     0.0] | (     0.0)      0.0 [     0.0] 
 \"\"\"
 ```
 
@@ -199,7 +198,7 @@ end
     read_gmx_delta_sasa_per_restype_values(filename::String, n)
 
 Reads the output of `gmx sasa` and returns the SASA values.
-`n` is the number of surfaces calculated (0 for BB only, 2 for SC and BB, for example).
+`n` is the number of surfaces calculated (1 for BB only, 2 for SC and BB, for example).
 
 =#
 function read_gmx_delta_sasa_per_restype_values(filename::String, n)
@@ -248,7 +247,7 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 function gmx_delta_sasa_per_restype(;
     native_pdb::AbstractString,
     desnat_pdb::AbstractString,
-    n_dots::Int=512,
+    n_dots::Int=500,
     ignore_hydrogen::Bool=true,
     gmx="gmx",
     backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
@@ -270,7 +269,7 @@ end
 function gmx_sasa_per_restype(
     pdbname, rname;
     gmx="gmx",
-    n_dots::Int=512,
+    n_dots::Int=500,
     backbone::Function,
     sidechain::Function,
     ignore_hydrogen::Bool=true,
@@ -306,14 +305,14 @@ function gmx_sasa_per_restype(
     if length(inds_sidechain) == 0 # special case for GLY
         sasa_sc = 0.0
         try
-            run(pipeline(`$gmx sasa -s $pdbname -probe -1.14 -ndots $n_dots -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots $n_dots -surface PROT -output BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
             error("Error running $gmx sasa for of $resname in $pdbname")
         end
         sasa_bb = read_gmx_delta_sasa_per_restype_values(sasa_file, 1)[1]
     else
         try
-            run(pipeline(`$gmx sasa -s $pdbname -probe -1.14 -ndots $n_dots -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
+            run(pipeline(`$gmx sasa -s $pdbname -probe 0.14 -ndots $n_dots -surface PROT -output SC BB -n $index_file -o $sasa_file`, stdout=devnull, stderr=devnull))
         catch
             error("Error running $gmx sasa for of $resname in $pdbname")
         end
