@@ -112,6 +112,7 @@ include("./tools/sasa.jl")
 include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
 include("./tools/mvalue/mvalue.jl")
+include("./tools/secondary_structure.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
