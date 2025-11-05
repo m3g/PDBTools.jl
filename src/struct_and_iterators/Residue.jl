@@ -48,7 +48,7 @@ struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     resname::String7
     residue::Int32
     resnum::Int32
-    chain::String3
+    chain::String7
     model::Int32
     segname::String7
 end

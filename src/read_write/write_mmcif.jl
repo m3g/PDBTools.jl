@@ -38,7 +38,7 @@ function _supported_write_cif_fields(field_assignment)
         "label_atom_id" => (String7, :name), # redundant - atom name
         "label_alt_id" => (String1, :_print_dot), # nothing (a dot: .)
         "label_comp_id" => (String7, :resname), # redundant - residue name
-        "label_asym_id" => (String3, :chain), # redundant - chain id
+        "label_asym_id" => (String7, :chain), # redundant - chain id
         "label_entity_id" => (Int32, :_entity_id), # entity_id: print 1 for protein, 2 for water, 3 for all others
         "label_seq_id" => (Int32, :resnum), # redundant - residue number
         "pdbx_PDB_ins_code" => (String1, :_print_question_mark), # nothing - print ?
@@ -50,7 +50,7 @@ function _supported_write_cif_fields(field_assignment)
         "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "auth_comp_id" => (String7, :resname), # Standard mmCIF
-        "auth_asym_id" => (String3, :chain), # Standard mmCIF
+        "auth_asym_id" => (String7, :chain), # Standard mmCIF
         "auth_atom_id" => (String7, :name), # Standard mmCIF
         "pdbx_PDB_model_num" => (Int32, :model),
     )

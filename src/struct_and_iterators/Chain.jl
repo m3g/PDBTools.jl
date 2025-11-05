@@ -46,7 +46,7 @@ julia> segname(chains[2])
 @kwdef struct Chain{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
-    chain::String3
+    chain::String7
     model::Int32
     segname::String7
 end
