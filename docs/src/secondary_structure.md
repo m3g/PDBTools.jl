@@ -5,14 +5,14 @@ CollapsedDocStrings = true
 # [Secondary structure](@id secondary-structure)
 
 These functions provide an interface to compute the secondary structure assignment of proteins
-using the STRIDE and DSSP algorithms.
+using the STRIDE and DSSP algorithms, using as inputs vectors of `PDBTools.Atom`s.
 
 ```@docs
 stride_run
 dssp_run
 ```
 
-The `stride_run` and `dssp_run` functions take as input a vector of `Atom`s and return a vector of `SSData` objects, each containing the secondary structure assignment and backbone dihedral angles for each residue.
+The `stride_run` and `dssp_run` functions return a vector of `SSData` objects, each containing the secondary structure assignment and backbone dihedral angles for each residue.
 
 These functions return a vector of `SSData` objects, as defined in [ProteinSecondaryStructures.jl](https://biojulia.dev/ProteinSecondaryStructures.jl). The secondary structure assignment codes are available 
 in the [ProteinSecondaryStructures.jl documentation](https://biojulia.dev/ProteinSecondaryStructures.jl/stable/overview/#Secondary-structure-classes).
@@ -42,6 +42,8 @@ ss_composition(ss)
 ```@example secondary-structure
 ss_name(ss[1]) # name of the secondary structure of the first residue
 ```
+
+For further information refer to to [ProteinSecondaryStructures.jl documentation](https://biojulia.dev/ProteinSecondaryStructures.jl/stable/user_guide/#Retrieving-names,-codes,-and-numeric-codes).
 
 
 
