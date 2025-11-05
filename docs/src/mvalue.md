@@ -94,9 +94,21 @@ mvalue(cAB, cA_free, "urea"; sel="chain A", model=MoeserHorinek)
 ```
 where the `tot` field is negative, indicating that exposing the cofactor binding surface is slightly favorable in urea.  
 
+The same applies to the cofactor, chain B:
+```@example mvalue
+cB_free = sasa_particles(select(bsx, "chain B"))
+mvalue(cAB, cB_free, "urea"; sel="chain B", model=MoeserHorinek)
+```
+and the exposed surface of the cofactor is also slightly stabilized in urea. Urea, thus tends to
+destabilize the binding of the cofactor to the receptor.
+
 By contrast, in a cosolvent that tends to promote protein aggregation, we have:
 ```@example mvalue 
 mvalue(cAB, cA_free, "Sucrose"; sel="chain A")
+```
+and
+```@example mvalue 
+mvalue(cAB, cB_free, "Sucrose"; sel="chain B")
 ```
 and thus Sucrose can stabilize cofactor binding. We remark that the values obtained here
 are very small, and this is intended to be only an illustrative example.
