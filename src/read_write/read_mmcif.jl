@@ -235,8 +235,8 @@ end
     @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
     field_assignment = Dict("type_symbol" => :custom)
     @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
-    @test read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)
-    @test read_mmcif(PDBTools.LONG_NAME_STRING_CIF)
+    @test length(read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)) == 8
+    @test length(read_mmcif(PDBTools.LONG_NAME_STRING_CIF)) == 1
 end
 
 function _parse_mmCIF(
