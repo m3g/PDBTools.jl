@@ -10,7 +10,7 @@ Fields:
         index_pdb::Int32 # The index as written in the PDB file (might be anything)
         name::String7 # Atom name
         resname::String7 # Residue name
-        chain::String3 # Chain identifier
+        chain::String7 # Chain identifier
         resnum::Int32 # Number of residue as written in PDB file
         residue::Int32 # Sequential residue (molecule) number in file
         x::Float32 # x coordinate
@@ -90,7 +90,7 @@ mutable struct Atom{CustomType}
     index_pdb::Int32 # The index as written in the PDB file (might be anything)
     name::String7
     resname::String7
-    chain::String3
+    chain::String7
     resnum::Int32 # Number of residue as written in PDB file
     residue::Int32 # Sequential residue (molecule) number in file
     x::Float32

@@ -201,7 +201,7 @@ function _supported_read_cif_fields(field_assignment)
         "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "label_comp_id" => (String7, :resname), # Standard mmCIF
-        "label_asym_id" => (String3, :chain), # Standard mmCIF
+        "label_asym_id" => (String7, :chain), # Standard mmCIF
         "label_atom_id" => (String7, :name), # Standard mmCIF
         "pdbx_PDB_model_num" => (Int32, :model),
     )
@@ -222,7 +222,7 @@ end
     @test _cif_fields["id"] == (Int32, :index_pdb)
     @test _cif_fields["type_symbol"] == (String7, :name)
     @test _cif_fields["label_comp_id"] == (String7, :resname)
-    @test _cif_fields["label_asym_id"] == (String3, :chain)
+    @test _cif_fields["label_asym_id"] == (String7, :chain)
     @test _cif_fields["label_seq_id"] == (Int32, :resnum)
     @test _cif_fields["Cartn_x"] == (Float32, :x)
     @test _cif_fields["Cartn_y"] == (Float32, :y)
@@ -235,9 +235,8 @@ end
     @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
     field_assignment = Dict("type_symbol" => :custom)
     @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
-    # These should be fixed: see https://github.com/m3g/PDBTools.jl/issues/92 
-    @test_throws ArgumentError read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)
-    @test_throws ArgumentError read_mmcif(PDBTools.LONG_NAME_STRING_CIF)
+    @test length(read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)) == 8
+    @test length(read_mmcif(PDBTools.LONG_NAME_STRING_CIF)) == 1
 end
 
 function _parse_mmCIF(
