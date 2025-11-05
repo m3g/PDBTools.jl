@@ -49,9 +49,10 @@ each amino acid residue type for the *m*-value, in the `residue_contributions_bb
 
 We can set the `beta` fields (for example) of the atoms as the residue contributions:
 ```@example mvalue
-for (ir, r) in enumerate(eachresidue(native_state))
+for (ir, r) in enumerate(eachresidue(native_state)) # iterate over residues
+    # total contribution of residue ir
     c_residue = m.residue_contributions_sc[ir] + m.residue_contributions_bb[ir]
-    for at in r
+    for at in r # iterate over atoms in residue
         at.beta = c_residue
     end
 end
