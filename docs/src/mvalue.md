@@ -49,9 +49,10 @@ each amino acid residue type for the *m*-value, in the `residue_contributions_bb
 
 We can set the `beta` fields (for example) of the atoms as the residue contributions:
 ```@example mvalue
-for (ir, r) in enumerate(eachresidue(native_state))
+for (ir, r) in enumerate(eachresidue(native_state)) # iterate over residues
+    # total contribution of residue ir
     c_residue = m.residue_contributions_sc[ir] + m.residue_contributions_bb[ir]
-    for at in r
+    for at in r # iterate over atoms in residue
         at.beta = c_residue
     end
 end
@@ -92,11 +93,23 @@ We now compute the $m$-value of **chain A** only, but using the surface areas co
 ```@example mvalue 
 mvalue(cAB, cA_free, "urea"; sel="chain A", model=MoeserHorinek)
 ```
-where the `tot` field is positive, indicating that exposing the cofactor binding surface is slightly favorable in urea.  
+where the `tot` field is negative, indicating that exposing the cofactor binding surface is slightly favorable in urea.  
+
+The same applies to the cofactor, chain B:
+```@example mvalue
+cB_free = sasa_particles(select(bsx, "chain B"))
+mvalue(cAB, cB_free, "urea"; sel="chain B", model=MoeserHorinek)
+```
+and the exposed surface of the cofactor is also slightly stabilized in urea. Urea, thus tends to
+destabilize the binding of the cofactor to the receptor.
 
 By contrast, in a cosolvent that tends to promote protein aggregation, we have:
 ```@example mvalue 
 mvalue(cAB, cA_free, "Sucrose"; sel="chain A")
+```
+and
+```@example mvalue 
+mvalue(cAB, cB_free, "Sucrose"; sel="chain B")
 ```
 and thus Sucrose can stabilize cofactor binding. We remark that the values obtained here
 are very small, and this is intended to be only an illustrative example.
