@@ -92,7 +92,7 @@ We now compute the $m$-value of **chain A** only, but using the surface areas co
 ```@example mvalue 
 mvalue(cAB, cA_free, "urea"; sel="chain A", model=MoeserHorinek)
 ```
-where the `tot` field is positive, indicating that exposing the cofactor binding surface is slightly favorable in urea.  
+where the `tot` field is negative, indicating that exposing the cofactor binding surface is slightly favorable in urea.  
 
 By contrast, in a cosolvent that tends to promote protein aggregation, we have:
 ```@example mvalue 
