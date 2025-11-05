@@ -1,6 +1,6 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
-version = "3.10.1-DEV"
+version = "3.11.0-DEV"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
 
 [deps]
@@ -16,6 +16,7 @@ MolSimToolkitShared = "aea21201-7910-416e-b888-414710bebccb"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+ProteinSecondaryStructures = "c298f58b-271f-48cb-96ac-5442ca7c67d9"
 SIMD = "fdea26ae-647d-5447-a871-4b548cad5224"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
@@ -45,6 +46,7 @@ OrderedCollections = "1.6.3"
 Plots = "1.39"
 PrecompileTools = "1.2.1"
 Printf = "1.10"
+ProteinSecondaryStructures = "2.0.3"
 SIMD = "3.7.1"
 ShowMethodTesting = "1.2"
 StaticArrays = "1.9.15"

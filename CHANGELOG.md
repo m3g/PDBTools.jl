@@ -10,8 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.10.1-DEV
+Version 3.11.0-DEV
 --------------
+- ![FEATURE][badge-feature] add `stride_run` and `dssp_run` functions to compute secondary structure from vectors of atoms.
 
 Version 3.10.0
 --------------
