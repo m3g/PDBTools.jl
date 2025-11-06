@@ -530,13 +530,15 @@ end
 #
 export isprotein, isbackbone, issidechain
 isprotein(atom::Atom) = 
-    haskey(protein_residues, atom.resname) || haskey(protein_residues, atom.resname[2:end])
+    haskey(protein_residues, atom.resname) || haskey(protein_residues, @view(atom.resname[2:end]))
 
-const backbone_atoms = ["N", "CA", "C", "O"]
-isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms
+const backbone_atoms = ("N", "CA", "C", "O")
+isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = 
+    (atom.name in backbone_atoms) && isprotein(atom)
 
-const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
-issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
+const not_side_chain_atoms = ("N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3")
+issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) =
+    !(atom.name in not_side_chain_atoms) && isprotein(atom)
 
 @testitem "atoms in struct" begin
     pdb = read_pdb(PDBTools.TESTPDB)
@@ -590,7 +592,7 @@ end
 
 Returns the element symbol, as a string, of an atom given the `Atom` structure.
 If the `pdb_element` is empty or "X", the element is inferred from the atom name. 
-Othwerwise, the `pdb_element` is returned.
+Otherwise, the `pdb_element` is returned.
 
 ### Example
 
@@ -651,7 +653,7 @@ end
 end
 
 #
-# Auxiliary function to retrive another property for matching elements
+# Auxiliary function to retrieve another property for matching elements
 #
 get_element_property(at::Atom, property::Symbol) = get_element_property(at, Val(property))
 function get_element_property(at::Atom, ::Val{property}) where {property}

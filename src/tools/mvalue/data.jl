@@ -1,17 +1,14 @@
+# Do not user underscores (_) in the following names:
 const cosolvent_column = Dict(
     "tmao" => 1,
-    "TMAO" => 1,  
-    "Tmao" => 1,  
-    "Sarcosine"=> 2,    
-    "Betaine"=> 3,    
-    "Proline" => 4,    
-    "Sorbitol" => 5,   
-    "Sucrose" => 6,
-    "Urea" => 7,
+    "sarcosine"=> 2,    
+    "betaine"=> 3,    
+    "proline" => 4,    
+    "sorbitol" => 5,   
+    "sucrose" => 6,
     "urea" => 7,
-    "UREA" => 7,
-    "UreaApp" => 8,
-    "UreaMH" => 9,
+    "urea-app" => 8,
+    "urea-mh" => 9,
 )
 
 #
@@ -26,7 +23,7 @@ Values for Urea GTFE+ values from Table S1 of https://doi.org/10.1021/jp409934q 
 Only Urea values are available for this model for now.
 
 =#
-const tfe_sc_bb_moeser_and_horinek = Dict(
+const tfe_sc_bb_moeser_and_horinek = Dict{String, NTuple{7,Float32}}(
 #                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose         Urea
     "ALA" => (   0.00,       0.00,       0.00,       0.00,       0.00,       0.00,       1.01),
     "PHE" => (   0.00,       0.00,       0.00,       0.00,       0.00,       0.00,     -68.64),
@@ -57,13 +54,13 @@ Amino acid side-chain and peptide backbone unit transfer free energies (cal/mol)
 Supplementary Table 1 of https://doi.org/10.1073/pnas.0507053102
 
 UreaWrong from GTFE* from Supplementary Table S1 of Moeser and Horinek and originally from https://doi.org/10.1073/pnas.0706251104
-UreaMH is the data from Moeser and Horinek
+urea_mh is the data from Moeser and Horinek
 
-The "Urea" column selection points to "UreaWrong" which is what is output from the server.
+The "urea" column selection points to "UreaWrong" which is what is output from the server.
 
 =#
-const tfe_sc_bb_auton_and_bolen = Dict(
-#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose      UreaWrong   UreaAPP     UreaMH
+const tfe_sc_bb_auton_and_bolen = Dict{String,NTuple{9,Float32}}(
+#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose      UreaWrong   UreaAPP     urea_mh
     "ALA" => ( -14.64,      10.91,       4.77,      -0.07,      16.57,      22.05,       0.63,       -4.69,     1.01),
     "PHE" => (  -9.32,     -12.64,    -112.93,     -71.26,      26.38,     -96.35,     -42.84,      -83.11,   -68.64),
     "LEU" => (  11.62,      38.33,     -17.73,       4.77,      39.07,      37.11,     -14.30,      -54.57,   -40.10),
@@ -93,7 +90,7 @@ Isolated ASA values are from the Supporting Table 2 of https://doi.org/10.1073/p
 (https://www.pnas.org/doi/suppl/10.1073/pnas.0507053102/suppl_file/07053table2.pdf)
 
 =#
-const isolated_ASA = Dict{String,Tuple{Float64,Float64}}( 
+const isolated_ASA = Dict{String,Tuple{Float32,Float32}}( 
                 # BB      SC   (Å^2)
     "ALA"	=> (46.2,	71.9),
     "PHE"	=> (38.4,	184.4),
@@ -116,38 +113,3 @@ const isolated_ASA = Dict{String,Tuple{Float64,Float64}}(
     "ARG"	=> (39.1,	216.9),
     "CYS"	=> (42.6,	103.5),
 ) 
-
-#=
-
-Average SASA values from lower and upper bounds of the denatured state ensemble,
-reported in Supplementary Table 2 of https://doi.org/10.1073/pnas.0507053102
-These are the average values of Table 1 of https://doi.org/10.1021/bi962819o
-Can be used for testing, but **do not** provide the same accuracy as the values
-calculated with GROMACS or obtained from the m-value server.
-
-=# 
-const sasa_desnat_average = Dict(
-    "ALA" => Dict(:bb => 27.9,	:sc => 55.1),
-    "PHE" => Dict(:bb => 24.3,	:sc => 128.8),
-    "LEU" => Dict(:bb => 22.7,	:sc => 109.6),
-    "ILE" => Dict(:bb => 20.0,	:sc => 117.1),
-    "VAL" => Dict(:bb => 20.4,	:sc => 96.4),
-    "PRO" => Dict(:bb => 22.5,	:sc => 87.0),
-    "MET" => Dict(:bb => 25.3,	:sc => 122.4),
-    "TRP" => Dict(:bb => 23.6,	:sc => 156.6),
-    "GLY" => Dict(:bb => 65.2,	:sc => 0.0),
-    "SER" => Dict(:bb => 29.4,	:sc => 66.5),
-    "THR" => Dict(:bb => 24.1,	:sc => 84.3),
-    "TYR" => Dict(:bb => 25.6,	:sc => 141.7),
-    "GLN" => Dict(:bb => 25.3,	:sc => 116.9),
-    "ASN" => Dict(:bb => 25.2,	:sc => 90.1),
-    "ASP" => Dict(:bb => 26.0,	:sc => 87.0),
-    "GLU" => Dict(:bb => 25.7,	:sc => 113.4),
-    "HIS" => Dict(:bb => 24.2,	:sc => 111.5),
-    "LYS" => Dict(:bb => 26.1,	:sc => 150.7),
-    "ARG" => Dict(:bb => 25.1,	:sc => 171.1),
-    "CYS" => Dict(:bb => 26.4,	:sc => 73.0),
-)
-
-
-

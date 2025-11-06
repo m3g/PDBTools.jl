@@ -1,9 +1,9 @@
 export mvalue
 export MoeserHorinek, AutonBolen
 
-abstract type MvalueModel end
-struct MoeserHorinek <: MvalueModel end
-struct AutonBolen <: MvalueModel end
+abstract type MValueModel end
+struct MoeserHorinek <: MValueModel end
+struct AutonBolen <: MValueModel end
 
 include("./data.jl")
 
@@ -30,7 +30,7 @@ end
         sasa_final::SASA{3,<:AbstractVector{<:Atom}},
         cosolvent::String;
         sel::Union{String,Function}=all,
-        model::Type{<:MvalueModel}=AutonBolen,
+        model::Type{<:MValueModel}=AutonBolen,
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
     )
@@ -42,12 +42,12 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
 - `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
-- `cosolvent::String`: The cosolvent used in the solution. One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) 
+- `cosolvent::String`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
 
 # Keyword Arguments
 
 - `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
-- `model::Type{<:MvalueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
+- `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 
@@ -88,25 +88,28 @@ function mvalue(
     sasa_final::SASA{3,<:AbstractVector{<:Atom}},
     cosolvent::String;
     sel::Union{String,Function}=all,
-    model::Type{<:MvalueModel}=AutonBolen,
+    model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
-) where {F1<:Function, F2<:Function}
+) where {F1<:Function,F2<:Function}
     selector = Select(sel)
     ats_initial = filter(selector, sasa_initial.particles)
     ats_final = filter(selector, sasa_final.particles)
     residues_initial = collect(eachresidue(ats_initial))
     residues_final = collect(eachresidue(ats_final))
+    cosolvent = lowercase(cosolvent)
     if length(residues_initial) != length(residues_final)
         throw(ArgumentError("""\n
             Initial and final states do not have the same number of residues.
             Got $(length(residues_initial)) and $(length(residues_final)) residues.
-        
+
         """
         ))
     end
     residue_contributions_bb = zeros(Float32, length(residues_initial))
     residue_contributions_sc = zeros(Float32, length(residues_initial))
+    sel_at_bb(at, r) = (at in r) & backbone(at) & selector(at)
+    sel_at_sc(at, r) = (at in r) & sidechain(at) & selector(at)
     for iresidue in eachindex(residues_initial)
         rinit = residues_initial[iresidue]
         rfinal = residues_final[iresidue]
@@ -125,10 +128,10 @@ function mvalue(
 
             """))
         end
-        bb_initial = sasa(sasa_initial, at -> (at in rinit) & backbone(at) & selector(at))
-        sc_initial = sasa(sasa_initial, at -> (at in rinit) & sidechain(at) & selector(at))
-        bb_final = sasa(sasa_final, at -> (at in rfinal) & backbone(at) & selector(at))
-        sc_final = sasa(sasa_final, at -> (at in rfinal) & sidechain(at) & selector(at))
+        bb_initial = sasa(sasa_initial, at -> sel_at_bb(at, rinit))
+        sc_initial = sasa(sasa_initial, at -> sel_at_sc(at, rinit))
+        bb_final = sasa(sasa_final, at -> sel_at_bb(at, rfinal))
+        sc_final = sasa(sasa_final, at -> sel_at_sc(at, rfinal))
         bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
         residue_contributions_bb[iresidue] = bb_type * (bb_final - bb_initial)
         residue_contributions_sc[iresidue] = sc_type * (sc_final - sc_initial)
@@ -148,7 +151,7 @@ as implemente by Moeser and Horinek (https://pubs.acs.org/doi/10.1021/jp409934q#
 
 =#
 function tfe_asa(
-    model::Type{<:MvalueModel},
+    model::Type{<:MValueModel},
     cosolvent::String,
     restype::AbstractString;
 )
@@ -157,14 +160,14 @@ function tfe_asa(
         # united model: all bb ASA contributions are the same
         bb_contribution = tfe_sc_bb_moeser_and_horinek["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"
-            0.0
+            0.0f0
         else
             tfe_sc_bb_moeser_and_horinek[restype][col] / last(isolated_ASA[restype])
         end
     elseif model == AutonBolen
         bb_contribution = tfe_sc_bb_auton_and_bolen["BB"][col] / first(isolated_ASA[restype])
         sc_contribution = if restype == "GLY"
-            0.0
+            0.0f0
         else
             sc_contribution = tfe_sc_bb_auton_and_bolen[restype][col] / last(isolated_ASA[restype])
         end

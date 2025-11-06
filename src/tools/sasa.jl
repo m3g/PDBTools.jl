@@ -13,7 +13,7 @@ struct SASA{N,V}
 end
 Base.getindex(x::SASA, i::Integer) = x.sasa[i]
 Base.eachindex(x::SASA) = eachindex(x.sasa)
-function Base.show(io::IO, ::MIME"text/plain", s::SASA) 
+function Base.show(io::IO, ::MIME"text/plain", s::SASA)
     print(io, chomp("""
     $(typeof(s))
         Number of particles: $(length(s.particles))
@@ -76,7 +76,7 @@ end
 struct AtomDotMatrix
     all_dots::Matrix{Bool}
 end
-Base.getindex(m::AtomDotMatrix, i) = AtomDots(@view(m.all_dots[:,i]))
+Base.getindex(m::AtomDotMatrix, i) = AtomDots(@view(m.all_dots[:, i]))
 CellListMap.copy_output(m::AtomDotMatrix) = AtomDotMatrix(copy(m.all_dots))
 function CellListMap.reset_output!(m::AtomDotMatrix)
     m.all_dots .= true
@@ -205,7 +205,7 @@ function sasa_particles(
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     output_dots::Bool=false,
-    unitcell::Union{AbstractVector, AbstractMatrix, Nothing}=nothing,
+    unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
 ) where {N}
@@ -231,7 +231,7 @@ function sasa_particles(
         xpositions=coor.(atoms),
         unitcell=unitcell,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
-        output=AtomDotMatrix(ones(Bool, n_dots, length(atoms))), 
+        output=AtomDotMatrix(ones(Bool, n_dots, length(atoms))),
         output_name=:surface_dots,
         parallel=parallel,
     )
@@ -248,8 +248,8 @@ function sasa_particles(
     s = zeros(Float32, length(atoms))
     dots = Vector{SVector{3,Float32}}[]
     for i in eachindex(atoms)
-        type_i  = atom_type(atoms[i])
-        s[i] = 4π*(atom_radius_from_type(atom_type(atoms[i])) + probe_radius)^2 * sum(system.surface_dots[i].exposed)/n_dots
+        type_i = atom_type(atoms[i])
+        s[i] = 4π * (atom_radius_from_type(atom_type(atoms[i])) + probe_radius)^2 * sum(system.surface_dots[i].exposed) / n_dots
         if output_dots
             dot_cache_i = dot_cache[type_i]
             exposed_i = system.surface_dots[i].exposed
@@ -355,7 +355,7 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa
 
     # Test the output of dots
     at_sasa = sasa_particles(select(prot, "name CA"); n_dots=20, output_dots=true)
-    @test sasa(at_sasa) ≈ 5856.9966f0  
+    @test sasa(at_sasa) ≈ 5856.9966f0
     @test sum(length(v) for v in at_sasa.dots) == 970
 
     # Test show method

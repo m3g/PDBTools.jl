@@ -67,7 +67,7 @@ mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sas
 
 """
 function mvalue_delta_sasa(;
-    model::Type{<:MvalueModel}=MoeserHorinek,
+    model::Type{<:MValueModel}=MoeserHorinek,
     cosolvent::String="urea",
     atoms::AbstractVector{<:PDBTools.Atom}, sasas, type=1
 )

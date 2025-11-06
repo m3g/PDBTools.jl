@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.11.3-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Small improvements in performance, particularly of the mvalue calculations. 
+- ![ENHANCEMENT][badge-enhancement] Cosolvent selection in `mvalue` is now case-insensitive.
 
 Version 3.11.2
 --------------
