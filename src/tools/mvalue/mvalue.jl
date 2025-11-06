@@ -91,7 +91,7 @@ function mvalue(
     model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
-) where {F1<:Function, F2<:Function}
+) where {F1<:Function,F2<:Function}
     selector = Select(sel)
     ats_initial = filter(selector, sasa_initial.particles)
     ats_final = filter(selector, sasa_final.particles)
@@ -102,7 +102,7 @@ function mvalue(
         throw(ArgumentError("""\n
             Initial and final states do not have the same number of residues.
             Got $(length(residues_initial)) and $(length(residues_final)) residues.
-        
+
         """
         ))
     end
