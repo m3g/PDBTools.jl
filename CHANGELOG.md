@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.11.1-DEV
+Version 3.11.1
 --------------
 - ![ENHANCEMENT][badge-enhancement] Use `InlineStrings.String7` for `chain` in `Atom` struct to support longer chain IDs from mmCIF files.
 - ![ENHANCEMENT][badge-enhancement] Faster `in` implementation for containment of atoms in residues, chains, models, segments.
