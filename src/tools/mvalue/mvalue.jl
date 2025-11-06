@@ -42,7 +42,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
 - `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
-- `cosolvent::String`: The cosolvent used in the solution. One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) 
+- `cosolvent::String`: The cosolvent to consider. One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
 
 # Keyword Arguments
 
