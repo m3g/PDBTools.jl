@@ -1,3 +1,4 @@
+# Do not user underscores (_) in the following names:
 const cosolvent_column = Dict(
     "tmao" => 1,
     "sarcosine"=> 2,    
