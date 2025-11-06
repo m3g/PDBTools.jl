@@ -15,7 +15,7 @@
 end
 
 #! format: off
-protein_residues = OrderedDict{String,ProteinResidue}(
+const protein_residues = OrderedDict{String,ProteinResidue}(
     "ALA" => ProteinResidue("Alanine",       "ALA", "A", "Aliphatic",  false, true,   71.037114,  71.0779,  0, false),
     "ARG" => ProteinResidue("Arginine",      "ARG", "R", "Basic",      true,  false, 156.101111, 156.1857,  1, false),
     "ASN" => ProteinResidue("Asparagine",    "ASN", "N", "Amide",      true,  false, 114.042927, 114.1026,  0, false),
