@@ -89,9 +89,9 @@ function mvalue(
     cosolvent::String;
     sel::Union{String,Function}=all,
     model::Type{<:MvalueModel}=AutonBolen,
-    backbone::Function=isbackbone,
-    sidechain::Function=issidechain,
-)
+    backbone::F1=isbackbone,
+    sidechain::F2=issidechain,
+) where {F1<:Function, F2<:Function}
     selector = Select(sel)
     ats_initial = filter(selector, sasa_initial.particles)
     ats_final = filter(selector, sasa_final.particles)
