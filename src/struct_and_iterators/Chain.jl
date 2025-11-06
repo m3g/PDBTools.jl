@@ -54,7 +54,8 @@ end
 # Necessary for the interface: define the same_struct_element function
 same_struct_element(::Type{Chain}, at1::Atom, at2::Atom) =
     at1.chain == at2.chain && at1.model == at2.model && at1.segname == at2.segname
-
+Base.in(at::Atom, c::Chain) = same_struct_element(Chain, at, first(c))
+Base.in(r::Residue, c::Chain) = same_struct_element(Chain, first(r), first(c))
 
 # Constructors
 function Chain(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
@@ -117,6 +118,11 @@ get_atoms(chain::Chain) = @view(chain.atoms[chain.range])
     @test pdb[48] in chains[1]
     @test !(pdb[49] in chains[1])
     @test pdb[49] in chains[2]
+    r = collect(eachresidue(pdb))
+    @test r[1] in chains[1]
+    @test r[2] in chains[1]
+    @test !(r[4] in chains[1])
+    @test r[4] in chains[2]
     @test name(chains[3]) == "A"
     @test index.(filter(at -> resname(at) == "ASP" && name(at) == "CA", chains[1])) == [2]
     @test length(findall(at -> resname(at) == "GLN", chains[1])) == 17

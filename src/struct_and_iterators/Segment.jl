@@ -41,6 +41,9 @@ end
 
 # Necessary for the interface: define the same_struct_element function
 same_struct_element(::Type{Segment}, at1::Atom, at2::Atom) = at1.segname == at2.segname && at1.model == at2.model
+Base.in(at::Atom, s::Segment) = same_struct_element(Segment, at, first(s))
+Base.in(r::Residue, s::Segment) = same_struct_element(Segment, first(r), first(s))
+Base.in(c::Chain, s::Segment) = same_struct_element(Segment, first(c), first(s))
 
 # Constructors 
 function Segment(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
@@ -101,6 +104,14 @@ get_atoms(segment::Segment) = @view(segment.atoms[segment.range])
     @test atoms[1] in s[1]
     @test !(atoms[1906] in s[1])
     @test atoms[1906] in s[2]
+    r = collect(eachresidue(atoms))
+    @test r[1] in s[1]
+    @test !(r[end] in s[1])
+    @test r[end] in s[2]
+    c = collect(eachchain(atoms))
+    @test c[1] in s[1]
+    @test !(c[1] in s[1])
+    @test c[2] in s[2]
     @test name(s[1]) == "A"
     @test name(s[2]) == "B"
     @test s[1].range == 1:1905

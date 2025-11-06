@@ -55,6 +55,7 @@ end
 
 # Necessary for the interface: define the same_struct_element function
 same_struct_element(::Type{Residue}, at1::Atom, at2::Atom) = same_residue(at1, at2)
+Base.in(at::Atom, r::Residue) = same_struct_element(Residue, at, first(r))
 
 # Constructors
 function Residue(atoms::AbstractVector{<:Atom}, range::AbstractRange{<:Integer})
