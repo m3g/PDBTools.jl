@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.11.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] The `MValue` data structure now contains a type parameter that indicates the model used, and a `Int` field with the number of residues in the selection.
 
 Version 3.11.1
 --------------
