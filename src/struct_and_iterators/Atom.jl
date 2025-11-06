@@ -592,7 +592,7 @@ end
 
 Returns the element symbol, as a string, of an atom given the `Atom` structure.
 If the `pdb_element` is empty or "X", the element is inferred from the atom name. 
-Othwerwise, the `pdb_element` is returned.
+Otherwise, the `pdb_element` is returned.
 
 ### Example
 
@@ -653,7 +653,7 @@ end
 end
 
 #
-# Auxiliary function to retrive another property for matching elements
+# Auxiliary function to retrieve another property for matching elements
 #
 get_element_property(at::Atom, property::Symbol) = get_element_property(at, Val(property))
 function get_element_property(at::Atom, ::Val{property}) where {property}
