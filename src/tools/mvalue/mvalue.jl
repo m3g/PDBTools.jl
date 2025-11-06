@@ -107,6 +107,8 @@ function mvalue(
     end
     residue_contributions_bb = zeros(Float32, length(residues_initial))
     residue_contributions_sc = zeros(Float32, length(residues_initial))
+    sel_at_bb(at, r) = (at in r) & backbone(at) & selector(at)
+    sel_at_sc(at, r) = (at in r) & sidechain(at) & selector(at)
     for iresidue in eachindex(residues_initial)
         rinit = residues_initial[iresidue]
         rfinal = residues_final[iresidue]
@@ -125,10 +127,10 @@ function mvalue(
 
             """))
         end
-        bb_initial = sasa(sasa_initial, at -> (at in rinit) & backbone(at) & selector(at))
-        sc_initial = sasa(sasa_initial, at -> (at in rinit) & sidechain(at) & selector(at))
-        bb_final = sasa(sasa_final, at -> (at in rfinal) & backbone(at) & selector(at))
-        sc_final = sasa(sasa_final, at -> (at in rfinal) & sidechain(at) & selector(at))
+        bb_initial = sasa(sasa_initial, at -> sel_at_bb(at, rinit))
+        sc_initial = sasa(sasa_initial, at -> sel_at_sc(at, rinit))
+        bb_final = sasa(sasa_final, at -> sel_at_bb(at, rfinal))
+        sc_final = sasa(sasa_final, at -> sel_at_sc(at, rfinal))
         bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
         residue_contributions_bb[iresidue] = bb_type * (bb_final - bb_initial)
         residue_contributions_sc[iresidue] = sc_type * (sc_final - sc_initial)
