@@ -97,6 +97,7 @@ function mvalue(
     ats_final = filter(selector, sasa_final.particles)
     residues_initial = collect(eachresidue(ats_initial))
     residues_final = collect(eachresidue(ats_final))
+    cosolvent = lowercase(cosolvent)
     if length(residues_initial) != length(residues_final)
         throw(ArgumentError("""\n
             Initial and final states do not have the same number of residues.

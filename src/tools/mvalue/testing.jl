@@ -15,6 +15,9 @@
     @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.852; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.066; atol=1e-2)
+    # Confirm that now cosolvent selection is not case-sensitive
+    r_1MJC = mvalue(n_sasa, d_sasa, "Urea") 
+    @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
@@ -254,13 +257,13 @@ end
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
     data_mvalue_server_auton_and_bolen_1MJC = Dict(
-        "TMAO" => (224, 1160, 2095),
-        "Sarcosine" => (406, 1010, 1614),
-        "Betaine" => (-502, 76, 650),
-        "Proline" => (-200, 226, 649),
-        "Sorbitol" => (378, 780, 1183),
-        "Sucrose" => (189, 876, 1559),
-        "Urea" => (-293, -711, -1132),
+        "tmao" => (224, 1160, 2095),
+        "sarcosine" => (406, 1010, 1614),
+        "betaine" => (-502, 76, 650),
+        "proline" => (-200, 226, 649),
+        "sorbitol" => (378, 780, 1183),
+        "sucrose" => (189, 876, 1559),
+        "urea" => (-293, -711, -1132),
     )
 
     MJC_clean = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
@@ -272,13 +275,13 @@ end
     end
 
     data_mvalue_server_auton_and_bolen_2RN2 = Dict(
-        "TMAO" => (978, 3215, 5453),
-        "Sarcosine" => (1410, 2867, 4323),
-        "Betaine" => (-1301, 130, 1560),
-        "Proline" => (-568, 464, 1496),
-        "Sorbitol" => (830, 1757, 2684),
-        "Sucrose" => (952, 2578, 4202),
-        "Urea" => (-1217, -2226, -3236)
+        "tmao" => (978, 3215, 5453),
+        "sarcosine" => (1410, 2867, 4323),
+        "betaine" => (-1301, 130, 1560),
+        "proline" => (-568, 464, 1496),
+        "sorbitol" => (830, 1757, 2684),
+        "sucrose" => (952, 2578, 4202),
+        "urea" => (-1217, -2226, -3236)
     )
 
     RN2_clean = read_pdb(joinpath(dir, "2RN2_clean.pdb"))

@@ -1,17 +1,13 @@
 const cosolvent_column = Dict(
     "tmao" => 1,
-    "TMAO" => 1,  
-    "Tmao" => 1,  
-    "Sarcosine"=> 2,    
-    "Betaine"=> 3,    
-    "Proline" => 4,    
-    "Sorbitol" => 5,   
-    "Sucrose" => 6,
-    "Urea" => 7,
+    "sarcosine"=> 2,    
+    "betaine"=> 3,    
+    "proline" => 4,    
+    "sorbitol" => 5,   
+    "sucrose" => 6,
     "urea" => 7,
-    "UREA" => 7,
-    "UreaApp" => 8,
-    "UreaMH" => 9,
+    "urea_app" => 8,
+    "urea_mh" => 9,
 )
 
 #
@@ -57,13 +53,13 @@ Amino acid side-chain and peptide backbone unit transfer free energies (cal/mol)
 Supplementary Table 1 of https://doi.org/10.1073/pnas.0507053102
 
 UreaWrong from GTFE* from Supplementary Table S1 of Moeser and Horinek and originally from https://doi.org/10.1073/pnas.0706251104
-UreaMH is the data from Moeser and Horinek
+urea_mh is the data from Moeser and Horinek
 
-The "Urea" column selection points to "UreaWrong" which is what is output from the server.
+The "urea" column selection points to "UreaWrong" which is what is output from the server.
 
 =#
 const tfe_sc_bb_auton_and_bolen = Dict(
-#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose      UreaWrong   UreaAPP     UreaMH
+#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose      UreaWrong   UreaAPP     urea_mh
     "ALA" => ( -14.64,      10.91,       4.77,      -0.07,      16.57,      22.05,       0.63,       -4.69,     1.01),
     "PHE" => (  -9.32,     -12.64,    -112.93,     -71.26,      26.38,     -96.35,     -42.84,      -83.11,   -68.64),
     "LEU" => (  11.62,      38.33,     -17.73,       4.77,      39.07,      37.11,     -14.30,      -54.57,   -40.10),
