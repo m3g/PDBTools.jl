@@ -6,8 +6,8 @@ const cosolvent_column = Dict(
     "sorbitol" => 5,   
     "sucrose" => 6,
     "urea" => 7,
-    "urea_app" => 8,
-    "urea_mh" => 9,
+    "urea-app" => 8,
+    "urea-mh" => 9,
 )
 
 #
