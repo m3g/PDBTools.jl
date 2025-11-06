@@ -7,7 +7,8 @@ struct AutonBolen <: MvalueModel end
 
 include("./data.jl")
 
-struct MValue
+struct MValue{T}
+    nresidues::Int
     tot::Float32
     bb::Float32
     sc::Float32
@@ -16,7 +17,7 @@ struct MValue
 end
 function Base.show(io::IO, ::MIME"text/plain", m::MValue)
     print(io, chomp("""
-    $(typeof(m))
+    $(typeof(m)) - $(m.nresidues) residues.
         Total m-value: $(m.tot) kcal mol⁻¹
         Backbone contributions: $(m.bb) kcal mol⁻¹
         Side-chain contributions: $(m.sc) kcal mol⁻¹
@@ -54,6 +55,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 A `MValue` object, with fields:
 
+- `ntatoms::Int`: Number of atoms considered.
 - `tot::Float32`: Total m-value (kcal/mol/M).
 - `bb::Float32`: Backbone contribution to the m-value (kcal/mol/M).
 - `sc::Float32`: Side chain contribution to the m-value (kcal/mol/M).
@@ -134,7 +136,7 @@ function mvalue(
     bb = sum(residue_contributions_bb)
     sc = sum(residue_contributions_sc)
     tot = bb + sc
-    return MValue(tot, bb, sc, residue_contributions_bb, residue_contributions_sc)
+    return MValue{model}(length(residues_initial), tot, bb, sc, residue_contributions_bb, residue_contributions_sc)
 end
 
 #=

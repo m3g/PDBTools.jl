@@ -18,7 +18,7 @@
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
-        MValue
+        MValue{AutonBolen} - 69 residues.
             Total m-value: -0.7856683 kcal mol⁻¹
             Backbone contributions: -0.8520461 kcal mol⁻¹
             Side-chain contributions: 0.06637777 kcal mol⁻¹
