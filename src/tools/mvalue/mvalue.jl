@@ -1,9 +1,9 @@
 export mvalue
 export MoeserHorinek, AutonBolen
 
-abstract type MvalueModel end
-struct MoeserHorinek <: MvalueModel end
-struct AutonBolen <: MvalueModel end
+abstract type MValueModel end
+struct MoeserHorinek <: MValueModel end
+struct AutonBolen <: MValueModel end
 
 include("./data.jl")
 
@@ -30,7 +30,7 @@ end
         sasa_final::SASA{3,<:AbstractVector{<:Atom}},
         cosolvent::String;
         sel::Union{String,Function}=all,
-        model::Type{<:MvalueModel}=AutonBolen,
+        model::Type{<:MValueModel}=AutonBolen,
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
     )
@@ -47,7 +47,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 # Keyword Arguments
 
 - `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
-- `model::Type{<:MvalueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
+- `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 
@@ -88,7 +88,7 @@ function mvalue(
     sasa_final::SASA{3,<:AbstractVector{<:Atom}},
     cosolvent::String;
     sel::Union{String,Function}=all,
-    model::Type{<:MvalueModel}=AutonBolen,
+    model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
 ) where {F1<:Function, F2<:Function}
@@ -151,7 +151,7 @@ as implemente by Moeser and Horinek (https://pubs.acs.org/doi/10.1021/jp409934q#
 
 =#
 function tfe_asa(
-    model::Type{<:MvalueModel},
+    model::Type{<:MValueModel},
     cosolvent::String,
     restype::AbstractString;
 )
