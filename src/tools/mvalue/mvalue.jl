@@ -160,14 +160,14 @@ function tfe_asa(
         # united model: all bb ASA contributions are the same
         bb_contribution = tfe_sc_bb_moeser_and_horinek["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"
-            0.0
+            0.0f0
         else
             tfe_sc_bb_moeser_and_horinek[restype][col] / last(isolated_ASA[restype])
         end
     elseif model == AutonBolen
         bb_contribution = tfe_sc_bb_auton_and_bolen["BB"][col] / first(isolated_ASA[restype])
         sc_contribution = if restype == "GLY"
-            0.0
+            0.0f0
         else
             sc_contribution = tfe_sc_bb_auton_and_bolen[restype][col] / last(isolated_ASA[restype])
         end
