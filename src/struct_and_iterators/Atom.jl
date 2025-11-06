@@ -530,13 +530,15 @@ end
 #
 export isprotein, isbackbone, issidechain
 isprotein(atom::Atom) = 
-    haskey(protein_residues, atom.resname) || haskey(protein_residues, atom.resname[2:end])
+    haskey(protein_residues, atom.resname) || haskey(protein_residues, @view(atom.resname[2:end]))
 
-const backbone_atoms = ["N", "CA", "C", "O"]
-isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = isprotein(atom) && atom.name in backbone_atoms
+const backbone_atoms = ("N", "CA", "C", "O")
+isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = 
+    (atom.name in backbone_atoms) && isprotein(atom)
 
-const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
-issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atom.name in not_side_chain_atoms)
+const not_side_chain_atoms = ("N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3")
+issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) =
+    !(atom.name in not_side_chain_atoms) && isprotein(atom)
 
 @testitem "atoms in struct" begin
     pdb = read_pdb(PDBTools.TESTPDB)
