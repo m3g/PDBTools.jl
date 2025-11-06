@@ -11,12 +11,12 @@
     #
     n_sasa = sasa_particles(MJC_native)
     d_sasa = sasa_particles(MJC_desnat)
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea") 
+    r_1MJC = mvalue(n_sasa, d_sasa, "urea")
     @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.852; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.066; atol=1e-2)
     # Confirm that now cosolvent selection is not case-sensitive
-    r_1MJC = mvalue(n_sasa, d_sasa, "Urea") 
+    r_1MJC = mvalue(n_sasa, d_sasa, "Urea")
     @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
 
     # Test show method
@@ -35,7 +35,7 @@
     @test isapprox(r_1MJC.bb, -1.600; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.0539; atol=1e-2)
 
-    r_1MJC = mvalue(n_sasa, d_sasa, "tmao") 
+    r_1MJC = mvalue(n_sasa, d_sasa, "tmao")
     @test isapprox(r_1MJC.tot, 3.073; atol=1e-2)
     @test isapprox(r_1MJC.bb, 3.692; atol=1e-2)
     @test isapprox(r_1MJC.sc, -0.619; atol=1e-2)
@@ -45,7 +45,7 @@
     # 
     n_sasa = sasa_particles(MJC_native)
     d_sasa = sasa_particles(MJC_desnat)
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea"; model=MoeserHorinek) 
+    r_1MJC = mvalue(n_sasa, d_sasa, "urea"; model=MoeserHorinek)
     @test isapprox(r_1MJC.tot, -0.937; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.391; atol=1e-2)
     @test isapprox(r_1MJC.sc, -0.546; atol=1e-2)
@@ -61,7 +61,7 @@
     # Same definitions as Gromacs for side chain and backbone
     n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
     d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea"; 
+    r_1MJC = mvalue(n_sasa, d_sasa, "urea";
         model=MoeserHorinek,
         backbone=at -> name(at) in ("N", "CA", "C", "O"),
         sidechain=at -> !(name(at) in ("N", "CA", "C", "O")),
@@ -79,23 +79,23 @@
     # Input file with non-protein atoms
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     s1 = sasa_particles(pdb)
-    s2 = sasa_particles(select(pdb,"protein"))
+    s2 = sasa_particles(select(pdb, "protein"))
     # This should work:
     m = mvalue(s1, s2, "urea"; sel="protein")
-    @test m.tot ≈ 0.0 atol=1e-2
+    @test m.tot ≈ 0.0 atol = 1e-2
     m = mvalue(s2, s1, "urea"; sel="protein")
-    @test m.tot ≈ 0.0 atol=1e-2
+    @test m.tot ≈ 0.0 atol = 1e-2
     # But these should error:
     @test_throws "same number of residues" mvalue(s2, s1, "urea") # different number of residues
     s2 = sasa_particles(pdb)
     @test_throws "non-protein residue" mvalue(s2, s1, "urea") # different number of residues
-    s1 = sasa_particles(select(pdb,"protein"))
+    s1 = sasa_particles(select(pdb, "protein"))
     pdb2 = copy.(pdb)
     rs = collect(eachresidue(pdb2))
     for at in rs[2]
         at.resname = "ASP"
     end
-    s2 = sasa_particles(select(pdb2,"protein"))
+    s2 = sasa_particles(select(pdb2, "protein"))
     @test_throws "same type" mvalue(s2, s1, "urea") # different number of residues
 
 end
@@ -216,8 +216,8 @@ end
     #
     # 2RN2
     #
-    RN2_native=read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
-    RN2_desnat=read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein")
+    RN2_native = read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
+    RN2_desnat = read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein")
 
     r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_clean, type=2)
     @test isapprox(r_2RN2.tot, references["2RN2"][1]; rtol=1e-1)
@@ -229,7 +229,7 @@ end
     @test isapprox(r_2RN2.tot, -3.13; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.89; rtol=1e-1)
     @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
-    sasa_2RN2_julia = delta_sasa_per_restype(;native=RN2_native, desnat=RN2_desnat, ignore_hydrogen=false)
+    sasa_2RN2_julia = delta_sasa_per_restype(; native=RN2_native, desnat=RN2_desnat, ignore_hydrogen=false)
     r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_julia)
     @test isapprox(r_2RN2.tot, -2.59; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.03; rtol=1e-1)
@@ -309,9 +309,41 @@ end
     # Test m-value calculation using PBCs
     pbc = read_pdb(joinpath(dir, "pbc.pdb"))
     no_pbc = read_pdb(joinpath(dir, "no_pbc.pdb"))
-    uc=lattice_to_matrix(107.845413,107.845413,107.845413,90., 90., 90.)
-    ss = delta_sasa_per_restype(;native=pbc, desnat=no_pbc, unitcell=uc) 
+    uc = lattice_to_matrix(107.845413, 107.845413, 107.845413, 90., 90., 90.)
+    ss = delta_sasa_per_restype(; native=pbc, desnat=no_pbc, unitcell=uc)
     m = mvalue_delta_sasa(model=AutonBolen, cosolvent="urea", atoms=pbc, sasas=ss)
-    @test m.tot ≈ 0.0 atol=1e-3
+    @test m.tot ≈ 0.0 atol = 1e-3
+
+    #=
+
+    Average SASA values from lower and upper bounds of the denatured state ensemble,
+    reported in Supplementary Table 2 of https://doi.org/10.1073/pnas.0507053102
+    These are the average values of Table 1 of https://doi.org/10.1021/bi962819o
+    Can be used for testing, but **do not** provide the same accuracy as the values
+    calculated with GROMACS or obtained from the m-value server.
+
+    =#
+    const sasa_desnat_average = Dict(
+        "ALA" => Dict(:bb => 27.9, :sc => 55.1),
+        "PHE" => Dict(:bb => 24.3, :sc => 128.8),
+        "LEU" => Dict(:bb => 22.7, :sc => 109.6),
+        "ILE" => Dict(:bb => 20.0, :sc => 117.1),
+        "VAL" => Dict(:bb => 20.4, :sc => 96.4),
+        "PRO" => Dict(:bb => 22.5, :sc => 87.0),
+        "MET" => Dict(:bb => 25.3, :sc => 122.4),
+        "TRP" => Dict(:bb => 23.6, :sc => 156.6),
+        "GLY" => Dict(:bb => 65.2, :sc => 0.0),
+        "SER" => Dict(:bb => 29.4, :sc => 66.5),
+        "THR" => Dict(:bb => 24.1, :sc => 84.3),
+        "TYR" => Dict(:bb => 25.6, :sc => 141.7),
+        "GLN" => Dict(:bb => 25.3, :sc => 116.9),
+        "ASN" => Dict(:bb => 25.2, :sc => 90.1),
+        "ASP" => Dict(:bb => 26.0, :sc => 87.0),
+        "GLU" => Dict(:bb => 25.7, :sc => 113.4),
+        "HIS" => Dict(:bb => 24.2, :sc => 111.5),
+        "LYS" => Dict(:bb => 26.1, :sc => 150.7),
+        "ARG" => Dict(:bb => 25.1, :sc => 171.1),
+        "CYS" => Dict(:bb => 26.4, :sc => 73.0),
+    )
 
 end
