@@ -110,7 +110,7 @@ get_atoms(segment::Segment) = @view(segment.atoms[segment.range])
     @test r[end] in s[2]
     c = collect(eachchain(atoms))
     @test c[1] in s[1]
-    @test !(c[1] in s[1])
+    @test !(c[1] in s[2])
     @test c[2] in s[2]
     @test name(s[1]) == "A"
     @test name(s[2]) == "B"
