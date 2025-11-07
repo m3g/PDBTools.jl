@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.11.4-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Improve performance of mvalue calculations by avoiding unnecessary allocations.
 
 Version 3.11.3
 --------------
