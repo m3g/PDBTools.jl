@@ -18,6 +18,10 @@
     # Confirm that now cosolvent selection is not case-sensitive
     r_1MJC = mvalue(n_sasa, d_sasa, "Urea")
     @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
+    # test non-parallel vs. parallel calculations
+    ms = mvalue(n_sasa, d_sasa, "urea"; parallel=false) 
+    mp = mvalue(n_sasa, d_sasa, "urea"; parallel=true) 
+    @test ms.tot ≈ mp.tot
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
