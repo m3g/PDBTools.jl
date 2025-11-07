@@ -24,6 +24,20 @@ function Base.show(io::IO, ::MIME"text/plain", m::MValue)
     """))
 end
 
+#=
+
+This function avoids allocating a new selection function at each
+iteration of the mvalue calculation, by replacing the residue to
+be compared instead of defining a new anonymous function.
+
+=#
+struct _AtomSelector{F<:Function} <: Function
+    f::F
+    residue::Ref{Residue}
+end
+_AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
+(a::_AtomSelector)(at::Atom) = (at in a.residue[]) && a.f(at)
+
 """
     mvalue(
         sasa_initial::SASA{3,<:AbstractVector{<:Atom}},    
@@ -93,8 +107,8 @@ function mvalue(
     sidechain::F2=issidechain,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    ats_initial = filter(selector, sasa_initial.particles)
-    ats_final = filter(selector, sasa_final.particles)
+    ats_initial = select(sasa_initial.particles, selector)
+    ats_final = select(sasa_final.particles, selector)
     residues_initial = collect(eachresidue(ats_initial))
     residues_final = collect(eachresidue(ats_final))
     cosolvent = lowercase(cosolvent)
@@ -108,8 +122,8 @@ function mvalue(
     end
     residue_contributions_bb = zeros(Float32, length(residues_initial))
     residue_contributions_sc = zeros(Float32, length(residues_initial))
-    sel_at_bb(at, r) = (at in r) & backbone(at) & selector(at)
-    sel_at_sc(at, r) = (at in r) & sidechain(at) & selector(at)
+    sel_at_bb = _AtomSelector(at -> backbone(at) & selector(at))
+    sel_at_sc = _AtomSelector(at -> sidechain(at) & selector(at))
     for iresidue in eachindex(residues_initial)
         rinit = residues_initial[iresidue]
         rfinal = residues_final[iresidue]
@@ -128,10 +142,14 @@ function mvalue(
 
             """))
         end
-        bb_initial = sasa(sasa_initial, at -> sel_at_bb(at, rinit))
-        sc_initial = sasa(sasa_initial, at -> sel_at_sc(at, rinit))
-        bb_final = sasa(sasa_final, at -> sel_at_bb(at, rfinal))
-        sc_final = sasa(sasa_final, at -> sel_at_sc(at, rfinal))
+        sel_at_sc.residue[] = rinit
+        sel_at_bb.residue[] = rinit
+        bb_initial = sasa(sasa_initial, sel_at_bb) 
+        sc_initial = sasa(sasa_initial, sel_at_sc)
+        sel_at_sc.residue[] = rfinal
+        sel_at_bb.residue[] = rfinal
+        bb_final = sasa(sasa_final, sel_at_bb)
+        sc_final = sasa(sasa_final, sel_at_sc)
         bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
         residue_contributions_bb[iresidue] = bb_type * (bb_final - bb_initial)
         residue_contributions_sc[iresidue] = sc_type * (sc_final - sc_initial)
