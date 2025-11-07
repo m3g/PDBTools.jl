@@ -10,8 +10,10 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.11.4-DEV
+Version 3.12.0-DEV
 --------------
+- ![FEATURE][badge-feature] add `parallel` keyword argument to `mvalue` function to enable parallel computation of residue contributions.
+- ![ENHANCEMENT][badge-enhancement] Improve performance of mvalue calculations by avoiding unnecessary allocations.
 
 Version 3.11.3
 --------------

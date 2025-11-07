@@ -1,3 +1,5 @@
+import ChunkSplitters
+
 export mvalue
 export MoeserHorinek, AutonBolen
 
@@ -24,6 +26,20 @@ function Base.show(io::IO, ::MIME"text/plain", m::MValue)
     """))
 end
 
+#=
+
+This function avoids allocating a new selection function at each
+iteration of the mvalue calculation, by replacing the residue to
+be compared instead of defining a new anonymous function.
+
+=#
+struct _AtomSelector{F<:Function} <: Function
+    f::F
+    residue::Ref{Residue}
+end
+_AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
+(a::_AtomSelector)(at::Atom) = (at in a.residue[]) && a.f(at)
+
 """
     mvalue(
         sasa_initial::SASA{3,<:AbstractVector{<:Atom}},    
@@ -33,6 +49,7 @@ end
         model::Type{<:MValueModel}=AutonBolen,
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
+        parallel:Bool = true,
     )
 
 Calculates the m-value (transfer free energy of a protein in 1M solution, in `kcal/mol`) using the Tanford transfer model,
@@ -50,6 +67,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
+- `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
 
 # Returns
 
@@ -91,10 +109,11 @@ function mvalue(
     model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
+    parallel::Bool=true,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    ats_initial = filter(selector, sasa_initial.particles)
-    ats_final = filter(selector, sasa_final.particles)
+    ats_initial = select(sasa_initial.particles, selector)
+    ats_final = select(sasa_final.particles, selector)
     residues_initial = collect(eachresidue(ats_initial))
     residues_final = collect(eachresidue(ats_final))
     cosolvent = lowercase(cosolvent)
@@ -108,33 +127,40 @@ function mvalue(
     end
     residue_contributions_bb = zeros(Float32, length(residues_initial))
     residue_contributions_sc = zeros(Float32, length(residues_initial))
-    sel_at_bb(at, r) = (at in r) & backbone(at) & selector(at)
-    sel_at_sc(at, r) = (at in r) & sidechain(at) & selector(at)
-    for iresidue in eachindex(residues_initial)
-        rinit = residues_initial[iresidue]
-        rfinal = residues_final[iresidue]
-        rtype = threeletter(resname(rinit)) # convert non-standard residue names in types (e. g. HSD -> HIS)
-        if !(haskey(protein_residues, rtype))
-            throw(ArgumentError("""\n
-                Found non-protein residue ($(resname(rinit))) in the selected atoms of SASA calculation.
-                m-value calculations are only defined for protein residues.
-
-            """))
+    nchunks = parallel ? Threads.nthreads() : 1
+    @sync for inds_chunk in ChunkSplitters.index_chunks(residues_initial; n=nchunks)
+        Threads.@spawn for iresidue in inds_chunk
+            sel_at_bb = _AtomSelector(at -> backbone(at) & selector(at))
+            sel_at_sc = _AtomSelector(at -> sidechain(at) & selector(at))
+            rinit = residues_initial[iresidue]
+            rfinal = residues_final[iresidue]
+            rtype = threeletter(resname(rinit)) # convert non-standard residue names in types (e. g. HSD -> HIS)
+            if !(haskey(protein_residues, rtype))
+                throw(ArgumentError("""\n
+                    Found non-protein residue ($(resname(rinit))) in the selected atoms of SASA calculation.
+                    m-value calculations are only defined for protein residues.
+    
+                """))
+            end
+            if rtype != threeletter(resname(rfinal))
+                throw(ArgumentError("""\n
+                    The residues of the initial and final state must be of the same type.
+                    Found residues at position $iresidue: $(resname(rinit)) and $(resname(rfinal))
+    
+                """))
+            end
+            sel_at_sc.residue[] = rinit
+            sel_at_bb.residue[] = rinit
+            bb_initial = sasa(sasa_initial, sel_at_bb) 
+            sc_initial = sasa(sasa_initial, sel_at_sc)
+            sel_at_sc.residue[] = rfinal
+            sel_at_bb.residue[] = rfinal
+            bb_final = sasa(sasa_final, sel_at_bb)
+            sc_final = sasa(sasa_final, sel_at_sc)
+            bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
+            residue_contributions_bb[iresidue] = bb_type * (bb_final - bb_initial)
+            residue_contributions_sc[iresidue] = sc_type * (sc_final - sc_initial)
         end
-        if rtype != threeletter(resname(rfinal))
-            throw(ArgumentError("""\n
-                The residues of the initial and final state must be of the same type.
-                Found residues at position $iresidue: $(resname(rinit)) and $(resname(rfinal))
-
-            """))
-        end
-        bb_initial = sasa(sasa_initial, at -> sel_at_bb(at, rinit))
-        sc_initial = sasa(sasa_initial, at -> sel_at_sc(at, rinit))
-        bb_final = sasa(sasa_final, at -> sel_at_bb(at, rfinal))
-        sc_final = sasa(sasa_final, at -> sel_at_sc(at, rfinal))
-        bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
-        residue_contributions_bb[iresidue] = bb_type * (bb_final - bb_initial)
-        residue_contributions_sc[iresidue] = sc_type * (sc_final - sc_initial)
     end
     bb = sum(residue_contributions_bb)
     sc = sum(residue_contributions_sc)
