@@ -15,7 +15,7 @@ The *m*-values can be estimated by the Tanford transfer model, in which each ami
 to the transfer free energy according to the change in its solvent accessible surface area and 
 experimental values of individual amino acid transfer energies, and a backbone contribution
 (here we implement the Auton/Bolen and Moeser/Horinek models 
-[[1](https://doi.org/10.1021/acs.jpcb.7b02138), 
+[[1](https://doi.org/10.1021/jp409934q), 
 [2](https://doi.org/10.1016/s0076-6879(07)28023-1), 
 [3](https://www.pnas.org/doi/10.1073/pnas.0706251104)]). 
 Typically, these models are used to obtain the effect of cosolvent on the structural stability of proteins,

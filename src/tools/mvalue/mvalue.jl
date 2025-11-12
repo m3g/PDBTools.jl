@@ -96,7 +96,7 @@ mvalue(sasa_initial, sasa_final, "chain A"; model=AutonBolen, cosolvent="TMAO")
 
 ## References
 
-1. https://doi.org/10.1021/acs.jpcb.7b02138
+1. https://doi.org/10.1021/jp409934q
 2. https://doi.org/10.1016/s0076-6879(07)28023-1
 3. https://www.pnas.org/doi/10.1073/pnas.0706251104
 
