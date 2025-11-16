@@ -351,7 +351,7 @@ end
     @test all(ismissing(pbc.matrix[i]) | isapprox(pbc.matrix[i], no_pbc.matrix[i]; rtol=1e-2) for i in eachindex(pbc.matrix))
 
     # Arithmetic operations on contact maps
-    pdb = wget("2cpb.pdb", "model 1 2")
+    pdb = wget("2cpb", "model 1 2")
     m = collect(eachmodel(pdb))
     c1 = contact_map(m[1])
     c2 = contact_map(m[2])
