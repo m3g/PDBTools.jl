@@ -162,14 +162,16 @@ function +(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Boo
 end
 function -(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
     _err_sum_cmap(c1, c2)
-    c3_matrix = copy(c1.matrix)
+    c3_matrix = zeros(Union{Int,Missing}, size(c1.matrix))
     for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
-        c3_matrix[i] = if (c3_matrix[i] === true) & (c2.matrix[i] === true)
-            false
-        elseif (c3_matrix[i] === true) & ismissing(c2.matrix[i])
-            true
+        c3_matrix[i] = if (c1.matrix[i] === true) & (c2.matrix[i] === true)
+            0
+        elseif (c1.matrix[i] === true) & (!(c2.matrix[i] === true))
+            1
+        elseif (!(c1.matrix[i] === true)) & (c2.matrix[i] === true)
+            -1
         else
-            c3_matrix[i]
+            missing
         end
     end
     return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
@@ -364,14 +366,16 @@ end
     c3 = c1 + c2
     @test sum(c3.matrix) == 424
     c3 = c2 - c1
-    @test sum(c3.matrix) == 10
+    @test sum(skipmissing(c3.matrix)) == -10
     c3 = c1 - c1
-    @test sum(c3.matrix) == 0
+    @test sum(skipmissing(c3.matrix)) == 0
     c3 = c1 + c1
     @test sum(c3.matrix) == sum(c1.matrix)
-    c3.matrix .= missing
-    c3 = c3 - c1
-    @test all(ismissing, c3.matrix)
+    c2.matrix .= missing
+    c3 = c2 - c1
+    @test sum(skipmissing(c3.matrix)) == -414
+    c3 = c1 - c2
+    @test sum(skipmissing(c3.matrix)) == 414
 
     c1 = contact_map(m[1]; discrete=false)
     c2 = contact_map(m[2]; discrete=false)

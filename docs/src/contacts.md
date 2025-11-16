@@ -74,29 +74,30 @@ different conformations, can be compared by subtraction or summation.
 
 For example, here we load two models from a PDB file that contains multiple conformations of a 
 protein, in solution, and compute the contact maps of the two models, and plot the difference
-of the maps:
+of the maps. 
 ```@example contacts
 pdb = wget("2cpb", "model 1 2")
 models = collect(eachmodel(pdb))
 c1 = contact_map(models[1])
 c2 = contact_map(models[2])
-c_diff = c2 - c1
-heatmap(c_diff)
+heatmap(c2 - c1)
 ```
+Blue dots indicate contacts present in the first set, but not in the second, and red dots
+the contacts present in the second but not in the first.
 
 A difference of distance maps can be similarly obtained by computing continous contact maps:
 ```@example contacts
-c1 = contact_map(models[1]; discrete=false)
-c2 = contact_map(models[2]; discrete=false)
+c1 = contact_map(models[1]; discrete=false, dmax=12.0)
+c2 = contact_map(models[2]; discrete=false, dmax=12.0)
 c_diff = c2 - c1
 heatmap(c_diff)
 ```
 
 !!! note
     Contacts farther than the tolerance set are `missing`. When summing or subtracting 
-    distance maps, `missing` values are propagated. For discrete maps, `true - missing` 
-    returns `true`, such that the presence of a contact in the first map is preserved
-    in the difference. 
+    distance maps, `missing` values are propagated. For discrete maps, `true` contacts
+    are preserved, resulting in `+1` or `-1` depending on the contact being present in 
+    the first or second structure.
 
 ## Customizing the plot
 

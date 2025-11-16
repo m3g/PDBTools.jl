@@ -67,7 +67,8 @@ function heatmap(
     xrotation=60,
     xlabel="residue",
     ylabel="residue",
-    colorbar_title="distance (Å)",
+    colorbar=ifelse(T <: Integer, :none, :right),
+    colorbar_title=ifelse(T <: Integer, nothing, "\ndistance (Å)"),
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
     xlims=(1,size(map.matrix, 1)),
     ylims=(1,size(map.matrix, 2)),
@@ -94,7 +95,7 @@ function heatmap(
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
-        size, framestyle, grid, clims, margin,
+        size, framestyle, grid, clims, margin, colorbar,
         kargs...
     )
 end
@@ -105,7 +106,7 @@ function heatmap(
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
-    xticks=PDBTools.residue_ticks(map.residues1; stride=xstep, serial=true),
+  xticks=PDBTools.residue_ticks(map.residues1; stride=xstep, serial=true),
     yticks=PDBTools.residue_ticks(map.residues2; stride=ystep, serial=true),
     xrotation=60,
     xlabel="residue",
