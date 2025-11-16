@@ -6,8 +6,8 @@ import Plots: heatmap, cgrad
 function _plot_size(map::ContactMap)
     nres1 = size(map.matrix, 1)
     nres2 = size(map.matrix, 2)
-    xpixels = min(600, max(300, round(Int,500 * nres1 / 100)))
-    ypixels = min(600, max(300, round(Int,500 * nres2 / 100)))
+    xpixels = min(600, max(400, round(Int, 10 * nres1)))
+    ypixels = min(600, max(400, round(Int, 10 * nres2)))
     return (xpixels, ypixels)
 end
 
@@ -71,12 +71,24 @@ function heatmap(
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
     xlims=(1,size(map.matrix, 1)),
     ylims=(1,size(map.matrix, 2)),
-    color=:grayC,
+    color=begin
+        ext = extrema(skipmissing(map.matrix))
+        if ext[1] < 0
+            :bwr
+        else
+            :grayC
+        end
+    end,
     size=plot_size,
     framestyle=:box,
     grid=false,
-    clims=(0,1.1) .* extrema(skipmissing(map.matrix)),
-    margin=0.5Plots.Measures.cm,
+    clims=begin 
+        ext = extrema(skipmissing(map.matrix))
+        c1 = 1.1 * min(0, ext[1])
+        c2 = 1.1 * max(0, ext[2])
+        (c1,c2)
+    end,
+    margin=0.3Plots.Measures.cm,
     kargs...
 ) where {T<:Real}
     return heatmap(transpose(map.matrix); 
@@ -107,7 +119,7 @@ function heatmap(
     grid=false,
     clims=(0,1),
     colorbar=:none,
-    margin=0.5Plots.Measures.cm,
+    margin=0.3Plots.Measures.cm,
     kargs...
 )
     return heatmap(transpose(map.matrix); 

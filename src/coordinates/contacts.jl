@@ -135,6 +135,61 @@ function Base.show(io::IO, ::MIME"text/plain", map::ContactMap{T}) where {T}
     print(io, "ContactMap{$T} of size $(size(map.matrix)), with threshold $(map.d) and gap $(map.gap)")
 end
 
+import Base: +, -
+
+function _err_sum_cmap(c1::ContactMap, c2::ContactMap)
+    if (length(c1.residues1) != length(c2.residues1)) || 
+       (length(c1.residues2) != length(c2.residues2))
+        throw(ArgumentError("""\n
+            Arithmetic operations are only defined for contact maps with the same number of residues.
+        
+        """))
+    end
+    return nothing
+end
+
+function +(c1::ContactMap{<:Union{Missing,Bool}}, c2::ContactMap{<:Union{Missing,Bool}})
+    _err_sum_cmap(c1, c2)
+    c3_matrix = copy(c1.matrix)
+    for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
+        c3_matrix[i] = if c2.matrix[i]
+            true
+        else
+            c3_matrix[i]
+        end
+    end
+    return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
+end
+function -(c1::ContactMap{<:Union{Missing,Bool}}, c2::ContactMap{<:Union{Missing,Bool}})
+    _err_sum_cmap(c1, c2)
+    c3_matrix = copy(c1.matrix)
+    for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
+        c3_matrix[i] = if c3_matrix[i] & c2.matrix[i]
+            false
+        elseif c3_matrix[i] & ismissing(c2.matrix[i])
+            true
+        else
+            c3_matrix[i]
+        end
+    end
+    return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
+end
+
+function +(c1::ContactMap{<:Union{Missing,AbstractFloat}}, c2::ContactMap{<:Union{Missing,AbstractFloat}})
+    _err_sum_cmap(c1, c2)
+    return ContactMap(c1.matrix + c2.matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
+end
+function -(c1::ContactMap{<:Union{Missing,AbstractFloat}}, c2::ContactMap{<:Union{Missing,AbstractFloat}})
+    _err_sum_cmap(c1, c2)
+    return ContactMap(c2.matrix - c1.matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
+end
+
+_err_same_type() = throw(ArgumentError("""\n
+        Arithmetic operations are only defined for contact maps of the same type (discrete *or* continuous).
+    """))
++(_::ContactMap, _::ContactMap) = _err_same_type()
+-(_::ContactMap, _::ContactMap) = _err_same_type()
+
 """
     contact_map(
         atoms1::AbstractVector{<:PDBTools.Atom}
@@ -294,5 +349,42 @@ end
     pbc = contact_map(pdb_pbc; discrete=false, unitcell=uc)
     no_pbc = contact_map(pdb_nopbc; discrete=false)
     @test all(ismissing(pbc.matrix[i]) | isapprox(pbc.matrix[i], no_pbc.matrix[i]; rtol=1e-2) for i in eachindex(pbc.matrix))
+
+    # Arithmetic operations on contact maps
+    pdb = wget("2cpb.pdb", "model 1 2")
+    m = collect(eachmodel(pdb))
+    c1 = contact_map(m[1])
+    c2 = contact_map(m[2])
+    c3 = c1 + c2
+    @test sum(c3.matrix) == 424
+    c3 = c2 - c1
+    @test sum(c3.matrix) == 10
+    c3 = c1 - c1
+    @test sum(c3.matrix) == 0
+    c3 = c1 + c1
+    @test sum(c3.matrix) == sum(c1.matrix)
+    c1 = contact_map(m[1]; discrete=false)
+    c2 = contact_map(m[2]; discrete=false)
+    c3 = c1 + c2
+    @test sum(skipmissing(c3.matrix)) ≈ 1564.5426f0
+    c3 = c2 - c1
+    @test sum(skipmissing(c3.matrix)) ≈ -3.5303345f0
+    c3 = c1 - c1
+    @test sum(skipmissing(c3.matrix)) ≈ 0.0
+    c3 = c1 + c1
+    @test sum(skipmissing(c3.matrix)) ≈ 2 * sum(skipmissing(c1.matrix))
+
+    c1 = contact_map(m[1])
+    c4 = contact_map(select(m[1], "residue > 1"))
+    @test_throws "only defined" c4 - c1
+    @test_throws "only defined" c4 + c1
+    c1 = contact_map(m[1]; discrete=false)
+    c4 = contact_map(select(m[1], "residue > 1"); discrete=false)
+    @test_throws "only defined" c4 - c1
+    @test_throws "only defined" c4 + c1
+    c1 = contact_map(m[1])
+    c4 = contact_map(select(m[1]); discrete=false)
+    @test_throws "same type" c4 - c1
+    @test_throws "same type" c4 + c1
 
 end
