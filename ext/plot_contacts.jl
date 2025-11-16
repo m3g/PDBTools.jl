@@ -146,7 +146,13 @@ end
     plt = heatmap(contact_map(cA))
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
-    plt = heatmap(contact_map(cA; discrete=false))
+    c_cont = contact_map(cA; discrete=false)
+    plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
+    c_cont.matrix .= rand.(Ref([-1,1])) .* c_cont.matrix 
+    plt = heatmap(c_cont)
+    savefig(plt, tmpplot)
+    @test isfile(tmpplot)
+    rm(tmpplot; force=true)
 end

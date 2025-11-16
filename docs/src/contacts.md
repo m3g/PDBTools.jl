@@ -92,6 +92,12 @@ c_diff = c2 - c1
 heatmap(c_diff)
 ```
 
+!!! note
+    Contacts farther than the tolerance set are `missing`. When summing or subtracting 
+    distance maps, `missing` values are propagated. For discrete maps, `true - missing` 
+    returns `true`, such that the presence of a contact in the first map is preserved
+    in the difference. 
+
 ## Customizing the plot
 
 All `heatmap` parametes can be customized using the `Plots` keyword syntax. Above, 
