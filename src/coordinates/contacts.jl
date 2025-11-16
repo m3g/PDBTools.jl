@@ -148,7 +148,7 @@ function _err_sum_cmap(c1::ContactMap, c2::ContactMap)
     return nothing
 end
 
-function +(c1::ContactMap{<:Union{Missing,Bool}}, c2::ContactMap{<:Union{Missing,Bool}})
+function +(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
     _err_sum_cmap(c1, c2)
     c3_matrix = copy(c1.matrix)
     for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
@@ -160,7 +160,7 @@ function +(c1::ContactMap{<:Union{Missing,Bool}}, c2::ContactMap{<:Union{Missing
     end
     return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
-function -(c1::ContactMap{<:Union{Missing,Bool}}, c2::ContactMap{<:Union{Missing,Bool}})
+function -(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
     _err_sum_cmap(c1, c2)
     c3_matrix = copy(c1.matrix)
     for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
@@ -175,11 +175,11 @@ function -(c1::ContactMap{<:Union{Missing,Bool}}, c2::ContactMap{<:Union{Missing
     return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
 
-function +(c1::ContactMap{<:Union{Missing,AbstractFloat}}, c2::ContactMap{<:Union{Missing,AbstractFloat}})
+function +(c1::ContactMap{<:Union{Missing,<:AbstractFloat}}, c2::ContactMap{<:Union{Missing,<:AbstractFloat}})
     _err_sum_cmap(c1, c2)
     return ContactMap(c1.matrix + c2.matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
-function -(c1::ContactMap{<:Union{Missing,AbstractFloat}}, c2::ContactMap{<:Union{Missing,AbstractFloat}})
+function -(c1::ContactMap{<:Union{Missing,<:AbstractFloat}}, c2::ContactMap{<:Union{Missing,<:AbstractFloat}})
     _err_sum_cmap(c1, c2)
     return ContactMap(c2.matrix - c1.matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
