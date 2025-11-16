@@ -321,13 +321,18 @@ end
 
 @testitem "contact_map" begin
     using PDBTools
+    using ShowMethodTesting
+
     # monomer
     ats = read_pdb(PDBTools.TESTPDB, "protein")
     map = contact_map(ats)
     @test size(map.matrix) == (104, 104)
     @test count(map.matrix) == 1106
+    @test parse_show(map) ≈ "ContactMap{Union{Missing, Bool}} of size (104, 104), with threshold 4.0 and gap 0"
     map = contact_map(ats; discrete=false)
     @test sum(skipmissing(map.matrix)) ≈ 2407.2163f0
+    @test parse_show(map) ≈ "ContactMap{Union{Missing, Float32}} of size (104, 104), with threshold 4.0 and gap 0"
+
     # dimer
     ats = read_pdb(PDBTools.DIMERPDB)
     cA = select(ats, "chain A")
@@ -336,6 +341,7 @@ end
     @test sum(map.matrix) == 17
     @test map[235, :] == [false, false, true, false, false, false, false, false, false, false, false, false]
     @test count(map[:, 3]) == 3
+    @test parse_show(map) ≈ "ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0"
     map = contact_map(cA, cB; discrete=false)
     @test sum(skipmissing(map.matrix)) ≈ 58.00371f0
 
