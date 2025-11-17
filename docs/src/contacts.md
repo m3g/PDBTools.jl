@@ -30,7 +30,7 @@ heatmap(::ContactMap)
 
 A typical usage consists in computing the contact map and plotting it:
 
-```@example
+```@example contacts
 using PDBTools
 using Plots
 ats = read_pdb(PDBTools.DIMERPDB);
@@ -46,12 +46,7 @@ In the example above we opted to plot a discrete contact map, with the default c
 distance `dmax=4.0`. Now we change two parameters: `discrete=false` and `dmax=12.0`, to
 compute a distance map up to a greater distance:
 
-```@example
-using PDBTools
-using Plots
-ats = read_pdb(PDBTools.DIMERPDB);
-cA = select(ats, "chain A");
-cB = select(ats, "chain B");
+```@example contacts
 map = contact_map(cA, cB; discrete=false, dmax=12.0) # contact map between chains A and B
 heatmap(map)
 ```
@@ -62,11 +57,7 @@ Similarly, we can produce plots for the contact map of a single structure. Here,
 showcase the use of the `gap` parameter, to ignore residues closer in the sequence
 by less than 4 residues:
 
-```@example
-using PDBTools
-using Plots
-ats = read_pdb(PDBTools.DIMERPDB);
-cA = select(ats, "chain A");
+```@example contacts
 distance_map = contact_map(cA; gap=4, discrete=false, dmax=12.0) # chain A only
 discrete_map = contact_map(cA; gap=4, discrete=true, dmax=12.0) # chain A only
 plot(
@@ -75,6 +66,38 @@ plot(
     layout=(1,2), size=(800,500)
 )
 ```
+
+## Difference (and sum) of maps
+
+Contact maps of the same type (discrete *or* continous), obtained for the same sequence, but with
+different conformations, can be compared by subtraction or summation. 
+
+For example, here we load two models from a PDB file that contains multiple conformations of a 
+protein, in solution, and compute the contact maps of the two models, and plot the difference
+of the maps. 
+```@example contacts
+pdb = wget("2cpb", "model 1 2")
+models = collect(eachmodel(pdb))
+c1 = contact_map(models[1])
+c2 = contact_map(models[2])
+heatmap(c2 - c1)
+```
+Blue dots indicate contacts present in the first set, but not in the second, and red dots
+the contacts present in the second but not in the first.
+
+A difference of distance maps can be similarly obtained by computing continous contact maps:
+```@example contacts
+c1 = contact_map(models[1]; discrete=false, dmax=12.0)
+c2 = contact_map(models[2]; discrete=false, dmax=12.0)
+c_diff = c2 - c1
+heatmap(c_diff)
+```
+
+!!! note
+    Contacts farther than the tolerance set are `missing`. When summing or subtracting 
+    distance maps, `missing` values are propagated. For discrete maps, `true` contacts
+    are preserved, resulting in `+1` or `-1` depending on the contact being present in 
+    the first or second structure.
 
 ## Customizing the plot
 

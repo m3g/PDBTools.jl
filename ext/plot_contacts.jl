@@ -6,8 +6,8 @@ import Plots: heatmap, cgrad
 function _plot_size(map::ContactMap)
     nres1 = size(map.matrix, 1)
     nres2 = size(map.matrix, 2)
-    xpixels = min(600, max(300, round(Int,500 * nres1 / 100)))
-    ypixels = min(600, max(300, round(Int,500 * nres2 / 100)))
+    xpixels = min(600, max(400, round(Int, 10 * nres1)))
+    ypixels = min(600, max(400, round(Int, 10 * nres2)))
     return (xpixels, ypixels)
 end
 
@@ -67,23 +67,37 @@ function heatmap(
     xrotation=60,
     xlabel="residue",
     ylabel="residue",
-    colorbar_title="distance (Å)",
+    colorbar=ifelse(T <: Integer, :none, :right),
+    colorbar_title=ifelse(T <: Integer, nothing, "\ndistance (Å)"),
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
     xlims=(1,size(map.matrix, 1)),
     ylims=(1,size(map.matrix, 2)),
-    color=:grayC,
+    color=begin
+        ext = extrema(skipmissing(map.matrix))
+        if ext[1] < 0
+            :bwr
+        else
+            :grayC
+        end
+    end,
     size=plot_size,
     framestyle=:box,
     grid=false,
-    clims=(0,1.1) .* extrema(skipmissing(map.matrix)),
-    margin=0.5Plots.Measures.cm,
+    clims=begin 
+        ext = extrema(skipmissing(map.matrix))
+        c1 = 1.1 * min(0, ext[1])
+        c2 = 1.1 * max(0, ext[2])
+        (c1,c2)
+    end,
+    margin=0.3Plots.Measures.cm,
+    fontfamily="Computer Modern",
     kargs...
 ) where {T<:Real}
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
-        size, framestyle, grid, clims, margin,
-        kargs...
+        size, framestyle, grid, clims, margin, colorbar, 
+        fontfamily, kargs...
     )
 end
 
@@ -93,7 +107,7 @@ function heatmap(
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
-    xticks=PDBTools.residue_ticks(map.residues1; stride=xstep, serial=true),
+  xticks=PDBTools.residue_ticks(map.residues1; stride=xstep, serial=true),
     yticks=PDBTools.residue_ticks(map.residues2; stride=ystep, serial=true),
     xrotation=60,
     xlabel="residue",
@@ -107,14 +121,15 @@ function heatmap(
     grid=false,
     clims=(0,1),
     colorbar=:none,
-    margin=0.5Plots.Measures.cm,
+    margin=0.3Plots.Measures.cm,
+    fontfamily="Computer Modern",
     kargs...
 )
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         color, colorbar, xlims, ylims, aspect_ratio,
-        size, framestyle, grid, clims, margin,
-        kargs...
+        size, framestyle, grid, clims, margin, 
+        fontfamily, kargs...
     )
 end
 
@@ -134,7 +149,13 @@ end
     plt = heatmap(contact_map(cA))
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
-    plt = heatmap(contact_map(cA; discrete=false))
+    c_cont = contact_map(cA; discrete=false)
+    plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
+    c_cont.matrix .= rand.(Ref([-1,1])) .* c_cont.matrix 
+    plt = heatmap(c_cont)
+    savefig(plt, tmpplot)
+    @test isfile(tmpplot)
+    rm(tmpplot; force=true)
 end

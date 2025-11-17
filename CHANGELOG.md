@@ -10,8 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.12.1-DEV
+Version 3.13.0-DEV
 --------------
+- ![FEATURE][badge-feature] `ContactMap` objects can be summed or subtracted, to obtain the effect of transformations on contact maps.
 
 Version 3.12.0
 --------------
