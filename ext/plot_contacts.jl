@@ -90,13 +90,14 @@ function heatmap(
         (c1,c2)
     end,
     margin=0.3Plots.Measures.cm,
+    fontfamily="Computer Modern",
     kargs...
 ) where {T<:Real}
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
-        size, framestyle, grid, clims, margin, colorbar,
-        kargs...
+        size, framestyle, grid, clims, margin, colorbar, 
+        fontfamily, kargs...
     )
 end
 
@@ -121,13 +122,14 @@ function heatmap(
     clims=(0,1),
     colorbar=:none,
     margin=0.3Plots.Measures.cm,
+    fontfamily="Computer Modern",
     kargs...
 )
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         color, colorbar, xlims, ylims, aspect_ratio,
-        size, framestyle, grid, clims, margin,
-        kargs...
+        size, framestyle, grid, clims, margin, 
+        fontfamily, kargs...
     )
 end
 

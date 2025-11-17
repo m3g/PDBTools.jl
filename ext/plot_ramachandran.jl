@@ -37,6 +37,8 @@ function scatter(ram::Ramachandran;
     size=(400,400),
     xticks=(-180:45:180),
     yticks=(-180:45:180),
+    fontfamily="Computer Modern",
+    kargs...
 )
     Plots.scatter(ram.phi, ram.psi;
         xlabel,
@@ -49,6 +51,8 @@ function scatter(ram::Ramachandran;
         size,
         xticks,
         yticks,
+        fontfamily, 
+        kargs...
     )
 end
 
