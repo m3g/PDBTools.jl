@@ -11,7 +11,7 @@ using Printf: @printf, @sprintf
 using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
-using InlineStrings: String1, String3, String7
+using InlineStrings: InlineStrings, InlineString, String1, String3, String7
 import MolSimToolkitShared: center_of_mass, wrap, dihedral
 
 # Version

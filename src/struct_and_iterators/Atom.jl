@@ -5,12 +5,12 @@ Structure that contains the atom properties. It is mutable, so its fields can be
 
 Fields:
 
-    mutable struct Atom{CustomType}
+    mutable struct Atom{CustomType,String7} (String7 by default)
         index::Int32 # The sequential index of the atoms in the file
         index_pdb::Int32 # The index as written in the PDB file (might be anything)
-        name::String7 # Atom name
-        resname::String7 # Residue name
-        chain::String7 # Chain identifier
+        name::String7 (by default) # Atom name
+        resname::String7 (by default) # Residue name
+        chain::String7 (by default) # Chain identifier
         resnum::Int32 # Number of residue as written in PDB file
         residue::Int32 # Sequential residue (molecule) number in file
         x::Float32 # x coordinate
@@ -19,7 +19,7 @@ Fields:
         beta::Float32 # temperature factor
         occup::Float32 # occupancy
         model::Int32 # model number
-        segname::String7 # Segment name (cols 73:76)
+        segname::String7 (by default) # Segment name (cols 73:76)
         pdb_element::String3 # Element symbol string (cols 77:78)
         charge::Float32 # Charge (cols: 79:80)
         custom::CustomType # Custom fields
@@ -65,6 +65,9 @@ The direct access to the fields is considered part of the interface.
 Custom fields can be set on `Atom` construction with the `custom` keyword argument. The Atom structure
 will then be parameterized with the type of `custom`. 
 
+The default maximum string size can be changed with `string_type` keyword in the atom constructors
+or reading functions. It can be `String3`, `String7`, `String15`, or other types exported by `InlineStrings.jl`.
+
 ### Example
 
 ```jldoctest
@@ -85,12 +88,12 @@ julia> atom.custom[:c]
 ```
 
 """
-mutable struct Atom{CustomType}
+mutable struct Atom{CustomType,StringType}
     index::Int32 # The sequential index of the atoms in the file
     index_pdb::Int32 # The index as written in the PDB file (might be anything)
-    name::String7
-    resname::String7
-    chain::String7
+    name::StringType
+    resname::StringType
+    chain::StringType
     resnum::Int32 # Number of residue as written in PDB file
     residue::Int32 # Sequential residue (molecule) number in file
     x::Float32
@@ -99,7 +102,7 @@ mutable struct Atom{CustomType}
     beta::Float32
     occup::Float32
     model::Int32
-    segname::String7 # Segment name (cols 73:76)
+    segname::StringType # Segment name (cols 73:76)
     pdb_element::String3
     charge::Float32
     custom::CustomType
@@ -109,8 +112,12 @@ end
 #
 # Default constructor
 #
-function Atom(; custom::CustomType=nothing, kargs...) where {CustomType}
-    atom = Atom{CustomType}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, custom, Int8(0))
+function Atom(; 
+    custom::CustomType=nothing, 
+    string_type::Type{<:InlineStrings.InlineString}=String7, 
+    kargs...
+) where {CustomType}
+    atom = Atom{CustomType, string_type}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, custom, Int8(0))
     kargs_values = values(kargs)
     kargs_keys = keys(kargs_values)
     ntuple(length(kargs_values)) do i
@@ -125,18 +132,23 @@ end
 #
 # Constructor without custom::Nothing
 #
-Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
+Atom(args...) = Atom{Nothing,String7}(args...)
+Atom{CustomType, StringType}(;kargs...) where {CustomType, StringType} = Atom{CustomType, StringType}(;kargs...)
 
 @testitem "Atom constructors" begin
-    atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
+    using InlineStrings
+    atref = Atom{Nothing,String7}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
     at = Atom()
     @test Base.summarysize(at) == 88
     @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
-    at1 = Atom{Nothing}(; index=1, name="CA")
+    at1 = Atom(; index=1, name="CA")
     at2 = Atom(; custom=nothing, index=1, name="CA")
     @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
     @test (@allocations at = Atom()) <= 1
     @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
+    at1 = Atom(; string_type=String15, index=1, name="CA")
+    @test at1.index == 1
+    @test at1.name == String15("CA")
 end
 
 index(atom::Atom) = atom.index
@@ -532,11 +544,11 @@ export isprotein, isbackbone, issidechain
 isprotein(atom::Atom) = 
     haskey(protein_residues, atom.resname) || haskey(protein_residues, @view(atom.resname[2:end]))
 
-const backbone_atoms = String7["N", "CA", "C", "O"]
+const backbone_atoms = String3["N", "CA", "C", "O"]
 isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = 
     (atom.name in backbone_atoms) && isprotein(atom)
 
-const not_side_chain_atoms = String7["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
+const not_side_chain_atoms = String3["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
 issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) =
     !(atom.name in not_side_chain_atoms) && isprotein(atom)
 

@@ -45,12 +45,12 @@ julia> mass(residues[1])
 struct Residue{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
-    resname::String7
+    resname::StringType
     residue::Int32
     resnum::Int32
-    chain::String7
+    chain::StringType
     model::Int32
-    segname::String7
+    segname::StringType
 end
 
 # Necessary for the interface: define the same_struct_element function
