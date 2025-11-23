@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.13.1-DEV
 --------------
+- ![INFO][badge-info] Use julia-cations/cache
 
 Version 3.13.0
 --------------
