@@ -2,7 +2,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://m3g.github.io/PDBTools.jl/dev)
 [![Tests](https://img.shields.io/badge/build-passing-green)](https://github.com/m3g/PDBTools.jl/actions)
 [![codecov](https://codecov.io/gh/m3g/PDBTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/m3g/PDBTools.jl)
-[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Aqua QA](https://JuliaTesting.github.io/Aqual.jl/dev/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 
 <div>
