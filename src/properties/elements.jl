@@ -3,7 +3,7 @@
 #
 # vdw radius from: https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page) 
 #
-struct Element
+@kwdef struct Element
     symbol::Symbol
     symbol_string::String3
     name::String
@@ -155,22 +155,26 @@ Here we repeteadly call `remove_custom_elements!()` to guarantee the proper exec
 test codes, without any custom elements predefined.
 
 """
-function add_element!(symbol::String, reference_element::Element; elements=elements)
+function add_element!(symbol::String, reference_element::Element; elements=elements, kargs...)
     if symbol in keys(elements)
         @warn """\n
             Element $symbol already exists. Overwriting.
 
         """ _file = nothing _line = nothing
     end
-    elements[symbol] = Element(
-        reference_element.symbol,
-        reference_element.symbol_string,
-        reference_element.name,
-        reference_element.atomic_number,
-        reference_element.mass,
-        true,
-        reference_element.vdw_radius,
-    )
+    properties = Dict{Symbol, Any}()
+    for field in fieldnames(Element) 
+        if field == :custom
+            value = true
+        elseif field in keys(kargs)
+            value = kargs[field]
+        else
+            value = getfield(reference_element, field)
+        end
+        properties[field] = value
+    end
+    @show properties
+    elements[symbol] = Element(;properties...)
     push!(element_names, symbol)
     sort!(element_names)
     return elements[symbol]

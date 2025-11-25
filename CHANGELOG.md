@@ -10,8 +10,11 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.14.1-DEV
+Version 3.15.0-DEV
 --------------
+- ![FEATURE][badge-feature] Allow updateing element properties when adding custom element.
+- ![ENHANCEMENT][badge-enhancement] Update vdW radii and masses of SIRAH elements.
+- ![ENHANCEMENT][badge-enhancement] Add c-terminal and n-terminal SIRAH residues to custom residue list.
 
 Version 3.14.0
 --------------
