@@ -101,6 +101,8 @@ function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
     add_element!("LN2", elements["N"])
     add_element!("LP1", elements["H"])
     add_element!("LP2", elements["H"])
+    append!(backbone_atoms, ["GN", "GC", "GO"])
+    append!(not_side_chain_atoms, ["GN", "GC", "GO"])
     nothing
 end
 
@@ -116,6 +118,10 @@ end
     @test element(pdb[1]) == "N"
     @test element(pdb[2]) == "C"
     @test element(pdb[3]) == "C"
+    bb = select(pdb, "backbone")
+    @test length(bb) == 15
+    sc = select(pdb, "sidechain")
+    @test length(sc) == 7
     remove_custom_protein_residues!()
     remove_custom_elements!()
 end
