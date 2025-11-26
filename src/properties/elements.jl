@@ -134,10 +134,10 @@ julia> remove_custom_elements!(); # if any
 julia> atoms = [ Atom(name="A1"), Atom(name="A2") ];
 
 julia> add_element!("A1", PDBTools.elements["C"])
-PDBTools.Element(:C, InlineStrings.String3("C"), "Carbon", 6, 12.011f0, true, 1.7f0)
+PDBTools.Element(:C, InlineStrings.String7("C"), "Carbon", 6, 12.011f0, true, 1.7f0)
 
 julia> add_element!("A2", PDBTools.elements["N"])
-PDBTools.Element(:N, InlineStrings.String3("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
+PDBTools.Element(:N, InlineStrings.String7("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
 
 julia> element(atoms[1])
 "C"
@@ -192,7 +192,7 @@ julia> using PDBTools
 julia> remove_custom_elements!();
 
 julia> add_element!("GN", PDBTools.elements["N"])
-PDBTools.Element(:N, InlineStrings.String3("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
+PDBTools.Element(:N, InlineStrings.String7("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
 
 julia> element(Atom(name="GN"))
 "N"
