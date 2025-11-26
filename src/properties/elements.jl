@@ -5,7 +5,7 @@
 #
 @kwdef struct Element
     symbol::Symbol
-    symbol_string::String3
+    symbol_string::String7
     name::String
     atomic_number::Int
     mass::Float32
@@ -173,7 +173,6 @@ function add_element!(symbol::String, reference_element::Element; elements=eleme
         end
         properties[field] = value
     end
-    @show properties
     elements[symbol] = Element(;properties...)
     push!(element_names, symbol)
     sort!(element_names)
