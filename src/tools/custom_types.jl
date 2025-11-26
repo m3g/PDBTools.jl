@@ -53,6 +53,7 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
     return nothing
 end
 
+#= 
 sirah_radii = Dict{String7, Float32}([
     ["GNz", "T1"] .=> 0.55000;
     ["GOz", "T2"] .=> 0.55000;
@@ -145,6 +146,7 @@ sirah_radii = Dict{String7, Float32}([
     "CaX" =>   0.40000;
     ["ZnX",  "ZX"] .=>   0.40000;
 ])
+=#
 
 function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
     @warn """\n
