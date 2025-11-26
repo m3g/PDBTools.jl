@@ -12,7 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.15.0-DEV
 --------------
-- ![FEATURE][badge-feature] Allow updateing element properties when adding custom element.
+- ![FEATURE][badge-feature] Allow updating element properties when adding custom element.
+- ![FEATURE][badge-feature] `sasa_particles(SIRAH, args...; kargs...)` computes SASAs with SIRAH parameters.
 - ![ENHANCEMENT][badge-enhancement] Update vdW radii and masses of SIRAH elements.
 - ![ENHANCEMENT][badge-enhancement] Add c-terminal and n-terminal SIRAH residues to custom residue list.
 
