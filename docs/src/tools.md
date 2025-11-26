@@ -52,56 +52,52 @@ to the list of residues and elements. This is illustrated in the
 [`custom_types.jl`](https://github.com/m3g/PDBTools.jl/blob/main/src/custom_types.jl) file of the source code, in this case for the residues and atom
 types of the [`SIRAH`](http://www.sirahff.com/) force field for Coarse-Grained protein simulations.
 
+!!! notes
+    - Masses of the SIRAH beads are not useful in general, and do not have a spcific physical meaning. 
+    - Residue `sX` is interpreted as a bridged Cysteine.
+    - To compute SASAs of SIRAH models, be careful in adding the SIRAH custom elements first, and use
+      the `sasa_particles(SIRAH, ...)` method.
+
+Here we repeteadly call `remove_custom_residues!()` and `remove_custom_elements!()` to guarantee the proper execution of the
+test codes, this is not necessary in a regular use of these functions.
+
 With those definitions, adding all SIRAH protein residue types and element names can be done with:
-```jldoctest
-julia> using PDBTools 
-
-julia> remove_custom_protein_residues!(); remove_custom_elements!();
-
-julia> custom_protein_residues!(SIRAH)
-┌ Warning: 
-│ 
-│     Residue `sX` will be interpreted as bridged Cysteine.
-│ 
-└ @ PDBTools
-
-julia> custom_elements!(SIRAH)
-┌ Warning:
-│
-│     The element masses are not the coarse-grained ones. This must be fixed in the future.
-│
-└ @ PDBTools
-
-julia> sirah_pdb = read_pdb(PDBTools.SIRAHPDB);
-
-julia> resname.(eachresidue(sirah_pdb))
-5-element Vector{InlineStrings.String7}:
- "sI"
- "sR"
- "sX"
- "sI"
- "sG"
-
-julia> getseq(sirah_pdb)
-5-element Vector{String}:
- "I"
- "R"
- "C"
- "I"
- "G"
-
-julia> all(isprotein.(sirah_pdb))
-true
-
-julia> remove_custom_protein_residues!(); remove_custom_elements!();
+```@example sirah
+using PDBTools 
+remove_custom_protein_residues!(); remove_custom_elements!();
+custom_protein_residues!(SIRAH)
+custom_elements!(SIRAH)
+sirah_pdb = read_pdb(PDBTools.SIRAHPDB)
+resname.(eachresidue(sirah_pdb))
 ```
 
 Note that the residue names of the SIRAH force-field are non-standard (`sI`, `sR`, etc.), but the sequence
-is properly retrieved with standard one-letter codes, and all the atoms of the structure are recognized 
-as being "protein" atoms.
+is properly retrieved with standard one-letter codes: 
 
-Here we repeteadly call `remove_custom_residues!()` and `remove_custom_elements!()` to guarantee the proper execution of the
-test codes.
+```@example sirah
+getseq(sirah_pdb)
+```
+
+And all protein atoms are recognized:
+
+```@example sirah
+all(isprotein.(sirah_pdb))
+```
+
+```@example sirah
+julia> remove_custom_protein_residues!(); remove_custom_elements!();
+```
+
+To compute the solvent accessible surface area of SIRAH models, call the `sasa_particles(SIRAH, ...)` method:
+
+```@example sirah
+s_sirah = sasa_particles(SIRAH, sirah_pdb)
+```
+
+which can be decomposed as usual:
+```@example sirah
+sasa(s_sirah, "sidechain")
+```
 
 ## Move atoms and center of mass
 
