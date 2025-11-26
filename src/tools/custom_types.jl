@@ -149,10 +149,6 @@ sirah_radii = Dict{String7, Float32}([
 =#
 
 function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
-    @warn """\n
-        The element masses are not the coarse-grained ones. This must be fixed in the future.
-
-    """ _file = nothing _line = nothing
     add_element!("GN", elements["N"]; mass=14.0067f0, vdw_radius=4.2) # 4.0 for N-terminal, 5.5 for charged N-terminal
     add_element!("GC", elements["C"]; mass=12.011f0, vdw_radius=4.2)
     add_element!("BCG", elements["C"]; mass=12.011f0, vdw_radius=4.2)
