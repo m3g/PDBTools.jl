@@ -130,7 +130,8 @@ Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
 @testitem "Atom constructors" begin
     atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
     at = Atom()
-    @test Base.summarysize(at) == 144
+    # On julia 1.10 the size is 128 with String15
+    @test Base.summarysize(at) <= 144
     @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
     at1 = Atom{Nothing}(; index=1, name="CA")
     at2 = Atom(; custom=nothing, index=1, name="CA")
