@@ -46,9 +46,9 @@ julia> segname(chains[2])
 @kwdef struct Chain{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
-    chain::String7
+    chain::StringType
     model::Int32
-    segname::String7
+    segname::StringType
 end
 
 # Necessary for the interface: define the same_struct_element function

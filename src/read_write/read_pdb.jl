@@ -48,33 +48,33 @@ julia> ALA = read_pdb(PDBTools.TESTPDB, atom -> atom.resname == "ALA")
 """
 function read_pdb end
 
-function read_pdb(file::Union{String,IOBuffer}, selection::String)
+function read_pdb(file::Union{String,IOBuffer}, selection::String; string_type=String7)
     query = parse_query(selection)
-    return read_pdb(file, atom -> apply_query(query, atom))
+    return read_pdb(file, atom -> apply_query(query, atom); string_type)
 end
 
-function read_pdb(pdbdata::IOBuffer, selection_function::Function=all)
-    atoms = _parse_pdb(pdbdata, selection_function)
+function read_pdb(pdbdata::IOBuffer, selection_function::Function=all; string_type=String7)
+    atoms = _parse_pdb(pdbdata, selection_function; string_type)
     return atoms
 end
 
-function read_pdb(filename::String, selection_function::Function=all)
+function read_pdb(filename::String, selection_function::Function=all; string_type=String7)
     atoms = open(expanduser(filename), "r") do f
-        _parse_pdb(f, selection_function)
+        _parse_pdb(f, selection_function; string_type)
     end
     return atoms
 end
 
-function _parse_pdb(pdbdata::Union{IOStream,IOBuffer}, selection_function::Function)
+function _parse_pdb(pdbdata::Union{IOStream,IOBuffer}, selection_function::Function; string_type=String7)
     imodel = 1
-    atoms = Atom{Nothing}[]
-    lastatom = Atom{Nothing}()
+    atoms = Atom{Nothing, string_type}[]
+    lastatom = Atom(; custom=nothing, string_type)
     for line in eachline(pdbdata)
         if occursin("END", line)
             imodel = imodel + 1
         end
         if startswith(line, r"ATOM|HETATM")
-            atom = read_atom_pdb(line, lastatom, imodel)
+            atom = read_atom_pdb(line, lastatom, imodel; string_type)
             atom.model = imodel
             selection_function(atom) && push!(atoms, atom)
             lastatom = atom
@@ -91,8 +91,8 @@ function _parse_pdb(pdbdata::Union{IOStream,IOBuffer}, selection_function::Funct
 end
 
 # read atom from PDB file
-function read_atom_pdb(record::String, lastatom::Atom=Atom{Nothing}(), imodel::Int=1)
-    atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom), model=imodel, flag=0)
+function read_atom_pdb(record::String, lastatom::Atom=Atom(), imodel::Int=1; string_type)
+    atom = Atom(; custom=nothing, string_type, index=index(lastatom) + 1, residue=residue(lastatom), model=imodel, flag=0)
     record[1:6] == "HETATM" && (atom.flag = 1)
     inds_and_names = (
         (1, Val(:name)),

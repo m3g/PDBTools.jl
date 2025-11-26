@@ -34,11 +34,11 @@ function _supported_write_cif_fields(field_assignment)
     # when writing the mmCIF file
     _atom_symbol_for_cif_field = OrderedDict{String,Tuple{DataType,Symbol}}(
         "id" => (Int32, :index_pdb), # Standard mmCIF
-        "type_symbol" => (String7, :pdb_element), # Standard mmCIF
-        "label_atom_id" => (String7, :name), # redundant - atom name
+        "type_symbol" => (StringType, :pdb_element), # Standard mmCIF
+        "label_atom_id" => (StringType, :name), # redundant - atom name
         "label_alt_id" => (String1, :_print_dot), # nothing (a dot: .)
-        "label_comp_id" => (String7, :resname), # redundant - residue name
-        "label_asym_id" => (String7, :chain), # redundant - chain id
+        "label_comp_id" => (StringType, :resname), # redundant - residue name
+        "label_asym_id" => (StringType, :chain), # redundant - chain id
         "label_entity_id" => (Int32, :_entity_id), # entity_id: print 1 for protein, 2 for water, 3 for all others
         "label_seq_id" => (Int32, :resnum), # redundant - residue number
         "pdbx_PDB_ins_code" => (String1, :_print_question_mark), # nothing - print ?
@@ -49,9 +49,9 @@ function _supported_write_cif_fields(field_assignment)
         "B_iso_or_equiv" => (Float32, :beta),
         "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
-        "auth_comp_id" => (String7, :resname), # Standard mmCIF
-        "auth_asym_id" => (String7, :chain), # Standard mmCIF
-        "auth_atom_id" => (String7, :name), # Standard mmCIF
+        "auth_comp_id" => (StringType, :resname), # Standard mmCIF
+        "auth_asym_id" => (StringType, :chain), # Standard mmCIF
+        "auth_atom_id" => (StringType, :name), # Standard mmCIF
         "pdbx_PDB_model_num" => (Int32, :model),
     )
     return replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
@@ -125,7 +125,7 @@ function write_mmcif(
                     write(buff, "$(@sprintf(" %1s ", _get_mmcif_field(atom, field_name)))")
                 elseif field_type == String3
                     write(buff, "$(@sprintf(" %3s ", _get_mmcif_field(atom, field_name)))")
-                elseif field_type == String7
+                elseif field_type == StringType
                     write(buff, "$(@sprintf(" %7s ", _get_mmcif_field(atom, field_name)))")
                 end
             end

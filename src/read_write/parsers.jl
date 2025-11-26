@@ -25,8 +25,7 @@ function _parse(
     end
 end
 
-_length(::Type{String3}) = 3
-_length(::Type{String7}) = 7
+_length(::Type{T}) where {T<:InlineString} = sizeof(T) - 1
 _length(::Type{<:AbstractString}) = typemax(Int)
 function _error_length(::Type{S},range,string) where {S}
     _length(S) >= length(range) && return nothing
