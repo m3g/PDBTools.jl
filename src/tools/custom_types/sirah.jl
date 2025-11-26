@@ -139,7 +139,7 @@ end
 end
 
 #= 
-sirah_radii = Dict{String7, Float32}([
+sirah_radii = Dict{String15, Float32}([
     ["GNz", "T1"] .=> 0.55000;
     ["GOz", "T2"] .=> 0.55000;
     ["GNn", "T3"] .=> 0.40000;

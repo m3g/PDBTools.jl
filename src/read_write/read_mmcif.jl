@@ -192,7 +192,7 @@ function _supported_read_cif_fields(field_assignment)
     # when writing the mmCIF file
     _atom_symbol_for_cif_field = OrderedDict{String,Tuple{DataType,Symbol}}(
         "id" => (Int32, :index_pdb), # Standard mmCIF
-        "type_symbol" => (String7, :pdb_element), # Standard mmCIF
+        "type_symbol" => (StringType, :pdb_element), # Standard mmCIF
         "Cartn_x" => (Float32, :x),
         "Cartn_y" => (Float32, :y),
         "Cartn_z" => (Float32, :z),
@@ -200,9 +200,9 @@ function _supported_read_cif_fields(field_assignment)
         "B_iso_or_equiv" => (Float32, :beta),
         "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
-        "label_comp_id" => (String7, :resname), # Standard mmCIF
-        "label_asym_id" => (String7, :chain), # Standard mmCIF
-        "label_atom_id" => (String7, :name), # Standard mmCIF
+        "label_comp_id" => (StringType, :resname), # Standard mmCIF
+        "label_asym_id" => (StringType, :chain), # Standard mmCIF
+        "label_atom_id" => (StringType, :name), # Standard mmCIF
         "pdbx_PDB_model_num" => (Int32, :model),
     )
     return replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
@@ -210,6 +210,7 @@ end
 
 @testitem "_supported_read_cif_fields" begin
     using PDBTools
+    using PDBTools: StringType
     using InlineStrings
     field_assignment = Dict(
         "type_symbol" => :name,
@@ -220,9 +221,9 @@ end
     _cif_fields = PDBTools._supported_read_cif_fields(field_assignment)
     @test length(_cif_fields) == 12
     @test _cif_fields["id"] == (Int32, :index_pdb)
-    @test _cif_fields["type_symbol"] == (String7, :name)
-    @test _cif_fields["label_comp_id"] == (String7, :resname)
-    @test _cif_fields["label_asym_id"] == (String7, :chain)
+    @test _cif_fields["type_symbol"] == (StringType, :name)
+    @test _cif_fields["label_comp_id"] == (StringType, :resname)
+    @test _cif_fields["label_asym_id"] == (StringType, :chain)
     @test _cif_fields["label_seq_id"] == (Int32, :resnum)
     @test _cif_fields["Cartn_x"] == (Float32, :x)
     @test _cif_fields["Cartn_y"] == (Float32, :y)

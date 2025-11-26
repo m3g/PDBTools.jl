@@ -34,11 +34,11 @@ function _supported_write_cif_fields(field_assignment)
     # when writing the mmCIF file
     _atom_symbol_for_cif_field = OrderedDict{String,Tuple{DataType,Symbol}}(
         "id" => (Int32, :index_pdb), # Standard mmCIF
-        "type_symbol" => (String7, :pdb_element), # Standard mmCIF
-        "label_atom_id" => (String7, :name), # redundant - atom name
+        "type_symbol" => (StringType, :pdb_element), # Standard mmCIF
+        "label_atom_id" => (StringType, :name), # redundant - atom name
         "label_alt_id" => (String1, :_print_dot), # nothing (a dot: .)
-        "label_comp_id" => (String7, :resname), # redundant - residue name
-        "label_asym_id" => (String7, :chain), # redundant - chain id
+        "label_comp_id" => (StringType, :resname), # redundant - residue name
+        "label_asym_id" => (StringType, :chain), # redundant - chain id
         "label_entity_id" => (Int32, :_entity_id), # entity_id: print 1 for protein, 2 for water, 3 for all others
         "label_seq_id" => (Int32, :resnum), # redundant - residue number
         "pdbx_PDB_ins_code" => (String1, :_print_question_mark), # nothing - print ?
@@ -49,9 +49,9 @@ function _supported_write_cif_fields(field_assignment)
         "B_iso_or_equiv" => (Float32, :beta),
         "pdbx_formal_charge" => (Float32, :charge),
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
-        "auth_comp_id" => (String7, :resname), # Standard mmCIF
-        "auth_asym_id" => (String7, :chain), # Standard mmCIF
-        "auth_atom_id" => (String7, :name), # Standard mmCIF
+        "auth_comp_id" => (StringType, :resname), # Standard mmCIF
+        "auth_asym_id" => (StringType, :chain), # Standard mmCIF
+        "auth_atom_id" => (StringType, :name), # Standard mmCIF
         "pdbx_PDB_model_num" => (Int32, :model),
     )
     return replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
@@ -92,6 +92,13 @@ function write_mmcif(
     write_mmcif(filename, atoms, atom -> apply_query(query, atom); field_assignment)
 end
 
+const _fmt_string = generate_formatter("%$(_length(StringType))s ")
+const _fmt_int = generate_formatter("%9i")
+const _fmt_float = generate_formatter("%12.5f")
+_fmt(::Type{<:InlineString}, val) = _fmt_string(val)
+_fmt(::Type{<:Integer}, val) = _fmt_int(val)
+_fmt(::Type{<:AbstractFloat}, val) = _fmt_float(val)
+
 function write_mmcif(
     filename::AbstractString, 
     atoms::AbstractVector{<:Atom},
@@ -113,21 +120,12 @@ function write_mmcif(
             !selection_function(atom) && continue
             index += 1
             buff = IOBuffer(; append=true)
-            write(buff, "ATOM $(@sprintf("%9i", index))")
+            write(buff, "ATOM $(_fmt(Int, index))")
             for (_, field) in _cif_fields
                 field_type = first(field)
                 field_name = last(field)
-                if !(field_name == :index_pdb) && (field_type <: Integer)
-                    write(buff, "$(@sprintf("%7i", _get_mmcif_field(atom, field_name)))")
-                elseif field_type <: AbstractFloat
-                    write(buff, "$(@sprintf("%12.5f",_get_mmcif_field(atom, field_name)))")
-                elseif field_type == String1
-                    write(buff, "$(@sprintf(" %1s ", _get_mmcif_field(atom, field_name)))")
-                elseif field_type == String3
-                    write(buff, "$(@sprintf(" %3s ", _get_mmcif_field(atom, field_name)))")
-                elseif field_type == String7
-                    write(buff, "$(@sprintf(" %7s ", _get_mmcif_field(atom, field_name)))")
-                end
+                field_name == :index_pdb && continue
+                write(buff, _fmt(field_type, _get_mmcif_field(atom, field_name)))
             end
             println(file, String(take!(buff)))
         end

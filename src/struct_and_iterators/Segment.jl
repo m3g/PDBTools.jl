@@ -23,7 +23,7 @@ julia> segments = collect(eachsegment(ats))
 ]
 
 julia> segname.(segments[1:2])
-2-element Vector{InlineStrings.String7}:
+2-element Vector{InlineStrings.String15}:
  "A"
  "B"
 
@@ -36,7 +36,7 @@ julia> length(segments[2])
 struct Segment{T<:Atom,Vec<:AbstractVector{T}} <: AbstractStructuralElement{T}
     atoms::Vec
     range::UnitRange{Int}
-    name::String7
+    name::StringType
 end
 
 # Necessary for the interface: define the same_struct_element function

@@ -5,17 +5,20 @@ import Downloads
 import InteractiveUtils
 import PrecompileTools
 using Compat: @compat
-using Format: format
+using Format: format, generate_formatter
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
 using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
-using InlineStrings: String1, String3, String7
+using InlineStrings: InlineString, String1, String15
 import MolSimToolkitShared: center_of_mass, wrap, dihedral
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
+
+# Default fixed String size for names, chains, segments, etc.
+const StringType = String15
 
 # AtomsBase interface compatibility: deprecated until AtomsBase becomes stable
 #import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
