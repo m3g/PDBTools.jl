@@ -3,9 +3,9 @@
 #
 # vdw radius from: https://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page) 
 #
-struct Element
+@kwdef struct Element
     symbol::Symbol
-    symbol_string::String3
+    symbol_string::String7
     name::String
     atomic_number::Int
     mass::Float32
@@ -134,10 +134,10 @@ julia> remove_custom_elements!(); # if any
 julia> atoms = [ Atom(name="A1"), Atom(name="A2") ];
 
 julia> add_element!("A1", PDBTools.elements["C"])
-PDBTools.Element(:C, InlineStrings.String3("C"), "Carbon", 6, 12.011f0, true, 1.7f0)
+PDBTools.Element(:C, InlineStrings.String7("C"), "Carbon", 6, 12.011f0, true, 1.7f0)
 
 julia> add_element!("A2", PDBTools.elements["N"])
-PDBTools.Element(:N, InlineStrings.String3("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
+PDBTools.Element(:N, InlineStrings.String7("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
 
 julia> element(atoms[1])
 "C"
@@ -155,22 +155,25 @@ Here we repeteadly call `remove_custom_elements!()` to guarantee the proper exec
 test codes, without any custom elements predefined.
 
 """
-function add_element!(symbol::String, reference_element::Element; elements=elements)
+function add_element!(symbol::String, reference_element::Element; elements=elements, kargs...)
     if symbol in keys(elements)
         @warn """\n
             Element $symbol already exists. Overwriting.
 
         """ _file = nothing _line = nothing
     end
-    elements[symbol] = Element(
-        reference_element.symbol,
-        reference_element.symbol_string,
-        reference_element.name,
-        reference_element.atomic_number,
-        reference_element.mass,
-        true,
-        reference_element.vdw_radius,
-    )
+    properties = Dict{Symbol, Any}()
+    for field in fieldnames(Element) 
+        if field == :custom
+            value = true
+        elseif field in keys(kargs)
+            value = kargs[field]
+        else
+            value = getfield(reference_element, field)
+        end
+        properties[field] = value
+    end
+    elements[symbol] = Element(;properties...)
     push!(element_names, symbol)
     sort!(element_names)
     return elements[symbol]
@@ -189,7 +192,7 @@ julia> using PDBTools
 julia> remove_custom_elements!();
 
 julia> add_element!("GN", PDBTools.elements["N"])
-PDBTools.Element(:N, InlineStrings.String3("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
+PDBTools.Element(:N, InlineStrings.String7("N"), "Nitrogen", 7, 14.0067f0, true, 1.55f0)
 
 julia> element(Atom(name="GN"))
 "N"
