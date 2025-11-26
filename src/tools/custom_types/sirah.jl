@@ -112,11 +112,20 @@ end
 
 @testitem "SIRAH" begin
     using PDBTools
-    pdb_file = PDBTools.SIRAHPDB
     remove_custom_protein_residues!()
     remove_custom_elements!()
+
+    pdb_file = PDBTools.SIRAHPDB
+    s0 = sasa_particles(ats)
+    @test sasa(s0) ≈ 768.41724
     custom_protein_residues!(SIRAH)
     custom_elements!(SIRAH)
+
+    s1 = sasa_particles(ats)
+    @test sasa(s1) ≈ 768.41724
+    s1 = sasa_particles(SIRAH, ats)
+    @test sasa(s1) ≈ 1535.7573
+
     pdb = read_pdb(pdb_file)
     @test length(isprotein.(pdb)) == 22
     @test element(pdb[1]) == "N"
