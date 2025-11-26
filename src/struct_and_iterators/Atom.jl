@@ -8,9 +8,9 @@ Fields:
     mutable struct Atom{CustomType}
         index::Int32 # The sequential index of the atoms in the file
         index_pdb::Int32 # The index as written in the PDB file (might be anything)
-        name::String7 # Atom name
-        resname::String7 # Residue name
-        chain::String7 # Chain identifier
+        name::$(StringType) # Atom name
+        resname::$(StringType) # Residue name
+        chain::$(StringType) # Chain identifier
         resnum::Int32 # Number of residue as written in PDB file
         residue::Int32 # Sequential residue (molecule) number in file
         x::Float32 # x coordinate
@@ -19,8 +19,8 @@ Fields:
         beta::Float32 # temperature factor
         occup::Float32 # occupancy
         model::Int32 # model number
-        segname::String7 # Segment name (cols 73:76)
-        pdb_element::String3 # Element symbol string (cols 77:78)
+        segname::$(StringType) # Segment name (cols 73:76)
+        pdb_element::$(StringType) # Element symbol string (cols 77:78)
         charge::Float32 # Charge (cols: 79:80)
         custom::CustomType # Custom fields
         flag::Int8 # Flag for internal use
@@ -88,9 +88,9 @@ julia> atom.custom[:c]
 mutable struct Atom{CustomType}
     index::Int32 # The sequential index of the atoms in the file
     index_pdb::Int32 # The index as written in the PDB file (might be anything)
-    name::String7
-    resname::String7
-    chain::String7
+    name::StringType
+    resname::StringType
+    chain::StringType
     resnum::Int32 # Number of residue as written in PDB file
     residue::Int32 # Sequential residue (molecule) number in file
     x::Float32
@@ -99,8 +99,8 @@ mutable struct Atom{CustomType}
     beta::Float32
     occup::Float32
     model::Int32
-    segname::String7 # Segment name (cols 73:76)
-    pdb_element::String3
+    segname::StringType # Segment name (cols 73:76)
+    pdb_element::StringType
     charge::Float32
     custom::CustomType
     flag::Int8
@@ -130,7 +130,7 @@ Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
 @testitem "Atom constructors" begin
     atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
     at = Atom()
-    @test Base.summarysize(at) == 88
+    @test Base.summarysize(at) == 144
     @test all((getfield(at, f) == getfield(atref, f) for f in fieldnames(Atom)))
     at1 = Atom{Nothing}(; index=1, name="CA")
     at2 = Atom(; custom=nothing, index=1, name="CA")
@@ -532,11 +532,11 @@ export isprotein, isbackbone, issidechain
 isprotein(atom::Atom) = 
     haskey(protein_residues, atom.resname) || haskey(protein_residues, @view(atom.resname[2:end]))
 
-const backbone_atoms = String7["N", "CA", "C", "O"]
+const backbone_atoms = StringType["N", "CA", "C", "O"]
 isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = 
     (atom.name in backbone_atoms) && isprotein(atom)
 
-const not_side_chain_atoms = String7["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
+const not_side_chain_atoms = StringType["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
 issidechain(atom::Atom; not_side_chain_atoms=not_side_chain_atoms) =
     !(atom.name in not_side_chain_atoms) && isprotein(atom)
 
@@ -610,7 +610,7 @@ function element(atom::Atom)
     # First, check if it was defined in pdb_element
     element_name = pdb_element(atom)
     if !isempty(element_name) && element_name != "X"
-        return String7(element_name)
+        return StringType(element_name)
     end
     # if there is match, just return the name
     element_name = name(atom)
@@ -630,7 +630,7 @@ function element(atom::Atom)
     for iel in imatch:lmatch
         el = element_names[iel]
         if lastindex(element_name) >= i0 + length(el) - 1 && el == @view(element_name[i0:i0+length(el)-1])
-            return el == "X" ? nothing : String7(el)
+            return el == "X" ? nothing : StringType(el)
         end
     end
     return nothing
