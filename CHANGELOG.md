@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.15.1-DEV
+Version 3.15.1
 --------------
 - ![INFO][badge-info] Use `String15` to store names, chains, etc, to support very large CIF files.
 - ![INFO][badge-info] The maximum string length for names, chains, etc, is defined by the constant global StringType.
