@@ -150,7 +150,7 @@ julia> findfirst(Select("beta = 0.00"), atoms)
 
     julia> name.(filter(sel"name CA", atoms))
     3-element Vector{InlineStrings.String15}:
-     "CA
+     "CA"
      "CA"
      "CA"
 
