@@ -112,17 +112,20 @@ end
     remove_custom_elements!()
 
     pdb_file = PDBTools.SIRAHPDB
-    s0 = sasa_particles(ats)
+    pdb = read_pdb(pdb_file)
+
+    s0 = sasa_particles(pdb)
     @test sasa(s0) ≈ 768.41724
     custom_protein_residues!(SIRAH)
     custom_elements!(SIRAH)
 
-    s1 = sasa_particles(ats)
+    s1 = sasa_particles(pdb)
     @test sasa(s1) ≈ 768.41724
-    s1 = sasa_particles(SIRAH, ats)
+    s1 = sasa_particles(SIRAH, pdb)
     @test sasa(s1) ≈ 1535.7573
+    @test sasa(s1, "backbone") ≈ 722.8112f0
+    @test sasa(s1, "sidechain") ≈ 812.94617f0
 
-    pdb = read_pdb(pdb_file)
     @test length(isprotein.(pdb)) == 22
     @test element(pdb[1]) == "N"
     @test element(pdb[2]) == "C"
