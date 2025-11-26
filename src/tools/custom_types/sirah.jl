@@ -8,8 +8,9 @@
 struct SIRAH end
 
 function sasa_particles(::Type{SIRAH}, args...; kargs...)
-    sasa_particles(args...; 
-        atom_type = name,
+    sasa_particles(args...;
+        atom_type=name,
+        probe_radius=2.1,
         kargs...
     )
 end
