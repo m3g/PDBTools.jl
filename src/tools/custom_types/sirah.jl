@@ -16,10 +16,6 @@ function sasa_particles(::Type{SIRAH}, args...; kargs...)
 end
 
 function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.protein_residues)
-    @warn """\n
-        Residue `sX` will be interpreted as bridged Cysteine.
-
-    """ _file = nothing _line = nothing
     #! format: off
     for s in ("s", "n", "c")
         add_protein_residue!("$(s)A",protein_residues["ALA"])
