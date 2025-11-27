@@ -24,7 +24,6 @@ Base.getindex(s::Structure, range::AbstractUnitRange{<:Integer}) = Structure(@vi
 
 Base.setproperty!(s::Structure, field::Symbol, val) = setproperty!(s::Structure, Val(field), val)
 Base.setproperty!(s::Structure, ::Val{field}, val) where {field} = getfield(s, :_meta_data)[field] = val
-Base.setproperty!(s::Structure, ::Val{:atoms}, val::AbstractVector{<:Atom}) = setfield!(s, :atoms, val)
 Base.setproperty!(_::Structure, ::Val{:_meta_data}, val) = throw(ArgumentError(" Cannot modify internal _meta_data field."))
 
 Base.getproperty(s::Structure, ::Val{:atoms}) = getfield(s, :atoms)
