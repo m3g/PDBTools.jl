@@ -14,8 +14,6 @@ Base.size(s::Structure) = size(getfield(s, :atoms))
 Base.getindex(s::Structure, i::Integer) = getfield(s, :atoms)[i]
 Base.setindex!(s::Structure, at::Atom, i::Integer) = setindex!(getfield(s, :atoms), at, i)
 Base.getindex(s::Structure, range::AbstractUnitRange{<:Integer}) = Structure(@view(s.atoms[range]), s._meta_data)
-Base.getindex(s::Structure, field::Symbol) = s._meta_data[field]
-Base.setindex!(s::Structure, val, field::Symbol) = s._meta_data[field] = val
 Base.setproperty!(s::Structure, name::Symbol, val) = s._meta_data[name] = val
 
 Base.getproperty(s::Structure, ::Val{:atoms}) = getfield(s, :atoms)
