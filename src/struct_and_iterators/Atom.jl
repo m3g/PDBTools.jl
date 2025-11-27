@@ -401,14 +401,15 @@ end
 
 function Base.show(io::IO, ats::AbstractVector{<:Atom})
     lines, cols = _displaysize(io)
-    natprint = min(lines - 5, length(ats))
+    ntitlelines = get(io, :ntitlelines, 5)::Int
+    natprint = min(lines - ntitlelines, length(ats))
     compact = get(io, :compact, false)::Bool
     indent = get(io, :indent, 0)::Int
     type = get(io, :type, true)::Bool
     title = get(io, :title, true)::Bool
     comma = get(io, :comma, true)::Bool
     braces = get(io, :braces, true)::Bool
-    if !compact && cols >= 115 && lines > 4
+    if !compact && cols >= 115 && lines > ntitlelines - 1 
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
         idot = div(natprint, 2) + 1
