@@ -14,7 +14,11 @@ Base.size(s::Structure) = size(getfield(s, :atoms))
 Base.getindex(s::Structure, i::Integer) = getfield(s, :atoms)[i]
 Base.setindex!(s::Structure, at::Atom, i::Integer) = setindex!(getfield(s, :atoms), at, i)
 Base.getindex(s::Structure, range::AbstractUnitRange{<:Integer}) = Structure(@view(s.atoms[range]), s._meta_data)
-Base.setproperty!(s::Structure, name::Symbol, val) = s._meta_data[name] = val
+
+Base.setproperty!(s::Structure, field::Symbol, val) = setproperty!(s::Structure, Val(field), val)
+Base.setproperty!(s::Structure, ::Val{field}, val) where {field} = getfield(s, :_meta_data)[field] = val
+Base.setproperty!(s::Structure, ::Val{:atoms}, val::AbstractVector{<:Atom}) = setfield!(s, :atoms, val)
+Base.setproperty!(_::Structure, ::Val{:_meta_data}, val) = throw(ArgumentError(" Cannot modify internal _meta_data field."))
 
 Base.getproperty(s::Structure, ::Val{:atoms}) = getfield(s, :atoms)
 Base.getproperty(s::Structure, ::Val{:_meta_data}) = getfield(s, :_meta_data)
@@ -54,6 +58,7 @@ end
     s = Structure(ats; unitcell=[1 0 0; 0 1 0; 0 0 1])
     @test propertynames(s) == (:atoms, :unitcell)
     @test s.unitcell == [ 1 0 0 ; 0 1 0 ; 0 0 1]
+    @test_throws "Cannot modify" s._meta_data = 1
 end
 
 @testitem "Structure - show" begin
