@@ -13,7 +13,7 @@ the unitcell information or other metadata. A `Structure` object behaves like a 
 ```@example structure
 using PDBTools
 ats = read_pdb(PDBTools.TESTPBC)
-uc = read_unitcell(PDBTools.PBCPDB)
+uc = read_unitcell(PDBTools.TESTPBC)
 str = Structure(ats; unitcell=uc)
 ```
 
