@@ -65,7 +65,7 @@ end
     ENV["COLUMNS"] = 120
     at = Atom(name="CA", segname="X")
     s = Structure([at]; unitcell=[1 0 0; 0 1 0; 0 0 1])
-    @test parse_show(s) ≈ """
+    @test parse_show(s; repl=Dict("PDBTools." => "")) ≈ """
        Structure{Vector{Atom{Nothing}}, Atom{Nothing}}
        number of atoms: 1, data: atoms, unitcell
        index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
