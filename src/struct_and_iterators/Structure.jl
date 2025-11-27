@@ -1,3 +1,10 @@
+"""
+    Structure
+
+A `Structure` is the main data structure in PDBTools.jl representing a molecular structure.
+It is a wrapper around a vector of `Atom` objects, with additional metadata stored in a dictionary.
+
+"""
 struct Structure{V,T} <: AbstractVector{T}
     atoms::V
     _meta_data::Dict{Symbol,Any}
