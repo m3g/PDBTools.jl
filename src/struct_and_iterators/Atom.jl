@@ -150,7 +150,7 @@ end
     @test (@allocations at = Atom()) <= 1
     @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
     @test Atom(name="CA") == Atom(name="CA")
-    @test !(Atom(name="CA" == Atom(name="N")))
+    @test !(Atom(name="CA") == Atom(name="N"))
 end
 
 index(atom::Atom) = atom.index
