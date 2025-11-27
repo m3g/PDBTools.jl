@@ -128,7 +128,8 @@ end
 Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
 
 # Equality of atoms: all fields must be identical
-function Base.isequal(at1::Atom, at2::Atom)
+import Base: ==
+function ==(at1::Atom, at2::Atom)
     for field in fieldnames(Atom)
         f1 = getfield(at1, field)
         f2 = getfield(at2, field)
