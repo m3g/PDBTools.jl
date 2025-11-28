@@ -127,6 +127,17 @@ end
 #
 Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
 
+# Equality of atoms: all fields must be identical
+import Base: ==
+function ==(at1::Atom, at2::Atom)
+    for field in fieldnames(Atom)
+        f1 = getfield(at1, field)
+        f2 = getfield(at2, field)
+        f1 == f2 || return false
+    end
+    return true
+end
+
 @testitem "Atom constructors" begin
     atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
     at = Atom()
@@ -138,6 +149,8 @@ Atom{Nothing}(; kargs...) = Atom(; custom=nothing, kargs...)
     @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
     @test (@allocations at = Atom()) <= 1
     @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
+    @test Atom(name="CA") == Atom(name="CA")
+    @test !(Atom(name="CA") == Atom(name="N"))
 end
 
 index(atom::Atom) = atom.index
@@ -388,14 +401,15 @@ end
 
 function Base.show(io::IO, ats::AbstractVector{<:Atom})
     lines, cols = _displaysize(io)
-    natprint = min(lines - 5, length(ats))
+    ntitlelines = get(io, :ntitlelines, 5)::Int
+    natprint = min(lines - ntitlelines, length(ats))
     compact = get(io, :compact, false)::Bool
     indent = get(io, :indent, 0)::Int
     type = get(io, :type, true)::Bool
     title = get(io, :title, true)::Bool
     comma = get(io, :comma, true)::Bool
     braces = get(io, :braces, true)::Bool
-    if !compact && cols >= 115 && lines > 4
+    if !compact && cols >= 115 && lines > ntitlelines - 1 
         type && println(io, "   $(typeof(ats)) with $(length(ats)) atoms with fields:")
         title && println(io, atom_title)
         idot = div(natprint, 2) + 1
@@ -840,4 +854,3 @@ end
     @test atomic_mass(at) ≈ 14.0067
     @test position(at) ≈ StaticArrays.SVector(0.0, 0.0, 0.0)
 end
-

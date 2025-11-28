@@ -27,6 +27,7 @@ export atomic_number, atomic_symbol, atomic_mass, position, set_position!
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
 export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
+export Structure
 export add_custom_field
 export Residue, eachresidue, resname, residue, resnum, model, segname, zeta, zeta_check
 export get_atoms
@@ -78,6 +79,7 @@ include("./properties/protein_residues.jl")
 # Data structures and their iterators
 #
 include("./struct_and_iterators/Atom.jl")
+include("./struct_and_iterators/Structure.jl")
 include("./struct_and_iterators/iterators_base.jl")
 include("./struct_and_iterators/Residue.jl")
 include("./struct_and_iterators/Chain.jl")
