@@ -12,8 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.16.0-DEV
 --------------
-- ![FEATURE][badge-feature] Introduce `Structure` object, to contain atom arrays and meta-data.
-- ![FEATURE][badge-feature] `Atom` object equality is supported (all fields must be identical).
+- ![FEATURE][badge-experimental] Introduce `Structure` object, to contain atom arrays and meta-data.
+- ![FEATURE][badge-experimental] `Atom` object equality is supported (all fields must be identical).
 
 Version 3.15.1
 --------------
