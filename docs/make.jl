@@ -25,6 +25,9 @@ makedocs(
         "Examples" => "examples.md",
         "Tools" => "tools.md",
         "Help entries" => "help.md",
+        "Experimental" => Any[ 
+            "Structure" => "structure.md",
+        ]
     ],
 )
 deploydocs(
