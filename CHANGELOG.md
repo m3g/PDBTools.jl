@@ -10,8 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.15.2-DEV
+Version 3.16.0-DEV
 --------------
+- ![FEATURE][badge-feature] Compute m-value of protein denaturation using Creamer denatured models.
 
 Version 3.15.1
 --------------
