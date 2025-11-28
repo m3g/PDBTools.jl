@@ -19,7 +19,8 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
-  upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
+  upon denaturation for each amino acid type. This data can be obtained from the `creamer_delta_sasa` function, the m-value server, or calculated using GROMACS:
+    - The `creamer_delta_sasa` function provides estimated variations in SASA of a protein, using the Creamer unfolded model.
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
     - Compute the SASA with `delta_sasa_per_restype`, a SASA calculation utility implemented in PDBTools.jl.
     - SASA values can be calculated using GROMACS with the `gmx_delta_sasa_per_restype` function defined in this module.

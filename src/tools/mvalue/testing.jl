@@ -351,3 +351,58 @@ end
     )
 
 end
+
+@testitem "creamer_delta_sasa" begin
+    using PDBTools
+    using PDBTools: mvalue_delta_sasa
+
+    # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
+    data_mvalue_server_auton_and_bolen_1MJC = Dict(
+        "tmao" => (224, 1160, 2095),
+        "sarcosine" => (406, 1010, 1614),
+        "betaine" => (-502, 76, 650),
+        "proline" => (-200, 226, 649),
+        "sorbitol" => (378, 780, 1183),
+        "sucrose" => (189, 876, 1559),
+        "urea" => (-293, -711, -1132),
+    )
+
+    MJC_clean = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
+    for (cos, dg) in data_mvalue_server_auton_and_bolen_1MJC
+        for ig in 1:3
+            m = mvalue_delta_sasa(
+                model=AutonBolen, 
+                cosolvent=cos, 
+                atoms=MJC_clean, 
+                sasas=creamer_delta_sasa(MJC_clean), 
+                type=ig
+            )
+            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.5
+        end
+    end
+
+    data_mvalue_server_auton_and_bolen_2RN2 = Dict(
+        "tmao" => (978, 3215, 5453),
+        "sarcosine" => (1410, 2867, 4323),
+        "betaine" => (-1301, 130, 1560),
+        "proline" => (-568, 464, 1496),
+        "sorbitol" => (830, 1757, 2684),
+        "sucrose" => (952, 2578, 4202),
+        "urea" => (-1217, -2226, -3236)
+    )
+
+    RN2_clean = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
+    for (cos, dg) in data_mvalue_server_auton_and_bolen_2RN2
+        for ig in 1:3
+            m = mvalue_delta_sasa(
+                model=AutonBolen, 
+                cosolvent=cos, 
+                atoms=RN2_clean, 
+                sasas=creamer_delta_sasa(RN2_clean), 
+                type=ig
+            )
+            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.7 # need double check 
+        end
+    end
+
+end
