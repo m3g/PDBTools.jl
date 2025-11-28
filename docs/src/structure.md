@@ -1,5 +1,10 @@
 # Structure object
 
+!!! warning
+    This is an experimental feature. The purpose is to provide a an object to carry meta data,
+    unitcells in particular, to simplify the interface of calculations with periodic boundary
+    conditions.
+
 ```@docs
 Structure
 ```
