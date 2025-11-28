@@ -1,4 +1,25 @@
 
+const creamer_atomic_radii = Dict{String, Float32}(
+  "C_BB" => 1.79547,
+  "O_BB" => 1.39941,
+  "S_SC" => 1.73841,
+  "O_SC" => 1.38058,
+  "N_BB" => 1.76601,
+  "N_SC" => 1.38848,
+  "C_SC" => 1.88785,
+)
+
+function creamer_atom_type(at)
+    name(at) == "N" && return "N_BB"
+    name(at) == "CA" && return "C_BB"
+    name(at) == "C" && return "C_BB"
+    name(at) == "O" && return "O_BB"
+    element(at) == "C" && return "C_SC"
+    element(at) == "N" && return "N_SC"
+    element(at) == "O" && return "O_SC"
+    element(at) == "S" && return "S_SC"
+end
+
 const creamer_sasas = Dict{
     String,
     @NamedTuple{bb_lower::Float32, bb_upper::Float32, sc_lower::Float32, sc_upper::Float32}
@@ -63,7 +84,10 @@ for each residue type.
 """
 function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
     sasas = Dict{String,Dict}()
-    sasa_atoms = sasa_particles(atoms)
+    sasa_atoms = sasa_particles(atoms;
+        atom_type = creamer_atom_type,
+        atom_radius_from_type = type -> creamer_atomic_radii[type]
+    )
     sel_bb = _Selector(isbackbone, Ref(first(eachresidue(atoms))))
     sel_sc = _Selector(issidechain, Ref(first(eachresidue(atoms))))
     for res in eachresidue(atoms)

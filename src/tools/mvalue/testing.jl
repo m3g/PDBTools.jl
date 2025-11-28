@@ -354,7 +354,9 @@ end
 
 @testitem "creamer_delta_sasa" begin
     using PDBTools
-    using PDBTools: mvalue_delta_sasa
+    using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
+
+    dir = @__DIR__
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
     data_mvalue_server_auton_and_bolen_1MJC = Dict(
@@ -377,7 +379,7 @@ end
                 sasas=creamer_delta_sasa(MJC_clean), 
                 type=ig
             )
-            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.5
+            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
 
@@ -401,7 +403,7 @@ end
                 sasas=creamer_delta_sasa(RN2_clean), 
                 type=ig
             )
-            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.7 # need double check 
+            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
 
