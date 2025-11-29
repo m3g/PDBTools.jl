@@ -114,15 +114,17 @@ mvalue(cAB, cB_free, "Sucrose"; sel="chain B")
 and thus Sucrose can stabilize cofactor binding. We remark that the values obtained here
 are very small, and this is intended to be only an illustrative example.
 
-## Alternative SASA calculations
+## Alternative m-value calculations
 
 The following functions can be used to compute *m*-values from the variation of the SASA per residue 
 type, which allow the use of external tools to compute the SASA. This is used mostly for testing 
 purposes. The functions allow the use of SASAs obtained directly from the [Auton & Bolen server](http://best.bio.jhu.edu/mvalue/), or 
-from Gromacs SASA calculations.
+from Gromacs SASA calculations. The `creamer_delta_sasa` function uses the same random coil models of the 
+server.
 
 ```@docs
 PDBTools.mvalue_delta_sasa
+PDBTools.creamer_delta_sasa
 PDBTools.delta_sasa_per_restype
 PDBTools.parse_mvalue_server_sasa
 PDBTools.gmx_delta_sasa_per_restype

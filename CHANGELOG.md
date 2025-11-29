@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.16.0-DEV
 --------------
+- ![FEATURE][badge-feature] Compute m-value of protein denaturation using Creamer denatured models.
 - ![FEATURE][badge-experimental] Introduce `Structure` object, to contain atom arrays and meta-data.
 - ![FEATURE][badge-experimental] `Atom` object equality is supported (all fields must be identical).
 
