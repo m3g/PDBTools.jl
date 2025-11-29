@@ -1,25 +1,215 @@
-
-const creamer_atomic_radii = Dict{String, Float32}(
-  "C_BB" => 1.79547,
-  "O_BB" => 1.39941,
-  "S_SC" => 1.73841,
-  "O_SC" => 1.38058,
-  "N_BB" => 1.76601,
-  "N_SC" => 1.38848,
-  "C_SC" => 1.88785,
+const creamer_atomic_radii = Dict{StringType, Float32}(
+    "Nsp2" => 1.64,
+    "Nsp3" => 1.64,
+    "Csp2" => 1.76,
+    "Csp3" => 1.88,
+    "Osp2" => 1.42,
+    "Osp3" => 1.46,
+    "Ssp3" => 1.46,
+    "H" => 0.0,
 )
 
-function creamer_atom_type(at)
-    name(at) == "N" && return "N_BB"
-    name(at) == "CA" && return "C_BB"
-    name(at) == "C" && return "C_BB"
-    name(at) == "O" && return "O_BB"
-    element(at) == "C" && return "C_SC"
-    element(at) == "N" && return "N_SC"
-    element(at) == "O" && return "O_SC"
-    element(at) == "S" && return "S_SC"
-    @warn "Could not find Creamer type for $(name(at)) - returning C_SC"
-    return "C_SC"
+const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
+    # --- Backbone Atoms (Common to all amino acids, except Gly) ---
+    "bb" => Dict(
+        "N"    => "Nsp2", # Backbone Amide Nitrogen (peptide bond is N-C=O, typically sp2/sp3 intermediate)
+        "CA"   => "Csp3", # Alpha Carbon
+        "C"    => "Csp2", # Backbone Carbonyl Carbon
+        "O"    => "Osp2", # Backbone Carbonyl Oxygen
+        "OXT"  => "Osp2", # C-terminal Oxygen (in the last residue)
+        "OT1"  => "Osp2", # C-terminal Oxygen (in the last residue)
+        "OT2"  => "Osp2", # C-terminal Oxygen (in the last residue)
+    ),
+
+    # --- Glycine (GLY) Side Chain ---
+    # Glycine has no side chain beyond CA, but sometimes the H is named H2 or H3
+    "GLY" => Dict(
+        "HA2"  => "H",    # Alpha Hydrogen
+        "HA3"  => "H",    # Alpha Hydrogen
+    ),
+
+    # --- Alanine (ALA) Side Chain ---
+    "ALA" => Dict(
+        "CB"   => "Csp3", # Beta Carbon
+    ),
+ 
+    # --- Valine (VAL) Side Chain ---
+    "VAL" => Dict(
+        "CB"   => "Csp3",
+        "CG1"  => "Csp3",
+        "CG2"  => "Csp3",
+    ),
+
+    # --- Leucine (LEU) Side Chain ---
+    "LEU" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp3",
+        "CD1"  => "Csp3",
+        "CD2"  => "Csp3",
+    ),
+
+    # --- Isoleucine (ILE) Side Chain ---
+    "ILE" => Dict(
+        "CB"   => "Csp3",
+        "CG1"  => "Csp3",
+        "CG2"  => "Csp3",
+        "CD"   => "Csp3",
+        "CD1"  => "Csp3",
+    ),
+
+    # --- Serine (SER) Side Chain ---
+    "SER" => Dict(
+        "CB"   => "Csp3",
+        "OG"   => "Osp3", # Gamma Oxygen (Alcohol)
+    ),
+
+    # --- Threonine (THR) Side Chain ---
+    "THR" => Dict(
+        "CB"   => "Csp3",
+        "OG1"  => "Osp3", # Gamma 1 Oxygen (Alcohol)
+        "CG2"  => "Csp3",
+    ),
+
+    # --- Cysteine (CYS) Side Chain ---
+    "CYS" => Dict(
+        "CB"   => "Csp3",
+        "SG"   => "Ssp3", # Gamma Sulfur (Thiol)
+    ),
+
+    # --- Methionine (MET) Side Chain ---
+    "MET" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp3",
+        "SD"   => "Ssp3", # Delta Sulfur (Thioether)
+        "CE"   => "Csp3",
+    ),
+
+    # --- Proline (PRO) Side Chain (Cyclic with backbone N) ---
+    # The backbone N in Proline is an sp3 tertiary amine.
+    # N is often considered Nsp3 in Proline, unlike other residues.
+    "PRO" => Dict(
+        "N"   => "Nsp3", # Specific for Proline's N
+        "CB"  => "Csp3",
+        "CG"  => "Csp3",
+        "CD"  => "Csp3", # Delta Carbon
+    ),
+
+    # --- Phenylalanine (PHE) Side Chain ---
+    "PHE" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp2", # Benzene ring attachment
+        "CD1"  => "Csp2", # Ring Carbons
+        "CD2"  => "Csp2",
+        "CE1"  => "Csp2",
+        "CE2"  => "Csp2",
+        "CZ"   => "Csp2",
+    ),
+
+    # --- Tyrosine (TYR) Side Chain ---
+    "TYR" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp2",
+        "CD1"  => "Csp2",
+        "CD2"  => "Csp2",
+        "CE1"  => "Csp2",
+        "CE2"  => "Csp2",
+        "CZ"   => "Csp2",
+        "OH"   => "Osp3", # Hydroxyl Oxygen
+    ),
+
+    # --- Tryptophan (TRP) Side Chain (Indole Ring) ---
+    "TRP" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp2",
+        "CD1"  => "Csp2",
+        "CD2"  => "Csp2",
+        "NE1"  => "Nsp2", # Indole Nitrogen
+        "CE2"  => "Csp2",
+        "CE3"  => "Csp2",
+        "CZ2"  => "Csp2",
+        "CZ3"  => "Csp2",
+        "CH2"  => "Csp2",
+    ),
+
+    # --- Aspartic Acid (ASP) Side Chain ---
+    "ASP" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp2", # Carboxyl Carbon
+        "OD1"  => "Osp2", # Carboxyl Oxygen
+        "OD2"  => "Osp2", # Carboxyl Oxygen
+    ),
+
+    # --- Asparagine (ASN) Side Chain ---
+    "ASN" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp2", # Amide Carbon
+        "OD1"  => "Osp2", # Amide Oxygen
+        "ND2"  => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+    ),
+
+    # --- Glutamic Acid (GLU) Side Chain ---
+    "GLU" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp3",
+        "CD"   => "Csp2", # Carboxyl Carbon
+        "OE1"  => "Osp2", # Carboxyl Oxygen
+        "OE2"  => "Osp2", # Carboxyl Oxygen
+    ),
+
+    # --- Glutamine (GLN) Side Chain ---
+    "GLN" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp3",
+        "CD"   => "Csp2", # Amide Carbon
+        "OE1"  => "Osp2", # Amide Oxygen
+        "NE2"  => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+    ),
+
+    # --- Lysine (LYS) Side Chain (Like your example) ---
+    "LYS" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp3",
+        "CD"   => "Csp3",
+        "CE"   => "Csp3",
+        "NZ"   => "Nsp3", # Zeta Nitrogen (Primary Amine/Ammonium)
+    ),
+
+    # --- Arginine (ARG) Side Chain (Guanidinium Group) ---
+    "ARG" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp3",
+        "CD"   => "Csp3",
+        "NE"   => "Nsp2", # Epsilon Nitrogen (Part of the delocalized system)
+        "CZ"   => "Csp2", # Guanidinium Carbon
+        "NH1"  => "Nsp2", # Guanidinium Nitrogen
+        "NH2"  => "Nsp2", # Guanidinium Nitrogen
+    ),
+
+    # --- Histidine (HIS) Side Chain (Imidazole Ring) ---
+    "HIS" => Dict(
+        "CB"   => "Csp3",
+        "CG"   => "Csp2", # Ring attachment
+        "ND1"  => "Nsp2", # Delta 1 Nitrogen (Pyridine-like, or N-H Imidazole form)
+        "CE1"  => "Csp2",
+        "NE2"  => "Nsp2", # Epsilon 2 Nitrogen (Pyrole-like, or N Imidazole form)
+        "CD2"  => "Csp2",
+    ),
+)
+
+function creamer_atom_type(at::Atom)
+    rname = resname(at)
+    atname = name(at)
+    if haskey(PDB_ATOM_HYBRIDIZATION[rname], atname)
+        return PDB_ATOM_HYBRIDIZATION[rname][atname]
+    elseif haskey(PDB_ATOM_HYBRIDIZATION["bb"], atname)
+        return PDB_ATOM_HYBRIDIZATION["bb"][atname]
+    else
+        element(at) == "H" && return "H"
+    end
+    throw(ArgumentError(("""\n
+        Could not determine Creamer united atom type for $rname - $atname
+
+    """)))
 end
 
 const creamer_sasas = Dict{
