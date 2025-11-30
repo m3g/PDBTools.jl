@@ -144,7 +144,8 @@ function delta_sasa_per_restype(;
             sc_native = 0.0
             sc_desnat = 0.0
         end
-        sasas[rname] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
+        # convert to standard residue (e. g. HSD -> HIS) name and save
+        sasas[threeletter(rname)] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
     end
     return sasas # Å^2  
 end
