@@ -120,7 +120,7 @@ The following functions can be used to compute *m*-values from the variation of 
 type, which allow the use of external tools to compute the SASA. This is used mostly for testing 
 purposes. The functions allow the use of SASAs obtained directly from the [Auton & Bolen server](http://best.bio.jhu.edu/mvalue/), or 
 from Gromacs SASA calculations. The `creamer_delta_sasa` function uses the same random coil models of the 
-server.
+server and same atom radii, providing the same results for unfolding m-values.
 
 ```@docs
 PDBTools.mvalue_delta_sasa
