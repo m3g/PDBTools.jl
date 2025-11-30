@@ -48,7 +48,7 @@ export sasa_particles, sasa
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
 export mvalue
-@compat public parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype
+@compat public parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype, creamer_delta_sasa
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!

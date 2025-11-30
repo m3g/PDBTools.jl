@@ -19,7 +19,8 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
 - `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
-  upon denaturation for each amino acid type. This data can be obtained from the m-value server or calculated using GROMACS:
+  upon denaturation for each amino acid type. This data can be obtained from the `creamer_delta_sasa` function, the m-value server, or calculated using GROMACS:
+    - The `creamer_delta_sasa` function provides estimated variations in SASA of a protein, using the Creamer unfolded model.
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
     - Compute the SASA with `delta_sasa_per_restype`, a SASA calculation utility implemented in PDBTools.jl.
     - SASA values can be calculated using GROMACS with the `gmx_delta_sasa_per_restype` function defined in this module.
@@ -78,8 +79,8 @@ function mvalue_delta_sasa(;
         rtype = threeletter(rname) # convert non-standard residue names in types (e. g. HSD -> HIS)
         bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
         DeltaG_per_residue[rtype] = (
-            bb=bb_type * sasas[rname][:bb][type],
-            sc=sc_type * sasas[rname][:sc][type]
+            bb=bb_type * sasas[rtype][:bb][type],
+            sc=sc_type * sasas[rtype][:sc][type]
         )
     end
     DeltaG_BB = sum(getfield(DeltaG_per_residue[key], :bb) for key in keys(DeltaG_per_residue))
@@ -143,7 +144,8 @@ function delta_sasa_per_restype(;
             sc_native = 0.0
             sc_desnat = 0.0
         end
-        sasas[rname] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
+        # convert to standard residue (e. g. HSD -> HIS) name and save
+        sasas[threeletter(rname)] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
     end
     return sasas # Å^2  
 end
