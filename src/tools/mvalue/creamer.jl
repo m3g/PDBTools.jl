@@ -197,17 +197,19 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
 )
 
 function creamer_atom_type(at::Atom)
-    rname = resname(at)
+    rname = threeletter(resname(at))
     atname = name(at)
-    if haskey(PDB_ATOM_HYBRIDIZATION[rname], atname)
-        return PDB_ATOM_HYBRIDIZATION[rname][atname]
-    elseif haskey(PDB_ATOM_HYBRIDIZATION["bb"], atname)
-        return PDB_ATOM_HYBRIDIZATION["bb"][atname]
-    else
-        element(at) == "H" && return "H"
+    if haskey(PDB_ATOM_HYBRIDIZATION, rname)
+        if haskey(PDB_ATOM_HYBRIDIZATION[rname], atname)
+            return PDB_ATOM_HYBRIDIZATION[rname][atname]
+        elseif haskey(PDB_ATOM_HYBRIDIZATION["bb"], atname)
+            return PDB_ATOM_HYBRIDIZATION["bb"][atname]
+        elseif element(at) == "H" 
+            return "H"
+        end
     end
     throw(ArgumentError(("""\n
-        Could not determine Creamer united atom type for $rname - $atname
+        Could not determine Creamer united atom type for $atname of residue $(resname(at))
 
     """)))
 end
@@ -283,7 +285,7 @@ function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
     sel_bb = _Selector(isbackbone, Ref(first(eachresidue(atoms))))
     sel_sc = _Selector(issidechain, Ref(first(eachresidue(atoms))))
     for res in eachresidue(atoms)
-        rname = resname(res)
+        rname = threeletter(resname(res))
         if !haskey(sasas, rname)
             sasas[rname] = Dict(:sc => (0.0, 0.0, 0.0), :bb => (0.0, 0.0, 0.0))
         end
@@ -293,7 +295,7 @@ function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
         sel_sc.residue[] = res
         sasa_res_bb = sasa(sasa_atoms, sel_bb)
         sasa_res_sc = sasa(sasa_atoms, sel_sc)
-        rname = resname(res)
+        rname = threeletter(resname(res))
         cr = creamer_sasas[rname]
         csc = sasas[rname][:sc]
         cbb = sasas[rname][:bb]

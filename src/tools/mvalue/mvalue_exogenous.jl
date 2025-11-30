@@ -79,8 +79,8 @@ function mvalue_delta_sasa(;
         rtype = threeletter(rname) # convert non-standard residue names in types (e. g. HSD -> HIS)
         bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
         DeltaG_per_residue[rtype] = (
-            bb=bb_type * sasas[rname][:bb][type],
-            sc=sc_type * sasas[rname][:sc][type]
+            bb=bb_type * sasas[rtype][:bb][type],
+            sc=sc_type * sasas[rtype][:sc][type]
         )
     end
     DeltaG_BB = sum(getfield(DeltaG_per_residue[key], :bb) for key in keys(DeltaG_per_residue))

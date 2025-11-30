@@ -406,5 +406,16 @@ end
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
+    
+    # test that hydrogens are properly handled (0 vdw radius)
+    pdb = read_pdb(PDBTools.TESTPDB, "protein or name CLA")
+    prot = select(pdb, "protein")
+    mH = mvalue_delta_sasa(; atoms=prot, sasas=creamer_delta_sasa(prot))
+    prot = select(pdb, "protein and not element H")
+    m_not_H = mvalue_delta_sasa(; atoms=prot, sasas=creamer_delta_sasa(prot))
+    @test mH.tot ≈ m_not_H.tot
+
+    # test error for non-recognized element
+    @test_throws "Could not determine" creamer_delta_sasa(pdb) 
 
 end
