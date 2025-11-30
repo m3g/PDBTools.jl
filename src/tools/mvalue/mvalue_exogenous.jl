@@ -43,13 +43,21 @@ Each entry in the dictionary is a named tuple with `bb` and `sc` fields represen
 
 ```julia
 using PDBTools
-using PDBTools: mvalue_delta_sasa
-using PDBTools: delta_sasa_per_restype, parse_mvalue_server_sasa, gmx_delta_sasa_per_restype
+using PDBTools: mvalue_delta_sasa,
+                delta_sasa_per_restype,
+                creamer_delta_sasa,
+                parse_mvalue_server_sasa,
+                gmx_delta_sasa_per_restype,
+
 protein = read_pdb("protein.pdb")
 
 # Using SASA values calculated with PDBTools.jl
 sasas=delta_sasa_per_restype(native=read_pdb("native.pdb"), desnat=read_pdb("desnat.pdb"))
 mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas)
+
+# Using SASA values computed for the Creamer denatured states
+sasas_from_creamer=creamer_delta_sasa(protein)
+mvalue_delta_sasa(; model=MoeserHorinek, cosolvent="urea", atoms=protein, sasas=sasas_from_creamer, type=2)
 
 # Using SASA values from the m-value server
 sasas_from_server=parse_mvalue_server_sasa(server_output)
