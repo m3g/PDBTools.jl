@@ -1,4 +1,4 @@
-const creamer_atomic_radii = Dict{StringType, Float32}(
+const creamer_atomic_radii = OrderedDict{StringType, Float32}(
     "Nsp2" => 1.64,
     "Nsp3" => 1.64,
     "Csp2" => 1.76,
@@ -9,9 +9,9 @@ const creamer_atomic_radii = Dict{StringType, Float32}(
     "H" => 0.0,
 )
 
-const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
+const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType, OrderedDict{StringType,StringType}}(
     # --- Backbone Atoms (Common to all amino acids, except Gly) ---
-    "bb" => Dict(
+    "bb" => OrderedDict(
         "N"    => "Nsp2", # Backbone Amide Nitrogen (peptide bond is N-C=O, typically sp2/sp3 intermediate)
         "CA"   => "Csp3", # Alpha Carbon
         "C"    => "Csp2", # Backbone Carbonyl Carbon
@@ -23,25 +23,25 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
 
     # --- Glycine (GLY) Side Chain ---
     # Glycine has no side chain beyond CA, but sometimes the H is named H2 or H3
-    "GLY" => Dict(
+    "GLY" => OrderedDict(
         "HA2"  => "H",    # Alpha Hydrogen
         "HA3"  => "H",    # Alpha Hydrogen
     ),
 
     # --- Alanine (ALA) Side Chain ---
-    "ALA" => Dict(
+    "ALA" => OrderedDict(
         "CB"   => "Csp3", # Beta Carbon
     ),
  
     # --- Valine (VAL) Side Chain ---
-    "VAL" => Dict(
+    "VAL" => OrderedDict(
         "CB"   => "Csp3",
         "CG1"  => "Csp3",
         "CG2"  => "Csp3",
     ),
 
     # --- Leucine (LEU) Side Chain ---
-    "LEU" => Dict(
+    "LEU" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp3",
         "CD1"  => "Csp3",
@@ -49,7 +49,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Isoleucine (ILE) Side Chain ---
-    "ILE" => Dict(
+    "ILE" => OrderedDict(
         "CB"   => "Csp3",
         "CG1"  => "Csp3",
         "CG2"  => "Csp3",
@@ -58,26 +58,26 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Serine (SER) Side Chain ---
-    "SER" => Dict(
+    "SER" => OrderedDict(
         "CB"   => "Csp3",
         "OG"   => "Osp3", # Gamma Oxygen (Alcohol)
     ),
 
     # --- Threonine (THR) Side Chain ---
-    "THR" => Dict(
+    "THR" => OrderedDict(
         "CB"   => "Csp3",
         "OG1"  => "Osp3", # Gamma 1 Oxygen (Alcohol)
         "CG2"  => "Csp3",
     ),
 
     # --- Cysteine (CYS) Side Chain ---
-    "CYS" => Dict(
+    "CYS" => OrderedDict(
         "CB"   => "Csp3",
         "SG"   => "Ssp3", # Gamma Sulfur (Thiol)
     ),
 
     # --- Methionine (MET) Side Chain ---
-    "MET" => Dict(
+    "MET" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp3",
         "SD"   => "Ssp3", # Delta Sulfur (Thioether)
@@ -87,7 +87,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     # --- Proline (PRO) Side Chain (Cyclic with backbone N) ---
     # The backbone N in Proline is an sp3 tertiary amine.
     # N is often considered Nsp3 in Proline, unlike other residues.
-    "PRO" => Dict(
+    "PRO" => OrderedDict(
         "N"   => "Nsp3", # Specific for Proline's N
         "CB"  => "Csp3",
         "CG"  => "Csp3",
@@ -95,7 +95,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Phenylalanine (PHE) Side Chain ---
-    "PHE" => Dict(
+    "PHE" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp2", # Benzene ring attachment
         "CD1"  => "Csp2", # Ring Carbons
@@ -106,7 +106,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Tyrosine (TYR) Side Chain ---
-    "TYR" => Dict(
+    "TYR" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp2",
         "CD1"  => "Csp2",
@@ -118,7 +118,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Tryptophan (TRP) Side Chain (Indole Ring) ---
-    "TRP" => Dict(
+    "TRP" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp2",
         "CD1"  => "Csp2",
@@ -132,7 +132,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Aspartic Acid (ASP) Side Chain ---
-    "ASP" => Dict(
+    "ASP" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp2", # Carboxyl Carbon
         "OD1"  => "Osp2", # Carboxyl Oxygen
@@ -140,7 +140,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Asparagine (ASN) Side Chain ---
-    "ASN" => Dict(
+    "ASN" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp2", # Amide Carbon
         "OD1"  => "Osp2", # Amide Oxygen
@@ -148,7 +148,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Glutamic Acid (GLU) Side Chain ---
-    "GLU" => Dict(
+    "GLU" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp3",
         "CD"   => "Csp2", # Carboxyl Carbon
@@ -157,7 +157,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Glutamine (GLN) Side Chain ---
-    "GLN" => Dict(
+    "GLN" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp3",
         "CD"   => "Csp2", # Amide Carbon
@@ -166,7 +166,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Lysine (LYS) Side Chain (Like your example) ---
-    "LYS" => Dict(
+    "LYS" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp3",
         "CD"   => "Csp3",
@@ -175,7 +175,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Arginine (ARG) Side Chain (Guanidinium Group) ---
-    "ARG" => Dict(
+    "ARG" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp3",
         "CD"   => "Csp3",
@@ -186,7 +186,7 @@ const PDB_ATOM_HYBRIDIZATION = Dict{StringType, Dict{StringType,StringType}}(
     ),
 
     # --- Histidine (HIS) Side Chain (Imidazole Ring) ---
-    "HIS" => Dict(
+    "HIS" => OrderedDict(
         "CB"   => "Csp3",
         "CG"   => "Csp2", # Ring attachment
         "ND1"  => "Nsp2", # Delta 1 Nitrogen (Pyridine-like, or N-H Imidazole form)
@@ -214,7 +214,7 @@ function creamer_atom_type(at::Atom)
     """)))
 end
 
-const creamer_sasas = Dict{
+const creamer_sasas = OrderedDict{
     String,
     @NamedTuple{bb_lower::Float32, bb_upper::Float32, sc_lower::Float32, sc_upper::Float32}
 }(
@@ -250,7 +250,43 @@ end
     creamer_delta_sasa(atoms::AbstractVector{<:Atom})
 
 Computes, for a vector of protein atoms, the predicted changes in SASA upon denaturation, using the 
-Creamer model. Returns a dictionary that can be directly used as input to the `mvalue` function.
+Creamer model. Returns a dictionary that can be directly used as input to the `mvalue_delta_sasa`
+function. The output is in kcal mol⁻¹.
+    
+Three estimates are provided: 1) low-denaturation, 2) mean denaturation, 3) high denaturation.
+Usually the experimental data is better reproduced with the mean denaturation SASA estimate.
+
+# Example
+
+```jldoctest; filter = r"(\\d*)\\.(\\d{2})\\d+" => s"\\1.\\2***"
+julia> using PDBTools
+
+julia> using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
+
+julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+
+julia> creamer_sasas = creamer_delta_sasa(prot)
+OrderedCollections.OrderedDict{String, OrderedCollections.OrderedDict} with 19 entries:
+  "ALA" => OrderedDict(:sc=>(186.517, 246.017, 305.517), :bb=>(22.1491, 78.4992, 134.849))
+  "CYS" => OrderedDict(:sc=>(172.186, 212.386, 252.586), :bb=>(5.23014, 37.8301, 70.4301))
+  "ASP" => OrderedDict(:sc=>(89.46, 136.26, 183.06), :bb=>(11.6685, 59.0685, 106.469))
+  "TYR" => OrderedDict(:sc=>(836.652, 932.501, 1028.35), :bb=>(118.904, 190.004, 261.104))
+  "THR" => OrderedDict(:sc=>(133.49, 175.19, 216.89), :bb=>(66.3468, 99.0468, 131.747))
+  ⋮     => ⋮
+
+julia> m = mvalue_delta_sasa(;
+           model=AutonBolen,  
+           cosolvent="tmao", 
+           atoms=prot, 
+           sasas=creamer_sasas, 
+           type=2, # mean denatured state surface areas
+       );
+
+julia> println("total = ", m.tot, "\\nbackbone = ", m.bb, "\\nsidechain = ", m.sc)
+total = 2.0265626662789282
+backbone = 3.2160695348676667
+sidechain = -1.1895068685887384
+```
 
 Reference:
 
@@ -277,7 +313,7 @@ for each residue type.
 
 """
 function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
-    sasas = Dict{String,Dict}()
+    sasas = OrderedDict{String,OrderedDict}()
     sasa_atoms = sasa_particles(atoms;
         atom_type = creamer_atom_type,
         atom_radius_from_type = type -> creamer_atomic_radii[type]
@@ -287,7 +323,7 @@ function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
     for res in eachresidue(atoms)
         rname = threeletter(resname(res))
         if !haskey(sasas, rname)
-            sasas[rname] = Dict(:sc => (0.0, 0.0, 0.0), :bb => (0.0, 0.0, 0.0))
+            sasas[rname] = OrderedDict(:sc => (0.0, 0.0, 0.0), :bb => (0.0, 0.0, 0.0))
         end
     end
     for res in eachresidue(atoms)
@@ -299,7 +335,7 @@ function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
         cr = creamer_sasas[rname]
         csc = sasas[rname][:sc]
         cbb = sasas[rname][:bb]
-        sasas[rname] = Dict(
+        sasas[rname] = OrderedDict(
             :sc => (
                 csc[1] + cr.sc_lower - sasa_res_sc,
                 csc[2] + 0.5 * (cr.sc_lower + cr.sc_upper) - sasa_res_sc,

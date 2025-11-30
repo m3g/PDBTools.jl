@@ -18,7 +18,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
    and should be more precise in that case. Other solvents are available for `AutonBolen`.
 - `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
-- `sasas::Dict{String, Dict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
+- `sasas::AbstractDict{String, AbstractDict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the `creamer_delta_sasa` function, the m-value server, or calculated using GROMACS:
     - The `creamer_delta_sasa` function provides estimated variations in SASA of a protein, using the Creamer unfolded model.
     - The output of the server can be parsed using the `parse_mvalue_server_sasa` function defined in this module.
@@ -43,13 +43,21 @@ Each entry in the dictionary is a named tuple with `bb` and `sc` fields represen
 
 ```julia
 using PDBTools
-using PDBTools: mvalue_delta_sasa
-using PDBTools: delta_sasa_per_restype, parse_mvalue_server_sasa, gmx_delta_sasa_per_restype
+using PDBTools: mvalue_delta_sasa,
+                delta_sasa_per_restype,
+                creamer_delta_sasa,
+                parse_mvalue_server_sasa,
+                gmx_delta_sasa_per_restype,
+
 protein = read_pdb("protein.pdb")
 
 # Using SASA values calculated with PDBTools.jl
 sasas=delta_sasa_per_restype(native=read_pdb("native.pdb"), desnat=read_pdb("desnat.pdb"))
 mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sasas)
+
+# Using SASA values computed for the Creamer denatured states
+sasas_from_creamer=creamer_delta_sasa(protein)
+mvalue_delta_sasa(; model=MoeserHorinek, cosolvent="urea", atoms=protein, sasas=sasas_from_creamer, type=2)
 
 # Using SASA values from the m-value server
 sasas_from_server=parse_mvalue_server_sasa(server_output)
@@ -74,7 +82,7 @@ function mvalue_delta_sasa(;
 )
     protein = select(atoms, "protein")
     residue_names = unique(resname.(protein))
-    DeltaG_per_residue = Dict{String,@NamedTuple{bb::Float64, sc::Float64}}()
+    DeltaG_per_residue = OrderedDict{String,@NamedTuple{bb::Float64, sc::Float64}}()
     for rname in residue_names
         rtype = threeletter(rname) # convert non-standard residue names in types (e. g. HSD -> HIS)
         bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
@@ -133,7 +141,7 @@ function delta_sasa_per_restype(;
     desnat_atoms = select(desnat, at -> isprotein(at) & keepH(at))
     native_atomic_sasa = PDBTools.sasa_particles(native_atoms; n_dots, unitcell)
     desnat_atomic_sasa = PDBTools.sasa_particles(desnat_atoms; n_dots, unitcell)
-    sasas = Dict{String,Dict{Symbol,Float32}}()
+    sasas = OrderedDict{String,OrderedDict{Symbol,Float32}}()
     for rname in unique(resname.(eachresidue(native_atoms)))
         bb_native = PDBTools.sasa(native_atomic_sasa, at -> resname(at) == rname && backbone(at))
         bb_desnat = PDBTools.sasa(desnat_atomic_sasa, at -> resname(at) == rname && backbone(at))
@@ -145,7 +153,7 @@ function delta_sasa_per_restype(;
             sc_desnat = 0.0
         end
         # convert to standard residue (e. g. HSD -> HIS) name and save
-        sasas[threeletter(rname)] = Dict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
+        sasas[threeletter(rname)] = OrderedDict(:sc => sc_desnat - sc_native, :bb => bb_desnat - bb_native)
     end
     return sasas # Å^2  
 end
@@ -179,7 +187,7 @@ Each of these keys maps to a tuple containing three Float64 values representing 
 
 """
 function parse_mvalue_server_sasa(string::AbstractString)
-    sasa = Dict{String,Dict{Symbol,Tuple{Float64,Float64,Float64}}}()
+    sasa = OrderedDict{String,OrderedDict{Symbol,Tuple{Float64,Float64,Float64}}}()
     for line in split(string, "\n")
         # Replace (, ) and [, ], | with spaces
         line = replace(line, '(' => ' ', ')' => ' ', '[' => ' ', ']' => ' ', '|' => ' ')
@@ -194,7 +202,7 @@ function parse_mvalue_server_sasa(string::AbstractString)
         bb1 = parse(Float64, data[6])
         bb2 = parse(Float64, data[7])
         bb3 = parse(Float64, data[8])
-        sasa[resname] = Dict(:sc => (sc1, sc2, sc3), :bb => (bb1, bb2, bb3))
+        sasa[resname] = OrderedDict(:sc => (sc1, sc2, sc3), :bb => (bb1, bb2, bb3))
     end
     return sasa
 end
@@ -258,12 +266,12 @@ function gmx_delta_sasa_per_restype(;
     backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
     sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
 )
-    sasas = Dict{String,Dict{Symbol,Float64}}()
+    sasas = OrderedDict{String,OrderedDict{Symbol,Float64}}()
     p = read_pdb(native_pdb, "protein")
     for rname in unique(resname.(eachresidue(p)))
         sasa_bb_native, sasa_sc_native = 100 .* gmx_sasa_per_restype(native_pdb, rname; gmx, n_dots, backbone, sidechain, ignore_hydrogen) # returns in nm^2
         sasa_bb_desnat, sasa_sc_desnat = 100 .* gmx_sasa_per_restype(desnat_pdb, rname; gmx, n_dots, backbone, sidechain, ignore_hydrogen)
-        sasas[rname] = Dict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
+        sasas[rname] = OrderedDict(:sc => sasa_sc_desnat - sasa_sc_native, :bb => sasa_bb_desnat - sasa_bb_native)
     end
     return sasas # returns in Å^2
 end
