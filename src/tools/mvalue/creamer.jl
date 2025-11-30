@@ -290,26 +290,8 @@ sidechain = -1.1895068685887384
 
 Reference:
 
-Creamer TP, Srinivasan R, Rose GD. Modeling unfolded states of proteins and peptides. II. Backbone solvent accessibility. 
+Creamer TP, Srinivasan R, Rose GD. **Modeling unfolded states of proteins and peptides. II. Backbone solvent accessibility.**
 *Biochemistry.* 1997;36:2832–2835. doi: 10.1021/bi962819o.
-
-# Example:
-
-```julia
-using PDBTools
-using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
-ats = read_pdb("protein.pdb")
-m = mvalue_delta_sasa(;
-    model=AutonBolen,
-    cosolvent="urea",
-    atoms=ats,
-    sasas=creamer_delta_sasa(ats)
-)
-```
-
-The output is a tuple where `m.tot`, `m.bb`, `m.sc` are the total, backbone, and sidechain contributions for the denaturation
-transfer free energy, and `m.restype` is a dictionary where each key contains the backbone and sidechain contributions 
-for each residue type.
 
 """
 function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
