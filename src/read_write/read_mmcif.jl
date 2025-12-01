@@ -240,6 +240,12 @@ end
     @test length(read_mmcif(PDBTools.LONG_NAME_STRING_CIF)) == 1
 end
 
+function _new_cif_token(line)
+    startswith(line, '_') && return true
+    startswith(line, "loop_") && return true
+    return false
+end
+
 function _parse_mmCIF(
     cifdata::Union{IOStream,IOBuffer}, selection_function::Function;
     memory_available::Real=0.8,
@@ -254,12 +260,7 @@ function _parse_mmCIF(
     ifield = 0
     _atom_site_field_inds = Dict{String,Int}()
     for line in eachline(cifdata)
-        # Reading the headers of the _atom_site loop
-        if occursin("loop_", line)
-            ifield = 0
-            empty!(_atom_site_field_inds)
-        end
-        if occursin("_atom_site.", line)
+        if startswith(line, "_atom_site.")
             field_end = findfirst(<=(' '), line)
             if isnothing(field_end)
                 field_end = length(line) + 1
@@ -269,7 +270,7 @@ function _parse_mmCIF(
             _atom_site_field_inds[field] = ifield
         end
         # Header ended
-        if startswith(line, r"ATOM|HETATM")
+        if ifield > 0 && startswith(line, r"ATOM|HETATM")
             for (key, keyval) in _atom_symbol_for_cif_field
                 if haskey(_atom_site_field_inds, key)
                     push!(_atom_field_columns, (_atom_site_field_inds[key], keyval))
@@ -279,7 +280,9 @@ function _parse_mmCIF(
             col_indices = NTuple{length(_atom_field_columns),Int}(first(el) for el in _atom_field_columns)
             col_field = NTuple{length(_atom_field_columns),Symbol}(last(last(el)) for el in _atom_field_columns)
             NCOLS = length(keys(_atom_site_field_inds))
-            break
+            if NCOLS > 0
+                break
+            end
         end
     end
     if length(_atom_field_columns) == 0
@@ -289,12 +292,22 @@ function _parse_mmCIF(
         ((col_indices[i], Val(col_field[i])))
     end
     seekstart(cifdata)
+    _atoms_token = false
+    _atoms = false
     for line in eachline(cifdata)
-        if startswith(line, r"ATOM|HETATM")
-            atom = read_atom_mmcif(Val(NCOLS), line, inds_and_names, lastatom)
-            selection_function(atom) && push!(atoms, atom)
-            _maximum_read(atoms, stop_at, memory_available) && break
-            lastatom = atom
+        if startswith(line, "_atom_site.")
+            _atoms_token = true
+        end
+        if _atoms_token 
+            if startswith(line, r"ATOM|HETATM")
+                _atoms = true
+                atom = read_atom_mmcif(Val(NCOLS), line, inds_and_names, lastatom)
+                selection_function(atom) && push!(atoms, atom)
+                _maximum_read(atoms, stop_at, memory_available) && break
+                lastatom = atom
+            elseif _atoms # went through atom list and a new token is found
+                _new_cif_token(line) && break
+            end
         end
     end
     seekstart(cifdata)

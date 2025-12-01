@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.16.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Better support for mmCIF files when `ATOM` strings are found outside atom descriptors. 
 
 Version 3.16.0
 --------------
