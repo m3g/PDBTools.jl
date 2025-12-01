@@ -1,3 +1,7 @@
+_refine.details                                  
+;ELEVEN RESIDUES ARE PRESENTED WITH ALTERNATE CONFORMATIONS
+ATOM AND SEQRES RECORDS BELOW.
+;
 _cell.length_a       74.4490
 _cell.length_b       74.4490
 _cell.length_c       74.4490
