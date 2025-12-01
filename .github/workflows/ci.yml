@@ -30,7 +30,7 @@ jobs:
         build_is_production_build:
           - true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
@@ -55,7 +55,7 @@ jobs:
         build_is_production_build:
           - false
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       # Add GROMACS installation for Ubuntu
       - name: Install GROMACS
         if: runner.os == 'Linux'
@@ -80,7 +80,7 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: julia-actions/setup-julia@v2
         with:
           version: 'lts'
