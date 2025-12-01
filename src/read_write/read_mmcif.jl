@@ -241,8 +241,8 @@ end
 end
 
 function _new_cif_token(line)
-    length(line) >= 1 && (line[1] == '_') && return true
-    length(line) >= 5 && (@view(line[1:5]) == "loop_") && return true
+    startswith(line, '_') && return true
+    startswith(line, "loop_") && return true
     return false
 end
 
@@ -260,7 +260,7 @@ function _parse_mmCIF(
     ifield = 0
     _atom_site_field_inds = Dict{String,Int}()
     for line in eachline(cifdata)
-        if occursin("_atom_site.", line)
+        if startswith(line, "_atom_site.")
             field_end = findfirst(<=(' '), line)
             if isnothing(field_end)
                 field_end = length(line) + 1
@@ -295,7 +295,7 @@ function _parse_mmCIF(
     _atoms_token = false
     _atoms = false
     for line in eachline(cifdata)
-        if length(line) >= 11 && @view(line[1:11]) == "_atom_site."
+        if startswith(line, "_atom_site.")
             _atoms_token = true
         end
         if _atoms_token 
