@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.16.2-DEV
+Version 3.17.0
 --------------
 - ![FEATURE][badge-feature] Implement `transfer_free_energy` function to compute the TFE of a single structure to different solutions. 
 - ![ENHANCEMENT][badge-enhancement] MValue object carries the `cosolvent` field, and shows the cosolvent.
