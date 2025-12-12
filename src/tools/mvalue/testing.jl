@@ -466,4 +466,10 @@ end
         Side-chain contributions: 0.4451674 kcal mol⁻¹
         """
 
+    # Test error path
+    pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
+    @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
+    s = sasa_particles(pdb)
+    @test_throws "non-protein residue" transfer_free_energy(s, "urea")
+
 end
