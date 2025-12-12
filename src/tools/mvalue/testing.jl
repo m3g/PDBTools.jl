@@ -19,13 +19,13 @@
     r_1MJC = mvalue(n_sasa, d_sasa, "Urea")
     @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
     # test non-parallel vs. parallel calculations
-    ms = mvalue(n_sasa, d_sasa, "urea"; parallel=false) 
-    mp = mvalue(n_sasa, d_sasa, "urea"; parallel=true) 
+    ms = mvalue(n_sasa, d_sasa, "urea"; parallel=false)
+    mp = mvalue(n_sasa, d_sasa, "urea"; parallel=true)
     @test ms.tot ≈ mp.tot
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
-        MValue{AutonBolen} - 69 residues.
+        MValue{AutonBolen} - 69 residues - cosolvent: "urea"
             Total m-value: -0.7856683 kcal mol⁻¹
             Backbone contributions: -0.8520461 kcal mol⁻¹
             Side-chain contributions: 0.06637777 kcal mol⁻¹
@@ -373,10 +373,10 @@ end
     for (cos, dg) in data_mvalue_server_auton_and_bolen_1MJC
         for ig in 1:3
             m = mvalue_delta_sasa(
-                model=AutonBolen, 
-                cosolvent=cos, 
-                atoms=MJC_clean, 
-                sasas=creamer_delta_sasa(MJC_clean), 
+                model=AutonBolen,
+                cosolvent=cos,
+                atoms=MJC_clean,
+                sasas=creamer_delta_sasa(MJC_clean),
                 type=ig
             )
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
@@ -397,16 +397,16 @@ end
     for (cos, dg) in data_mvalue_server_auton_and_bolen_2RN2
         for ig in 1:3
             m = mvalue_delta_sasa(
-                model=AutonBolen, 
-                cosolvent=cos, 
-                atoms=RN2_clean, 
-                sasas=creamer_delta_sasa(RN2_clean), 
+                model=AutonBolen,
+                cosolvent=cos,
+                atoms=RN2_clean,
+                sasas=creamer_delta_sasa(RN2_clean),
                 type=ig
             )
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
-    
+
     # test that hydrogens are properly handled (0 vdw radius)
     pdb = read_pdb(PDBTools.TESTPDB, "protein or name CLA")
     prot = select(pdb, "protein")
@@ -416,6 +416,54 @@ end
     @test mH.tot ≈ m_not_H.tot
 
     # test error for non-recognized element
-    @test_throws "Could not determine" creamer_delta_sasa(pdb) 
+    @test_throws "Could not determine" creamer_delta_sasa(pdb)
+
+end
+
+@testitem "transfer free energy" begin
+    using PDBTools
+    using ShowMethodTesting
+    dir = @__DIR__
+
+    #
+    # Server results for 2RN2_clean.pdb
+    #
+    #     Native State Transfer Free Energy Contributions to the m-value for /tmp/phpt5bGI3. 
+    server_result = Dict(
+        "tmao" => (bb=3573, sc=-1945, tot=1629),
+        "sarcosine" => (bb=2065, sc=-715, tot=1349),
+        "betaine" => (bb=2660, sc=-3334, tot=-674),
+        "proline" => (bb=1906, sc=-2207, tot=-301),
+        #"Glycerol" => (bb=556, sc=-1093, tot=-537),
+        "sorbitol" => (bb=1390, sc=-1011, tot=379),
+        "sucrose" => (bb=2462, sc=-1698, tot=764),
+        #"Trehalose" => (bb=2462, sc=-1341, tot=1121),
+        "urea" => (bb=-1548, sc=445, tot=-1104),
+    )
+    p = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
+    s = sasa_particles(p; 
+        atom_type=PDBTools.creamer_atom_type, 
+        atom_radius_from_type=at -> PDBTools.creamer_atomic_radii[at]
+    )
+    for (cosolvent, vals)  in pairs(server_result)
+        t = transfer_free_energy(s, cosolvent)
+        @test t.bb ≈ 1e-3*vals.bb atol=0.1
+        @test t.sc ≈ 1e-3*vals.sc atol=0.1
+        @test t.tot ≈ 1e-3*vals.tot atol=0.1
+    end
+
+    # Call with structure instead of sasas:
+    t = transfer_free_energy(p, "urea")
+    @test t.bb ≈ 1e-3*server_result["urea"].bb atol=0.1
+    @test t.sc ≈ 1e-3*server_result["urea"].sc atol=0.1
+    @test t.tot ≈ 1e-3*server_result["urea"].tot atol=0.1
+
+    # Test show method
+    @test parse_show(t; repl=Dict(r"PDBTools." => "")) ≈ """
+        PDBTools.TransferFreeEnergy{AutonBolen} - 155 residues to 1M "urea".
+        Total transfer free energy: -1.125963 kcal mol⁻¹
+        Backbone contributions: -1.5711304 kcal mol⁻¹
+        Side-chain contributions: 0.4451674 kcal mol⁻¹
+        """
 
 end
