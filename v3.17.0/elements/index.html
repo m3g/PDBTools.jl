@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Atom and element properties · PDBTools.jl</title><meta name="title" content="Atom and element properties · PDBTools.jl"/><meta property="og:title" content="Atom and element properties · PDBTools.jl"/><meta property="twitter:title" content="Atom and element properties · PDBTools.jl"/><meta name="description" content="Documentation for PDBTools.jl."/><meta property="og:description" content="Documentation for PDBTools.jl."/><meta property="twitter:description" content="Documentation for PDBTools.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="PDBTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">PDBTools.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../readwrite/">Read and Write</a></li><li><a class="tocitem" href="../selections/">Selections</a></li><li><a class="tocitem" href="../iterators/">Iterators</a></li><li class="is-active"><a class="tocitem" href>Atom and element properties</a><ul class="internal"><li><a class="tocitem" href="#custom-atom-fields"><span>Custom Atom fields</span></a></li><li class="toplevel"><a class="tocitem" href="#Elements-for-custom-atom-types"><span>Elements for custom atom types</span></a></li><li><a class="tocitem" href="#Additional-property-retrieving-and-set-functions"><span>Additional property-retrieving and set functions</span></a></li></ul></li><li><a class="tocitem" href="../contacts/">Contact maps</a></li><li><a class="tocitem" href="../dihedrals/">Dihedrals and Ramachandran</a></li><li><a class="tocitem" href="../secondary_structure/">Secondary structures</a></li><li><a class="tocitem" href="../hydrogen_bonds/">Hydrogen bonds</a></li><li><a class="tocitem" href="../sasa/">Solvent Accessible Area</a></li><li><a class="tocitem" href="../mvalue/">Transfer Free Energy</a></li><li><a class="tocitem" href="../auxiliary/">Auxiliary functions</a></li><li><a class="tocitem" href="../examples/">Examples</a></li><li><a class="tocitem" href="../tools/">Tools</a></li><li><a class="tocitem" href="../help/">Help entries</a></li><li><span class="tocitem">Experimental</span><ul><li><a class="tocitem" href="../structure/">Structure</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Atom and element properties</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Atom and element properties</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl/blob/main/docs/src/elements.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Atomic-and-molecular-properties"><a class="docs-heading-anchor" href="#Atomic-and-molecular-properties">Atomic and molecular properties</a><a id="Atomic-and-molecular-properties-1"></a><a class="docs-heading-anchor-permalink" href="#Atomic-and-molecular-properties" title="Permalink"></a></h1><p>Some simple atom properties can be retrieved using special functions, which operate on atoms of the type <code>Atom</code>. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; atoms = read_pdb(&quot;./file.pdb&quot;);
+
+julia&gt; printatom(atoms[1])
+   index name resname chain   resnum  residue        x        y        z  beta occup model segname index_pdb
+       1   OW     SOL     X        1        1   54.370   45.310   33.970  0.00  0.00     1       -         1
+
+julia&gt; mass(atoms[1])
+14.0067
+
+julia&gt; atomic_number(atoms[1])
+7
+
+julia&gt; element(atoms[1])
+&quot;N&quot;
+
+julia&gt; element_name(atoms[1])
+&quot;Nitrogen&quot;</code></pre><p>The formula or stoichiometry of a selection can also be retrieved:</p><pre><code class="language-julia-repl hljs">julia&gt; atoms = wget(&quot;1LBD&quot;,&quot;protein and residue 1&quot;);
+
+julia&gt; f = formula(atoms)
+C₃N₁O₂
+
+julia&gt; stoichiometry(select(atoms,&quot;water&quot;))
+H₂O₁
+</code></pre><article><details class="docstring"><summary id="PDBTools.mass"><a class="docstring-binding" href="#PDBTools.mass"><code>PDBTools.mass</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">mass(s::Sequence)</code></pre><p>Returns the mass of a sequence of amino acids, given a <code>Sequence</code> struct type.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; seq = [&quot;Alanine&quot;, &quot;Glutamic acid&quot;, &quot;Glycine&quot;];
+
+julia&gt; mass(Sequence(seq))
+257.2432
+
+julia&gt; seq = &quot;AEG&quot;;
+
+julia&gt; mass(Sequence(seq))
+257.2432
+
+julia&gt; seq = [&quot;ALA&quot;, &quot;GLU&quot;, &quot;GLY&quot;];
+
+julia&gt; mass(Sequence(seq))
+257.2432</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/properties/protein_residues.jl#L239-L263">source</a></section><section><div><pre><code class="language-julia hljs">mass(atom::Atom)
+mass(atoms::AbstractVector{&lt;:Atoms})</code></pre><p>Returns the mass of an atom given its name, or <code>Atom</code> structure, or the total mass of a vector of <code>Atom</code>s. </p><p>If a mass is defined as a custom field in the the <code>Atom</code> structure, it is returned. Otherwise, the mass is retrieved from the element mass as inferred from the atom name.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = [ Atom(name=&quot;NT3&quot;), Atom(name=&quot;CA&quot;) ];
+
+julia&gt; mass(atoms[1])
+14.0067f0
+
+julia&gt; mass(atoms)
+26.0177f0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L779-L802">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.element"><a class="docstring-binding" href="#PDBTools.element"><code>PDBTools.element</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">element(atom::Atom)</code></pre><p>Returns the element symbol, as a string, of an atom given the <code>Atom</code> structure. If the <code>pdb_element</code> is empty or &quot;X&quot;, the element is inferred from the atom name.  Otherwise, the <code>pdb_element</code> is returned.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; at = Atom(name=&quot;NT3&quot;);
+
+julia&gt; element(at)
+&quot;N&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L605-L623">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.element_name"><a class="docstring-binding" href="#PDBTools.element_name"><code>PDBTools.element_name</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">element_name(atom::Atom)</code></pre><p>Returns the element name of an atom given its name, or <code>Atom</code> structure.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; at = Atom(name=&quot;NT3&quot;);
+
+julia&gt; element_name(at)
+&quot;Nitrogen&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L702-L718">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.element_symbol"><a class="docstring-binding" href="#PDBTools.element_symbol"><code>PDBTools.element_symbol</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">element_symbol(atom::Atom)</code></pre><p>Returns a symbol for element name of an atom given its name, or <code>Atom</code> structure.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools 
+
+julia&gt; at = Atom(name=&quot;NT3&quot;);
+
+julia&gt; element_symbol(at)
+:N</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L722-L738">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.element_symbol_string"><a class="docstring-binding" href="#PDBTools.element_symbol_string"><code>PDBTools.element_symbol_string</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">element_symbol_string(atom::Atom)</code></pre><p>Returns a string with the symbol of the element, given the <code>Atom</code> structure.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools 
+
+julia&gt; at = Atom(name=&quot;NT3&quot;);
+
+julia&gt; element_symbol_string(at)
+&quot;N&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L741-L757">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.element_vdw_radius"><a class="docstring-binding" href="#PDBTools.element_vdw_radius"><code>PDBTools.element_vdw_radius</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">element_vdw_radius(atom::Atom)</code></pre><p>Returns the vdW radius of the element of the atom, in Å, or NaN if the data is not available.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools 
+
+julia&gt; at = Atom(name=&quot;NT3&quot;);
+
+julia&gt; element_vdw_radius(at)
+1.55f0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L760-L776">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.formula"><a class="docstring-binding" href="#PDBTools.formula"><code>PDBTools.formula</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">formula(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Returns the molecular formula of the current selection. The output is an indexable &quot;Formula&quot; structure, where each element is a tuple with the element name and the number of atoms.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; pdb  = read_pdb(PDBTools.TESTPDB, &quot;residue 1&quot;); # testing PDB file
+
+julia&gt; resname(pdb[1])
+&quot;ALA&quot;
+
+julia&gt; f = formula(pdb)
+H₇C₃N₁O₁
+
+julia&gt; f[1]
+(&quot;H&quot;, 7)
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/properties/formula.jl#L22-L46">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.stoichiometry"><a class="docstring-binding" href="#PDBTools.stoichiometry"><code>PDBTools.stoichiometry</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">stoichiometry(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Returns the stoichiometry of atom selection in a <code>Formula</code> structure. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; pdb  = read_pdb(PDBTools.TESTPDB, &quot;water&quot;); # testing PDB file
+
+julia&gt; stoichiometry(pdb)
+H₂O₁</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/properties/formula.jl#L72-L88">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.printatom"><a class="docstring-binding" href="#PDBTools.printatom"><code>PDBTools.printatom</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">printatom(atom::Atom)
+printatom(io::IO, atom::Atom)</code></pre><p>Prints an <code>Atom</code> structure in a human-readable format, with a title line. By default the output is printed to <code>stdout</code>, and the <code>io</code> argument can be used to specify a different output stream.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.TESTPDB, &quot;protein and residue 2&quot;);
+
+julia&gt; printatom(atoms[1])
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13
+
+julia&gt; atoms[1] # default show method
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      13    N     CYS     A        2        2   -6.351  -14.461   -5.695  1.00  0.00     1    PROT        13</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L347-L370">source</a></section></details></article><h2 id="custom-atom-fields"><a class="docs-heading-anchor" href="#custom-atom-fields">Custom Atom fields</a><a id="custom-atom-fields-1"></a><a class="docs-heading-anchor-permalink" href="#custom-atom-fields" title="Permalink"></a></h2><p>Custom atom fields can be created in <code>Atom</code> objects by defining the <code>custom</code> keyword. By default, <code>custom == nothing</code>. The custom fields can be added on construction, or  with the <code>add_custom_field</code> function, which creates a new instance of an <code>Atom</code>  with the added value in the custom field:</p><p>For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atom = Atom(custom=&quot;TEST&quot;);
+
+julia&gt; atom.custom
+&quot;TEST&quot;
+
+julia&gt; atom = Atom(;name = &quot;CA&quot;, resname=&quot;ALA&quot;); # no custom field
+
+julia&gt; atom.resname
+&quot;ALA&quot;
+
+julia&gt; new_atom = add_custom_field(atom, Dict(:charge =&gt; 2.0));
+
+julia&gt; new_atom.resname
+&quot;ALA&quot;
+
+julia&gt; new_atom.custom[:charge]
+2.0
+</code></pre><article><details class="docstring"><summary id="PDBTools.add_custom_field"><a class="docstring-binding" href="#PDBTools.add_custom_field"><code>PDBTools.add_custom_field</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">add_custom_field(atom::Atom, value)</code></pre><p>Adds a custom field to an <code>Atom</code> structure, returning a new <code>Atom</code> structure with the custom field added. The returning Atom structure is parameterized with the type of <code>value</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L218-L224">source</a></section></details></article><h1 id="Elements-for-custom-atom-types"><a class="docs-heading-anchor" href="#Elements-for-custom-atom-types">Elements for custom atom types</a><a id="Elements-for-custom-atom-types-1"></a><a class="docs-heading-anchor-permalink" href="#Elements-for-custom-atom-types" title="Permalink"></a></h1><p>The types of atoms that <code>PDBTools</code> recognizes is defined in the <code>PDBTools.elements</code> dictionary.  If new atom types are defined, it is possible to add these types to the dictionary, such that other functions work for the new types. The function to be used is <code>add_element!</code>.</p><article><details class="docstring"><summary id="PDBTools.add_element!"><a class="docstring-binding" href="#PDBTools.add_element!"><code>PDBTools.add_element!</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">add_element!(symbol::String, reference_element::PDBTools.Element; elements=PDBTools.elements)</code></pre><p>Add a new element to the elements dictionary. If the element already exists, overwrite it.</p><p>To remove all custom elements, use <code>remove_custom_elements!()</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; remove_custom_elements!(); # if any
+
+julia&gt; atoms = [ Atom(name=&quot;A1&quot;), Atom(name=&quot;A2&quot;) ];
+
+julia&gt; add_element!(&quot;A1&quot;, PDBTools.elements[&quot;C&quot;])
+PDBTools.Element(:C, InlineStrings.String15(&quot;C&quot;), &quot;Carbon&quot;, 6, 12.011f0, true, 1.7f0)
+
+julia&gt; add_element!(&quot;A2&quot;, PDBTools.elements[&quot;N&quot;])
+PDBTools.Element(:N, InlineStrings.String15(&quot;N&quot;), &quot;Nitrogen&quot;, 7, 14.0067f0, true, 1.55f0)
+
+julia&gt; element(atoms[1])
+&quot;C&quot;
+
+julia&gt; element(atoms[2])
+&quot;N&quot;
+
+julia&gt; mass(atoms)
+26.0177f0
+
+julia&gt; remove_custom_elements!(); </code></pre><p>Here we repeteadly call <code>remove_custom_elements!()</code> to guarantee the proper execution of the test codes, without any custom elements predefined.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/properties/elements.jl#L120-L158">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.remove_custom_elements!"><a class="docstring-binding" href="#PDBTools.remove_custom_elements!"><code>PDBTools.remove_custom_elements!</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">remove_custom_elements!()</code></pre><p>Remove all custom elements from the elements dictionary.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; remove_custom_elements!();
+
+julia&gt; add_element!(&quot;GN&quot;, PDBTools.elements[&quot;N&quot;])
+PDBTools.Element(:N, InlineStrings.String15(&quot;N&quot;), &quot;Nitrogen&quot;, 7, 14.0067f0, true, 1.55f0)
+
+julia&gt; element(Atom(name=&quot;GN&quot;))
+&quot;N&quot;
+
+julia&gt; remove_custom_elements!();
+
+julia&gt; element(Atom(name=&quot;GN&quot;)) # returns `nothing`
+</code></pre><p>Here we repeatedly call <code>remove_custom_elements!()</code> to guarantee the proper execution of the test codes, without any custom elements predefined.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/properties/elements.jl#L182-L209">source</a></section></details></article><h2 id="Additional-property-retrieving-and-set-functions"><a class="docs-heading-anchor" href="#Additional-property-retrieving-and-set-functions">Additional property-retrieving and set functions</a><a id="Additional-property-retrieving-and-set-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Additional-property-retrieving-and-set-functions" title="Permalink"></a></h2><p>The following functions are supported as part of the API, as a intending to interface with <code>AtomsBase</code>. Nevertheless, currently these functions do not overload the exported ones from <code>AtomsBase</code>, because that package is in a unstable state.</p><table><tr><th style="text-align: left">Function</th><th style="text-align: left">Example</th><th style="text-align: center">Output</th></tr><tr><td style="text-align: left"><code>atomic_number(::Atom)</code></td><td style="text-align: left"><code>atomic_number(Atom(name=&quot;NE2&quot;))</code></td><td style="text-align: center"><code>7</code></td></tr><tr><td style="text-align: left"><code>atomic_symbol(::Atom)</code></td><td style="text-align: left"><code>atomic_symbol(Atom(name=&quot;NE2&quot;))</code></td><td style="text-align: center"><code>:N</code></td></tr><tr><td style="text-align: left"><code>atomic_mass(::Atom)</code></td><td style="text-align: left"><code>atomic_mass(Atom(name=&quot;NE2&quot;))</code></td><td style="text-align: center"><code>14.0067</code></td></tr><tr><td style="text-align: left"><code>position(::Atom)</code></td><td style="text-align: left"><code>position(Atom(name=&quot;NE2&quot;))</code></td><td style="text-align: center"><code>SVector{3,Float64}(0,0,0)</code></td></tr><tr><td style="text-align: left"><code>set_position!(::Atom, x::Union{Tuple,AbstractVector})</code></td><td style="text-align: left"><code>set_position!(at, (1,2,3))</code></td><td style="text-align: center"><code>Atom</code></td></tr></table><article><details class="docstring"><summary id="PDBTools.atomic_number"><a class="docstring-binding" href="#PDBTools.atomic_number"><code>PDBTools.atomic_number</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">atomic_number(atom::Atom)</code></pre><p>Returns the atomic number of an atom from its <code>Atom</code> structure.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; at = Atom(name=&quot;NT3&quot;);
+
+julia&gt; atomic_number(at)
+7</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L683-L699">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.atomic_symbol"><a class="docstring-binding" href="#PDBTools.atomic_symbol"><code>PDBTools.atomic_symbol</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">atomic_symbol(atom::Atom)</code></pre><p>Returns the atomic symbol of an atom given the <code>Atom</code> structure.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L249-L254">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.atomic_mass"><a class="docstring-binding" href="#PDBTools.atomic_mass"><code>PDBTools.atomic_mass</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">atomic_mass(atom::Atom)</code></pre><p>Returns the atomic mass of an atom given the <code>Atom</code> structure.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L257-L262">source</a></section></details></article><article><details class="docstring"><summary id="Base.position"><a class="docstring-binding" href="#Base.position"><code>Base.position</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">position(atom::Atom)</code></pre><p>Returns the position of an atom given the <code>Atom</code> structure.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L265-L270">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.set_position!"><a class="docstring-binding" href="#PDBTools.set_position!"><code>PDBTools.set_position!</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">set_position!(atom::Atom, x::Union{Tuple,AbstractVector})</code></pre><p>Sets the position (x,y,z coordinates) of the atom, given a vector or tuple of coordinates.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/e321c8a9f2d3daf2c894895b55e0c5f86b906296/src/struct_and_iterators/Atom.jl#L273-L278">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../iterators/">« Iterators</a><a class="docs-footer-nextpage" href="../contacts/">Contact maps »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Friday 12 December 2025 14:17">Friday 12 December 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
