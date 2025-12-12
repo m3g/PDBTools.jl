@@ -2,19 +2,21 @@
 CollapsedDocStrings = true
 ```
 
-# [*m*-value (protein transfer free energy) calculator](@id mvalues)
+# [Protein transfer free energy calculator](@id mvalues)
+
+These function compute the transfer free energies of proteins from water to different solvent, using 
+the Tanford additive transfer models. 
 
 *m*-values are the transfer free-energy difference, here in `kcal/mol`, between two structures from water
-to a 1M solution of a cosolvent.
+to a 1M solution of a cosolvent. Estimates of `m-values` for denaturation events can be computed
+using the Creamer estimates for denatued accessible surface areas.
 
 ```@docs
+transfer_free_energy
 mvalue
 ```
 
-The *m*-values can be estimated by the Tanford transfer model, in which each amino acid contributes
-to the transfer free energy according to the change in its solvent accessible surface area and 
-experimental values of individual amino acid transfer energies, and a backbone contribution
-(here we implement the Auton/Bolen and Moeser/Horinek models 
+Here we implement the Auton/Bolen and Moeser/Horinek models 
 [[1](https://doi.org/10.1021/jp409934q), 
 [2](https://doi.org/10.1016/s0076-6879(07)28023-1), 
 [3](https://www.pnas.org/doi/10.1073/pnas.0706251104)]). 
@@ -22,12 +24,34 @@ Typically, these models are used to obtain the effect of cosolvent on the struct
 but the current implementation allows the practical use of these functions to compute *m*-values of 
 more general transformations, as described in the examples.
 
+## Transfer free energy
+
+The transfer free energy of a protein from water to a 1M solution of a cosolvent can be estimated
+with the `transfer_free_energy` function:
+
+```@example mvalue
+using PDBTools
+native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/1MJC_native.pdb", "protein")
+tfe = transfer_free_energy(native_state, "urea")
+```
+
+The resulting `TransferFreeEnegy` object contains the information of the contribution of each residue
+to the transfer free energy obtained, split into backbone and side-chain contributions:
+```@example mvalue
+tfe.residue_contributions_bb[1]
+```
+```@example mvalue
+tfe.residue_contributions_sc[1]
+```
+
+When multiple protein conformations are of interest, the `mvalue` methods provide a direct way to compute the 
+variations in transfer free energies associated to the states involved, as shown in the following examples.
+
 ## Protein denaturation
 
 Consider these two states of a model protein, a native and a denatured (straight chain) state, for
 which we compute the SASA:
 ```@example mvalue
-using PDBTools
 native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/1MJC_native.pdb", "protein")
 sasa_native = sasa_particles(native_state)
 ```
