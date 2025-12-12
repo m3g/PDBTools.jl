@@ -16,10 +16,11 @@ struct MValue{T}
     sc::Float32
     residue_contributions_bb::Vector{Float32}
     residue_contributions_sc::Vector{Float32}
+    cosolvent::String
 end
 function Base.show(io::IO, ::MIME"text/plain", m::MValue)
     print(io, chomp("""
-    $(typeof(m)) - $(m.nresidues) residues.
+    $(typeof(m)) - $(m.nresidues) residues - cosolvent: \"$(m.cosolvent)\"
         Total m-value: $(m.tot) kcal mol⁻¹
         Backbone contributions: $(m.bb) kcal mol⁻¹
         Side-chain contributions: $(m.sc) kcal mol⁻¹
@@ -28,7 +29,7 @@ end
 
 #=
 
-This function avoids allocating a new selection function at each
+This functor avoids allocating a new selection function at each
 iteration of the mvalue calculation, by replacing the residue to
 be compared instead of defining a new anonymous function.
 
@@ -79,6 +80,7 @@ A `MValue` object, with fields:
 - `sc::Float32`: Side chain contribution to the m-value (kcal/mol/M).
 - `residue_contributions_bb::Vector{Float32}`: Backbone contributions of each residue to the m-value.
 - `residue_contributions_sc::Vector{Float32}`: Side-chain contributions of each residue to the m-value.
+- `cosolvent::String`: The cosolvent considered.
 
 ## Example
 
@@ -165,15 +167,15 @@ function mvalue(
     bb = sum(residue_contributions_bb)
     sc = sum(residue_contributions_sc)
     tot = bb + sc
-    return MValue{model}(length(residues_initial), tot, bb, sc, residue_contributions_bb, residue_contributions_sc)
+    return MValue{model}(length(residues_initial), tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cosolvent)
 end
 
 #=
     tfe_asa(::Type{Urea}, restype::AbstractString)
 
 Returns the transfer free energy per unit area (kcal/nm^2) for side chain and backbone
-for a given amino acid type in urea solution according to the Tanford transfer model,
-as implemente by Moeser and Horinek (https://pubs.acs.org/doi/10.1021/jp409934q#_i14).
+for a given amino acid type in cosolvent solution according to the Tanford transfer model,
+as implemented by Auton and Bolen or Moeser and Horinek (https://pubs.acs.org/doi/10.1021/jp409934q#_i14).
 
 =#
 function tfe_asa(
@@ -202,6 +204,7 @@ function tfe_asa(
     return bb_contribution / 1000, sc_contribution / 1000
 end
 
+include("./transfer_free_energy.jl")
 include("./mvalue_exogenous.jl")
 include("./creamer.jl")
 include("./testing.jl")
