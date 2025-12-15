@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.17.1-DEV
+Version 3.18.0-DEV
 --------------
 - ![FEATURE][badge-feature] Numeric selection keywords accept "to" to define ranges, as in `residue 1 to 5`. 
 
