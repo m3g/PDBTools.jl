@@ -414,7 +414,20 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
                 end
                 
                 keyword_args = s_vec[begin+1:end] # Arguments following the keyword name
-        
+                # Support range syntax "start to end" for numeric keywords, e.g. "index 5 to 10"
+                if length(keyword_args) == 3 && keyword_args[2] == "to"
+                    # only numeric types support ranges
+                    if !(key_obj.ValueType <: Number)
+                        parse_error("Range syntax 'to' is only supported for numeric keywords.")
+                    end
+                    # validate bounds parse correctly
+                    if isnothing(tryparse(key_obj.ValueType, keyword_args[1])) || isnothing(tryparse(key_obj.ValueType, keyword_args[3]))
+                        parse_error("Could not parse range bounds for keyword '$(key_obj.name)'. Expected $(key_obj.ValueType)")
+                    end
+                    # Build an AND expression: keyword >= start AND keyword <= end
+                    return (&, key_obj([">=", keyword_args[1]]), key_obj(["<=", keyword_args[3]]))
+                end
+
                 is_operator_syntax_match = false
                 if !isempty(keyword_args)
                     first_arg = keyword_args[1]
@@ -536,6 +549,11 @@ end
     @test length(select(atoms, "resname ALA ARG GLU and name N")) == 14
     @test length(select(atoms, "(resname ALA ARG GLU) and (name N or name CA)")) == 28
     @test length(select(atoms, "index 2 3 4 5")) == 4
+    @test length(select(atoms, "index 5 to 10")) == length(select(atoms, "index >= 5 and index <= 10"))
+    @test length(select(atoms, "index 5 to 10")) == 6
+    @test length(select(atoms, "residue 5 to 10")) == length(select(atoms, "residue >= 5 and residue <= 10"))
+    @test length(select(atoms, "resnum 5 to 10")) == length(select(atoms, "resnum >= 5 and resnum <= 10"))
+    @test length(select(atoms, "x 5 to 10")) == length(select(atoms, "x >= 5 and x <= 10"))
     @test length(select(atoms, "element C")) == 1023
     @test length(select(atoms, "element C N")) == 1331
     @test length(select(atoms, "(element C N)")) == 1331
@@ -562,6 +580,10 @@ end
     @test_throws ArgumentError select(atoms, "residue")
     @test_throws ArgumentError select(atoms, "element")
     @test_throws ArgumentError select(atoms, "not")
+    @test_throws ArgumentError select(atoms, "name 1 to 5")
+    @test_throws ArgumentError select(atoms, "index 5 to")
+    @test_throws ArgumentError select(atoms, "index 5 to a")
+    @test_throws ArgumentError select(atoms, "index 5 to 10 12")
 
     # test string interpolation
     t = "protein"
