@@ -27,11 +27,8 @@ Select
 - Accepted Boolean operators: `and`, `or`, and `not`. 
 - Accepted comparison operators: `<`, `>`, `<=`, `=>`, `==`
 - Support for parenthesis. 
-- Support for multiple keys as a shorcut for multiple `or` (i. e. `residue 1 3 5`)
-
-!!! compat
-    - Support for selection strings supporting parenthesis and multiple keys was introduced in v3.1.0
-    - Support for selection by coordinates, `x`, `y`, and `z` was introduced in v3.2.0
+- Support for multiple keys as a shortcut for multiple `or` (i. e. `residue 1 3 5`).
+- Supports `to` as a syntax sugar for ranges, as in `residue 2 to 15`.
 
 The accepted keywords for the selection are: 
 
