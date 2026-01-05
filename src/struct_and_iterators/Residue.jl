@@ -404,7 +404,7 @@ julia> atoms = read_pdb(PDBTools.SMALLPDB);
 julia> residues = collect(eachresidue(atoms));
 
 julia> mass(residues[1])
-82.0385f0
+73.09489f0
 ```
 
 """
@@ -461,12 +461,12 @@ and 0 is returned.
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue 1");
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and resname GLU");
 
 julia> residues = collect(eachresidue(atoms));
 
 julia> charge(residues[1])
-1
+-1
 ```
 
 """

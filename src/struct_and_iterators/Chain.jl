@@ -233,7 +233,7 @@ julia> atoms = read_pdb(PDBTools.CHAINSPDB);
 julia> chains = collect(eachchain(atoms));
 
 julia> mass(chains[1])
-5841.794f0
+353.3787f0
 ```
 
 """

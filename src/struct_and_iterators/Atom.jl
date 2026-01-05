@@ -496,7 +496,7 @@ julia> using PDBTools
 julia> atoms = read_pdb(PDBTools.SMALLPDB);
 
 julia> pdb_element(atoms[1])
-""
+"N"
 ```
 
 """

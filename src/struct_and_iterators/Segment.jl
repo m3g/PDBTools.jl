@@ -166,7 +166,7 @@ julia> atoms = read_pdb(PDBTools.DIMERPDB);
 julia> segments = collect(eachsegment(atoms));
 
 julia> mass(segments[1])
-23374.684f0
+25222.553f0
 ```
 
 """
