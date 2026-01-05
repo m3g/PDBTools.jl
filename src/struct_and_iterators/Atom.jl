@@ -153,19 +153,386 @@ end
     @test !(Atom(name="CA") == Atom(name="N"))
 end
 
+"""
+    index(atom::Atom)
+
+Returns the sequential index of the atom in the structure.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Int32`: The sequential index of the atom.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atom = Atom(index=42);
+
+julia> index(atom)
+42
+```
+
+"""
 index(atom::Atom) = atom.index
+
+"""
+    index_pdb(atom::Atom)
+
+Returns the atom index as written in the PDB file (may differ from sequential index).
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Int32`: The PDB file index of the atom.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> index_pdb(atoms[1])
+1
+```
+
+"""
 index_pdb(atom::Atom) = atom.index_pdb
+
+"""
+    name(atom::Atom)
+
+Returns the name of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `String`: The atom name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> name(atoms[1])
+"N"
+```
+
+"""
 name(atom::Atom) = atom.name
+
+"""
+    resname(atom::Atom)
+
+Returns the residue name of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `String`: The residue name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> resname(atoms[1])
+"ALA"
+```
+
+"""
 resname(atom::Atom) = atom.resname
+
+"""
+    chain(atom::Atom)
+
+Returns the chain identifier of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `String`: The chain identifier.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> chain(atoms[1])
+"A"
+```
+
+"""
 chain(atom::Atom) = atom.chain
+"""
+    resnum(atom::Atom)
+
+Returns the residue number as written in the PDB file.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Int32`: The residue number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> resnum(atoms[1])
+1
+```
+
+"""
 resnum(atom::Atom) = atom.resnum
+
+"""
+    residue(atom::Atom)
+
+Returns the sequential residue (molecule) number in the structure.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Int32`: The sequential residue number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residue(atoms[1])
+1
+```
+
+"""
 residue(atom::Atom) = atom.residue
+
+"""
+    beta(atom::Atom)
+
+Returns the temperature factor (B-factor) of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Float32`: The B-factor value.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> beta(atoms[1])
+0.0f0
+```
+
+"""
 beta(atom::Atom) = atom.beta
+
+"""
+    occup(atom::Atom)
+
+Returns the occupancy of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Float32`: The occupancy value (typically between 0 and 1).
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> occup(atoms[1])
+0.0f0
+```
+
+"""
 occup(atom::Atom) = atom.occup
+
+"""
+    model(atom::Atom)
+
+Returns the model number of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Int32`: The model number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> model(atoms[1])
+1
+```
+
+"""
 model(atom::Atom) = atom.model
+"""
+    segname(atom::Atom)
+
+Returns the segment name of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `String`: The segment name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> segname(atoms[1])
+"PROT"
+```
+
+"""
 segname(atom::Atom) = atom.segname
+
+"""
+    charge(atom::Atom)
+
+Returns the formal charge of the atom.
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `Float32`: The charge value.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atom = Atom(charge=1.0);
+
+julia> charge(atom)
+1.0f0
+```
+
+"""
 charge(atom::Atom) = atom.charge
+
+"""
+    pdb_element(atom::Atom)
+
+Returns the element symbol as written in the PDB file (columns 77-78).
+
+# Positional Arguments
+
+- `atom::Atom`: An `Atom` object.
+
+# Returns
+
+- `String`: The element symbol from the PDB file.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> pdb_element(atoms[1])
+"N"
+```
+
+"""
 pdb_element(atom::Atom) = atom.pdb_element
+
+"""
+    get_atoms(atom::Atom)
+    get_atoms(atoms::AbstractVector{<:Atom})
+
+Returns the atom or vector of atoms. This function provides a consistent interface
+for extracting atoms from various structural elements (Atom, Residue, Chain, Model, etc.).
+
+# Positional Arguments
+
+- `atom::Atom`: A single `Atom` object.
+- `atoms::AbstractVector{<:Atom}`: A vector of `Atom` objects.
+
+# Returns
+
+- `Atom` or `AbstractVector{<:Atom}`: The input atom(s).
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> get_atoms(atoms[1]) == atoms[1]
+true
+
+julia> get_atoms(atoms) == atoms
+true
+```
+
+"""
 get_atoms(atom::Atom) = atom
 get_atoms(atoms::AbstractVector{<:Atom}) = atoms
 

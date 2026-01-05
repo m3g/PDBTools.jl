@@ -93,11 +93,181 @@ julia> chains = collect(eachchain(ats))
 eachchain(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Chain}(atoms)
 
 # Specific getters for this type
+
+"""
+    name(chain::Chain)
+
+Returns the name (chain identifier) of the chain.
+
+# Positional Arguments
+
+- `chain::Chain`: A `Chain` object.
+
+# Returns
+
+- `String`: The chain identifier.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chains = collect(eachchain(atoms));
+
+julia> name(chains[1])
+"A"
+```
+
+"""
 name(chain::Chain) = chain.chain
+
+"""
+    chain(chain::Chain)
+
+Returns the chain identifier of the chain.
+
+# Positional Arguments
+
+- `chain::Chain`: A `Chain` object.
+
+# Returns
+
+- `String`: The chain identifier.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chains = collect(eachchain(atoms));
+
+julia> chain(chains[1])
+"A"
+```
+
+"""
 chain(chain::Chain) = chain.chain
+
+"""
+    model(chain::Chain)
+
+Returns the model number of the chain.
+
+# Positional Arguments
+
+- `chain::Chain`: A `Chain` object.
+
+# Returns
+
+- `Int32`: The model number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chains = collect(eachchain(atoms));
+
+julia> model(chains[1])
+1
+```
+
+"""
 model(chain::Chain) = chain.model
+
+"""
+    segname(chain::Chain)
+
+Returns the segment name of the chain.
+
+# Positional Arguments
+
+- `chain::Chain`: A `Chain` object.
+
+# Returns
+
+- `String`: The segment name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+
+julia> chains = collect(eachchain(atoms));
+
+julia> segname(chains[1])
+"PROT"
+```
+
+"""
 segname(chain::Chain) = chain.segname
+
+"""
+    mass(chain::Chain)
+
+Returns the total mass of all atoms in the chain.
+
+# Positional Arguments
+
+- `chain::Chain`: A `Chain` object.
+
+# Returns
+
+- `Float32`: The total mass in atomic mass units (amu).
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chains = collect(eachchain(atoms));
+
+julia> mass(chains[1])
+353.3787f0
+```
+
+"""
 mass(chain::Chain) = mass(@view chain.atoms[chain.range])
+
+"""
+    get_atoms(chain::Chain)
+
+Returns a view of the atoms that belong to the chain.
+
+# Positional Arguments
+
+- `chain::Chain`: A `Chain` object.
+
+# Returns
+
+- `SubArray{Atom}`: A view of the atoms in the chain.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia> chains = collect(eachchain(atoms));
+
+julia> chain_atoms = get_atoms(chains[1]);
+
+julia> length(chain_atoms)
+48
+```
+
+"""
 get_atoms(chain::Chain) = @view(chain.atoms[chain.range])
 
 @testitem "Chain iterator" begin

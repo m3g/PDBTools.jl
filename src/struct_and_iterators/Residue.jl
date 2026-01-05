@@ -177,15 +177,299 @@ julia> collect(eachresidue(atoms))
 eachresidue(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Residue}(atoms)
 
 # Specific getters for this type
+
+"""
+    name(residue::Residue)
+
+Returns the name (residue name) of the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `String`: The residue name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> name(residues[1])
+"ALA"
+```
+
+"""
 name(residue::Residue) = residue.resname
+
+"""
+    resname(residue::Residue)
+
+Returns the residue name of the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `String`: The residue name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> resname(residues[1])
+"ALA"
+```
+
+"""
 resname(residue::Residue) = residue.resname
+
+"""
+    residue(residue::Residue)
+
+Returns the sequential residue (molecule) number of the residue in the structure.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `Int32`: The sequential residue number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> residue(residues[1])
+1
+```
+
+"""
 residue(residue::Residue) = residue.residue
+
+"""
+    resnum(residue::Residue)
+
+Returns the residue number as written in the PDB file.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `Int32`: The residue number from the PDB file.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> resnum(residues[1])
+1
+```
+
+"""
 resnum(residue::Residue) = residue.resnum
+
+"""
+    chain(residue::Residue)
+
+Returns the chain identifier of the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `String`: The chain identifier.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> chain(residues[1])
+"A"
+```
+
+"""
 chain(residue::Residue) = residue.chain
+
+"""
+    model(residue::Residue)
+
+Returns the model number of the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `Int32`: The model number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> model(residues[1])
+1
+```
+
+"""
 model(residue::Residue) = residue.model
+
+"""
+    segname(residue::Residue)
+
+Returns the segment name of the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `String`: The segment name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> segname(residues[1])
+"PROT"
+```
+
+"""
 segname(residue::Residue) = residue.segname
+
+"""
+    mass(residue::Residue)
+
+Returns the total mass of all atoms in the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `Float32`: The total mass in atomic mass units (amu).
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> mass(residues[1])
+73.09489f0
+```
+
+"""
 mass(residue::Residue) = mass(@view residue.atoms[residue.range])
+
+"""
+    get_atoms(residue::Residue)
+
+Returns a view of the atoms that belong to the residue.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `SubArray{Atom}`: A view of the atoms in the residue.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> res_atoms = get_atoms(residues[1]);
+
+julia> length(res_atoms)
+12
+```
+
+"""
 get_atoms(residue::Residue) = @view(residue.atoms[residue.range])
+
+"""
+    charge(residue::Residue)
+
+Returns the formal charge of the residue. For protein residues, the charge is obtained
+from the standard protein residue database. For non-protein residues, a warning is issued
+and 0 is returned.
+
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `Int`: The formal charge of the residue.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and resname GLU");
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> charge(residues[1])
+-1
+```
+
+"""
 function charge(residue::Residue)  
     if residue.resname in keys(protein_residues)
         return protein_residues[residue.resname].charge

@@ -102,7 +102,65 @@ julia> collect(models)
 eachmodel(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Model}(atoms)
 
 # Specific getters for this type
+
+"""
+    model(model::Model)
+
+Returns the model number.
+
+# Positional Arguments
+
+- `model::Model`: A `Model` object.
+
+# Returns
+
+- `Int32`: The model number.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = wget("8S8N");
+
+julia> models = collect(eachmodel(atoms));
+
+julia> model(models[1])
+1
+```
+
+"""
 model(model::Model) = model.number
+
+"""
+    get_atoms(model::Model)
+
+Returns a view of the atoms that belong to the model.
+
+# Positional Arguments
+
+- `model::Model`: A `Model` object.
+
+# Returns
+
+- `SubArray{Atom}`: A view of the atoms in the model.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = wget("8S8N");
+
+julia> models = collect(eachmodel(atoms));
+
+julia> model_atoms = get_atoms(models[1]);
+
+julia> length(model_atoms)
+234
+```
+
+"""
 get_atoms(model::Model) = @view(model.atoms[model.range])
 
 #

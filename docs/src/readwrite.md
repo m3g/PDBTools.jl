@@ -186,5 +186,26 @@ julia> printatom(atoms[1])
 edit!
 ```
 
+## Atom property getters
+
+The following functions provide convenient access to individual properties of `Atom` objects:
+
+```@docs
+index
+index_pdb
+name
+resname
+chain
+resnum
+residue
+beta
+occup
+model
+segname
+charge
+pdb_element
+get_atoms
+```
+
 
 
