@@ -84,9 +84,123 @@ julia> collect(sit)
 eachsegment(atoms::AbstractVector{<:Atom}) = EachStructuralElement{Segment}(atoms)
 
 # Specific getters for this type
+
+"""
+    name(segment::Segment)
+
+Returns the name (segment name) of the segment.
+
+# Positional Arguments
+
+- `segment::Segment`: A `Segment` object.
+
+# Returns
+
+- `String`: The segment name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia> segments = collect(eachsegment(atoms));
+
+julia> name(segments[1])
+"A"
+```
+
+"""
 name(segment::Segment) = segment.name
+
+"""
+    segname(segment::Segment)
+
+Returns the segment name of the segment.
+
+# Positional Arguments
+
+- `segment::Segment`: A `Segment` object.
+
+# Returns
+
+- `String`: The segment name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia> segments = collect(eachsegment(atoms));
+
+julia> segname(segments[1])
+"A"
+```
+
+"""
 segname(segment::Segment) = segment.name
+
+"""
+    mass(segment::Segment)
+
+Returns the total mass of all atoms in the segment.
+
+# Positional Arguments
+
+- `segment::Segment`: A `Segment` object.
+
+# Returns
+
+- `Float32`: The total mass in atomic mass units (amu).
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia> segments = collect(eachsegment(atoms));
+
+julia> mass(segments[1])
+23374.684f0
+```
+
+"""
 mass(segment::Segment) = mass(@view segment.atoms[segment.range])
+
+"""
+    get_atoms(segment::Segment)
+
+Returns a view of the atoms that belong to the segment.
+
+# Positional Arguments
+
+- `segment::Segment`: A `Segment` object.
+
+# Returns
+
+- `SubArray{Atom}`: A view of the atoms in the segment.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia> segments = collect(eachsegment(atoms));
+
+julia> seg_atoms = get_atoms(segments[1]);
+
+julia> length(seg_atoms)
+1905
+```
+
+"""
 get_atoms(segment::Segment) = @view(segment.atoms[segment.range])
 
 @testitem "Segment iterator" begin

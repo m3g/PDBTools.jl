@@ -69,7 +69,23 @@ r1_atoms = get_atoms(residues[1])
 ```@docs
 Residue
 eachresidue
-resname
+```
+
+#### Residue property getters
+
+The following functions provide convenient access to properties of `Residue` objects:
+
+```@docs
+name(::Residue)
+resname(::Residue)
+residue(::Residue)
+resnum(::Residue)
+chain(::Residue)
+model(::Residue)
+segname(::Residue)
+mass(::Residue)
+get_atoms(::Residue)
+charge(::Residue)
 residuename
 ```
 
@@ -139,6 +155,19 @@ Chain
 eachchain
 ```
 
+#### Chain property getters
+
+The following functions provide convenient access to properties of `Chain` objects:
+
+```@docs
+name(::Chain)
+chain(::Chain)
+model(::Chain)
+segname(::Chain)
+mass(::Chain)
+get_atoms(::Chain)
+```
+
 ## Iterate over segments 
 
 The `eachsegment` iterator enables iteration over the segments of a structure. For example:
@@ -201,6 +230,17 @@ Segment
 eachsegment
 ```
 
+#### Segment property getters
+
+The following functions provide convenient access to properties of `Segment` objects:
+
+```@docs
+name(::Segment)
+segname(::Segment)
+mass(::Segment)
+get_atoms(::Segment)
+```
+
 ## Iterate over models
 
 The `eachmodel` iterator enables iteration over the segments of a structure. For example:
@@ -238,5 +278,14 @@ center_of_mass.(eachmodel(ats))
 ```@docs
 Model
 eachmodel
+```
+
+#### Model property getters
+
+The following functions provide convenient access to properties of `Model` objects:
+
+```@docs
+model(::Model)
+get_atoms(::Model)
 ```
 
