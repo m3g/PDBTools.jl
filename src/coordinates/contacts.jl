@@ -288,7 +288,7 @@ function contact_map(
     map = zero(ContactMap{type}, length(residues), length(residues), dmax, gap, residues, residues)
     nthreads = parallel ? Threads.nthreads() : 1
     @sync for ires_range in ChunksSplitters.chunks(eachindex(residues); n=nthreads)
-        @spawn for ires in ires_range
+        Threads.@spawn for ires in ires_range
             for jres in ires+gap:length(residues)
                 r1 = residues[ires]
                 r2 = residues[jres]
@@ -320,7 +320,7 @@ function contact_map(
     map = zero(ContactMap{type}, length(residues), length(residues2), dmax, 0, residues, residues2)
     nthreads = parallel ? Threads.nthreads() : 1
     @sync for ires_range in ChunksSplitters.chunks(eachindex(residues); n=nthreads)
-        @spawn for ires in ires_range
+        Threads.@spawn for ires in ires_range
             for jres in eachindex(residues2)
                 r1 = residues[ires]
                 r2 = residues2[jres]
