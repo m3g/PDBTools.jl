@@ -1,3 +1,5 @@
+import ChunkSplitters
+
 export ContactMap, contact_map, residue_residue_distance
 
 """
@@ -81,7 +83,7 @@ end
         for j in eachindex(r_pbc, r_nopbc)
             dpbc = residue_residue_distance(r_pbc[i], r_pbc[j]; unitcell=uc)
             dnopbc = residue_residue_distance(r_nopbc[i], r_nopbc[j])
-            @test dpbc ≈ dnopbc rtol=1e-2
+            @test dpbc ≈ dnopbc rtol = 1e-2
         end
     end
 end
@@ -138,11 +140,11 @@ end
 import Base: +, -
 
 function _err_sum_cmap(c1::ContactMap, c2::ContactMap)
-    if (length(c1.residues1) != length(c2.residues1)) || 
+    if (length(c1.residues1) != length(c2.residues1)) ||
        (length(c1.residues2) != length(c2.residues2))
         throw(ArgumentError("""\n
             Arithmetic operations are only defined for contact maps with the same number of residues.
-        
+
         """))
     end
     return nothing
@@ -151,7 +153,7 @@ end
 function +(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
     _err_sum_cmap(c1, c2)
     c3_matrix = copy(c1.matrix)
-    for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
+    for i in eachindex(c1.matrix, c2.matrix, c3_matrix)
         c3_matrix[i] = if (c2.matrix[i] === true)
             true
         else
@@ -163,7 +165,7 @@ end
 function -(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
     _err_sum_cmap(c1, c2)
     c3_matrix = zeros(Union{Int,Missing}, size(c1.matrix))
-    for i in eachindex(c1.matrix,c2.matrix,c3_matrix)
+    for i in eachindex(c1.matrix, c2.matrix, c3_matrix)
         c3_matrix[i] = if (c1.matrix[i] === true) & (c2.matrix[i] === true)
             0
         elseif (c1.matrix[i] === true) & (!(c2.matrix[i] === true))
@@ -231,6 +233,7 @@ Returns the contact map as a `ContactMap` object.
   If `false`, the matrix contains distances between residues.
 - `positions`: Positions of the atoms in the structure. If provided, the function uses these 
   positions to calculate the distance between residues.
+- `parallel`: `true` by default, to use multithreading if available. To disable set to `false`.
 
 # Examples
 
@@ -278,20 +281,26 @@ function contact_map(
     discrete::Bool=true,
     unitcell=nothing,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
+    parallel::Bool=true,
 )
     type = Union{Missing,discrete ? Bool : typeof(atoms1[1].x)}
     residues = collect(PDBTools.eachresidue(atoms1))
     map = zero(ContactMap{type}, length(residues), length(residues), dmax, gap, residues, residues)
-    for ires in eachindex(residues), jres in ires+gap:length(residues)
-        r1 = residues[ires]
-        r2 = residues[jres]
-        d12 = residue_residue_distance(r1, r2; positions, unitcell)
-        if discrete
-            map[ires, jres] = d12 <= dmax ? true : false
-        else
-            map[ires, jres] = d12 <= dmax ? d12 : missing
+    nthreads = parallel ? Threads.nthreads() : 1
+    @sync for ires_range in ChunksSplitters.chunks(eachindex(residues); n=nthreads)
+        @spawn for ires in ires_range
+            for jres in ires+gap:length(residues)
+                r1 = residues[ires]
+                r2 = residues[jres]
+                d12 = residue_residue_distance(r1, r2; positions, unitcell)
+                if discrete
+                    map[ires, jres] = d12 <= dmax ? true : false
+                else
+                    map[ires, jres] = d12 <= dmax ? d12 : missing
+                end
+                map[jres, ires] = map.matrix[ires, jres]
+            end
         end
-        map[jres, ires] = map.matrix[ires, jres]
     end
     return map
 end
@@ -303,19 +312,25 @@ function contact_map(
     discrete::Bool=true,
     unitcell=nothing,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
+    parallel::Bool=true,
 )
     type = Union{Missing,discrete ? Bool : typeof(atoms1[1].x)}
     residues = collect(PDBTools.eachresidue(atoms1))
     residues2 = collect(PDBTools.eachresidue(atoms2))
     map = zero(ContactMap{type}, length(residues), length(residues2), dmax, 0, residues, residues2)
-    for ires in eachindex(residues), jres in eachindex(residues2)
-        r1 = residues[ires]
-        r2 = residues2[jres]
-        d12 = residue_residue_distance(r1, r2; positions, unitcell)
-        if discrete
-            map[ires, jres] = d12 <= dmax ? true : false
-        else
-            map[ires, jres] = d12 <= dmax ? d12 : missing
+    nthreads = parallel ? Threads.nthreads() : 1
+    @sync for ires_range in ChunksSplitters.chunks(eachindex(residues); n=nthreads)
+        @spawn for ires in ires_range
+            for jres in eachindex(residues2)
+                r1 = residues[ires]
+                r2 = residues2[jres]
+                d12 = residue_residue_distance(r1, r2; positions, unitcell)
+                if discrete
+                    map[ires, jres] = d12 <= dmax ? true : false
+                else
+                    map[ires, jres] = d12 <= dmax ? d12 : missing
+                end
+            end
         end
     end
     return map

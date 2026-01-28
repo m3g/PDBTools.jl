@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.18.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Contact maps can be computed using multi-threading.
 - ![INFO][badge-info] Document properly all property getters. 
 
 Version 3.18.0
