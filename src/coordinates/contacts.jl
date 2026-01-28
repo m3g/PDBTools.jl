@@ -287,7 +287,7 @@ function contact_map(
     residues = collect(PDBTools.eachresidue(atoms1))
     map = zero(ContactMap{type}, length(residues), length(residues), dmax, gap, residues, residues)
     nthreads = parallel ? Threads.nthreads() : 1
-    @sync for ires_range in ChunksSplitters.chunks(eachindex(residues); n=nthreads)
+    @sync for ires_range in ChunkSplitters.chunks(eachindex(residues); n=nthreads)
         Threads.@spawn for ires in ires_range
             for jres in ires+gap:length(residues)
                 r1 = residues[ires]
@@ -319,7 +319,7 @@ function contact_map(
     residues2 = collect(PDBTools.eachresidue(atoms2))
     map = zero(ContactMap{type}, length(residues), length(residues2), dmax, 0, residues, residues2)
     nthreads = parallel ? Threads.nthreads() : 1
-    @sync for ires_range in ChunksSplitters.chunks(eachindex(residues); n=nthreads)
+    @sync for ires_range in ChunkSplitters.chunks(eachindex(residues); n=nthreads)
         Threads.@spawn for ires in ires_range
             for jres in eachindex(residues2)
                 r1 = residues[ires]
