@@ -10,8 +10,10 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.18.1-DEV
+Version 3.19.0-DEV
 --------------
+- ![FEATURE][badge-feature] Add `parallel` option to contact and distance map calcualtions, set to false by default.
+- ![ENHANCEMENT][badge-enhancement] Implement fast contact and distance map calculations using cell lists. 
 - ![INFO][badge-info] Document properly all property getters. 
 
 Version 3.18.0
