@@ -1,4 +1,4 @@
-HEADER    PDBTools.jl - 999 atoms                 05-Jan-26
+HEADER    PDBTools.jl - 999 atoms                 29-Jan-26
 ATOM     37  N   SER A   2      14.210  24.950  39.381  0.80 -0.00       AP1 N
 ATOM     38  HN  SER A   2      13.353  24.515  39.657  0.80 -0.00       AP1 H
 ATOM     39  CA  SER A   2      13.987  25.698  38.130  0.80 -0.00       AP1 C
