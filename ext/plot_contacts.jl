@@ -43,12 +43,12 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB)
-ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0
 
 julia> # plt = heatmap(map) # uncomment to plot
 
 julia> map = contact_map(cA, cB; discrete=false) # distance map
-ContactMap{Union{Missing, Float32}} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Float32} of size (243, 12), with threshold 4.0 and gap 0
 
 julia> # plt = heatmap(map) # uncomment to plot
 ```
@@ -58,7 +58,7 @@ function heatmap(::ContactMap) end
 
 # heatmap for distance (quantitative) maps
 function heatmap(
-    map::ContactMap{Union{Missing,T}}; 
+    map::ContactMap{T}; 
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -103,7 +103,7 @@ end
 
 # heatmap for binary (discrete) maps
 function heatmap(
-    map::ContactMap{Union{Missing, Bool}}; 
+    map::ContactMap{Bool}; 
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),

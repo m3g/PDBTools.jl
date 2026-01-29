@@ -1,4 +1,5 @@
 import CellListMap
+using SparseArrays: SparseMatrixCSC, sparse, spzeros
 
 export ContactMap, contact_map, residue_residue_distance
 
@@ -20,30 +21,23 @@ calculated between residues separated by at least 3 residues in the sequence.
 
 # Fields
 
-- `matrix::Matrix{Union{Missing,T}}`: Matrix of distances between residues.
+- `matrix::SparseMatrixCSC{T}`: Sparse matrix of distances between residues. 
 - `d::T`: Threshold distance for a contact.
 - `gap::Int`: Gap between residues to calculate contacts.
 
 If the contact map was calculated with `discrete=true`, the matrix contains
-`Bool` values, where `true` indicates a contact and `false` indicates no contact.
+`Bool` values, where `true` indicates a contact.
 On the other hand, if `discrete=false`, the matrix contains distances between
-residues.
+residues. Residue pairs without contacts within the `dmax` will not be stored
+in the sparse matrix representation. 
 
 """
-struct ContactMap{T<:Union{Union{Missing,Bool},Union{Missing,<:Real}}}
-    matrix::Matrix{T}
+struct ContactMap{T<:Union{Bool,<:Real}}
+    matrix::SparseMatrixCSC{T}
     d::Float64
     gap::Int
     residues1::Vector{PDBTools.Residue}
     residues2::Vector{PDBTools.Residue}
-end
-function Base.zero(
-    ::Type{ContactMap{T}},
-    n, m, d::Real, gap::Int,
-    residues1::Vector{PDBTools.Residue},
-    residues2::Vector{PDBTools.Residue},
-) where {T}
-    ContactMap{T}([missing for i in 1:n, j in 1:m], d, gap, residues1, residues2)
 end
 Base.setindex!(map::ContactMap, value, i, j) = map.matrix[i, j] = value
 Base.getindex(map::ContactMap, i, j) = map.matrix[i, j]
@@ -64,40 +58,29 @@ function _err_sum_cmap(c1::ContactMap, c2::ContactMap)
     return nothing
 end
 
-function +(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
+function +(c1::ContactMap{Bool}, c2::ContactMap{Bool})
     _err_sum_cmap(c1, c2)
-    c3_matrix = copy(c1.matrix)
-    for i in eachindex(c1.matrix, c2.matrix, c3_matrix)
-        c3_matrix[i] = if (c2.matrix[i] === true)
-            true
-        else
-            c3_matrix[i]
-        end
-    end
+    c3_matrix = c1.matrix .| c2.matrix
     return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
-function -(c1::ContactMap{Union{Missing,Bool}}, c2::ContactMap{Union{Missing,Bool}})
+function -(c1::ContactMap{Bool}, c2::ContactMap{Bool})
     _err_sum_cmap(c1, c2)
-    c3_matrix = zeros(Union{Int,Missing}, size(c1.matrix))
+    c3_matrix = spzeros(Int, size(c1.matrix))
     for i in eachindex(c1.matrix, c2.matrix, c3_matrix)
-        c3_matrix[i] = if (c1.matrix[i] === true) & (c2.matrix[i] === true)
-            0
-        elseif (c1.matrix[i] === true) & (!(c2.matrix[i] === true))
-            1
+        if (c1.matrix[i] === true) & (!(c2.matrix[i] === true))
+            c3_matrix[i] = 1
         elseif (!(c1.matrix[i] === true)) & (c2.matrix[i] === true)
-            -1
-        else
-            missing
+            c3_matrix[i] = -1
         end
     end
     return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
 
-function +(c1::ContactMap{<:Union{Missing,<:AbstractFloat}}, c2::ContactMap{<:Union{Missing,<:AbstractFloat}})
+function +(c1::ContactMap{<:AbstractFloat}, c2::ContactMap{<:AbstractFloat})
     _err_sum_cmap(c1, c2)
     return ContactMap(c1.matrix + c2.matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
-function -(c1::ContactMap{<:Union{Missing,<:AbstractFloat}}, c2::ContactMap{<:Union{Missing,<:AbstractFloat}})
+function -(c1::ContactMap{<:AbstractFloat}, c2::ContactMap{<:AbstractFloat})
     _err_sum_cmap(c1, c2)
     return ContactMap(c2.matrix - c1.matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
@@ -165,7 +148,7 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB) # contact map between chains A and B
-ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0 
+ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
 
 julia> # using Plots; heatmap(map); # uncomment to plot the contact map
 ```
@@ -182,7 +165,7 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB) # contact map between chains A and B
-ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0 
+ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
 
 julia> # using Plots; heatmap(map); # uncomment plot the contact map
 ```
@@ -194,50 +177,47 @@ function contact_map end
 # Fast contact map calculation for big structures using cell lists.
 #
 struct MapMatrix{T}
-    m::Matrix{T}
+    col_ind::Vector{Int}
+    row_ind::Vector{Int}
+    value::Vector{T}
 end
 
-_contact(x::Bool, y::Bool) = x | y
-function _contact(x, y)
-    ismissing(x) && ismissing(y) && return missing
-    ismissing(x) && return y
-    ismissing(y) && return x
-    return min(x, y)
+function _contact!(m::MapMatrix, ires, jres; symmetric=false)
+    push!(m.col_ind, ires)
+    push!(m.row_ind, jres)
+    push!(m.value, true)
+    if symmetric
+        push!(m.row_ind, ires)
+        push!(m.col_ind, jres)
+        push!(m.value, true)
+    end
+    return m
 end
 
-CellListMap.copy_output(x::MapMatrix) = MapMatrix(copy(x.m))
+function _contact!(m::MapMatrix, ires, jres, d; symmetric=false)
+    push!(m.col_ind, ires)
+    push!(m.row_ind, jres)
+    push!(m.value, d)
+    if symmetric
+        push!(m.row_ind, ires)
+        push!(m.col_ind, jres)
+        push!(m.value, d)
+    end
+    return m
+end
+
+CellListMap.copy_output(x::MapMatrix) = MapMatrix(copy(x.col_ind), copy(x.row_ind), copy(x.value))
 function CellListMap.reducer(x::MapMatrix, y::MapMatrix)
-    for i in eachindex(x.m, y.m)
-        x.m[i] = _contact(x.m[i], y.m[i])
-    end
+    append!(x.row_ind, y.row_ind)
+    append!(x.col_ind, y.col_ind)
+    append!(x.value, y.value)
     return x
 end
-_reset(::Type{Bool}) = false
-_reset(::Type{<:Real}) = missing
-function CellListMap.reset_output!(x::MapMatrix{<:Union{Missing,<:T}}) where {T}
-    x.m .= _reset(T)
+function CellListMap.reset_output!(x::MapMatrix)   
+    empty!(x.row_ind)
+    empty!(x.col_ind)
+    empty!(x.value)
     return x
-end
-
-function update_map_matrix(
-    i, j, d2, map_matrix,
-    index_residue::Vector{Int},
-    gap::Real,
-    discrete::Bool
-)
-    (; m) = map_matrix
-    ires = index_residue[i]
-    jres = index_residue[j]
-    d_gap = abs(ires - jres)
-    if d_gap >= gap
-        if discrete
-            m[ires, jres] = true
-        elseif d_gap > 0 # same-residue distance is zero
-            m[ires, jres] = _contact(m[ires, jres], sqrt(d2))
-        end
-        m[jres, ires] = m[ires, jres]
-    end
-    return map_matrix
 end
 
 function assign_index_residue(atoms, residues)
@@ -252,6 +232,36 @@ function assign_index_residue(atoms, residues)
     return residue_index
 end
 
+function update_map_matrix(
+    i, j, d2, map_matrix,
+    index_residue::Vector{Int},
+    gap::Real,
+    discrete::Bool
+)
+    ires = index_residue[i]
+    jres = index_residue[j]
+    d_gap = abs(ires - jres)
+    if d_gap >= gap
+        if discrete
+            _contact!(map_matrix, ires, jres; symmetric=true)
+        else
+            if d_gap == 0 # same-residue distance is zero
+                _contact!(map_matrix, ires, jres, zero(d2); symmetric=true)
+            else
+                _contact!(map_matrix, ires, jres, sqrt(d2); symmetric=true)
+            end
+        end
+    end
+    return map_matrix
+end
+
+# 
+# Function to combine elements of same indices in the sparse matrix
+# final construction
+#
+_combine(::Type{Bool}, x, y) = x | y
+_combine(::Type{<:Real}, x, y) = min(x,y)
+
 function contact_map(
     atoms1::AbstractVector{<:PDBTools.Atom};
     dmax::Real=4.0,
@@ -261,11 +271,10 @@ function contact_map(
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
     parallel::Bool=false,
 )
-    type = Union{Missing,discrete ? Bool : typeof(atoms1[1].x)}
+    T = discrete ? Bool : typeof(atoms1[1].x)
     residues = collect(PDBTools.eachresidue(atoms1))
     index_residue = assign_index_residue(atoms1, residues)
-    map = zero(ContactMap{type}, length(residues), length(residues), dmax, gap, residues, residues)
-    map_matrix = MapMatrix(map.matrix)
+    map_matrix = MapMatrix(Int[], Int[], T[])
     sys = CellListMap.ParticleSystem(
         positions=isnothing(positions) ? coor.(atoms1) : positions,
         cutoff=dmax,
@@ -278,6 +287,17 @@ function contact_map(
         (x, y, i, j, d2, map_matrix) -> update_map_matrix(i, j, d2, map_matrix, index_residue, gap, discrete),
         sys
     )
+    map = ContactMap{T}(
+        sparse(
+            map_matrix.col_ind, map_matrix.row_ind, map_matrix.value, 
+            length(residues), length(residues), 
+            (x,y) -> _combine(T,x,y)
+        ), 
+        dmax, 
+        gap, 
+        residues, 
+        residues
+    )
     return map
 end
 
@@ -287,13 +307,12 @@ function update_map_matrix(
     index_residue2::Vector{Int},
     discrete::Bool,
 )
-    (; m) = map_matrix
     ires = index_residue1[i]
     jres = index_residue2[j]
     if discrete
-        m[ires, jres] = true
+        _contact!(map_matrix, ires, jres)
     else
-        m[ires, jres] = _contact(m[ires, jres], sqrt(d2))
+        _contact!(map_matrix, ires, jres, sqrt(d2))
     end
     return map_matrix
 end
@@ -308,13 +327,12 @@ function contact_map(
     positions2::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
     parallel::Bool=false,
 )
-    type = Union{Missing,discrete ? Bool : promote_type(typeof(atoms1[1].x), typeof(atoms2[1].x))}
+    T = discrete ? Bool : promote_type(typeof(atoms1[1].x), typeof(atoms2[1].x))
     residues1 = collect(PDBTools.eachresidue(atoms1))
     index_residue1 = assign_index_residue(atoms1, residues1)
     residues2 = collect(PDBTools.eachresidue(atoms2))
     index_residue2 = assign_index_residue(atoms2, residues2)
-    map = zero(ContactMap{type}, length(residues1), length(residues2), dmax, 0, residues1, residues2)
-    map_matrix = MapMatrix(map.matrix)
+    map_matrix = MapMatrix(Int[], Int[], T[])
     sys = CellListMap.ParticleSystem(
         xpositions=isnothing(positions1) ? coor.(atoms1) : positions1,
         ypositions=isnothing(positions2) ? coor.(atoms2) : positions2,
@@ -328,12 +346,24 @@ function contact_map(
         (x, y, i, j, d2, map_matrix) -> update_map_matrix(i, j, d2, map_matrix, index_residue1, index_residue2, discrete),
         sys
     )
+    map = ContactMap{T}(
+        sparse(
+            map_matrix.col_ind, map_matrix.row_ind, map_matrix.value, 
+            length(residues1), length(residues2), 
+            (x,y) -> _combine(T,x,y)
+        ), 
+        dmax, 
+        0, 
+        residues1, 
+        residues2,
+    )
     return map
 end
 
 @testitem "contact_map" begin
     using PDBTools
     using ShowMethodTesting
+    using SparseArrays
 
     # monomer
     ats = read_pdb(PDBTools.TESTPDB, "protein")
@@ -341,10 +371,10 @@ end
         map = contact_map(ats)
         @test size(map.matrix) == (104, 104)
         @test count(map.matrix) == 1106
-        @test parse_show(map) ≈ "ContactMap{Union{Missing, Bool}} of size (104, 104), with threshold 4.0 and gap 0"
+        @test parse_show(map) ≈ "ContactMap{Bool} of size (104, 104), with threshold 4.0 and gap 0"
         map = contact_map(ats; discrete=false)
-        @test sum(skipmissing(map.matrix)) ≈ 2407.2163f0
-        @test parse_show(map) ≈ "ContactMap{Union{Missing, Float32}} of size (104, 104), with threshold 4.0 and gap 0"
+        @test sum(map.matrix) ≈ 2407.2163f0
+        @test parse_show(map) ≈ "ContactMap{Float32} of size (104, 104), with threshold 4.0 and gap 0"
     end
 
     # dimer
@@ -356,9 +386,9 @@ end
         @test sum(map.matrix) == 17
         @test map[235, :] == [false, false, true, false, false, false, false, false, false, false, false, false]
         @test count(map[:, 3]) == 3
-        @test parse_show(map) ≈ "ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0"
+        @test parse_show(map) ≈ "ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0"
         map = contact_map(cA, cB; discrete=false, parallel=parallel)
-        @test sum(skipmissing(map.matrix)) ≈ 58.00371f0
+        @test sum(map.matrix) ≈ 58.00371f0
     end
 
     # Test with and without periodic boundary conditions
@@ -382,29 +412,29 @@ end
     c3 = c1 + c2
     @test sum(c3.matrix) == 424
     c3 = c2 - c1
-    @test sum(skipmissing(c3.matrix)) == -10
+    @test sum(c3.matrix) == -10
     c3 = c1 - c1
-    @test sum(skipmissing(c3.matrix)) == 0
+    @test sum(c3.matrix) == 0
     c3 = c1 + c1
     @test sum(c3.matrix) == sum(c1.matrix)
-    c2.matrix .= missing
+    droptol!(c2.matrix, 10)
     c3 = c2 - c1
-    @test sum(skipmissing(c3.matrix)) == -414
+    @test sum(c3.matrix) == -414
     c3 = c1 - c2
-    @test sum(skipmissing(c3.matrix)) == 414
+    @test sum(c3.matrix) == 414
 
     c1 = contact_map(m[1]; discrete=false)
     c2 = contact_map(m[2]; discrete=false)
     c3 = c1 + c2
-    @test sum(skipmissing(c3.matrix)) ≈ 1564.5426f0
+    @test sum(c3.matrix) ≈ 1564.5426f0
     c3 = c2 - c1
-    @test sum(skipmissing(c3.matrix)) ≈ -3.5303345f0
+    @test sum(c3.matrix) ≈ -3.5303345f0
     c3 = c1 - c1
-    @test sum(skipmissing(c3.matrix)) ≈ 0.0
+    @test sum(c3.matrix) ≈ 0.0
     c3 = c1 + c1
-    @test sum(skipmissing(c3.matrix)) ≈ 2 * sum(skipmissing(c1.matrix))
+    @test sum(c3.matrix) ≈ 2 * sum(c1.matrix)
     c3 = contact_map(m[1]; discrete=false)
-    c3.matrix .= missing
+    droptol!(c3.matrix, 10)
     c3 = c3 - c1
     @test all(ismissing, c3.matrix)
 
