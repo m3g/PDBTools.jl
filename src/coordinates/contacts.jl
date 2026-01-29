@@ -1,5 +1,5 @@
 import CellListMap
-using SparseArrays: SparseMatrixCSC, sparse, spzeros
+using SparseArrays: SparseMatrixCSC, sparse, spzeros, findnz, dropzeros!
 
 export ContactMap, contact_map, residue_residue_distance
 
@@ -71,42 +71,72 @@ end
 
 function +(c1::ContactMap{Bool}, c2::ContactMap{Bool})
     _err_sum_cmap(c1, c2)
-    c3_matrix = c1.matrix .| c2.matrix
-    return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
-end
-function -(c1::ContactMap{Bool}, c2::ContactMap{Bool})
-    _err_sum_cmap(c1, c2)
-    c3_matrix = spzeros(Int, size(c1.matrix))
-    for i in eachindex(c1.matrix, c2.matrix, c3_matrix)
-        if (c1.matrix[i] === true) & (!(c2.matrix[i] === true))
-            c3_matrix[i] = 1
-        elseif (!(c1.matrix[i] === true)) & (c2.matrix[i] === true)
-            c3_matrix[i] = -1
-        end
-    end
-    return ContactMap(c3_matrix, c1.d, c1.gap, c1.residues1, c1.residues2)
-end
-
-function +(c1::ContactMap{T1<:AbstractFloat}, c2::ContactMap{T2<:AbstractFloat}) where {T1,T2}
-    _err_sum_cmap(c1, c2)
-    T = promote_type(T1,T2)
-    c1_i, c1_j, c1_v = findnz(c1)
-    c2_i, c2_j, c2_v = findnz(c2)
+    c1_i, c1_j, c1_v = findnz(c1.matrix)
+    c2_i, c2_j, c2_v = findnz(c2.matrix)
     c_sum = sparse(
         vcat(c1_i, c2_i),
         vcat(c1_j, c2_j),
         vcat(c1_v, c2_v),
         length(c1.residues1), length(c1.residues2), 
-        (x,y) -> _combine(T,x,y)
+        (x,y) -> x | y
     )
     return ContactMap(c_sum, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
-voltar
+
+function -(c1::ContactMap{Bool}, c2::ContactMap{Bool})
+    _err_sum_cmap(c1, c2)
+    c1_i, c1_j, c1_v = findnz(c1.matrix)
+    c_sub = sparse(
+        c1_i, c1_j, Int.(c1_v),
+        length(c1.residues1), length(c1.residues2), 
+    )
+    c2_i, c2_j, c2_v = findnz(c2.matrix)
+    for iel in eachindex(c2_i, c2_j, c2_v)
+        i = c2_i[iel]
+        j = c2_j[iel]
+        v = c2_v[iel]
+        if (c_sub[i,j] == 1) & v
+            c_sub[i,j] = 0
+        elseif v
+            c_sub[i,j] = -1
+        end
+    end
+    dropzeros!(c_sub)
+    return ContactMap(c_sub, c1.d, c1.gap, c1.residues1, c1.residues2)
+end
+
+function add_sub(
+    c1::ContactMap{<:AbstractFloat}, 
+    c2::ContactMap{<:AbstractFloat},
+    op::F,
+) where {F<:Function}
+    _err_sum_cmap(c1, c2)
+    c1_i, c1_j, c1_v = findnz(c1.matrix)
+    c = sparse(
+        c1_i, c1_j, c1_v,
+        length(c1.residues1), length(c1.residues2), 
+    )
+    c2_i, c2_j, c2_v = findnz(c2.matrix)
+    for iel in eachindex(c2_i, c2_j, c2_v)
+        i = c2_i[iel]
+        j = c2_j[iel]
+        v = c2_v[iel]
+        if ismissing(c1[i,j]) | ismissing(c2[i,j])
+            c[i,j] = 0
+        else
+            c[i,j] = inv(op(inv(c[i,j]),inv(v)))
+        end
+    end
+    dropzeros!(c)
+    return ContactMap(c, c1.d, c1.gap, c1.residues1, c1.residues2)
+end
+
+function +(c1::ContactMap{<:AbstractFloat}, c2::ContactMap{<:AbstractFloat})
+    add_sub(c1, c2, +)
+end
 
 function -(c1::ContactMap{<:AbstractFloat}, c2::ContactMap{<:AbstractFloat})
-    _err_sum_cmap(c1, c2)
-    c_sub = @. inv(inv(c1) - inv(c2)) 
-    return ContactMap(c_sub, c1.d, c1.gap, c1.residues1, c1.residues2)
+    add_sub(c1, c2, -)
 end
 
 _err_same_type() = throw(ArgumentError("""\n
@@ -455,13 +485,12 @@ end
 
     c1 = contact_map(m[1]; discrete=false)
     c2 = contact_map(m[2]; discrete=false)
-    voltar
     c3 = c1 + c2
-    @test sum(c3.matrix) ≈ 1564.5426f0
+    @test sum(inv.(nonzeros(c3.matrix))) ≈ 1564.5426f0
     c3 = c2 - c1
-    @test sum(c3.matrix) ≈ -3.5303345f0
+    @test sum(inv.(nonzeros(c3.matrix))) ≈ -3.5303345f0
     c3 = c1 - c1
-    @test sum(c3.matrix) ≈ 0.0
+    @test sum(inv.(nonzeros(c3.matrix))) ≈ 0.0
     c3 = c1 + c1
     @test sum(c3.matrix) ≈ 2 * sum(c1.matrix)
     c3 = contact_map(m[1]; discrete=false)
