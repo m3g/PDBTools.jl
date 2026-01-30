@@ -84,8 +84,12 @@ function heatmap(
 ) where {T<:Real}
     i, j, invd = findnz(map.matrix)
     d = inv.(invd)
-    distance_matrix = sparse(i, j, d, Base.size(map.matrix)...)
-    ext = extrema(distance_matrix)
+    ext = extrema(d)
+    distance_matrix = Matrix{Union{Missing, T}}(undef, Base.size(map.matrix))
+    distance_matrix .= missing
+    for iel in eachindex(i, j, d)
+        distance_matrix[i[iel],j[iel]] = d[iel]
+    end
     color = isnothing(color) ? (ext[1] < 0 ? :bwr : :grayC) : color
     clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
     return heatmap(transpose(distance_matrix); 
