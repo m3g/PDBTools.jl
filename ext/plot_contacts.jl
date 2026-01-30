@@ -63,12 +63,12 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB)
-ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Bool} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0
 
 julia> # plt = heatmap(map) # uncomment to plot
 
 julia> map = contact_map(cA, cB; discrete=false) # distance map
-ContactMap{Float32} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Float32} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0
 
 julia> # plt = heatmap(map) # uncomment to plot
 ```
