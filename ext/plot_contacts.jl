@@ -1,4 +1,4 @@
-import Plots: heatmap, scatter
+import Plots: heatmap, scatter, cgrad
 using SparseArrays: sparse, findnz
 
 # the size of the plot should be proportional to the number 
@@ -62,7 +62,7 @@ julia> # plt = heatmap(map) # uncomment to plot
 ```
 
 """
-function Plots.heatmap(
+function heatmap(
     map::ContactMap{T}; 
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
