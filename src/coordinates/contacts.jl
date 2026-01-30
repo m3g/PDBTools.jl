@@ -1,5 +1,5 @@
 import CellListMap
-using SparseArrays: SparseMatrixCSC, sparse, spzeros, findnz, dropzeros!
+using SparseArrays: SparseMatrixCSC, sparse, spzeros, findnz, dropzeros!, nnz
 
 export ContactMap, contact_map, residue_residue_distance
 
@@ -34,7 +34,7 @@ residues. Residue pairs without contacts within the `dmax` will not be stored
 in the sparse matrix representation. 
 
 """
-struct ContactMap{T<:Union{Bool,<:Real}}
+struct ContactMap{T}
     matrix::SparseMatrixCSC{T}
     d::Float64
     gap::Int
@@ -53,7 +53,7 @@ end
 Base.getindex(map::ContactMap{Bool}, i, j) = map.matrix[i,j]
 
 function Base.show(io::IO, ::MIME"text/plain", map::ContactMap{T}) where {T}
-    print(io, "ContactMap{$T} of size $(size(map.matrix)), with threshold $(map.d) and gap $(map.gap)")
+    println(io, "ContactMap{$T} of size $(size(map.matrix)) with $(nnz(map.matrix)) contacts, threshold $(map.d) and gap $(map.gap)")
 end
 
 import Base: +, -
@@ -95,7 +95,7 @@ function -(c1::ContactMap{Bool}, c2::ContactMap{Bool})
         i = c2_i[iel]
         j = c2_j[iel]
         v = c2_v[iel]
-        if (c_sub[i,j] == 1) & v
+        if v && (c_sub[i,j] == 1)
             c_sub[i,j] = 0
         elseif v
             c_sub[i,j] = -1
@@ -118,13 +118,18 @@ function add_sub(
     )
     c2_i, c2_j, c2_v = findnz(c2.matrix)
     for iel in eachindex(c2_i, c2_j, c2_v)
-        i = c2_i[iel]
-        j = c2_j[iel]
-        v = c2_v[iel]
-        if ismissing(c1[i,j]) | ismissing(c2[i,j])
+        i, j, v = c2_i[iel], c2_j[iel], c2_v[iel]
+        if ismissing(c1[i,j])
             c[i,j] = 0
         else
             c[i,j] = inv(op(inv(c[i,j]),inv(v)))
+        end
+    end
+    # Remove missing distances of second contact map
+    for iel in eachindex(c1_i, c1_j, c1_v)
+        i, j = c1_i[iel], c1_j[iel]
+        if ismissing(c2[i,j])
+            c[i,j] = 0
         end
     end
     dropzeros!(c)
@@ -200,7 +205,7 @@ julia> ats = read_pdb(PDBTools.DIMERPDB);
 julia> cA = select(ats, "chain A");
 
 julia> map = contact_map(cA) # contact map of chain A
-ContactMap{Bool} of size (243, 243), with threshold 4.0 and gap 0 
+ContactMap{Bool} of size (243, 243) with 2285 contacts, threshold 4.0 and gap 0 
 
 julia> map[95,95] # fetch the existence of a contact
 true
@@ -220,7 +225,7 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB) # contact map between chains A and B
-ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0 
+ContactMap{Bool} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0 
 
 julia> map[80, 5] # fetch existence of contact 
 true
@@ -431,10 +436,10 @@ end
         map = contact_map(ats)
         @test size(map.matrix) == (104, 104)
         @test count(map.matrix) == 1106
-        @test parse_show(map) ≈ "ContactMap{Bool} of size (104, 104), with threshold 4.0 and gap 0"
+        @test parse_show(map) ≈ "ContactMap{Bool} of size (104, 104) with 1106 contacts, threshold 4.0 and gap 0"
         map = contact_map(ats; discrete=false)
         @test sum(inv.(nonzeros(map.matrix))) ≈ 2407.2163f0
-        @test parse_show(map) ≈ "ContactMap{Float32} of size (104, 104), with threshold 4.0 and gap 0"
+        @test parse_show(map) ≈ "ContactMap{Float32} of size (104, 104) with 1106 contacts, threshold 4.0 and gap 0"
     end
 
     # dimer
@@ -446,7 +451,7 @@ end
         @test sum(map.matrix) == 17
         @test map[235, :] == [false, false, true, false, false, false, false, false, false, false, false, false]
         @test count(map[:, 3]) == 3
-        @test parse_show(map) ≈ "ContactMap{Bool} of size (243, 12), with threshold 4.0 and gap 0"
+        @test parse_show(map) ≈ "ContactMap{Bool} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0"
         map = contact_map(cA, cB; discrete=false, parallel=parallel)
         @test sum(inv.(nonzeros(map.matrix))) ≈ 58.00371f0
     end
@@ -487,16 +492,16 @@ end
     c2 = contact_map(m[2]; discrete=false)
     c3 = c1 + c2
     @test sum(inv.(nonzeros(c3.matrix))) ≈ 1564.5426f0
+    c3 = c2 + c1
+    @test sum(inv.(nonzeros(c3.matrix))) ≈ 1564.5426f0
     c3 = c2 - c1
+    @test sum(inv.(nonzeros(c3.matrix))) ≈ 3.5303345f0
+    c3 = c1 - c2
     @test sum(inv.(nonzeros(c3.matrix))) ≈ -3.5303345f0
     c3 = c1 - c1
     @test sum(inv.(nonzeros(c3.matrix))) ≈ 0.0
     c3 = c1 + c1
     @test sum(c3.matrix) ≈ 2 * sum(c1.matrix)
-    c3 = contact_map(m[1]; discrete=false)
-    droptol!(c3.matrix, 10)
-    c3 = c3 - c1
-    @test nnz(c3.matrix) == 0  
 
     # Errors
     c1 = contact_map(m[1])
@@ -514,88 +519,4 @@ end
 
 end
 
-"""
-    residue_residue_distance(
-        r1::PDBTools.Residue, 
-        r2::PDBTools.Residue; 
-        positions::AbstractVector{AbstractVector{T}}=nothing; 
-        unitcell=nothing
-    ) 
 
-Calculate the minimum distance between two residues in a protein structure. 
-If the `positions` argument is not provided, the function calculates the distance
-using the coordinates of the atoms in the residues. If `positions` is provided,
-the function uses the coordinates in the positions array. 
-
-# Arguments
-
-- `r1::PDBTools.Residue`: Residue 1
-- `r2::PDBTools.Residue`: Residue 2
-- `positions::AbstractVector{AbstractVector{T}}`: Optional alternate positions of the atoms in the structure.
-- `unitcell=nothing`: Optional unit cell dimensions for periodic boundary conditions.
-
-!!! note
-    The index of the atoms in the residues must match the index of the atoms in the
-    positions array. 
-
-# Example
-
-```jldoctest
-julia> using PDBTools
-
-julia> ats = read_pdb(PDBTools.DIMERPDB);
-
-julia> residues = collect(eachresidue(ats));
-
-julia> r1 = residues[1]; r10 = residues[10];
-
-julia> println(name(r1), resnum(r1), " and ", name(r10), resnum(r10))
-LYS211 and GLU220
-
-julia> d = residue_residue_distance(r1, r10)
-16.16511f0
-```
-
-"""
-function residue_residue_distance(
-    r1::PDBTools.Residue,
-    r2::PDBTools.Residue;
-    positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
-    unitcell=nothing
-)
-    dmin = typemax(first(r1).x)
-    for (iat, jat) in Iterators.product(eachindex(r1), eachindex(r2))
-        p_i = isnothing(positions) ? PDBTools.coor(r1[iat]) : positions[PDBTools.index(r1[iat])]
-        p_j = isnothing(positions) ? PDBTools.coor(r2[jat]) : positions[PDBTools.index(r2[jat])]
-        p_j = !isnothing(unitcell) ? wrap(p_j, p_i, unitcell) : p_j
-        d = norm(p_j - p_i)
-        d < dmin && (dmin = d)
-    end
-    return dmin
-end
-
-@testitem "residue_residue_distance" begin
-    using PDBTools
-    ats = read_pdb(PDBTools.TESTPDB, "protein")
-    residues = collect(eachresidue(ats))
-    r1 = residues[1]
-    r10 = residues[10]
-    # Testing call with residue information only
-    @test residue_residue_distance(r1, r10) ≈ 5.6703672f0
-    d = residue_residue_distance(r1, r10; positions=coor(ats))
-    @test d ≈ 5.6703672f0
-
-    # Test with a PBC cell (protein broken by the PBCs)
-    pdb_pbc = read_pdb(PDBTools.TESTPBC, "protein")
-    uc = read_unitcell(PDBTools.TESTPBC)
-    pdb_nopbc = read_pdb(PDBTools.TESTNOPBC, "protein")
-    r_pbc = collect(eachresidue(pdb_pbc))
-    r_nopbc = collect(eachresidue(pdb_nopbc))
-    for i in eachindex(r_pbc, r_nopbc)
-        for j in eachindex(r_pbc, r_nopbc)
-            dpbc = residue_residue_distance(r_pbc[i], r_pbc[j]; unitcell=uc)
-            dnopbc = residue_residue_distance(r_nopbc[i], r_nopbc[j])
-            @test dpbc ≈ dnopbc rtol = 1e-2
-        end
-    end
-end
