@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.19.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Use sparse arrays to store contact matrices, accelerating computations and saving a lot of memory, for large systems.
 
 Version 3.19.0
 --------------
