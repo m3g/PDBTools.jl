@@ -1,4 +1,4 @@
-import Plots: heatmap, cgrad
+import Plots: heatmap, cgrad, spy
 using SparseArrays: sparse, nonzeros, findnz
 
 # the size of the plot should be proportional to the number 
@@ -12,25 +12,13 @@ function _plot_size(map::ContactMap)
     return (xpixels, ypixels)
 end
 
-# If the number of contacts is too large, abort and warn the user for the 
-# use of the `unsafe` option
-function _unsafe(unsafe, map; n_unsafe=10^8)
-    n = length(map.matrix)
-    if !unsafe & (n > n_unsafe)
-        throw(ArgumentError("""\n
-            The size of the contact matrix ($(size(map.matrix))) is too large.
-            Plotting it may explode the memory of your computer.
+# Add space of not to colorbar title
+_n(dmax) = dmax > 9.9 ? "\n" : ""
 
-            If you are sure you want to plot it, use the `unsafe` option:
-            
-                heatmap(map; unsafe=true)
-            
-            at your own risk.
-
-        """))
-    end
-end
-
+#
+# The following "heatmap" function uses Plots.spy under the hood, to deal 
+# better with the non-attributed values of the sparse arrays.
+#
 """
     heatmap(map::PDBTools.ContactMap; kwargs...)
 
@@ -74,12 +62,8 @@ julia> # plt = heatmap(map) # uncomment to plot
 ```
 
 """
-function heatmap(::ContactMap) end
-
-# heatmap for distance (quantitative) maps
 function heatmap(
     map::ContactMap{T}; 
-    unsafe=false, n_unsafe=10^8,
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -89,7 +73,7 @@ function heatmap(
     xlabel="residue",
     ylabel="residue",
     colorbar=ifelse(T <: Integer, :none, :right),
-    colorbar_title=ifelse(T <: Integer, nothing, "\ndistance (Å)"),
+    colorbar_title=nothing,
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
     xlims=(1,size(map.matrix, 1)),
     ylims=(1,size(map.matrix, 2)),
@@ -100,57 +84,27 @@ function heatmap(
     clims=nothing,
     margin=0.3Plots.Measures.cm,
     fontfamily="Computer Modern",
+    markershape=:rect,
+    markersize=2,
     kargs...
 ) where {T<:Real}
-    _unsafe(unsafe, map; n_unsafe)
     i, j, invd = findnz(map.matrix)
     d = inv.(invd)
+    @. d += nextfloat(zero(T))
     ext = extrema(d)
-    distance_matrix = Matrix{Union{Missing, T}}(undef, Base.size(map.matrix))
-    distance_matrix .= missing
-    for iel in eachindex(i, j, d)
-        distance_matrix[i[iel],j[iel]] = d[iel]
-    end
+    imax = Base.size(map.matrix,1)
+    @. i = imax - i + 1
+    yticks = (collect(yticks[1]) .+ imax .- maximum(yticks[1]), reverse!(yticks[2]))
+    distance_matrix = sparse(i, j, d, Base.size(map.matrix)...)
     color = isnothing(color) ? (ext[1] < 0 ? :bwr : :grayC) : color
     clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
-    return heatmap(transpose(distance_matrix); 
+    colorbar_title = isnothing(colorbar_title) ?  
+        ifelse(T <: Integer, nothing, "$(_n(ext[2]))distance (Å)") : colorbar_tile
+    return spy(distance_matrix;
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
         size, framestyle, grid, clims, margin, colorbar, 
-        fontfamily, kargs...
-    )
-end
-
-# heatmap for binary (discrete) maps
-function heatmap(
-    map::ContactMap{Bool}; 
-    unsafe=false, n_unsafe=10^8,
-    plot_size=_plot_size(map),
-    xstep=max(1, div(size(map.matrix, 1), 20)), 
-    ystep=max(1, div(size(map.matrix, 2), 20)),
-  xticks=PDBTools.residue_ticks(map.residues1; stride=xstep, serial=true),
-    yticks=PDBTools.residue_ticks(map.residues2; stride=ystep, serial=true),
-    xrotation=60,
-    xlabel="residue",
-    ylabel="residue",
-    xlims=(1,size(map.matrix, 1)),
-    ylims=(1,size(map.matrix, 2)),
-    color=:Greys_9,
-    size=plot_size,
-    aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
-    framestyle=:box,
-    grid=false,
-    clims=(0,1),
-    colorbar=:none,
-    margin=0.3Plots.Measures.cm,
-    fontfamily="Computer Modern",
-    kargs...
-)
-    _unsafe(unsafe, map; n_unsafe)
-    return heatmap(transpose(map.matrix); 
-        xlabel, ylabel, xticks, yticks, xrotation,
-        color, colorbar, xlims, ylims, aspect_ratio,
-        size, framestyle, grid, clims, margin, 
+        markershape, markersize,
         fontfamily, kargs...
     )
 end
@@ -179,11 +133,4 @@ end
     plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
-
-    # Test unsafe error
-    cm = contact_map(cA)
-    @test_throws "risk" heatmap(cm; n_unsafe=100)
-    plt = heatmap(cm; unsafe=true, n_unsafe=100)
-    savefig(plt, tmpplot)
-    rm(tmpplot; force=true)
 end
