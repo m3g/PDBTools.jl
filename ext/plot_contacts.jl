@@ -1,5 +1,5 @@
-import Plots: heatmap, cgrad, spy
-using SparseArrays: sparse, nonzeros, findnz
+import Plots: heatmap, scatter
+using SparseArrays: sparse, findnz
 
 # the size of the plot should be proportional to the number 
 # of residues in each dimension, with a 100 residues for 
@@ -16,7 +16,7 @@ end
 _n(dmax) = dmax > 9.9 ? "\n" : ""
 
 #
-# The following "heatmap" function uses Plots.spy under the hood, to deal 
+# The following "heatmap" function uses Plots.scatter under the hood, to deal 
 # better with the non-attributed values of the sparse arrays.
 #
 """
@@ -62,7 +62,7 @@ julia> # plt = heatmap(map) # uncomment to plot
 ```
 
 """
-function heatmap(
+function Plots.heatmap(
     map::ContactMap{T}; 
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
@@ -75,8 +75,8 @@ function heatmap(
     colorbar=ifelse(T <: Integer, :none, :right),
     colorbar_title=nothing,
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
-    xlims=(1,size(map.matrix, 1)),
-    ylims=(1,size(map.matrix, 2)),
+    xlims=(0,size(map.matrix, 1)+1),
+    ylims=(0,size(map.matrix, 2)+1),
     color=nothing,
     size=plot_size,
     framestyle=:box,
@@ -86,25 +86,24 @@ function heatmap(
     fontfamily="Computer Modern",
     markershape=:rect,
     markersize=2,
+    markerstrokewidth=0,
+    label="",
     kargs...
 ) where {T<:Real}
     i, j, invd = findnz(map.matrix)
     d = inv.(invd)
-    @. d += nextfloat(zero(T))
+    @. d += nextfloat(zero(eltype(d)))
     ext = extrema(d)
-    imax = Base.size(map.matrix,1)
-    @. i = imax - i + 1
-    yticks = (collect(yticks[1]) .+ imax .- maximum(yticks[1]), reverse!(yticks[2]))
-    distance_matrix = sparse(i, j, d, Base.size(map.matrix)...)
-    color = isnothing(color) ? (ext[1] < 0 ? :bwr : :grayC) : color
+    color = isnothing(color) ? 
+        T == Bool ? cgrad([:white, :black], 2) : (ext[1] < 0 ? :bwr : :grayC) : color
     clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
     colorbar_title = isnothing(colorbar_title) ?  
         ifelse(T <: Integer, nothing, "$(_n(ext[2]))distance (Å)") : colorbar_tile
-    return spy(distance_matrix;
-        xlabel, ylabel, xticks, yticks, xrotation,
-        colorbar_title, color, aspect_ratio, xlims, ylims,
-        size, framestyle, grid, clims, margin, colorbar, 
-        markershape, markersize,
+    return Plots.scatter(i, j; zcolor=d, colorbar, color,
+        xlabel, ylabel, xticks, yticks, xrotation, label,
+        colorbar_title, aspect_ratio, xlims, ylims,
+        size, framestyle, grid, clims, margin, 
+        markershape, markersize, markerstrokewidth,
         fontfamily, kargs...
     )
 end
