@@ -112,17 +112,32 @@ Common customization options are:
 - `clims`: the range of the color scale.
 - `colorbar_title`: the title of the colorbar. Default: "distance (Å)" for distances, no title for binary maps.
 
+## REPL visualization of the contact matrix
+
+Although this is not considered a fundamental feature, a quick visualization of the 
+contact matrix can be obtained in the REPL by showing the sparse matrix representation
+directly:
+
+```@example contacts
+c1.matrix
+```
+
 ## Indexing
 
 The `ContactMap` data structure can be indexed to extract the contacts of a specific 
 residue. For example:
 
-```@example
+```@example getindex_map
 using PDBTools
 ats = read_pdb(PDBTools.DIMERPDB);
 cA = select(ats, "chain A");
 cB = select(ats, "chain B");
 map = contact_map(cA, cB; discrete=false, dmax=12.0)
+map[235,7] # Distance of 235 to 7
+```
+
+Or slicing:
+```@example getindex_map
 map[235,:] # all distances below 12.0 Angs of residue 235 of cA with cB
 ```
 
