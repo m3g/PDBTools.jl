@@ -53,7 +53,7 @@ end
 Base.getindex(map::ContactMap{Bool}, i, j) = map.matrix[i,j]
 
 function Base.show(io::IO, ::MIME"text/plain", map::ContactMap{T}) where {T}
-    println(io, "ContactMap{$T} of size $(size(map.matrix)) with $(nnz(map.matrix)) contacts, threshold $(map.d) and gap $(map.gap)")
+    print(io, "ContactMap{$T} of size $(size(map.matrix)) with $(nnz(map.matrix)) contacts, threshold $(map.d) and gap $(map.gap)")
 end
 
 import Base: +, -

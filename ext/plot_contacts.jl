@@ -1,4 +1,5 @@
 import Plots: heatmap, cgrad
+using SparseArrays: sparse, nonzeros, findnz
 
 # the size of the plot should be proportional to the number 
 # of residues in each dimension, with a 100 residues for 
@@ -72,28 +73,22 @@ function heatmap(
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
     xlims=(1,size(map.matrix, 1)),
     ylims=(1,size(map.matrix, 2)),
-    color=begin
-        ext = extrema(skipmissing(map.matrix))
-        if ext[1] < 0
-            :bwr
-        else
-            :grayC
-        end
-    end,
+    color=nothing,
     size=plot_size,
     framestyle=:box,
     grid=false,
-    clims=begin 
-        ext = extrema(skipmissing(map.matrix))
-        c1 = 1.1 * min(0, ext[1])
-        c2 = 1.1 * max(0, ext[2])
-        (c1,c2)
-    end,
+    clims=nothing,
     margin=0.3Plots.Measures.cm,
     fontfamily="Computer Modern",
     kargs...
 ) where {T<:Real}
-    return heatmap(transpose(map.matrix); 
+    i, j, invd = findnz(map.matrix)
+    d = inv.(invd)
+    distance_matrix = sparse(i, j, d, Base.size(map.matrix)...)
+    ext = extrema(distance_matrix)
+    color = isnothing(color) ? (ext[1] < 0 ? :bwr : :grayC) : color
+    clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
+    return heatmap(transpose(distance_matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
         size, framestyle, grid, clims, margin, colorbar, 
