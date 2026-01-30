@@ -10,7 +10,7 @@ to provide a convenient way to plot the contact or distance maps.
 
 ```@docs
 contact_map
-heatmap(::ContactMap)
+heatmap(::ContactMap{<:Real})
 ```
 
 !!! note
@@ -47,7 +47,7 @@ distance `dmax=4.0`. Now we change two parameters: `discrete=false` and `dmax=12
 compute a distance map up to a greater distance:
 
 ```@example contacts
-map = contact_map(cA, cB; discrete=false, dmax=12.0) # contact map between chains A and B
+map = contact_map(cA, cB; discrete=false, dmax=8.0) # contact map between chains A and B
 heatmap(map)
 ```
 
@@ -58,8 +58,8 @@ showcase the use of the `gap` parameter, to ignore residues closer in the sequen
 by less than 4 residues:
 
 ```@example contacts
-distance_map = contact_map(cA; gap=4, discrete=false, dmax=12.0) # chain A only
-discrete_map = contact_map(cA; gap=4, discrete=true, dmax=12.0) # chain A only
+distance_map = contact_map(cA; gap=4, discrete=false, dmax=8.0) # chain A only
+discrete_map = contact_map(cA; gap=4, discrete=true, dmax=8.0) # chain A only
 plot(
     heatmap(distance_map; colorbar=nothing, color=:davos), 
     heatmap(discrete_map); 
