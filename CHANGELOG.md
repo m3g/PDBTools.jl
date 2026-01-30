@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.19.3-DEV
+--------------
+
 Version 3.19.2
 --------------
 - ![ENHANCEMENT][badge-enhancement] Use `scatter` instead `heatmap` under the hood to plot contact maps, to avoid memory issues. The API function continues to be `heatmap`.  
