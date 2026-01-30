@@ -103,6 +103,12 @@ julia> distance(protein,ligand)
 distance
 ```
 
+A special related function to compute the distance between a pair of residues is:
+
+```@docs
+residue_residue_distance
+```   
+
 ## Closest atoms and their distance
 
 A function similar to the one above is `closest`, which returns the shortest distance between atoms
@@ -236,9 +242,9 @@ The `stride` option can be used to skip residues and declutter the tick labels.
 If `oneletter` is `false`, three-letter residue codes are returned. Residues with unknown names will be 
 named `X` or `XXX`. 
 
-if `serial=false` the positions of the ticks will be returned as a the serial residue index in the structure.
-If `serial=true` the positions of the ticks are returned as their residue numbers. This difference is important
-if the residue numbers do not start at `1` and depending on the indexing of the data to be plotted.  
+If `serial=false`, the positions of the ticks will be returned as the serial residue index in the structure.
+If `serial=true`, the positions of the ticks are returned as their residue numbers. This difference is important
+if the residue numbers do not start at `1`, and depending on the indexing of the data to be plotted.  
 
 ```@docs
 residue_ticks

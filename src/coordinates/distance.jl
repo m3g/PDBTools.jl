@@ -196,3 +196,88 @@ end
 
 end
 
+"""
+    residue_residue_distance(
+        r1::PDBTools.Residue, 
+        r2::PDBTools.Residue; 
+        positions::AbstractVector{AbstractVector{T}}=nothing; 
+        unitcell=nothing
+    ) 
+
+Calculate the minimum distance between two residues in a protein structure. 
+If the `positions` argument is not provided, the function calculates the distance
+using the coordinates of the atoms in the residues. If `positions` is provided,
+the function uses the coordinates in the positions array. 
+
+# Arguments
+
+- `r1::PDBTools.Residue`: Residue 1
+- `r2::PDBTools.Residue`: Residue 2
+- `positions::AbstractVector{AbstractVector{T}}`: Optional alternate positions of the atoms in the structure.
+- `unitcell=nothing`: Optional unit cell dimensions for periodic boundary conditions.
+
+!!! note
+    The index of the atoms in the residues must match the index of the atoms in the
+    positions array. 
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> ats = read_pdb(PDBTools.DIMERPDB);
+
+julia> residues = collect(eachresidue(ats));
+
+julia> r1 = residues[1]; r10 = residues[10];
+
+julia> println(name(r1), resnum(r1), " and ", name(r10), resnum(r10))
+LYS211 and GLU220
+
+julia> d = residue_residue_distance(r1, r10)
+16.16511f0
+```
+
+"""
+function residue_residue_distance(
+    r1::PDBTools.Residue,
+    r2::PDBTools.Residue;
+    positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
+    unitcell=nothing
+)
+    dmin = typemax(first(r1).x)
+    for (iat, jat) in Iterators.product(eachindex(r1), eachindex(r2))
+        p_i = isnothing(positions) ? PDBTools.coor(r1[iat]) : positions[PDBTools.index(r1[iat])]
+        p_j = isnothing(positions) ? PDBTools.coor(r2[jat]) : positions[PDBTools.index(r2[jat])]
+        p_j = !isnothing(unitcell) ? wrap(p_j, p_i, unitcell) : p_j
+        d = norm(p_j - p_i)
+        d < dmin && (dmin = d)
+    end
+    return dmin
+end
+
+@testitem "residue_residue_distance" begin
+    using PDBTools
+    ats = read_pdb(PDBTools.TESTPDB, "protein")
+    residues = collect(eachresidue(ats))
+    r1 = residues[1]
+    r10 = residues[10]
+    # Testing call with residue information only
+    @test residue_residue_distance(r1, r10) ≈ 5.6703672f0
+    d = residue_residue_distance(r1, r10; positions=coor(ats))
+    @test d ≈ 5.6703672f0
+
+    # Test with a PBC cell (protein broken by the PBCs)
+    pdb_pbc = read_pdb(PDBTools.TESTPBC, "protein")
+    uc = read_unitcell(PDBTools.TESTPBC)
+    pdb_nopbc = read_pdb(PDBTools.TESTNOPBC, "protein")
+    r_pbc = collect(eachresidue(pdb_pbc))
+    r_nopbc = collect(eachresidue(pdb_nopbc))
+    for i in eachindex(r_pbc, r_nopbc)
+        for j in eachindex(r_pbc, r_nopbc)
+            dpbc = residue_residue_distance(r_pbc[i], r_pbc[j]; unitcell=uc)
+            dnopbc = residue_residue_distance(r_nopbc[i], r_nopbc[j])
+            @test dpbc ≈ dnopbc rtol = 1e-2
+        end
+    end
+end

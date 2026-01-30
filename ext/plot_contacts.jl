@@ -1,4 +1,5 @@
 import Plots: heatmap, cgrad
+using SparseArrays: sparse, nonzeros, findnz
 
 # the size of the plot should be proportional to the number 
 # of residues in each dimension, with a 100 residues for 
@@ -9,6 +10,25 @@ function _plot_size(map::ContactMap)
     xpixels = min(600, max(400, round(Int, 10 * nres1)))
     ypixels = min(600, max(400, round(Int, 10 * nres2)))
     return (xpixels, ypixels)
+end
+
+# If the number of contacts is too large, abort and warn the user for the 
+# use of the `unsafe` option
+function _unsafe(unsafe, map; n_unsafe=10^8)
+    n = length(map.matrix)
+    if !unsafe & (n > n_unsafe)
+        throw(ArgumentError("""\n
+            The size of the contact matrix ($(size(map.matrix))) is too large.
+            Plotting it may explode the memory of your computer.
+
+            If you are sure you want to plot it, use the `unsafe` option:
+            
+                heatmap(map; unsafe=true)
+            
+            at your own risk.
+
+        """))
+    end
 end
 
 """
@@ -43,12 +63,12 @@ julia> cA = select(ats, "chain A");
 julia> cB = select(ats, "chain B");
 
 julia> map = contact_map(cA, cB)
-ContactMap{Union{Missing, Bool}} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Bool} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0
 
 julia> # plt = heatmap(map) # uncomment to plot
 
 julia> map = contact_map(cA, cB; discrete=false) # distance map
-ContactMap{Union{Missing, Float32}} of size (243, 12), with threshold 4.0 and gap 0
+ContactMap{Float32} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0
 
 julia> # plt = heatmap(map) # uncomment to plot
 ```
@@ -58,7 +78,8 @@ function heatmap(::ContactMap) end
 
 # heatmap for distance (quantitative) maps
 function heatmap(
-    map::ContactMap{Union{Missing,T}}; 
+    map::ContactMap{T}; 
+    unsafe=false, n_unsafe=10^8,
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -72,28 +93,27 @@ function heatmap(
     aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
     xlims=(1,size(map.matrix, 1)),
     ylims=(1,size(map.matrix, 2)),
-    color=begin
-        ext = extrema(skipmissing(map.matrix))
-        if ext[1] < 0
-            :bwr
-        else
-            :grayC
-        end
-    end,
+    color=nothing,
     size=plot_size,
     framestyle=:box,
     grid=false,
-    clims=begin 
-        ext = extrema(skipmissing(map.matrix))
-        c1 = 1.1 * min(0, ext[1])
-        c2 = 1.1 * max(0, ext[2])
-        (c1,c2)
-    end,
+    clims=nothing,
     margin=0.3Plots.Measures.cm,
     fontfamily="Computer Modern",
     kargs...
 ) where {T<:Real}
-    return heatmap(transpose(map.matrix); 
+    _unsafe(unsafe, map; n_unsafe)
+    i, j, invd = findnz(map.matrix)
+    d = inv.(invd)
+    ext = extrema(d)
+    distance_matrix = Matrix{Union{Missing, T}}(undef, Base.size(map.matrix))
+    distance_matrix .= missing
+    for iel in eachindex(i, j, d)
+        distance_matrix[i[iel],j[iel]] = d[iel]
+    end
+    color = isnothing(color) ? (ext[1] < 0 ? :bwr : :grayC) : color
+    clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
+    return heatmap(transpose(distance_matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         colorbar_title, color, aspect_ratio, xlims, ylims,
         size, framestyle, grid, clims, margin, colorbar, 
@@ -103,7 +123,8 @@ end
 
 # heatmap for binary (discrete) maps
 function heatmap(
-    map::ContactMap{Union{Missing, Bool}}; 
+    map::ContactMap{Bool}; 
+    unsafe=false, n_unsafe=10^8,
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -125,6 +146,7 @@ function heatmap(
     fontfamily="Computer Modern",
     kargs...
 )
+    _unsafe(unsafe, map; n_unsafe)
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         color, colorbar, xlims, ylims, aspect_ratio,
@@ -157,5 +179,11 @@ end
     plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
+
+    # Test unsafe error
+    cm = contact_map(cA)
+    @test_throws "risk" heatmap(cm; n_unsafe=100)
+    plt = heatmap(cm; unsafe=true, n_unsafe=100)
+    savefig(plt, tmpplot)
     rm(tmpplot; force=true)
 end

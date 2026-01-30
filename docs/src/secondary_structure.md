@@ -43,7 +43,7 @@ ss_composition(ss)
 ss_name(ss[1]) # name of the secondary structure of the first residue
 ```
 
-For further information refer to to [ProteinSecondaryStructures.jl documentation](https://biojulia.dev/ProteinSecondaryStructures.jl/stable/user_guide/#Retrieving-names,-codes,-and-numeric-codes).
+For further information, refer to the [ProteinSecondaryStructures.jl documentation](https://biojulia.dev/ProteinSecondaryStructures.jl/stable/user_guide/#Retrieving-names,-codes,-and-numeric-codes).
 
 
 

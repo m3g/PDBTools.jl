@@ -12,10 +12,11 @@ PDBTools.jl Changelog
 
 Version 3.19.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Use sparse arrays to store contact matrices, accelerating computations and saving a lot of memory, for large systems.
 
 Version 3.19.0
 --------------
-- ![FEATURE][badge-feature] Add `parallel` option to contact and distance map calcualtions, set to false by default.
+- ![FEATURE][badge-feature] Add `parallel` option to contact and distance map calculations, set to false by default.
 - ![ENHANCEMENT][badge-enhancement] Implement fast contact and distance map calculations using cell lists. 
 - ![INFO][badge-info] Document properly all property getters. 
 

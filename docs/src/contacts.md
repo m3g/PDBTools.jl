@@ -69,7 +69,7 @@ plot(
 
 ## Difference (and sum) of maps
 
-Contact maps of the same type (discrete *or* continous), obtained for the same sequence, but with
+Contact maps of the same type (discrete *or* continuous), obtained for the same sequence, but with
 different conformations, can be compared by subtraction or summation. 
 
 For example, here we load two models from a PDB file that contains multiple conformations of a 
@@ -85,7 +85,7 @@ heatmap(c2 - c1)
 Blue dots indicate contacts present in the first set, but not in the second, and red dots
 the contacts present in the second but not in the first.
 
-A difference of distance maps can be similarly obtained by computing continous contact maps:
+A difference of distance maps can be similarly obtained by computing continuous contact maps:
 ```@example contacts
 c1 = contact_map(models[1]; discrete=false, dmax=12.0)
 c2 = contact_map(models[2]; discrete=false, dmax=12.0)
@@ -101,7 +101,7 @@ heatmap(c_diff)
 
 ## Customizing the plot
 
-All `heatmap` parametes can be customized using the `Plots` keyword syntax. Above, 
+All `heatmap` parameters can be customized using the `Plots` keyword syntax. Above, 
 we illustrated this by removing the color bar and changing the color scale. 
 
 Common customization options are:
@@ -112,17 +112,32 @@ Common customization options are:
 - `clims`: the range of the color scale.
 - `colorbar_title`: the title of the colorbar. Default: "distance (Å)" for distances, no title for binary maps.
 
+## REPL visualization of the contact matrix
+
+Although this is not considered a fundamental feature, a quick visualization of the 
+contact matrix can be obtained in the REPL by showing the sparse matrix representation
+directly:
+
+```@example contacts
+c1.matrix
+```
+
 ## Indexing
 
 The `ContactMap` data structure can be indexed to extract the contacts of a specific 
 residue. For example:
 
-```@example
+```@example getindex_map
 using PDBTools
 ats = read_pdb(PDBTools.DIMERPDB);
 cA = select(ats, "chain A");
 cB = select(ats, "chain B");
 map = contact_map(cA, cB; discrete=false, dmax=12.0)
+map[235,7] # Distance of 235 to 7
+```
+
+Or slicing:
+```@example getindex_map
 map[235,:] # all distances below 12.0 Angs of residue 235 of cA with cB
 ```
 
@@ -130,5 +145,4 @@ map[235,:] # all distances below 12.0 Angs of residue 235 of cA with cB
 
 ```@docs
 ContactMap
-residue_residue_distance
 ```

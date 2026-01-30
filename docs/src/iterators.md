@@ -190,7 +190,7 @@ s = collect(eachsegment(ats))
 s[1]
 ```
 
-These segment structure *does not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
+These segment structures *do not* copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  
 
 Iterators can be used to obtain or modify properties of the segments. Here we illustrate computing the mass of
 each segment and renaming segment of all atoms with the segment indices:
