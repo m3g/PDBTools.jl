@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.19.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Use `scatter` instead `heatmap` under the hood to plot contact maps, to avoid memory issues. The API function continues to be `heatmap`.  
+
 
 Version 3.19.1
 --------------
