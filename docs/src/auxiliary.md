@@ -103,6 +103,12 @@ julia> distance(protein,ligand)
 distance
 ```
 
+A special related function to compute the distance between a pair of residues is:
+
+```@docs
+residue_residue_distance
+```   
+
 ## Closest atoms and their distance
 
 A function similar to the one above is `closest`, which returns the shortest distance between atoms

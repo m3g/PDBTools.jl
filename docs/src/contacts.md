@@ -130,5 +130,4 @@ map[235,:] # all distances below 12.0 Angs of residue 235 of cA with cB
 
 ```@docs
 ContactMap
-residue_residue_distance
 ```
