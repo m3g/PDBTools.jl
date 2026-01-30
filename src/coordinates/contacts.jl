@@ -42,9 +42,13 @@ struct ContactMap{T}
     residues2::Vector{PDBTools.Residue}
 end
 Base.setindex!(map::ContactMap, value, i, j) = map.matrix[i, j] = value
-function Base.getindex(map::ContactMap{T}, i, j) where {T<:Real}
-    @. ifelse(map.matrix[i,j] == zero(T), zero(T), inv(map.matrix[i, j]))
-end
+# Single element fetching
+Base.getindex(map::ContactMap{T}, i::Integer, j::Integer) where {T<:Real} = 
+    ifelse(map.matrix[i,j] == zero(T), missing, inv(map.matrix[i, j]))
+Base.getindex(map::ContactMap{Bool}, i::Integer, j::Integer) = map.matrix[i,j]
+# For slices
+Base.getindex(map::ContactMap{T}, i, j) where {T} =
+    @. ifelse(map.matrix[i,j] == zero(T), zero(T), inv(map.matrix[i, j]) + nextfloat(zero(T)))
 Base.getindex(map::ContactMap{Bool}, i, j) = map.matrix[i,j]
 
 function Base.show(io::IO, ::MIME"text/plain", map::ContactMap{T}) where {T}
