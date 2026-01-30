@@ -43,12 +43,7 @@ struct ContactMap{T}
 end
 Base.setindex!(map::ContactMap, value, i, j) = map.matrix[i, j] = value
 function Base.getindex(map::ContactMap{T}, i, j) where {T<:Real}
-    value = map.matrix[i, j]
-    if value == zero(T) 
-        missing
-    else
-        inv(value)
-    end
+    @. ifelse(map.matrix[i,j] == zero(T), zero(T), inv(map.matrix[i, j]))
 end
 Base.getindex(map::ContactMap{Bool}, i, j) = map.matrix[i,j]
 
