@@ -12,6 +12,25 @@ function _plot_size(map::ContactMap)
     return (xpixels, ypixels)
 end
 
+# If the number of contacts is too large, abort and warn the user for the 
+# use of the `unsafe` option
+function _unsafe(unsafe, map; n_unsafe=10^8)
+    n = length(map.matrix)
+    if !unsafe & (n > n_unsafe)
+        throw(ArgumentError("""\n
+            The size of the contact matrix ($(size(map.matrix))) is too large.
+            Plotting it may explode the memory of your computer.
+
+            If you are sure you want to plot it, use the `unsafe` option:
+            
+                heatmap(map; unsafe=true)
+            
+            at your own risk.
+
+        """))
+    end
+end
+
 """
     heatmap(map::PDBTools.ContactMap; kwargs...)
 
@@ -60,6 +79,7 @@ function heatmap(::ContactMap) end
 # heatmap for distance (quantitative) maps
 function heatmap(
     map::ContactMap{T}; 
+    unsafe=false, n_unsafe=10^8,
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -82,6 +102,7 @@ function heatmap(
     fontfamily="Computer Modern",
     kargs...
 ) where {T<:Real}
+    _unsafe(unsafe, map; n_unsafe)
     i, j, invd = findnz(map.matrix)
     d = inv.(invd)
     ext = extrema(d)
@@ -103,6 +124,7 @@ end
 # heatmap for binary (discrete) maps
 function heatmap(
     map::ContactMap{Bool}; 
+    unsafe=false, n_unsafe=10^8,
     plot_size=_plot_size(map),
     xstep=max(1, div(size(map.matrix, 1), 20)), 
     ystep=max(1, div(size(map.matrix, 2), 20)),
@@ -124,6 +146,7 @@ function heatmap(
     fontfamily="Computer Modern",
     kargs...
 )
+    _unsafe(unsafe, map; n_unsafe)
     return heatmap(transpose(map.matrix); 
         xlabel, ylabel, xticks, yticks, xrotation,
         color, colorbar, xlims, ylims, aspect_ratio,
@@ -156,5 +179,11 @@ end
     plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
+
+    # Test unsafe error
+    cm = contact_map(cA)
+    @test_throws "risk" heatmap(cm; n_unsafe=100)
+    plt = heatmap(cm; unsafe=true, n_unsafe=100)
+    savefig(plt, tmpplot)
     rm(tmpplot; force=true)
 end
