@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Iterators · PDBTools.jl</title><meta name="title" content="Iterators · PDBTools.jl"/><meta property="og:title" content="Iterators · PDBTools.jl"/><meta property="twitter:title" content="Iterators · PDBTools.jl"/><meta name="description" content="Documentation for PDBTools.jl."/><meta property="og:description" content="Documentation for PDBTools.jl."/><meta property="twitter:description" content="Documentation for PDBTools.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="PDBTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">PDBTools.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../readwrite/">Read and Write</a></li><li><a class="tocitem" href="../selections/">Selections</a></li><li class="is-active"><a class="tocitem" href>Iterators</a><ul class="internal"><li><a class="tocitem" href="#Iterate-over-residues-(or-molecules)"><span>Iterate over residues (or molecules)</span></a></li><li><a class="tocitem" href="#Iterate-over-chains"><span>Iterate over chains</span></a></li><li><a class="tocitem" href="#Iterate-over-segments"><span>Iterate over segments</span></a></li><li><a class="tocitem" href="#Iterate-over-models"><span>Iterate over models</span></a></li></ul></li><li><a class="tocitem" href="../elements/">Atom and element properties</a></li><li><a class="tocitem" href="../contacts/">Contact maps</a></li><li><a class="tocitem" href="../dihedrals/">Dihedrals and Ramachandran</a></li><li><a class="tocitem" href="../secondary_structure/">Secondary structures</a></li><li><a class="tocitem" href="../hydrogen_bonds/">Hydrogen bonds</a></li><li><a class="tocitem" href="../sasa/">Solvent Accessible Area</a></li><li><a class="tocitem" href="../mvalue/">Transfer Free Energy</a></li><li><a class="tocitem" href="../auxiliary/">Auxiliary functions</a></li><li><a class="tocitem" href="../examples/">Examples</a></li><li><a class="tocitem" href="../tools/">Tools</a></li><li><a class="tocitem" href="../help/">Help entries</a></li><li><span class="tocitem">Experimental</span><ul><li><a class="tocitem" href="../structure/">Structure</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Iterators</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Iterators</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl/blob/main/docs/src/iterators.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Iterators"><a class="docs-heading-anchor" href="#Iterators">Iterators</a><a id="Iterators-1"></a><a class="docs-heading-anchor-permalink" href="#Iterators" title="Permalink"></a></h1><p>PDBTools.jl provides lazy iterators over Residues, Chains, Segments, and Models of a structure file. The iterators behave similarly, and can be used bo computed properties of independent structural elements. The documentation bellow exemplifies in more detail the features associated to Residue and Chain interators, but the properties and valid for Segment and Model iterators similarly.</p><h2 id="Iterate-over-residues-(or-molecules)"><a class="docs-heading-anchor" href="#Iterate-over-residues-(or-molecules)">Iterate over residues (or molecules)</a><a id="Iterate-over-residues-(or-molecules)-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-residues-(or-molecules)" title="Permalink"></a></h2><p>The <code>eachresidue</code> iterator enables iteration over the residues of a structure. In PDB files, distinct molecules are often treated as separate residues, so this iterator can be used to iterate over the molecules within a structure. For example:</p><pre><code class="language-julia hljs">using PDBTools
+protein = read_pdb(PDBTools.SMALLPDB);
+count(res -&gt; resname(res) == &quot;ALA&quot;, eachresidue(protein))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1</code></pre><p>Here, we use <code>eachresidue</code> to count the number of residues named &quot;ALA&quot;. This highlights the distinction between residue-level and atom-level operations.</p><h3 id="Collecting-Residues-into-a-Vector"><a class="docs-heading-anchor" href="#Collecting-Residues-into-a-Vector">Collecting Residues into a Vector</a><a id="Collecting-Residues-into-a-Vector-1"></a><a class="docs-heading-anchor-permalink" href="#Collecting-Residues-into-a-Vector" title="Permalink"></a></h3><p>Residues produced by <code>eachresidue</code> can be collected into a vector for further processing:</p><pre><code class="language-julia hljs">residues = collect(eachresidue(protein))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{Residue}[ 
+    ALA1A
+    CYS2A
+    ASP3A
+]</code></pre><p>and the atoms of a specific residue can be seen by indexing the residue:</p><pre><code class="language-julia hljs">residues[1]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Residue of name ALA with 12 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+⋮
+      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
+      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12</code></pre><div class="admonition is-info" id="Note-2349f28241893270"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-2349f28241893270" title="Permalink"></a></header><div class="admonition-body"><p>Iterators or collected vectors <em>do not</em> create copies of the original atom data. This means that any changes made to the residue vector will directly modify the corresponding data in the original atom vector.</p></div></div><h3 id="Iterating-Over-Atoms-Within-Residues"><a class="docs-heading-anchor" href="#Iterating-Over-Atoms-Within-Residues">Iterating Over Atoms Within Residues</a><a id="Iterating-Over-Atoms-Within-Residues-1"></a><a class="docs-heading-anchor-permalink" href="#Iterating-Over-Atoms-Within-Residues" title="Permalink"></a></h3><p>You can iterate over the atoms of one or more residues using nested loops. Here, we compute the total number of atoms of ALA residues: </p><pre><code class="language-julia hljs">let n_ala_cys = 0
+    for residue in eachresidue(protein)
+        if name(residue) in (&quot;ALA&quot;, &quot;CYS&quot;)
+            for atom in residue
+                n_ala_cys += 1
+            end
+        end
+    end
+    n_ala_cys
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">23</code></pre><p>This method produces the same result as the more concise approach:</p><pre><code class="language-julia hljs">sum(length(r) for r in eachresidue(protein) if name(r) in (&quot;ALA&quot;, &quot;CYS&quot;))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">23</code></pre><p>Alternativelly, an image (not a copy!) of the atoms corresponding to a residue can be obtained with <code>get_atoms</code>:</p><pre><code class="language-julia hljs">r1_atoms = get_atoms(residues[1])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">   SubArray{Atom{Nothing}, 1, Vector{Atom{Nothing}}, Tuple{UnitRange{Int64}}, true} with 12 atoms with fields:
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
+       2 1HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2
+⋮
+      11    C     ALA     A        1        1   -7.227  -14.047   -6.599  1.00  0.00     1    PROT        11
+      12    O     ALA     A        1        1   -7.083  -13.048   -7.303  1.00  0.00     1    PROT        12</code></pre><h3 id="Reference-documentation"><a class="docs-heading-anchor" href="#Reference-documentation">Reference documentation</a><a id="Reference-documentation-1"></a><a class="docs-heading-anchor-permalink" href="#Reference-documentation" title="Permalink"></a></h3><article><details class="docstring"><summary id="PDBTools.Residue"><a class="docstring-binding" href="#PDBTools.Residue"><code>PDBTools.Residue</code></a> — <span class="docstring-category">Type</span></summary><section><div><pre><code class="language-julia hljs">Residue</code></pre><p>Residue data structure. </p><p>The Residue structure carries the properties of the residue or molecule of the atoms it contains, but it does not copy the original vector of atoms, only the residue meta data for each residue. Thus, changes in the residue atoms will be reflected in the original vector of atoms.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; pdb = wget(&quot;1LBD&quot;);
+
+julia&gt; residues = collect(eachresidue(pdb))
+238-element Vector{Residue}[
+    SER225A
+    ALA226A
+    ⋮
+    MET461A
+    THR462A
+]
+
+julia&gt; resnum.(residues[1:3])
+3-element Vector{Int32}:
+ 225
+ 226
+ 227
+
+julia&gt; residues[5].chain
+&quot;A&quot;
+
+julia&gt; residues[8].range
+52:58
+
+julia&gt; mass(residues[1])
+82.0385f0
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L1-L44">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.eachresidue"><a class="docstring-binding" href="#PDBTools.eachresidue"><code>PDBTools.eachresidue</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">eachresidue(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the residues (or molecules) of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = wget(&quot;1LBD&quot;);
+
+julia&gt; eachresidue(atoms)
+ Residue iterator with length = 238
+
+julia&gt; collect(eachresidue(atoms))
+238-element Vector{Residue}[
+    SER225A
+    ALA226A
+    ⋮
+    MET461A
+    THR462A
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L151-L176">source</a></section></details></article><h4 id="Residue-property-getters"><a class="docs-heading-anchor" href="#Residue-property-getters">Residue property getters</a><a id="Residue-property-getters-1"></a><a class="docs-heading-anchor-permalink" href="#Residue-property-getters" title="Permalink"></a></h4><p>The following functions provide convenient access to properties of <code>Residue</code> objects:</p><article><details class="docstring"><summary id="PDBTools.name-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.name-Tuple{Residue}"><code>PDBTools.name</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">name(residue::Residue)</code></pre><p>Returns the name (residue name) of the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The residue name.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; name(residues[1])
+&quot;ALA&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L181-L207">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.resname-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.resname-Tuple{Residue}"><code>PDBTools.resname</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">resname(residue::Residue)</code></pre><p>Returns the residue name of the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The residue name.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; resname(residues[1])
+&quot;ALA&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L210-L236">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.residue-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.residue-Tuple{Residue}"><code>PDBTools.residue</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">residue(residue::Residue)</code></pre><p>Returns the sequential residue (molecule) number of the residue in the structure.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Int32</code>: The sequential residue number.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; residue(residues[1])
+1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L239-L265">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.resnum-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.resnum-Tuple{Residue}"><code>PDBTools.resnum</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">resnum(residue::Residue)</code></pre><p>Returns the residue number as written in the PDB file.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Int32</code>: The residue number from the PDB file.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; resnum(residues[1])
+1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L268-L294">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.chain-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.chain-Tuple{Residue}"><code>PDBTools.chain</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">chain(residue::Residue)</code></pre><p>Returns the chain identifier of the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The chain identifier.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; chain(residues[1])
+&quot;A&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L297-L323">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.model-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.model-Tuple{Residue}"><code>PDBTools.model</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">model(residue::Residue)</code></pre><p>Returns the model number of the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Int32</code>: The model number.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; model(residues[1])
+1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L326-L352">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.segname-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.segname-Tuple{Residue}"><code>PDBTools.segname</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">segname(residue::Residue)</code></pre><p>Returns the segment name of the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The segment name.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; segname(residues[1])
+&quot;PROT&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L355-L381">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.mass-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.mass-Tuple{Residue}"><code>PDBTools.mass</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">mass(residue::Residue)</code></pre><p>Returns the total mass of all atoms in the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Float32</code>: The total mass in atomic mass units (amu).</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; mass(residues[1])
+73.09489f0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L384-L410">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.get_atoms-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.get_atoms-Tuple{Residue}"><code>PDBTools.get_atoms</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">get_atoms(residue::Residue)</code></pre><p>Returns a view of the atoms that belong to the residue.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>SubArray{Atom}</code>: A view of the atoms in the residue.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; res_atoms = get_atoms(residues[1]);
+
+julia&gt; length(res_atoms)
+12</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L413-L441">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.charge-Tuple{Residue}"><a class="docstring-binding" href="#PDBTools.charge-Tuple{Residue}"><code>PDBTools.charge</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">charge(residue::Residue)</code></pre><p>Returns the formal charge of the residue. For protein residues, the charge is obtained from the standard protein residue database. For non-protein residues, a warning is issued and 0 is returned.</p><p><strong>Positional Arguments</strong></p><ul><li><code>residue::Residue</code>: A <code>Residue</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Int</code>: The formal charge of the residue.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.TESTPDB, &quot;protein and resname GLU&quot;);
+
+julia&gt; residues = collect(eachresidue(atoms));
+
+julia&gt; charge(residues[1])
+-1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Residue.jl#L444-L472">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.residuename"><a class="docstring-binding" href="#PDBTools.residuename"><code>PDBTools.residuename</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">residuename(residue::Union{AbstractString,Char})</code></pre><p>Function to return the long residue name from other residue codes. The function is case-insensitive.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; residuename(&quot;A&quot;)
+&quot;Alanine&quot;
+
+julia&gt; residuename(&quot;Glu&quot;)
+&quot;Glutamic Acid&quot;
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/properties/protein_residues.jl#L182-L198">source</a></section></details></article><h2 id="Iterate-over-chains"><a class="docs-heading-anchor" href="#Iterate-over-chains">Iterate over chains</a><a id="Iterate-over-chains-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-chains" title="Permalink"></a></h2><p>The <code>eachchain</code> iterator in PDBTools enables users to iterate over the chains in a PDB structure. A PDB file may contain multiple protein chains. This iterator simplifies operations involving individual chains.</p><pre><code class="language-julia hljs">ats = read_pdb(PDBTools.CHAINSPDB);
+chain.(eachchain(ats)) # Retrieve the names of all chains in the structure</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">4-element Vector{InlineStrings.String15}:
+ &quot;A&quot;
+ &quot;B&quot;
+ &quot;A&quot;
+ &quot;D&quot;</code></pre><pre><code class="language-julia hljs">model.(eachchain(ats)) # Retrieve the model numbers associated with each chain</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">4-element Vector{Int32}:
+ 1
+ 1
+ 1
+ 2</code></pre><pre><code class="language-julia hljs">chain_A1 = first(eachchain(ats)); # Access the first chain in the iterator</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Chain A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48</code></pre><pre><code class="language-julia hljs">resname.(eachresidue(chain_A1)) # Retrieve residue names for chain A in model 1</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{InlineStrings.String15}:
+ &quot;ASP&quot;
+ &quot;GLN&quot;
+ &quot;LEU&quot;</code></pre><p>In the example above, the <code>chain.</code> command retrieves the names of all chains in the structure, while  <code>model.</code> command lists the model numbers for each chain. This PDB structure contains two models for chain A, where the third residue changes from leucine (LEU) in model 1 to valine (VAL) in model 2.</p><h3 id="Collect-chains-and-indexing"><a class="docs-heading-anchor" href="#Collect-chains-and-indexing">Collect chains and indexing</a><a id="Collect-chains-and-indexing-1"></a><a class="docs-heading-anchor-permalink" href="#Collect-chains-and-indexing" title="Permalink"></a></h3><p>As seen in the previous example, The <code>first</code> and <code>last</code> commands allow quick access to the first an last elements in the iterator. For more specific indexing, you can collect all chains into an array and then use numerical indices to access them.</p><pre><code class="language-julia hljs">chains = collect(eachchain(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">4-element Vector{Chain}[ 
+    Chain(A-48 atoms)
+    Chain(B-48 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
+]</code></pre><pre><code class="language-julia hljs">chain_B = chains[2]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Chain B with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+      49    N     ASP     B        4        4  135.661  123.866  -22.311  1.00  0.00     1    ASYN        49
+      50   CA     ASP     B        4        4  136.539  123.410  -21.227  1.00  0.00     1    ASYN        50
+⋮
+      95 HD23     LEU     B        6        6  138.780  120.216  -17.864  1.00  0.00     1    ASYN        95
+      96    O     LEU     B        6        6  141.411  117.975  -21.923  1.00  0.00     1    ASYN        96</code></pre><h3 id="Modifying-Atom-Properties-in-a-Chain"><a class="docs-heading-anchor" href="#Modifying-Atom-Properties-in-a-Chain">Modifying Atom Properties in a Chain</a><a id="Modifying-Atom-Properties-in-a-Chain-1"></a><a class="docs-heading-anchor-permalink" href="#Modifying-Atom-Properties-in-a-Chain" title="Permalink"></a></h3><p>Any changes made to the atoms of a chain variable directly overwrite the properties of the original atoms in the structure. For example, modifying the occupancy and beta-factor columns of atoms in model 2 of chain A will update the corresponding properties in the original structure.</p><p>In the example below, the <code>occup</code> and <code>beta</code> properties of all atoms in model 2 of chain A are set to 0.00. The changes are reflected in the original <code>ats</code> vector, demonstrating that the modifications propagate to the parent data structure.</p><pre><code class="language-julia hljs">first(eachchain(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Chain A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48</code></pre><pre><code class="language-julia hljs">for chain in eachchain(ats)
+    if name(chain) == &quot;A&quot; &amp;&amp; model(chain) == 1
+        for atom in chain
+            atom.occup = 0.00
+            atom.beta = 0.00
+        end
+    end
+end
+first(eachchain(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Chain A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  0.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  0.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  0.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  0.00  0.00     1    ASYN        48</code></pre><p>This behavior ensures efficient data manipulation but requires careful handling to avoid unintended changes. </p><h3 id="Reference-documentation-2"><a class="docs-heading-anchor" href="#Reference-documentation-2">Reference documentation</a><a class="docs-heading-anchor-permalink" href="#Reference-documentation-2" title="Permalink"></a></h3><article><details class="docstring"><summary id="PDBTools.Chain"><a class="docstring-binding" href="#PDBTools.Chain"><code>PDBTools.Chain</code></a> — <span class="docstring-category">Type</span></summary><section><div><pre><code class="language-julia hljs">Chain</code></pre><p>Creates a Chain data structure. Chains must be consecutive in the <code>atoms</code> vector, and are identified by having the same <code>chain</code>, <code>segment</code>, and <code>model</code> fields.</p><p>The Chain structure carries the properties of the atoms it contains, but it does not copy the original vector of atoms. This means that any changes made in the Chain structure atoms, will overwrite the original vector of atoms. </p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; chains = collect(eachchain(ats))
+4-element Vector{Chain}[
+    Chain(A-48 atoms)
+    Chain(B-48 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
+]
+
+julia&gt; chains[1]
+ Chain A with 48 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  1.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  1.00  0.00     1    ASYN         2
+⋮
+      47 HD23     LEU     A        3        3  130.568  111.868  -26.242  1.00  0.00     1    ASYN        47
+      48    O     LEU     A        3        3  132.066  112.711  -21.739  1.00  0.00     1    ASYN        48
+
+julia&gt; mass(chains[1])
+353.3787f0 
+
+julia&gt; model(chains[4])
+2
+
+julia&gt; segname(chains[2])
+&quot;ASYN&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L1-L45">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.eachchain"><a class="docstring-binding" href="#PDBTools.eachchain"><code>PDBTools.eachchain</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">eachchain(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the chains of a selection. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; eachchain(ats)
+ Chain iterator with length = 4
+
+julia&gt; chains = collect(eachchain(ats))
+4-element Vector{Chain}[
+    Chain(A-48 atoms)
+    Chain(B-48 atoms)
+    Chain(A-48 atoms)
+    Chain(D-45 atoms)
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L68-L92">source</a></section></details></article><h4 id="Chain-property-getters"><a class="docs-heading-anchor" href="#Chain-property-getters">Chain property getters</a><a id="Chain-property-getters-1"></a><a class="docs-heading-anchor-permalink" href="#Chain-property-getters" title="Permalink"></a></h4><p>The following functions provide convenient access to properties of <code>Chain</code> objects:</p><article><details class="docstring"><summary id="PDBTools.name-Tuple{Chain}"><a class="docstring-binding" href="#PDBTools.name-Tuple{Chain}"><code>PDBTools.name</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">name(chain::Chain)</code></pre><p>Returns the name (chain identifier) of the chain.</p><p><strong>Positional Arguments</strong></p><ul><li><code>chain::Chain</code>: A <code>Chain</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The chain identifier.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; chains = collect(eachchain(atoms));
+
+julia&gt; name(chains[1])
+&quot;A&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L97-L123">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.chain-Tuple{Chain}"><a class="docstring-binding" href="#PDBTools.chain-Tuple{Chain}"><code>PDBTools.chain</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">chain(chain::Chain)</code></pre><p>Returns the chain identifier of the chain.</p><p><strong>Positional Arguments</strong></p><ul><li><code>chain::Chain</code>: A <code>Chain</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The chain identifier.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; chains = collect(eachchain(atoms));
+
+julia&gt; chain(chains[1])
+&quot;A&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L126-L152">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.model-Tuple{Chain}"><a class="docstring-binding" href="#PDBTools.model-Tuple{Chain}"><code>PDBTools.model</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">model(chain::Chain)</code></pre><p>Returns the model number of the chain.</p><p><strong>Positional Arguments</strong></p><ul><li><code>chain::Chain</code>: A <code>Chain</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Int32</code>: The model number.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; chains = collect(eachchain(atoms));
+
+julia&gt; model(chains[1])
+1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L155-L181">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.segname-Tuple{Chain}"><a class="docstring-binding" href="#PDBTools.segname-Tuple{Chain}"><code>PDBTools.segname</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">segname(chain::Chain)</code></pre><p>Returns the segment name of the chain.</p><p><strong>Positional Arguments</strong></p><ul><li><code>chain::Chain</code>: A <code>Chain</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The segment name.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.TESTPDB, &quot;protein&quot;);
+
+julia&gt; chains = collect(eachchain(atoms));
+
+julia&gt; segname(chains[1])
+&quot;PROT&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L184-L210">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.mass-Tuple{Chain}"><a class="docstring-binding" href="#PDBTools.mass-Tuple{Chain}"><code>PDBTools.mass</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">mass(chain::Chain)</code></pre><p>Returns the total mass of all atoms in the chain.</p><p><strong>Positional Arguments</strong></p><ul><li><code>chain::Chain</code>: A <code>Chain</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Float32</code>: The total mass in atomic mass units (amu).</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; chains = collect(eachchain(atoms));
+
+julia&gt; mass(chains[1])
+353.3787f0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L213-L239">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.get_atoms-Tuple{Chain}"><a class="docstring-binding" href="#PDBTools.get_atoms-Tuple{Chain}"><code>PDBTools.get_atoms</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">get_atoms(chain::Chain)</code></pre><p>Returns a view of the atoms that belong to the chain.</p><p><strong>Positional Arguments</strong></p><ul><li><code>chain::Chain</code>: A <code>Chain</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>SubArray{Atom}</code>: A view of the atoms in the chain.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.CHAINSPDB);
+
+julia&gt; chains = collect(eachchain(atoms));
+
+julia&gt; chain_atoms = get_atoms(chains[1]);
+
+julia&gt; length(chain_atoms)
+48</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Chain.jl#L242-L270">source</a></section></details></article><h2 id="Iterate-over-segments"><a class="docs-heading-anchor" href="#Iterate-over-segments">Iterate over segments</a><a id="Iterate-over-segments-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-segments" title="Permalink"></a></h2><p>The <code>eachsegment</code> iterator enables iteration over the segments of a structure. For example:</p><pre><code class="language-julia hljs">read_pdb(PDBTools.DIMERPDB)
+eachsegment(ats)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Segment iterator with length = 2</code></pre><pre><code class="language-julia hljs">name.(eachsegment(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{InlineStrings.String15}:
+ &quot;ASYN&quot;
+ &quot;ASYN&quot;</code></pre><p>The result of the iterator can also be collected, with:</p><pre><code class="language-julia hljs">s = collect(eachsegment(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Segment}[ 
+    ASYN-(144 atoms))
+    ASYN-(45 atoms))
+]</code></pre><pre><code class="language-julia hljs">s[1]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Segment of name ASYN with 144 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     ASP     A        1        1  133.978  119.386  -23.646  0.00  0.00     1    ASYN         1
+       2   CA     ASP     A        1        1  134.755  118.916  -22.497  0.00  0.00     1    ASYN         2
+⋮
+     143 HD23     LEU     A        9        9  142.275  131.839  -10.225  0.00  0.00     1    ASYN       143
+     144    O     LEU     A        9        9  141.311  127.197  -12.279  0.00  0.00     1    ASYN       144</code></pre><p>These segment structures <em>do not</em> copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  </p><p>Iterators can be used to obtain or modify properties of the segments. Here we illustrate computing the mass of each segment and renaming segment of all atoms with the segment indices:</p><pre><code class="language-julia hljs">s = collect(eachsegment(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Segment}[ 
+    ASYN-(144 atoms))
+    ASYN-(45 atoms))
+]</code></pre><p>Properties of each segment can then be obtained by broadcasting over the segments:</p><pre><code class="language-julia hljs">mass.(s)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Float32}:
+ 1060.1364
+  339.35178</code></pre><pre><code class="language-julia hljs">formula.(s)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{PDBTools.Formula}:
+ H₆₉C₄₅N₁₅O₁₅
+ H₂₁C₁₄N₅O₅</code></pre><p>And iterating over the segments can allow changing properties of the atoms in a segment-specific way. For instance, here we change the segment names:</p><pre><code class="language-julia hljs">for (iseg, seg) in enumerate(eachsegment(ats))
+    for at in seg
+        at.segname = &quot;$(at.segname)$iseg&quot;
+    end
+end</code></pre><pre><code class="language-julia hljs">collect(eachsegment(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Segment}[ 
+    ASYN1-(144 atoms))
+    ASYN2-(45 atoms))
+]</code></pre><h3 id="Reference-documentation-3"><a class="docs-heading-anchor" href="#Reference-documentation-3">Reference documentation</a><a class="docs-heading-anchor-permalink" href="#Reference-documentation-3" title="Permalink"></a></h3><article><details class="docstring"><summary id="PDBTools.Segment"><a class="docstring-binding" href="#PDBTools.Segment"><code>PDBTools.Segment</code></a> — <span class="docstring-category">Type</span></summary><section><div><pre><code class="language-julia hljs">Segment</code></pre><p>Segment data structure. Segments must be consecutive in the <code>atoms</code> vector, and are identified by having the same <code>segname</code> and <code>model</code> fields.</p><p>The Segment structure carries the properties of the segment  it contains, but it does not copy the original vector of atoms, only the segment meta data and the reference to the original vector. Thus, changes in the segment atoms will be reflected in the original vector of atoms.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; segments = collect(eachsegment(ats))
+2-element Vector{Segment}[
+    A-(1905 atoms))
+    B-(92 atoms))
+]
+
+julia&gt; segname.(segments[1:2])
+2-element Vector{InlineStrings.String15}:
+ &quot;A&quot;
+ &quot;B&quot;
+
+julia&gt; length(segments[2])
+92
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Segment.jl#L1-L35">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.eachsegment"><a class="docstring-binding" href="#PDBTools.eachsegment"><code>PDBTools.eachsegment</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">eachsegment(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the segments of a selection.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; sit = eachsegment(ats)
+ Segment iterator with length = 2
+
+julia&gt; for seg in sit
+           @show length(seg)
+       end
+length(seg) = 1905
+length(seg) = 92
+
+julia&gt; collect(sit)
+2-element Vector{Segment}[ 
+    A-(1905 atoms))
+    B-(92 atoms))
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Segment.jl#L55-L83">source</a></section></details></article><h4 id="Segment-property-getters"><a class="docs-heading-anchor" href="#Segment-property-getters">Segment property getters</a><a id="Segment-property-getters-1"></a><a class="docs-heading-anchor-permalink" href="#Segment-property-getters" title="Permalink"></a></h4><p>The following functions provide convenient access to properties of <code>Segment</code> objects:</p><article><details class="docstring"><summary id="PDBTools.name-Tuple{Segment}"><a class="docstring-binding" href="#PDBTools.name-Tuple{Segment}"><code>PDBTools.name</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">name(segment::Segment)</code></pre><p>Returns the name (segment name) of the segment.</p><p><strong>Positional Arguments</strong></p><ul><li><code>segment::Segment</code>: A <code>Segment</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The segment name.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; segments = collect(eachsegment(atoms));
+
+julia&gt; name(segments[1])
+&quot;A&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Segment.jl#L88-L114">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.segname-Tuple{Segment}"><a class="docstring-binding" href="#PDBTools.segname-Tuple{Segment}"><code>PDBTools.segname</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">segname(segment::Segment)</code></pre><p>Returns the segment name of the segment.</p><p><strong>Positional Arguments</strong></p><ul><li><code>segment::Segment</code>: A <code>Segment</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>String</code>: The segment name.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; segments = collect(eachsegment(atoms));
+
+julia&gt; segname(segments[1])
+&quot;A&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Segment.jl#L117-L143">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.mass-Tuple{Segment}"><a class="docstring-binding" href="#PDBTools.mass-Tuple{Segment}"><code>PDBTools.mass</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">mass(segment::Segment)</code></pre><p>Returns the total mass of all atoms in the segment.</p><p><strong>Positional Arguments</strong></p><ul><li><code>segment::Segment</code>: A <code>Segment</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Float32</code>: The total mass in atomic mass units (amu).</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; segments = collect(eachsegment(atoms));
+
+julia&gt; mass(segments[1])
+25222.553f0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Segment.jl#L146-L172">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.get_atoms-Tuple{Segment}"><a class="docstring-binding" href="#PDBTools.get_atoms-Tuple{Segment}"><code>PDBTools.get_atoms</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">get_atoms(segment::Segment)</code></pre><p>Returns a view of the atoms that belong to the segment.</p><p><strong>Positional Arguments</strong></p><ul><li><code>segment::Segment</code>: A <code>Segment</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>SubArray{Atom}</code>: A view of the atoms in the segment.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; segments = collect(eachsegment(atoms));
+
+julia&gt; seg_atoms = get_atoms(segments[1]);
+
+julia&gt; length(seg_atoms)
+1905</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Segment.jl#L175-L203">source</a></section></details></article><h2 id="Iterate-over-models"><a class="docs-heading-anchor" href="#Iterate-over-models">Iterate over models</a><a id="Iterate-over-models-1"></a><a class="docs-heading-anchor-permalink" href="#Iterate-over-models" title="Permalink"></a></h2><p>The <code>eachmodel</code> iterator enables iteration over the segments of a structure. For example:</p><pre><code class="language-julia hljs">ats = wget(&quot;8S8N&quot;);
+eachmodel(ats)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Model iterator with length = 11</code></pre><pre><code class="language-julia hljs">model.(eachmodel(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">11-element Vector{Int32}:
+  1
+  2
+  3
+  ⋮
+ 10
+ 11</code></pre><p>The result of the iterator can also be collected, with:</p><pre><code class="language-julia hljs">m = collect(eachmodel(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">11-element Vector{Model}[ 
+    1-(234 atoms))
+    2-(234 atoms))
+    ⋮
+    10-(234 atoms))
+    11-(234 atoms))
+]</code></pre><pre><code class="language-julia hljs">m[1]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"> Model 1 with 234 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     DLE     A        2        1   -5.811   -0.380   -2.159  1.00  0.00     1                 1
+       2   CA     DLE     A        2        1   -4.785   -0.493   -3.227  1.00  0.00     1                 2
+⋮
+     233  HT2   A1H5T     B      101       13   -5.695    5.959   -3.901  1.00  0.00     1               233
+     234  HT1   A1H5T     B      101       13   -4.693    4.974   -2.743  1.00  0.00     1               234</code></pre><p>The model structure <em>does not</em> copy the data from the original atom vector. Therefore, changes performed on these vectors will be reflected on the original data.  </p><p>Iterators can be used to obtain or modify properties of the models. Here we illustrate computing the mass of each segment and renaming segment of all atoms with the segment indices:</p><pre><code class="language-julia hljs">center_of_mass.(eachmodel(ats))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">11-element Vector{StaticArraysCore.SVector{3, Float32}}:
+ [0.6337627, -0.14130484, -0.2179606]
+ [0.56077266, -0.15154965, 0.1354806]
+ [0.5065595, -0.0977174, 0.030405657]
+ ⋮
+ [0.38899764, -0.21103837, 0.2180245]
+ [0.69953984, -0.15372278, 0.21793146]</code></pre><h3 id="Reference-documentation-4"><a class="docs-heading-anchor" href="#Reference-documentation-4">Reference documentation</a><a class="docs-heading-anchor-permalink" href="#Reference-documentation-4" title="Permalink"></a></h3><article><details class="docstring"><summary id="PDBTools.Model"><a class="docstring-binding" href="#PDBTools.Model"><code>PDBTools.Model</code></a> — <span class="docstring-category">Type</span></summary><section><div><pre><code class="language-julia hljs">Model</code></pre><p>Model data structure. It carries the data of a model in a PDB file. Models must be consecutive in the <code>atoms</code> vector, and are identified by having the same <code>model</code> field.</p><p>The Model structure carries the properties of the model it contains, but it does not copy the original vector of atoms, only the model meta data and the reference to the original vector. Thus, changes in the model atoms will be reflected in the original vector of atoms.</p><p><strong>Example</strong></p><p>In the example below, 8S8N is PDB entry with 11 models.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = wget(&quot;8S8N&quot;);
+
+julia&gt; models = collect(eachmodel(ats))
+11-element Vector{Model}[
+    1-(234 atoms))
+    2-(234 atoms))
+    ⋮
+    10-(234 atoms))
+    11-(234 atoms))
+]
+
+julia&gt; models[1]
+ Model 1 with 234 atoms.
+   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
+       1    N     DLE     A        2        1   -5.811   -0.380   -2.159  1.00  0.00     1                 1
+       2   CA     DLE     A        2        1   -4.785   -0.493   -3.227  1.00  0.00     1                 2
+⋮
+     233  HT2   A1H5T     B      101       13   -5.695    5.959   -3.901  1.00  0.00     1               233
+     234  HT1   A1H5T     B      101       13   -4.693    4.974   -2.743  1.00  0.00     1               234
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Model.jl#L1-L42">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.eachmodel"><a class="docstring-binding" href="#PDBTools.eachmodel"><code>PDBTools.eachmodel</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">eachmodel(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Iterator for the models of a selection.</p><p><strong>Example</strong></p><p>Here we show how to iterate over the models of a PDB file, annotate  the index of the first atom of each model, and collect all models.</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = wget(&quot;8S8N&quot;);
+
+julia&gt; models = eachmodel(ats)
+ Model iterator with length = 11
+
+julia&gt; first_atom = Atom[]
+       for model in models
+           push!(first_atom, model[1])
+       end
+       @show index.(first_atom);
+index.(first_atom) = Int32[1, 235, 469, 703, 937, 1171, 1405, 1639, 1873, 2107, 2341]
+
+julia&gt; collect(models)
+11-element Vector{Model}[
+    1-(234 atoms))
+    2-(234 atoms))
+    ⋮
+    10-(234 atoms))
+    11-(234 atoms))
+]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Model.jl#L66-L101">source</a></section></details></article><h4 id="Model-property-getters"><a class="docs-heading-anchor" href="#Model-property-getters">Model property getters</a><a id="Model-property-getters-1"></a><a class="docs-heading-anchor-permalink" href="#Model-property-getters" title="Permalink"></a></h4><p>The following functions provide convenient access to properties of <code>Model</code> objects:</p><article><details class="docstring"><summary id="PDBTools.model-Tuple{Model}"><a class="docstring-binding" href="#PDBTools.model-Tuple{Model}"><code>PDBTools.model</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">model(model::Model)</code></pre><p>Returns the model number.</p><p><strong>Positional Arguments</strong></p><ul><li><code>model::Model</code>: A <code>Model</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>Int32</code>: The model number.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = wget(&quot;8S8N&quot;);
+
+julia&gt; models = collect(eachmodel(atoms));
+
+julia&gt; model(models[1])
+1</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Model.jl#L106-L132">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.get_atoms-Tuple{Model}"><a class="docstring-binding" href="#PDBTools.get_atoms-Tuple{Model}"><code>PDBTools.get_atoms</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">get_atoms(model::Model)</code></pre><p>Returns a view of the atoms that belong to the model.</p><p><strong>Positional Arguments</strong></p><ul><li><code>model::Model</code>: A <code>Model</code> object.</li></ul><p><strong>Returns</strong></p><ul><li><code>SubArray{Atom}</code>: A view of the atoms in the model.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = wget(&quot;8S8N&quot;);
+
+julia&gt; models = collect(eachmodel(atoms));
+
+julia&gt; model_atoms = get_atoms(models[1]);
+
+julia&gt; length(model_atoms)
+234</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/da6afc1bbc5c28136339228450c5dc3c05dd01be/src/struct_and_iterators/Model.jl#L135-L163">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../selections/">« Selections</a><a class="docs-footer-nextpage" href="../elements/">Atom and element properties »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Friday 30 January 2026 20:42">Friday 30 January 2026</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
