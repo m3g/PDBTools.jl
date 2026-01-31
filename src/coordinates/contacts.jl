@@ -504,7 +504,7 @@ end
     c1[2,1] = 1.f0
     @test c1[2,1] == 1.f0 
     c1[2,1] == 1.3291166f0
-    @test c1[1,:] ≈ vcat([0.f0, 1.32912], zeros(48)) atol=1e-4
+    @test c1[1,:] ≈ vcat([0.f0, 1.32912f0], zeros(Float32,48)) atol=1e-4
 
     c1 = contact_map(m[1]; discrete=false)
     c2 = contact_map(m[2]; discrete=false)
