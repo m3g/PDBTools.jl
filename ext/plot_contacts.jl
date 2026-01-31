@@ -92,13 +92,14 @@ function heatmap(
 ) where {T<:Real}
     i, j, invd = findnz(map.matrix)
     d = inv.(invd)
-    @. d += nextfloat(zero(eltype(d)))
     ext = extrema(d)
     color = isnothing(color) ? 
-        T == Bool ? cgrad([:white, :black], 2) : (ext[1] < 0 ? :bwr : :grayC) : color
+        T == Bool ? cgrad([:white, :black], 2) : 
+        (ext[1] < 0 ? :bwr : :grayC) : color
     clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
     colorbar_title = isnothing(colorbar_title) ?  
-        ifelse(T <: Integer, nothing, "$(_n(ext[2]))distance (Å)") : colorbar_tile
+        ifelse(T <: Integer, nothing, "$(_n(ext[2]))distance (Å)") : 
+        colorbar_tile
     return Plots.scatter(i, j; zcolor=d, colorbar, color,
         xlabel, ylabel, xticks, yticks, xrotation, label,
         colorbar_title, aspect_ratio, xlims, ylims,
