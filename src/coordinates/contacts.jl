@@ -468,10 +468,18 @@ end
         @test all(isapprox(pbc.matrix[i], no_pbc.matrix[i]; rtol=1e-2) for i in eachindex(pbc.matrix))
     end
 
-    # Arithmetic operations on contact maps
     pdb = wget("2cpb", "model 1 2")
     m = collect(eachmodel(pdb))
     c1 = contact_map(m[1])
+
+    # getindex and setindex
+    @test c1[1,1] == true
+    @test c1[20,1] == false 
+    c1[20,1] = true
+    @test c1[20,1] == true
+    c1[20,1] == false
+
+    # Arithmetic operations on contact maps
     c2 = contact_map(m[2])
     c3 = c1 + c2
     @test sum(c3.matrix) == 424
@@ -488,6 +496,16 @@ end
     @test sum(c3.matrix) == 414
 
     c1 = contact_map(m[1]; discrete=false)
+
+    # getindex and setindex
+    @test c1[1,1] == 0.f0
+    @test c1[20,1] === missing
+    @test c1[2,1] == 1.3291166f0
+    c1[2,1] = 1.f0
+    @test c1[2,1] == 1.f0 
+    c1[2,1] == 1.3291166f0
+    @test c1[1,:] ≈ vcat([0.f0, 1.32912], zeros(48)) atol=1e-4
+
     c2 = contact_map(m[2]; discrete=false)
     c3 = c1 + c2
     @test sum(inv.(nonzeros(c3.matrix))) ≈ 1564.5426f0
