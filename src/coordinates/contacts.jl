@@ -480,6 +480,7 @@ end
     c1[20,1] == false
 
     # Arithmetic operations on contact maps
+    c1 = contact_map(m[1])
     c2 = contact_map(m[2])
     c3 = c1 + c2
     @test sum(c3.matrix) == 424
@@ -494,7 +495,6 @@ end
     @test sum(c3.matrix) == -414
     c3 = c1 - c2
     @test sum(c3.matrix) == 414
-
 
     # getindex and setindex
     c1 = contact_map(m[1]; discrete=false)
