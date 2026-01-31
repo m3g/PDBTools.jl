@@ -43,13 +43,13 @@ struct ContactMap{T}
 end
 Base.setindex!(map::ContactMap, value, i, j) = map.matrix[i, j] = value
 # Single element fetching
-Base.getindex(map::ContactMap{T}, i::Integer, j::Integer) where {T<:Real} = 
-    ifelse(map.matrix[i,j] == zero(T), missing, inv(map.matrix[i, j]))
-Base.getindex(map::ContactMap{Bool}, i::Integer, j::Integer) = map.matrix[i,j]
+Base.getindex(map::ContactMap{T}, i::Integer, j::Integer) where {T<:Real} =
+    ifelse(map.matrix[i, j] == zero(T), missing, inv(map.matrix[i, j]))
+Base.getindex(map::ContactMap{Bool}, i::Integer, j::Integer) = map.matrix[i, j]
 # For slices
 Base.getindex(map::ContactMap{T}, i, j) where {T} =
-    @. ifelse(map.matrix[i,j] == zero(T), zero(T), inv(map.matrix[i, j]) + nextfloat(zero(T)))
-Base.getindex(map::ContactMap{Bool}, i, j) = map.matrix[i,j]
+    @. ifelse(map.matrix[i, j] == zero(T), zero(T), inv(map.matrix[i, j]) + nextfloat(zero(T)))
+Base.getindex(map::ContactMap{Bool}, i, j) = map.matrix[i, j]
 
 function Base.show(io::IO, ::MIME"text/plain", map::ContactMap{T}) where {T}
     print(io, "ContactMap{$T} of size $(size(map.matrix)) with $(nnz(map.matrix)) contacts, threshold $(map.d) and gap $(map.gap)")
@@ -76,8 +76,8 @@ function +(c1::ContactMap{Bool}, c2::ContactMap{Bool})
         vcat(c1_i, c2_i),
         vcat(c1_j, c2_j),
         vcat(c1_v, c2_v),
-        length(c1.residues1), length(c1.residues2), 
-        (x,y) -> x | y
+        length(c1.residues1), length(c1.residues2),
+        (x, y) -> x | y
     )
     return ContactMap(c_sum, c1.d, c1.gap, c1.residues1, c1.residues2)
 end
@@ -87,17 +87,17 @@ function -(c1::ContactMap{Bool}, c2::ContactMap{Bool})
     c1_i, c1_j, c1_v = findnz(c1.matrix)
     c_sub = sparse(
         c1_i, c1_j, Int.(c1_v),
-        length(c1.residues1), length(c1.residues2), 
+        length(c1.residues1), length(c1.residues2),
     )
     c2_i, c2_j, c2_v = findnz(c2.matrix)
     for iel in eachindex(c2_i, c2_j, c2_v)
         i = c2_i[iel]
         j = c2_j[iel]
         v = c2_v[iel]
-        if v && (c_sub[i,j] == 1)
-            c_sub[i,j] = 0
+        if v && (c_sub[i, j] == 1)
+            c_sub[i, j] = 0
         elseif v
-            c_sub[i,j] = -1
+            c_sub[i, j] = -1
         end
     end
     dropzeros!(c_sub)
@@ -105,7 +105,7 @@ function -(c1::ContactMap{Bool}, c2::ContactMap{Bool})
 end
 
 function add_sub(
-    c1::ContactMap{<:AbstractFloat}, 
+    c1::ContactMap{<:AbstractFloat},
     c2::ContactMap{<:AbstractFloat},
     op::F,
 ) where {F<:Function}
@@ -113,22 +113,22 @@ function add_sub(
     c1_i, c1_j, c1_v = findnz(c1.matrix)
     c = sparse(
         c1_i, c1_j, c1_v,
-        length(c1.residues1), length(c1.residues2), 
+        length(c1.residues1), length(c1.residues2),
     )
     c2_i, c2_j, c2_v = findnz(c2.matrix)
     for iel in eachindex(c2_i, c2_j, c2_v)
         i, j, v = c2_i[iel], c2_j[iel], c2_v[iel]
-        if ismissing(c1[i,j])
-            c[i,j] = 0
+        if ismissing(c1[i, j])
+            c[i, j] = 0
         else
-            c[i,j] = inv(op(inv(c[i,j]),inv(v)))
+            c[i, j] = inv(op(inv(c[i, j]), inv(v)))
         end
     end
     # Remove missing distances of second contact map
     for iel in eachindex(c1_i, c1_j, c1_v)
         i, j = c1_i[iel], c1_j[iel]
-        if ismissing(c2[i,j])
-            c[i,j] = 0
+        if ismissing(c2[i, j])
+            c[i, j] = 0
         end
     end
     dropzeros!(c)
@@ -275,7 +275,7 @@ function CellListMap.reducer(x::MapMatrix, y::MapMatrix)
     append!(x.value, y.value)
     return x
 end
-function CellListMap.reset_output!(x::MapMatrix)   
+function CellListMap.reset_output!(x::MapMatrix)
     empty!(x.row_ind)
     empty!(x.col_ind)
     empty!(x.value)
@@ -324,7 +324,7 @@ end
 # matrix representation.
 #
 _combine(::Type{Bool}, x, y) = x | y
-_combine(::Type{<:Real}, x, y) = max(x,y)
+_combine(::Type{<:Real}, x, y) = max(x, y)
 
 function contact_map(
     atoms1::AbstractVector{<:PDBTools.Atom};
@@ -353,13 +353,13 @@ function contact_map(
     )
     map = ContactMap{T}(
         sparse(
-            map_matrix.col_ind, map_matrix.row_ind, map_matrix.value, 
-            length(residues), length(residues), 
-            (x,y) -> _combine(T,x,y)
-        ), 
-        dmax, 
-        gap, 
-        residues, 
+            map_matrix.col_ind, map_matrix.row_ind, map_matrix.value,
+            length(residues), length(residues),
+            (x, y) -> _combine(T, x, y)
+        ),
+        dmax,
+        gap,
+        residues,
         residues
     )
     return map
@@ -412,13 +412,13 @@ function contact_map(
     )
     map = ContactMap{T}(
         sparse(
-            map_matrix.col_ind, map_matrix.row_ind, map_matrix.value, 
-            length(residues1), length(residues2), 
-            (x,y) -> _combine(T,x,y)
-        ), 
-        dmax, 
-        0, 
-        residues1, 
+            map_matrix.col_ind, map_matrix.row_ind, map_matrix.value,
+            length(residues1), length(residues2),
+            (x, y) -> _combine(T, x, y)
+        ),
+        dmax,
+        0,
+        residues1,
         residues2,
     )
     return map
@@ -468,9 +468,18 @@ end
         @test all(isapprox(pbc.matrix[i], no_pbc.matrix[i]; rtol=1e-2) for i in eachindex(pbc.matrix))
     end
 
-    # Arithmetic operations on contact maps
     pdb = wget("2cpb", "model 1 2")
     m = collect(eachmodel(pdb))
+    c1 = contact_map(m[1])
+
+    # getindex and setindex
+    @test c1[1,1] == true
+    @test c1[20,1] == false 
+    c1[20,1] = true
+    @test c1[20,1] == true
+    c1[20,1] == false
+
+    # Arithmetic operations on contact maps
     c1 = contact_map(m[1])
     c2 = contact_map(m[2])
     c3 = c1 + c2
@@ -486,6 +495,19 @@ end
     @test sum(c3.matrix) == -414
     c3 = c1 - c2
     @test sum(c3.matrix) == 414
+
+    # getindex and setindex
+    c1 = contact_map(m[1]; discrete=false)
+    @test c1[1,1] == 0.f0
+    @test c1[20,1] === missing
+    @test c1[2,1] == 1.3291166f0
+    c1[2,1] = 1.f0
+    @test c1[2,1] == 1.f0 
+    c1[2,1] == 1.3291166f0
+    x = c1[1,:]
+    @test x[1] ≈ 0.f0 atol=1e-4
+    @test x[2] ≈ 1.32912f0 atol=1e-4
+    @test length(x) == 50
 
     c1 = contact_map(m[1]; discrete=false)
     c2 = contact_map(m[2]; discrete=false)

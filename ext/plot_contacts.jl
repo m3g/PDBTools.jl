@@ -63,9 +63,9 @@ julia> # plt = heatmap(map) # uncomment to plot
 
 """
 function heatmap(
-    map::ContactMap{T}; 
+    map::ContactMap{T};
     plot_size=_plot_size(map),
-    xstep=max(1, div(size(map.matrix, 1), 20)), 
+    xstep=max(1, div(size(map.matrix, 1), 20)),
     ystep=max(1, div(size(map.matrix, 2), 20)),
     xticks=PDBTools.residue_ticks(map.residues1; stride=xstep, serial=true),
     yticks=PDBTools.residue_ticks(map.residues2; stride=ystep, serial=true),
@@ -74,9 +74,9 @@ function heatmap(
     ylabel="residue",
     colorbar=ifelse(T <: Integer, :none, :right),
     colorbar_title=nothing,
-    aspect_ratio=(last(plot_size)/first(plot_size))*(Base.size(map.matrix,1)/Base.size(map.matrix,2)),
-    xlims=(0,size(map.matrix, 1)+1),
-    ylims=(0,size(map.matrix, 2)+1),
+    aspect_ratio=(last(plot_size) / first(plot_size)) * (Base.size(map.matrix, 1) / Base.size(map.matrix, 2)),
+    xlims=(0, size(map.matrix, 1) + 1),
+    ylims=(0, size(map.matrix, 2) + 1),
     color=nothing,
     size=plot_size,
     framestyle=:box,
@@ -92,17 +92,18 @@ function heatmap(
 ) where {T<:Real}
     i, j, invd = findnz(map.matrix)
     d = inv.(invd)
-    @. d += nextfloat(zero(eltype(d)))
     ext = extrema(d)
-    color = isnothing(color) ? 
-        T == Bool ? cgrad([:white, :black], 2) : (ext[1] < 0 ? :bwr : :grayC) : color
+    color = isnothing(color) ?
+            T == Bool ? cgrad([:white, :black], 2) :
+            (ext[1] < 0 ? :bwr : :grayC) : color
     clims = isnothing(clims) ? (1.1 * min(0, ext[1]), 1.1 * max(0, ext[2])) : clims
-    colorbar_title = isnothing(colorbar_title) ?  
-        ifelse(T <: Integer, nothing, "$(_n(ext[2]))distance (Å)") : colorbar_tile
+    colorbar_title = isnothing(colorbar_title) ?
+                     ifelse(T <: Integer, nothing, "$(_n(ext[2]))distance (Å)") :
+                     colorbar_tile
     return Plots.scatter(i, j; zcolor=d, colorbar, color,
         xlabel, ylabel, xticks, yticks, xrotation, label,
         colorbar_title, aspect_ratio, xlims, ylims,
-        size, framestyle, grid, clims, margin, 
+        size, framestyle, grid, clims, margin,
         markershape, markersize, markerstrokewidth,
         fontfamily, kargs...
     )
@@ -111,7 +112,7 @@ end
 @testitem "contact plots" begin
     using PDBTools
     using Plots
-    tmpplot = tempname()*".png"
+    tmpplot = tempname() * ".png"
     ats = read_pdb(PDBTools.DIMERPDB)
     cA = select(ats, "chain A")
     cB = select(ats, "chain B")
@@ -128,7 +129,7 @@ end
     plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
-    c_cont.matrix .= rand.(Ref([-1,1])) .* c_cont.matrix 
+    c_cont.matrix .= rand.(Ref([-1, 1])) .* c_cont.matrix
     plt = heatmap(c_cont)
     savefig(plt, tmpplot)
     @test isfile(tmpplot)
