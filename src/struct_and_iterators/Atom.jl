@@ -147,8 +147,8 @@ end
     at1 = Atom{Nothing}(; index=1, name="CA")
     at2 = Atom(; custom=nothing, index=1, name="CA")
     @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
-    @test (@allocations at = Atom()) <= 1
-    @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
+    @test (@allocations Atom()) <= 1
+    @test (@allocations Atom(; index=1, residue=1, name="CA")) <= 1
     @test Atom(name="CA") == Atom(name="CA")
     @test !(Atom(name="CA") == Atom(name="N"))
 end

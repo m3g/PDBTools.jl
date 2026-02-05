@@ -1,5 +1,5 @@
 import CellListMap
-using CellListMap: ParticleSystem, map_pairwise!
+using CellListMap: ParticleSystem, pairwise!
 using LinearAlgebra: norm
 using SIMD: VecRange
 
@@ -114,10 +114,11 @@ function update_dot_exposure!(deltaxy, dot_cache, exposed_i, rj_sq, ::Val{N}) wh
 end
 
 function update_pair_dot_exposure!(
-    x, y, i, j, d2, surface_dots;
+    pair, surface_dots;
     atoms, dot_cache, atom_type::F1, atom_radius_from_type::F2, probe_radius,
     N_SIMD::Val{N}=Val(16),
 ) where {F1,F2,N}
+    (; x, y, i, j, d2) = pair
     type_i = atom_type(atoms[i])
     type_j = atom_type(atoms[j])
     r_i = atom_radius_from_type(type_i) + probe_radius
@@ -236,10 +237,9 @@ function sasa_particles(
         parallel=parallel,
     )
 
-    map_pairwise!(
-        (x, y, i, j, d2, surface_dots) ->
-            update_pair_dot_exposure!(
-                x, y, i, j, d2, surface_dots;
+    pairwise!(
+        (pair, surface_dots) -> update_pair_dot_exposure!(
+                pair, surface_dots;
                 atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius, N_SIMD,
             ),
         system,
