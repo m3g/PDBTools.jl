@@ -30,6 +30,9 @@ end
 end
 Base.length(x::HBonds) = length(x.D)
 Base.getindex(x::HBonds, i::Integer) = (D=x.D[i], H=x.H[i], A=x.A[i], r=x.r[i], ang=x.ang[i])
+Base.keys(x::HBonds) = LinearIndices(x.D)
+Base.eachindex(x::HBonds) = eachindex(x.D)
+Base.iterate(x::HBonds, i=1) = i > length(x) ? nothing : (x[i], i + 1)
 function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     print(io, chomp("""
     HBonds data structure with $(length(hb)) hydrogen-bonds.
@@ -512,5 +515,18 @@ end
 
     # Test set overlap error
     @test_throws ArgumentError hydrogen_bonds(models[1], "resname ARG" => "protein"; unitcell=pbcs[1])
+
+    # Test iteration interface
+    hbs = hydrogen_bonds(models[1], "protein")
+    hb = hbs["protein => protein"]
+    @test length(hb) == 63
+    @test keys(hb) == 1:63
+    @test eachindex(hb) == 1:63
+    collected = collect(hb)
+    @test length(collected) == 63
+    @test collected[1] == hb[1]
+    @test collected[end] == hb[length(hb)]
+    @test all(x -> haskey(x, :D) && haskey(x, :H) && haskey(x, :A) && haskey(x, :r) && haskey(x, :ang), hb)
+    @test findfirst(x -> x.D == hb[1].D, hb) == 1
 
 end
