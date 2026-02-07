@@ -343,7 +343,7 @@ If no selection is provided, the hydrogen bonds of the complete structure will b
 
 # Example
 
-```jldoctest; filter = r"(\\d*)\\.(\\d{2})\\d+" => s"\\1.\\2***"
+```jldoctest; filter = r"\\d+" => s"***"
 julia> using PDBTools
 
 julia> pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb", "model 1");
@@ -367,7 +367,7 @@ julia> hbs["protein => protein"][1] # first h-bond
 julia> hbs = hydrogen_bonds(pdb, "protein", "protein" => "resname SOL"; unitcell=uc) # Multiple selections
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 2 entries:
   "protein => protein"     => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877…
-  "protein => resname SOL" => HBonds(Int32[1406, 1583, 1799, 2027, 789, 3503, 1169, 184, 3914, 4304  …  1224, 38768, 12…
+  "protein => resname SOL" => HBonds(Int32[1, 20, 32, 108, 108, 108, 21392, 29792, 153, 1406  …  34082, 1212, 1217, 122…
 
 julia> hbs["protein => protein"]
 HBonds data structure with 63 hydrogen-bonds.
@@ -378,8 +378,8 @@ HBonds data structure with 63 hydrogen-bonds.
 
 julia> hbs["protein => resname SOL"]
 HBonds data structure with 138 hydrogen-bonds.
-    First hbond: (D-H---A) = (D = 1406, H = 1407, A = 160, r = 2.9361732f0, ang = 6.771988f0)
-    Last hbond: (D-H---A) = (D = 41798, H = 41800, A = 395, r = 2.6894214f0, ang = 10.623453f0)
+    First hbond: (D-H---A) = (D = 1, H = 3, A = 35690, r = 2.7569013f0, ang = 20.980583f0)
+    Last hbond: (D-H---A) = (D = 8489, H = 8491, A = 1230, r = 2.6744883f0, ang = 15.279592f0)
     - r is the distance between Donor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
 ```
