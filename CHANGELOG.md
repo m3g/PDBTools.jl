@@ -10,9 +10,10 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.19.3-DEV
+Version 3.20.0-DEV
 --------------
-- ![INFO][badge-info] Code formatting and small adjustments. 
+- ![FEATURE][badge-feature] Add iteration interface (`iterate`, `keys`, `eachindex`) for `HBonds` data structure, enabling `for` loops, `collect`, `findfirst`, etc.
+- ![INFO][badge-info] Code formatting and small adjustments.
 
 Version 3.19.2
 --------------
