@@ -327,10 +327,10 @@ end
 
 @testitem "read_mmcif" setup = [AllocTest] begin
     using PDBTools
-    using BenchmarkTools
+    using Chairmarks
     using .AllocTest: Allocs
 
-    b = @benchmark read_mmcif($(PDBTools.TESTCIF)) samples = 1 evals = 1
+    b = @b read_mmcif($(PDBTools.TESTCIF))
     @test b.allocs < Allocs(500)
     ats = read_mmcif(PDBTools.TESTCIF)
     @test count(iswater, ats) == 5
@@ -348,11 +348,11 @@ end
     inds_and_names = ((2, Val{:index_pdb}()), (4, Val{:name}()), (6, Val{:resname}()), (7, Val{:chain}()), (9, Val{:resnum}()), (11, Val{:x}()), (12, Val{:y}()), (13, Val{:z}()), (14, Val{:occup}()), (15, Val{:beta}()), (16, Val{:charge}()), (17, Val{:resnum}()), (18, Val{:resname}()), (19, Val{:chain}()), (20, Val{:name}()), (21, Val{:model}()))
     lastatom = Atom()
     NCOLS = 21
-    b = @benchmark PDBTools.read_atom_mmcif($(Val(NCOLS)), $record, $inds_and_names, $lastatom) samples = 1 evals = 1
+    b = @b PDBTools.read_atom_mmcif($(Val(NCOLS)), $record, $inds_and_names, $lastatom)
     @test b.allocs == Allocs(1)
     field_values = NTuple{NCOLS}(eachsplit(record))
     atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom))
-    b = @benchmark PDBTools._fast_setfield!($atom, $field_values, $inds_and_names) samples = 1 evals = 1
+    b = @b PDBTools._fast_setfield!($atom, $field_values, $inds_and_names)
     @test b.allocs == Allocs(0)
 
     # Test early stoppers

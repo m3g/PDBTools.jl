@@ -30,9 +30,24 @@ end
 end
 Base.length(x::HBonds) = length(x.D)
 Base.getindex(x::HBonds, i::Integer) = (D=x.D[i], H=x.H[i], A=x.A[i], r=x.r[i], ang=x.ang[i])
+Base.getindex(x::HBonds, i::AbstractVector) = HBonds(D=x.D[i], H=x.H[i], A=x.A[i], r=x.r[i], ang=x.ang[i])
 Base.keys(x::HBonds) = LinearIndices(x.D)
 Base.eachindex(x::HBonds) = eachindex(x.D)
 Base.iterate(x::HBonds, i=1) = i > length(x) ? nothing : (x[i], i + 1)
+function Base.filter(f::Function, x::HBonds)
+    filtered_hbonds = HBonds()
+    for bond in x
+        if f(bond) 
+            push!(filtered_hbonds.D, bond.D)
+            push!(filtered_hbonds.H, bond.H)
+            push!(filtered_hbonds.A, bond.A)
+            push!(filtered_hbonds.r, bond.r)
+            push!(filtered_hbonds.ang, bond.ang)
+        end
+    end
+    return filtered_hbonds
+end
+
 function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     print(io, chomp("""
     HBonds data structure with $(length(hb)) hydrogen-bonds.
@@ -528,5 +543,39 @@ end
     @test collected[end] == hb[length(hb)]
     @test all(x -> haskey(x, :D) && haskey(x, :H) && haskey(x, :A) && haskey(x, :r) && haskey(x, :ang), hb)
     @test findfirst(x -> x.D == hb[1].D, hb) == 1
+
+    # Test getindex with AbstractVector
+    subset = hb[[1, 3, 5]]
+    @test subset isa PDBTools.HBonds
+    @test length(subset) == 3
+    @test subset[1] == hb[1]
+    @test subset[2] == hb[3]
+    @test subset[3] == hb[5]
+    # Test with range
+    range_subset = hb[1:5]
+    @test range_subset isa PDBTools.HBonds
+    @test length(range_subset) == 5
+    @test range_subset[1] == hb[1]
+    @test range_subset[5] == hb[5]
+    # Test with findall indices
+    indices = findall(x -> x.ang < 15, hb)
+    subset_from_findall = hb[indices]
+    @test subset_from_findall isa PDBTools.HBonds
+    @test length(subset_from_findall) == length(indices)
+    @test all(x -> x.ang < 15, subset_from_findall)
+
+    # Test filter function
+    filtered = filter(x -> x.r < 2.8, hb)
+    @test filtered isa PDBTools.HBonds
+    @test all(x -> x.r < 2.8, filtered)
+    @test length(filtered) == length(findall(x -> x.r < 2.8, hb))
+    # Filter with multiple conditions
+    filtered_multi = filter(x -> x.r < 2.8 && x.ang < 15, hb)
+    @test filtered_multi isa PDBTools.HBonds
+    @test all(x -> x.r < 2.8 && x.ang < 15, filtered_multi)
+    # Filter returning empty
+    filtered_empty = filter(x -> x.r < 0.0, hb)
+    @test filtered_empty isa PDBTools.HBonds
+    @test length(filtered_empty) == 0
 
 end
