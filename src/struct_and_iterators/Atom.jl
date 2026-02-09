@@ -139,6 +139,7 @@ function ==(at1::Atom, at2::Atom)
 end
 
 @testitem "Atom constructors" begin
+    using Chairmarks
     atref = Atom{Nothing}(0, 0, "X", "XXX", "X", 0, 0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0.0f0, 0, "", "X", 0.0f0, nothing, 0)
     at = Atom()
     # On julia 1.10 the size is 128 with String15
@@ -147,8 +148,8 @@ end
     at1 = Atom{Nothing}(; index=1, name="CA")
     at2 = Atom(; custom=nothing, index=1, name="CA")
     @test all((getfield(at1, f) == getfield(at2, f) for f in fieldnames(Atom)))
-    @test (@allocations at = Atom()) <= 1
-    @test (@allocations at = Atom(; index=1, residue=1, name="CA")) <= 1
+    @test (@b Atom()).allocs <= 1
+    @test (@b Atom(; index=1, residue=1, name="CA")).allocs <= 1
     @test Atom(name="CA") == Atom(name="CA")
     @test !(Atom(name="CA") == Atom(name="N"))
 end
@@ -1188,7 +1189,7 @@ end
 
 @testitem "fetch atomic element properties" setup = [AllocTest] begin
     using PDBTools
-    using BenchmarkTools
+    using Chairmarks
     using .AllocTest: Allocs
 
     at = Atom(name="NT3")
@@ -1208,7 +1209,7 @@ end
     @test atomic_number(Atom(name="CAL")) == 20
     @test element(Atom(name="CAL", pdb_element="CA")) == "CA"
     @test atomic_number(Atom(name="CAL", pdb_element="CA")) === nothing
-    a = @benchmark sum($mass, $atoms) samples = 1 evals = 1
+    a = @b sum($mass, $atoms)
     @test a.allocs == Allocs(0)
 end
 
