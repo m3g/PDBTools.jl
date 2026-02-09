@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.20.1-DEV
+--------------
+
 Version 3.20.0
 --------------
 - ![FEATURE][badge-feature] Add support for `filter(f, ::HBonds)` and slicing `HBonds` objects with `hbonds[1:5]`, or with index vectors.
