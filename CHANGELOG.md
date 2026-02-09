@@ -12,8 +12,11 @@ PDBTools.jl Changelog
 
 Version 3.20.0-DEV
 --------------
+- ![FEATURE][badge-feature] Add support for `filter(f, ::HBonds)` and slicing `HBonds` objects with `hbonds[1:5]`, or with index vectors.
 - ![FEATURE][badge-feature] Add iteration interface (`iterate`, `keys`, `eachindex`) for `HBonds` data structure, enabling `for` loops, `collect`, `findfirst`, etc.
+- ![INFO][badge-info] Document comprehensivelly the hydrogen-bonds functionality.
 - ![INFO][badge-info] Code formatting and small adjustments.
+- ![INFO][badge-info] Replace BenchmarkTools.jl by Chairmarks.jl in allocation tests.
 
 Version 3.19.2
 --------------
@@ -118,7 +121,7 @@ Version 3.6.0
 -------------
 - ![FEATURE][badge-feature] `output_dots` option to `sasa_particles` to return the dots of the surface. 
 - ![ENHANCEMENT][badge-enhancement] return more compact SASA object. Rename `atomic_sasa` to `sasa_particles` (keep alias for compatibility).
-- ![ENHANCEMENT][badge-enhancement] make the `AtomDots` of sasa calculation a continguous memory block, to reduce GC pressure.
+- ![ENHANCEMENT][badge-enhancement] make the `AtomDots` of sasa calculation a contiguous memory block, to reduce GC pressure.
 - ![INFO][badge-info] Set default `n_dots` of `atomic_sasa` computations to 512 instead of 500 such that it is a multiple of 16, the default `N_SIMD`.
 - ![INFO][badge-info] add doc examples.
 

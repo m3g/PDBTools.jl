@@ -11,10 +11,10 @@ using TestItemRunner
     end
     Allocs(allocs::Int) = Allocs(; allocs)
     import Base: ==, >, <
-    ==(a::Int, b::Allocs) = b.prodbuild ? a == b.allocs : true
-    <(a::Int, b::Allocs) = b.prodbuild ? a < b.allocs : true
-    ==(a::Allocs, b::Int) = a.prodbuild ? a.allocs == b : true
-    <(a::Allocs, b::Int) = a.prodbuild ? a.allocs < b : true
+    ==(a::Real, b::Allocs) = b.prodbuild ? Int(a) == b.allocs : true
+    <(a::Real, b::Allocs) = b.prodbuild ? Int(a) < b.allocs : true
+    ==(a::Allocs, b::Real) = a.prodbuild ? a.allocs == Int(b) : true
+    <(a::Allocs, b::Real) = a.prodbuild ? a.allocs < Int(b) : true
 end
 
 @run_package_tests
