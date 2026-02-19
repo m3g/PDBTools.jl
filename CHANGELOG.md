@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.20.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Improve printing of list of HBonds in compact form.
 - ![INFO][badge-info] Requires CellListMap 0.10.0.
 
 Version 3.20.0

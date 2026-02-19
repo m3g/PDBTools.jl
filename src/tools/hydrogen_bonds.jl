@@ -58,6 +58,14 @@ function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     """))
 end
 
+function Base.show(io::IO, hb::HBonds)
+    if get(io, :compact, false)
+        print(io, "$(length(hb)) hydrogen-bonds")
+    else
+        print(io, "PDBTools.HBonds($(hb.D), $(hb.H), $(hb.A), $(hb.r), $(hb.ang))")
+    end
+end
+
 CellListMap.copy_output(x::HBonds) = HBonds(copy(x.D), copy(x.H), copy(x.A), copy(x.r), copy(x.ang))
 function CellListMap.reset_output!(x::HBonds)
     empty!(x.D)
@@ -86,15 +94,20 @@ function push_hbond!(hbonds,
     pair, polar_bonds, positions, 
     unitcell, ang, ats_sel1
 )
-    (; i, j, x, y, d2) = pair
+    (; i, j, d2) = pair
     # Find if i is a donor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
+    xD = positions[i]
     # Might have more than one polar hydrogen
     while polar_bonds.D[ii] == i
+        # We manually wrap here because the H is not wrapped. If the system is not periodic,
+        # using the internal (x,y) could be problematic (it is not) and require the position
+        # of the H atom to be wrapped to x as well. To be sure, let us manage this locally.  
+        xA = isnothing(unitcell) ? positions[j] : wrap(positions[j], xD, unitcell)
         iH = polar_bonds.H[ii]
-        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], x, unitcell)
-        hbond_ang = hbond_angle(x, xH, y)
+        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], xD, unitcell)
+        hbond_ang = hbond_angle(xD, xH, xA)
         if hbond_ang <= ang
             push!(hbonds.D, index(ats_sel1[i]))
             push!(hbonds.H, index(ats_sel1[iH]))
@@ -109,18 +122,23 @@ function push_hbond!(hbonds,
 end
 
 function push_hbond2!(hbonds,
-    pair, polar_bonds, positions,
+    pair, polar_bonds, positions1, positions2,
     unitcell, ang, ats_sel1, ats_sel2
 )
-    (; i, j, x, y, d2) = pair
+    (; i, j, d2) = pair
     # Find if i is a donor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
     # Might have more than one polar hydrogen
+    xD = positions1[i]
     while polar_bonds.D[ii] == i
+        # We manually wrap here because the H is not wrapped. If the system is not periodic,
+        # using the internal (x,y) could be problematic (it is not) and require the position
+        # of the H atom to be wrapped to x as well. To be sure, let us manage this locally.  
+        xA = isnothing(unitcell) ? positions2[j] : wrap(positions2[j], xD, unitcell)
         iH = polar_bonds.H[ii]
-        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], x, unitcell)
-        hbond_ang = hbond_angle(x, xH, y)
+        xH = isnothing(unitcell) ? positions1[iH] : wrap(positions1[iH], xD, unitcell)
+        hbond_ang = hbond_angle(xD, xH, xA)
         if hbond_ang <= ang
             push!(hbonds.D, index(ats_sel1[i]))
             push!(hbonds.H, index(ats_sel1[iH]))
@@ -315,12 +333,12 @@ function compute_hbonds!(sys::ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff,
         el_j = element(at_j)
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             push_hbond2!(hbonds,
-                pair, s1.polar_bonds, sys.xpositions,
+                pair, s1.polar_bonds, sys.xpositions, sys.ypositions,
                 sys.unitcell, angle_cutoff, s1.ats, s2.ats
             )
             pair_swap = NeighborPair(j, i, y, x, d2)
             push_hbond2!(hbonds,
-                pair_swap, s2.polar_bonds, sys.ypositions,
+                pair_swap, s2.polar_bonds, sys.ypositions, sys.xpositions,
                 sys.unitcell, angle_cutoff, s2.ats, s1.ats
             )
         end
@@ -520,6 +538,10 @@ end
     end
 
     hbs = hydrogen_bonds(models[1], "protein"; unitcell=pbcs[1])
+    @test parse_show(hbs; repl=Dict("PDBTools." => "")) ≈ """
+        OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
+        "protein => protein" => 63 hydrogen-bonds
+    """
     @test parse_show(hbs["protein => protein"]) ≈ """
         HBonds data structure with 63 hydrogen-bonds.
             First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
