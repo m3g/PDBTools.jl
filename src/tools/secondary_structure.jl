@@ -104,7 +104,7 @@ julia> ss = dssp_run(atoms)
 function ProteinSecondaryStructures.dssp_run(atoms::AbstractVector{<:PDBTools.Atom})
     ats_new = _set_pdb(atoms)
     tmppdb = tempname() * ".pdb"
-    write_pdb(tmppdb, ats_new)
+    write_mmcif(tmppdb, ats_new)
     ss = dssp_run(tmppdb; adjust_pdb=true)
     rm(tmppdb; force=true)
     return ss
