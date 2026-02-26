@@ -21,7 +21,7 @@ may not function correctly.
 
 =# 
 function _set_pdb(ats::AbstractVector{<:PDBTools.Atom})
-    ats_new = copy.(ats)
+    ats_new = copy.(select(ats, at -> isprotein(at) && element(at) != "H"))
     for r in eachresidue(ats_new)
         N = false
         CA = false
@@ -34,10 +34,10 @@ function _set_pdb(ats::AbstractVector{<:PDBTools.Atom})
             name(at) == "C" && (C = true)
             name(at) == "O" && (O = true)
         end
-        N || @warn("Residue $(resname(r))$(resnum(r)) is missing N backbone atom.")
-        CA || @warn("Residue $(resname(r))$(resnum(r)) is missing CA backbone atom.")
-        C || @warn("Residue $(resname(r))$(resnum(r)) is missing C backbone atom.")
-        O || @warn("Residue $(resname(r))$(resnum(r)) is missing O backbone atom.")
+        N || @warn("Residue $(resname(r))$(resnum(r)) - chain $(chain(r)) is missing N backbone atom.")
+        CA || @warn("Residue $(resname(r))$(resnum(r)) - chain $(chain(r)) is missing CA backbone atom.")
+        C || @warn("Residue $(resname(r))$(resnum(r)) - chain $(chain(r)) is missing C backbone atom.")
+        O || @warn("Residue $(resname(r))$(resnum(r)) - chain $(chain(r)) is missing O backbone atom.")
     end
     return ats_new
 end
@@ -103,10 +103,10 @@ julia> ss = dssp_run(atoms)
 """
 function ProteinSecondaryStructures.dssp_run(atoms::AbstractVector{<:PDBTools.Atom})
     ats_new = _set_pdb(atoms)
-    tmppdb = tempname() * ".pdb"
-    write_pdb(tmppdb, ats_new)
-    ss = dssp_run(tmppdb; adjust_pdb=true)
-    rm(tmppdb; force=true)
+    tmpcif = tempname() * ".cif"
+    write_mmcif(tmpcif, ats_new)
+    ss = dssp_run(tmpcif)
+    rm(tmpcif; force=true)
     return ss
 end
 

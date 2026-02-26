@@ -47,7 +47,7 @@ function _supported_write_cif_fields(field_assignment)
         "Cartn_z" => (Float32, :z),
         "occupancy" => (Float32, :occup),
         "B_iso_or_equiv" => (Float32, :beta),
-        "pdbx_formal_charge" => (Float32, :charge),
+        "pdbx_formal_charge" => (String1, :_print_question_mark), # use ? for unknown/zero charges
         "auth_seq_id" => (Int32, :resnum), # Standard mmCIF
         "auth_comp_id" => (StringType, :resname), # Standard mmCIF
         "auth_asym_id" => (StringType, :chain), # Standard mmCIF
@@ -107,11 +107,73 @@ function write_mmcif(
 )
     _cif_fields = _supported_write_cif_fields(field_assignment)
     open(expanduser(filename), "w") do file
-        # Header
-        println(file, "_software.name PDBTools.jl $(VERSION)")
-        println(file, "_loop")
+        # Data block header
+        println(file, "data_MODEL")
+        println(file, "#")
+        println(file, "_entry.id MODEL")
+        println(file, "#")
+        println(file, "_audit_conform.dict_name       mmcif_pdbx.dic")
+        println(file, "_audit_conform.dict_version    5.397")
+        println(file, "_audit_conform.dict_location   http://mmcif.pdb.org/dictionaries/ascii/mmcif_pdbx.dic")
+        println(file, "#")
+        # Collect chain→entity_id (unique per chain) and unique (chain, resnum) pairs
+        chain_entity = OrderedDict{String,Int}()
+        chain_type = OrderedDict{String,Symbol}()  # :protein, :water, :other
+        residue_list = OrderedDict{Tuple{String,Int32},Nothing}()
+        for atom in atoms
+            !selection_function(atom) && continue
+            ch = string(atom.chain)
+            if !haskey(chain_entity, ch)
+                chain_entity[ch] = length(chain_entity) + 1
+                chain_type[ch] = isprotein(atom) ? :protein : iswater(atom) ? :water : :other
+            end
+            key = (ch, atom.resnum)
+            haskey(residue_list, key) || (residue_list[key] = nothing)
+        end
+        # _entity: one entry per chain (each chain gets its own entity_id to avoid DSSP hang)
+        println(file, "loop_")
+        println(file, "_entity.id")
+        println(file, "_entity.type")
+        for (ch, eid) in chain_entity
+            type_str = chain_type[ch] == :protein ? "polymer" : chain_type[ch] == :water ? "water" : "non-polymer"
+            println(file, "$eid $type_str")
+        end
+        println(file, "#")
+        # _entity_poly (only for polymer/protein chains)
+        if any(t -> t == :protein, values(chain_type))
+            println(file, "loop_")
+            println(file, "_entity_poly.entity_id")
+            println(file, "_entity_poly.type")
+            for (ch, eid) in chain_entity
+                chain_type[ch] == :protein && println(file, "$eid polypeptide(L)")
+            end
+            println(file, "#")
+        end
+        # _struct_asym
+        println(file, "loop_")
+        println(file, "_struct_asym.id")
+        println(file, "_struct_asym.entity_id")
+        for (ch, eid) in chain_entity
+            println(file, "$ch $eid")
+        end
+        println(file, "#")
+        # _pdbx_poly_seq_scheme (only for protein/polymer chains)
+        poly_residues = [(ch, rnum) for (ch, rnum) in keys(residue_list) if get(chain_type, ch, :other) == :protein]
+        if !isempty(poly_residues)
+            println(file, "loop_")
+            println(file, "_pdbx_poly_seq_scheme.asym_id")
+            println(file, "_pdbx_poly_seq_scheme.seq_id")
+            println(file, "_pdbx_poly_seq_scheme.pdb_strand_id")
+            println(file, "_pdbx_poly_seq_scheme.pdb_seq_num")
+            println(file, "_pdbx_poly_seq_scheme.pdb_ins_code")
+            for (ch, rnum) in poly_residues
+                println(file, "$ch $rnum $ch $rnum ?")
+            end
+            println(file, "#")
+        end
+        # _atom_site loop
+        println(file, "loop_")
         println(file, "_atom_site.group_PDB")
-        # Atom fields
         for (key, _) in _cif_fields
             println(file, "_atom_site.$key")
         end
@@ -125,7 +187,8 @@ function write_mmcif(
                 field_type = first(field)
                 field_name = last(field)
                 field_name == :index_pdb && continue
-                write(buff, _fmt(field_type, _get_mmcif_field(atom, field_name)))
+                val = field_name == :_entity_id ? chain_entity[string(atom.chain)] : _get_mmcif_field(atom, field_name)
+                write(buff, _fmt(field_type, val))
             end
             println(file, String(take!(buff)))
         end
