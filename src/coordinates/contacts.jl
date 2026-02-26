@@ -295,11 +295,12 @@ function assign_index_residue(atoms, residues)
 end
 
 function update_map_matrix(
-    i, j, d2, map_matrix,
+    pair, map_matrix,
     index_residue::Vector{Int},
     gap::Real,
     discrete::Bool
 )
+    (; i, j, d2) = pair
     ires = index_residue[i]
     jres = index_residue[j]
     d_gap = abs(ires - jres)
@@ -347,8 +348,8 @@ function contact_map(
         output_name=:map_matrix,
         parallel=parallel,
     )
-    CellListMap.map_pairwise!(
-        (x, y, i, j, d2, map_matrix) -> update_map_matrix(i, j, d2, map_matrix, index_residue, gap, discrete),
+    CellListMap.pairwise!(
+        (pair, map_matrix) -> update_map_matrix(pair, map_matrix, index_residue, gap, discrete),
         sys
     )
     map = ContactMap{T}(
@@ -366,11 +367,12 @@ function contact_map(
 end
 
 function update_map_matrix(
-    i, j, d2, map_matrix,
+    pair, map_matrix,
     index_residue1::Vector{Int},
     index_residue2::Vector{Int},
     discrete::Bool,
 )
+    (; i, j, d2) = pair
     ires = index_residue1[i]
     jres = index_residue2[j]
     if discrete
@@ -406,8 +408,8 @@ function contact_map(
         output_name=:map_matrix,
         parallel=parallel,
     )
-    CellListMap.map_pairwise!(
-        (x, y, i, j, d2, map_matrix) -> update_map_matrix(i, j, d2, map_matrix, index_residue1, index_residue2, discrete),
+    CellListMap.pairwise!(
+        (pair, map_matrix) -> update_map_matrix(pair, map_matrix, index_residue1, index_residue2, discrete),
         sys
     )
     map = ContactMap{T}(

@@ -34,3 +34,4 @@ src/tools/cysthr.dat
 .gitignore
 src/tools/sasa.vmd
 contrib.pdb
+Manifest-v1.12.toml
