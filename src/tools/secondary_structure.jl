@@ -43,15 +43,11 @@ function _set_pdb(ats::AbstractVector{<:PDBTools.Atom})
 end
 
 function _chain_map(i)
-    c = if i <= 26
-        ('A':'Z')[i]
-    elseif i <= 26 + 10 
-        ('0':'9')[i - 26]
-    elseif i <= 26 + 10 + 26
-        ('a':'z')[i - 10 - 26]
+    c = if i <= 94
+        c = ('\x21':'\x7e')[i]
     else
         error("""\n
-            Number of chains not supported by stride. Use dssp_run instead.
+            Number of chains greater than 94 not supported by stride. Use dssp_run instead.
 
         """)
     end
