@@ -49,7 +49,7 @@ function _chain_map(i)
         throw(ArgumentError(("""\n
             Number of chains greater than 94 not supported by stride. Use dssp_run instead.
 
-        """))
+        """)))
     end
     return String15(string(c))
 end
