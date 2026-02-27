@@ -69,9 +69,51 @@ julia> ss = stride_run(atoms)
 """
 function ProteinSecondaryStructures.stride_run(atoms::AbstractVector{<:PDBTools.Atom})
     ats_new = _set_pdb(atoms)
+    # Possibly remove non-standard chain names coming from CIF data
+    non_standard_chain = findfirst(c -> length(c) > 1, chain(at) for at in ats_new)
+    if !isnothing(non_standard_chain)
+        original_chains = chain.(eachresidue(ats_new))
+        c = String15("A")
+        iat = 0
+        ires = 1
+        for r in eachresidue(ats_new)
+            if ires == 1
+                iat += length(r)
+                ires += 1
+                continue
+            end
+            if original_chains[ires] != original_chains[ires-1]
+                c = c == String15("A") ? String15("B") : String15("A")
+            end
+            for at in r
+                iat += 1
+                ats_new[iat].chain = c
+            end
+            ires += 1
+        end
+    end
     tmppdb = tempname() * ".pdb"
     write_pdb(tmppdb, ats_new)
     ss = stride_run(tmppdb; adjust_pdb=true)
+    if !isnothing(non_standard_chain)
+        if length(ss) != length(original_chains)
+            @warn("""\n
+                Mapping of stride output residues failed relative to original residue names,
+                which do not follow the PDB single-letter standard.
+
+                    Number of original residues: $(length(original_chains))
+                    Number of resulting secondary structure data elements: $(length(ss))
+
+                The chain identifiers of the secondary structure elements might be incorrect.
+
+            """)
+        end
+        is = 0
+        for s in ss
+            is += 1
+            ss[is] = SSData(s.resname, original_chains[is], s.resnum, s.sscode, s.phi, s.psi)
+        end
+    end
     rm(tmppdb; force=true)
     return ss
 end
