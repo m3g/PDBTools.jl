@@ -70,6 +70,7 @@ const DIMERPDB = joinpath(src_dir, "../test/dimer.pdb")
 const HETATMPDB = joinpath(src_dir, "../test/hetatm.pdb")
 const TESTPBC = joinpath(src_dir, "../test/pbc.pdb")
 const TESTNOPBC = joinpath(src_dir, "../test/no_pbc.pdb")
+const CIF_2C_CHAIN = joinpath(src_dir, "../test/6CO8.cif")
 
 # Basic chemistry
 include("./properties/elements.jl")

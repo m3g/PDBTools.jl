@@ -160,4 +160,11 @@ end
     @test length(ss_dssp) == 103
     @test ss_composition(ss_stride) == Dict("310 helix" => 0, "bend" => 0, "turn" => 36, "beta bridge" => 4, "kappa helix" => 0, "pi helix" => 0, "beta strand" => 21, "alpha helix" => 17, "loop" => 0, "coil" => 26)
     @test ss_composition(ss_dssp) == Dict("310 helix" => 0, "bend" => 18, "turn" => 9, "beta bridge" => 3, "kappa helix" => 2, "pi helix" => 0, "beta strand" => 15, "alpha helix" => 17, "loop" => 39, "coil" => 0) 
+    p = read_mmcif(PDBTools.CIF_2C_CHAIN)
+    ss_dssp = dssp_run(p)
+    @test length(ss_dssp) == 501
+    @test ss_dssp[1].chain == "A_1"
+    ss_stride = stride_run(p)
+    @test length(ss_stride) == 501
+    @test ss_stride[1].chain == "A_1"
 end
