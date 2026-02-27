@@ -46,10 +46,10 @@ function _chain_map(i)
     c = if i <= 94
         c = ('\x21':'\x7e')[i]
     else
-        error("""\n
+        throw(ArgumentError(("""\n
             Number of chains greater than 94 not supported by stride. Use dssp_run instead.
 
-        """)
+        """))
     end
     return String15(string(c))
 end
@@ -167,4 +167,5 @@ end
     ss_stride = stride_run(p)
     @test length(ss_stride) == 501
     @test ss_stride[1].chain == "A_1"
+    @test_throws "greater than 94" PDBTools._chain_map(95)
 end
