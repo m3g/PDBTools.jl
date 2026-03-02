@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.20.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Improve printing of list of HBonds in compact form.
+- ![INFO][badge-info] Requires CellListMap 0.10.0.
 - ![ENHANCEMENT][badge-enhancement] `stride_run` supports computing secondary structure of models with up to 94 chains, so many more CIF files will be properly handled. An error message is printed otherwise.
 
 Version 3.20.1

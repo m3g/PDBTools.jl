@@ -1,4 +1,9 @@
-using CellListMap: CellListMap, map_pairwise!, ParticleSystem1, ParticleSystem2
+using CellListMap: CellListMap, 
+    pairwise!, 
+    AbstractParticleSystem, 
+    ParticleSystem1, 
+    ParticleSystem2,
+    NeighborPair
 
 struct HPolarBonds
     D::Vector{Int32} # Hydrogen-bond donor
@@ -53,6 +58,14 @@ function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     """))
 end
 
+function Base.show(io::IO, hb::HBonds)
+    if get(io, :compact, false)
+        print(io, "$(length(hb)) hydrogen-bonds")
+    else
+        print(io, "PDBTools.HBonds($(hb.D), $(hb.H), $(hb.A), $(hb.r), $(hb.ang))")
+    end
+end
+
 CellListMap.copy_output(x::HBonds) = HBonds(copy(x.D), copy(x.H), copy(x.A), copy(x.r), copy(x.ang))
 function CellListMap.reset_output!(x::HBonds)
     empty!(x.D)
@@ -77,15 +90,24 @@ function hbond_angle(D, H, A)
     return acosd(dot(v1, v2) / (norm(v1) * norm(v2)))
 end
 
-function push_hbond!(hbonds, i, j, x, y, polar_bonds, positions, unitcell, ang, ats_sel1, d2)
+function push_hbond!(hbonds, 
+    pair, polar_bonds, positions, 
+    unitcell, ang, ats_sel1
+)
+    (; i, j, d2) = pair
     # Find if i is a donor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
+    xD = positions[i]
     # Might have more than one polar hydrogen
     while polar_bonds.D[ii] == i
+        # We manually wrap here because the H is not wrapped. If the system is not periodic,
+        # using the internal (x,y) could be problematic (it is not) and require the position
+        # of the H atom to be wrapped to x as well. To be sure, let us manage this locally.  
+        xA = isnothing(unitcell) ? positions[j] : wrap(positions[j], xD, unitcell)
         iH = polar_bonds.H[ii]
-        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], x, unitcell)
-        hbond_ang = hbond_angle(x, xH, y)
+        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], xD, unitcell)
+        hbond_ang = hbond_angle(xD, xH, xA)
         if hbond_ang <= ang
             push!(hbonds.D, index(ats_sel1[i]))
             push!(hbonds.H, index(ats_sel1[iH]))
@@ -100,17 +122,23 @@ function push_hbond!(hbonds, i, j, x, y, polar_bonds, positions, unitcell, ang, 
 end
 
 function push_hbond2!(hbonds,
-    i, j, x, y, polar_bonds, positions,
-    unitcell, ang, ats_sel1, ats_sel2, d2
+    pair, polar_bonds, positions1, positions2,
+    unitcell, ang, ats_sel1, ats_sel2
 )
+    (; i, j, d2) = pair
     # Find if i is a donor
     ii = searchsortedfirst(polar_bonds.D, i)
     ii > length(polar_bonds.D) && return nothing
     # Might have more than one polar hydrogen
+    xD = positions1[i]
     while polar_bonds.D[ii] == i
+        # We manually wrap here because the H is not wrapped. If the system is not periodic,
+        # using the internal (x,y) could be problematic (it is not) and require the position
+        # of the H atom to be wrapped to x as well. To be sure, let us manage this locally.  
+        xA = isnothing(unitcell) ? positions2[j] : wrap(positions2[j], xD, unitcell)
         iH = polar_bonds.H[ii]
-        xH = isnothing(unitcell) ? positions[iH] : wrap(positions[iH], x, unitcell)
-        hbond_ang = hbond_angle(x, xH, y)
+        xH = isnothing(unitcell) ? positions1[iH] : wrap(positions1[iH], xD, unitcell)
+        hbond_ang = hbond_angle(xD, xH, xA)
         if hbond_ang <= ang
             push!(hbonds.D, index(ats_sel1[i]))
             push!(hbonds.H, index(ats_sel1[iH]))
@@ -141,7 +169,8 @@ function find_hbond_donors(
         parallel,
         output_name=:polar_bonds,
     )
-    polar_bonds = map_pairwise!(sys) do _, _, i, j, d2, polar_bonds
+    polar_bonds = pairwise!(sys) do pair, polar_bonds
+        (; i, j, d2) = pair
         at_i = ats_sel[i]
         at_j = ats_sel[j]
         el_i = element(at_i)
@@ -239,7 +268,7 @@ function setup_particle_systems(
     donor_acceptor_distance,
     parallel
 )
-    systems = Dict{String,Union{CellListMap.ParticleSystem1,CellListMap.ParticleSystem2}}()
+    systems = Dict{String,AbstractParticleSystem}()
     for selection_pair in selection_pairs
         sel1, sel2 = first(selection_pair), last(selection_pair)
         key = _key_name(sel1, sel2)
@@ -271,17 +300,19 @@ function setup_particle_systems(
 end
 
 function compute_hbonds!(sys::ParticleSystem1, s1, angle_cutoff, electronegative_elements)
-    map_pairwise!(sys) do x, y, i, j, d2, hbonds
+    pairwise!(sys) do pair, hbonds
+        (; i, j, x, y, d2) = pair
         el_i = element(s1.ats[i])
         el_j = element(s1.ats[j])
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             push_hbond!(hbonds,
-                i, j, x, y, s1.polar_bonds, sys.xpositions,
-                sys.unitcell, angle_cutoff, s1.ats, d2
+                pair, s1.polar_bonds, sys.xpositions,
+                sys.unitcell, angle_cutoff, s1.ats
             )
+            pair_swap = NeighborPair(j, i, y, x, d2)
             push_hbond!(hbonds,
-                j, i, y, x, s1.polar_bonds, sys.xpositions,
-                sys.unitcell, angle_cutoff, s1.ats, d2
+                pair_swap, s1.polar_bonds, sys.xpositions,
+                sys.unitcell, angle_cutoff, s1.ats
             )
         end
         return hbonds
@@ -289,7 +320,8 @@ function compute_hbonds!(sys::ParticleSystem1, s1, angle_cutoff, electronegative
 end
 
 function compute_hbonds!(sys::ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements)
-    map_pairwise!(sys) do x, y, i, j, d2, hbonds
+    pairwise!(sys) do pair, hbonds
+        (; i, j, x, y, d2) = pair
         at_i = s1.ats[i]
         at_j = s2.ats[j]
         if index(at_i) == index(at_j)
@@ -301,12 +333,13 @@ function compute_hbonds!(sys::ParticleSystem2, s1, s2, sel1, sel2, angle_cutoff,
         el_j = element(at_j)
         if (el_i in electronegative_elements) & (el_j in electronegative_elements)
             push_hbond2!(hbonds,
-                i, j, x, y, s1.polar_bonds, sys.xpositions,
-                sys.unitcell, angle_cutoff, s1.ats, s2.ats, d2
+                pair, s1.polar_bonds, sys.xpositions, sys.ypositions,
+                sys.unitcell, angle_cutoff, s1.ats, s2.ats
             )
+            pair_swap = NeighborPair(j, i, y, x, d2)
             push_hbond2!(hbonds,
-                j, i, y, x, s2.polar_bonds, sys.ypositions,
-                sys.unitcell, angle_cutoff, s2.ats, s1.ats, d2
+                pair_swap, s2.polar_bonds, sys.ypositions, sys.xpositions,
+                sys.unitcell, angle_cutoff, s2.ats, s1.ats
             )
         end
         return hbonds
@@ -346,7 +379,7 @@ If no selection is provided, the hydrogen bonds of the complete structure will b
 
 # Example
 
-```jldoctest; filter = r"(\\d*)\\.(\\d{2})\\d+" => s"\\1.\\2***"
+```jldoctest; filter = r"\\d+" => s"***"
 julia> using PDBTools
 
 julia> pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb", "model 1");
@@ -370,7 +403,7 @@ julia> hbs["protein => protein"][1] # first h-bond
 julia> hbs = hydrogen_bonds(pdb, "protein", "protein" => "resname SOL"; unitcell=uc) # Multiple selections
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 2 entries:
   "protein => protein"     => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877…
-  "protein => resname SOL" => HBonds(Int32[1406, 1583, 1799, 2027, 789, 3503, 1169, 184, 3914, 4304  …  1224, 38768, 12…
+  "protein => resname SOL" => HBonds(Int32[1, 20, 32, 108, 108, 108, 21392, 29792, 153, 1406  …  34082, 1212, 1217, 122…
 
 julia> hbs["protein => protein"]
 HBonds data structure with 63 hydrogen-bonds.
@@ -381,8 +414,8 @@ HBonds data structure with 63 hydrogen-bonds.
 
 julia> hbs["protein => resname SOL"]
 HBonds data structure with 138 hydrogen-bonds.
-    First hbond: (D-H---A) = (D = 1406, H = 1407, A = 160, r = 2.9361732f0, ang = 6.771988f0)
-    Last hbond: (D-H---A) = (D = 41798, H = 41800, A = 395, r = 2.6894214f0, ang = 10.623453f0)
+    First hbond: (D-H---A) = (D = 1, H = 3, A = 35690, r = 2.7569013f0, ang = 20.980583f0)
+    Last hbond: (D-H---A) = (D = 8489, H = 8491, A = 1230, r = 2.6744883f0, ang = 15.279592f0)
     - r is the distance between Donor and Acceptor atoms (D-A)
     - ang is the angle (degrees) between H-D and A-D.
 ```
@@ -505,6 +538,10 @@ end
     end
 
     hbs = hydrogen_bonds(models[1], "protein"; unitcell=pbcs[1])
+    @test parse_show(hbs; repl=Dict("PDBTools." => "")) ≈ """
+        OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
+        "protein => protein" => 63 hydrogen-bonds
+    """
     @test parse_show(hbs["protein => protein"]) ≈ """
         HBonds data structure with 63 hydrogen-bonds.
             First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
