@@ -9,25 +9,33 @@ makedocs(
         isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :Plotting) : PDBTools.Plotting
     ],
     sitename = "PDBTools.jl",
+    top_menu = true,
     pages = [
         "Home" => "index.md",
-        "Read and Write" => "readwrite.md",
-        "Selections" => "selections.md",
-        "Iterators" => "iterators.md",
-        "Atom and element properties" => "elements.md",
-        "Contact maps" => "contacts.md",
-        "Dihedrals and Ramachandran" => "dihedrals.md",
-        "Secondary structures" => "secondary_structure.md",
-        "Hydrogen bonds" => "hydrogen_bonds.md",
-        "Solvent Accessible Area" => "sasa.md",
-        "Transfer Free Energy" => "mvalue.md",
-        "Auxiliary functions" => "auxiliary.md",
-        "Examples" => "examples.md",
-        "Tools" => "tools.md",
-        "Help entries" => "help.md",
-        "Experimental" => Any[ 
-            "Structure" => "structure.md",
-        ]
+        "Getting started" => Any[
+            "Read and Write" => "readwrite.md",
+            "Selections" => "selections.md",
+            "Iterators" => "iterators.md",
+            "Atom and element properties" => "elements.md",
+        ],
+        "Structure" => Any[
+            "Contact maps" => "contacts.md",
+            "Dihedrals and Ramachandran" => "dihedrals.md",
+            "Secondary structures" => "secondary_structure.md",
+            "Hydrogen bonds" => "hydrogen_bonds.md",
+            "Solvent Accessible Area" => "sasa.md",
+        ],
+        "m-values" => Any[
+            "Transfer Free Energy" => "mvalue.md",
+        ],
+        "Other" => Any[
+            "Auxiliary functions" => "auxiliary.md",
+            "Tools" => "tools.md",
+            "Examples" => "examples.md",
+            "Experimental" => Any[ 
+                "Structure" => "structure.md",
+            ],
+        ],
     ],
 )
 deploydocs(
