@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.20.2-DEV
+Version 3.20.2
 --------------
 - ![ENHANCEMENT][badge-enhancement] Improve printing of list of HBonds in compact form.
 - ![ENHANCEMENT][badge-enhancement] `stride_run` supports computing secondary structure of models with up to 94 chains, so many more CIF files will be properly handled. An error message is printed otherwise.
