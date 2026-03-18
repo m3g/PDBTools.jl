@@ -73,4 +73,5 @@ TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 test = ["Test", "TestItemRunner", "StaticArrays", "Aqua", "Documenter", "DelimitedFiles", "Plots", "ShowMethodTesting", "Chairmarks"]
 
 [sources]
-CellListMap = {url = "https://github.com/m3g/CellListMap.jl", rev = "main"}
+Documenter = {rev = "top_menu_from_pages", url = "https://github.com/lmiq/Documenter.jl"}
+
