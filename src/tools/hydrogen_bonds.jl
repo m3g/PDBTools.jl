@@ -525,6 +525,12 @@ end
             - ang is the angle (degrees) between H-D and A-D.
         """
 
+    # This show methods is hardly ever reached, adding test to guarantee coverage
+    hbs = hydrogen_bonds(models[1], "protein" => "water")
+    @test parse_show(hbs; context=(:compact => false)) ≈ """
+            OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry: "protein => water" => PDBTools.HBonds(Int 32 [ 128   18.384043 ])
+        """
+
     # Test set overlap error
     @test_throws ArgumentError hydrogen_bonds(models[1], "resname ARG" => "protein"; unitcell=pbcs[1])
 
