@@ -363,7 +363,7 @@ julia> uc = read_unitcell(PDBTools.test_dir*"/hbonds.pdb");
 
 julia> hbs = hydrogen_bonds(pdb, "protein"; unitcell=uc) # Single set of atoms: selection is optional
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
-  "protein => protein" => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877, 96…
+  "protein => protein" => 63 hydrogen-bonds
 
 julia> hbs["protein => protein"] # Summary
 HBonds data structure with 63 hydrogen-bonds.
@@ -377,8 +377,8 @@ julia> hbs["protein => protein"][1] # first h-bond
 
 julia> hbs = hydrogen_bonds(pdb, "protein", "protein" => "resname SOL"; unitcell=uc) # Multiple selections
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 2 entries:
-  "protein => protein"     => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877…
-  "protein => resname SOL" => HBonds(Int32[1406, 1583, 1799, 2027, 789, 3503, 1169, 184, 3914, 4304  …  1224, 38768, 12…
+  "protein => protein"     => 63 hydrogen-bonds
+  "protein => resname SOL" => 138 hydrogen-bonds
 
 julia> hbs["protein => protein"]
 HBonds data structure with 63 hydrogen-bonds.
