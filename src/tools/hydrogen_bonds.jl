@@ -53,6 +53,14 @@ function Base.show(io::IO, ::MIME"text/plain", hb::HBonds)
     """))
 end
 
+function Base.show(io::IO, hb::HBonds)
+    if get(io, :compact, false)
+        print(io, "$(length(hb)) hydrogen-bonds")
+    else
+        print(io, "PDBTools.HBonds($(hb.D), $(hb.H), $(hb.A), $(hb.r), $(hb.ang))")
+    end
+end
+
 CellListMap.copy_output(x::HBonds) = HBonds(copy(x.D), copy(x.H), copy(x.A), copy(x.r), copy(x.ang))
 function CellListMap.reset_output!(x::HBonds)
     empty!(x.D)
@@ -505,6 +513,10 @@ end
     end
 
     hbs = hydrogen_bonds(models[1], "protein"; unitcell=pbcs[1])
+    @test parse_show(hbs; repl=Dict("PDBTools." => "")) ≈ """
+        OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
+        "protein => protein" => 63 hydrogen-bonds
+    """
     @test parse_show(hbs["protein => protein"]) ≈ """
         HBonds data structure with 63 hydrogen-bonds.
             First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
