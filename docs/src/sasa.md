@@ -56,3 +56,33 @@ scatter!(Tuple.(dots); # surface dots
 !!! note
     The `sasa_particles` function supports periodic boundary conditions if a unit cell is provided. 
     See the how to [read the unitcell](@ref read-unitcell)  for further information.
+
+## Computing SIRAH solvent accessible area
+
+To compute the solvent accessible surface area of SIRAH models, call the `sasa_particles(SIRAH, ...)` method, after [loading the custom protein residues](@ref sirah) and elements of the SIRAH force field:
+
+```@example sirah_sasa
+using PDBTools
+custom_protein_residues!(SIRAH)
+custom_elements!(SIRAH)
+sirah_pdb = read_pdb(PDBTools.SIRAHPDB)
+```
+
+Now we compute the SASA of the full structure:
+
+```@example sirah_sasa
+s_sirah = sasa_particles(SIRAH, sirah_pdb)
+```
+
+And the SASA of subsets of the structure can also be obtained:
+
+```@example sirah_sasa
+sasa(s_sirah, "sidechain")
+```
+
+Here we remove the custom elements and residues, to guarantee proper execution of test codes:
+
+```@example sirah_sasa
+remove_custom_protein_residues!()
+remove_custom_elements!()
+```

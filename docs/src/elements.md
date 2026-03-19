@@ -4,6 +4,8 @@ CollapsedDocStrings = true
 
 # Atomic and molecular properties
 
+## Atom properties
+
 Some simple atom properties can be retrieved using special functions, which
 operate on atoms of the type `Atom`. For example:
 
@@ -27,7 +29,19 @@ julia> element_name(atoms[1])
 "Nitrogen"
 ```
 
-The formula or stoichiometry of a selection can also be retrieved:
+```@docs
+mass
+element
+element_name
+element_symbol
+element_symbol_string
+element_vdw_radius
+printatom
+```
+
+## Molecular formula and stoichiometry
+
+The formula or stoichiometry of a selection can be obtained from a vector of Atoms:
 
 ```julia-repl
 julia> atoms = wget("1LBD","protein and residue 1");
@@ -41,15 +55,8 @@ H₂O₁
 ```
 
 ```@docs
-mass
-element
-element_name
-element_symbol
-element_symbol_string
-element_vdw_radius
 formula
 stoichiometry
-printatom
 ```
 
 ## [Custom Atom fields](@id custom-atom-fields)
@@ -110,15 +117,96 @@ ones from `AtomsBase`, because that package is in a unstable state.
 |`atomic_number(::Atom)` | `atomic_number(Atom(name="NE2"))` |  `7` |
 |`atomic_symbol(::Atom)` |  `atomic_symbol(Atom(name="NE2"))` |  `:N` |
 |`atomic_mass(::Atom)`   |  `atomic_mass(Atom(name="NE2"))` |  `14.0067` |
-|`position(::Atom)`      |  `position(Atom(name="NE2"))` |  `SVector{3,Float64}(0,0,0)` |
-|`set_position!(::Atom, x::Union{Tuple,AbstractVector})`      |  `set_position!(at, (1,2,3))` |  `Atom` |
 
 ```@docs
 atomic_number
 atomic_symbol
 atomic_mass
-position
-set_position!
+```
+
+## Custom protein residue types
+
+It is possible to add to the list of protein residues, custom residue types. 
+This can be done by simply adding to the `PDBTools.protein_residues` dictionary
+of residues a new `PDBTools.ProteinResidue` entry. 
+
+```@docs
+add_protein_residue!
+remove_custom_protein_residues!
+```
+
+For example, here we create
+a new resiude type `NEW` with the same properties of an `ALA` residue. To 
+remove all custom protein residues, use `remove_custom_protein_residues!()`.
+
+```@example custom_types
+using PDBTools
+add_protein_residue!("NEW", PDBTools.protein_residues["ALA"])
+```
+
+Then, an atom of residue name `NEW` will be recognized as a protein residue:
+```@example custom_types
+atom = Atom(resname="NEW")
+isprotein(atom)
+```
+
+To remove the elements added, do:
+
+```@example custom_types
+remove_custom_protein_residues!()
+```
+
+## [The SIRAH force-field residues and element types](@id sirah)
+
+Conveniencie functions can be created to add sets of new types of residues and atom types
+to the list of residues and elements. This is illustrated in the 
+[`custom_types.jl`](https://github.com/m3g/PDBTools.jl/blob/main/src/custom_types.jl) file of the source code, in this case for the residues and atom
+types of the [`SIRAH`](http://www.sirahff.com/) force field for Coarse-Grained protein simulations.
+
+!!! note
+    - Masses of the SIRAH beads are not useful in general, and do not have a spcific physical meaning. 
+    - Residue `sX` is interpreted as a bridged Cysteine.
+    - To compute SASAs of SIRAH models, be careful in adding the SIRAH custom elements first, and use
+      the `sasa_particles(SIRAH, ...)` method.
+
+### Defining atom and residue types
+
+Here we repeteadly call `remove_custom_residues!()` and `remove_custom_elements!()` to guarantee the proper execution of the test codes, this is not necessary in a regular use of these functions.
+
+With those definitions, adding all SIRAH protein residue types and element names can be done with:
+```@example sirah
+using PDBTools 
+custom_protein_residues!(SIRAH)
+custom_elements!(SIRAH)
+```
+
+With that, SIRAH structures have a special support. Let us start reading a CG model:
+
+```@example sirah
+sirah_pdb = read_pdb(PDBTools.SIRAHPDB)
+resname.(eachresidue(sirah_pdb))
+```
+
+Note that the residue names of the SIRAH force-field are non-standard (`sI`, `sR`, etc.), but the sequence
+is properly retrieved with standard one-letter codes: 
+
+```@example sirah
+getseq(sirah_pdb)
+```
+
+And all protein atoms are recognized:
+
+```@example sirah
+all(isprotein.(sirah_pdb))
+```
+
+### Removing the custom types
+
+To remove the custom element types and residues, do:
+
+```@example sirah
+remove_custom_protein_residues!()
+remove_custom_elements!()
 ```
 
 

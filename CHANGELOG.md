@@ -10,7 +10,10 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.20.2-DEV
+Version 3.20.3-DEV
+--------------
+
+Version 3.20.2
 --------------
 - ![ENHANCEMENT][badge-enhancement] Improve printing of list of HBonds in compact form.
 - ![INFO][badge-info] Requires CellListMap 0.10.0.

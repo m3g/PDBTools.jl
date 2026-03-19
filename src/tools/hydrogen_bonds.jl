@@ -388,7 +388,7 @@ julia> uc = read_unitcell(PDBTools.test_dir*"/hbonds.pdb");
 
 julia> hbs = hydrogen_bonds(pdb, "protein"; unitcell=uc) # Single set of atoms: selection is optional
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
-  "protein => protein" => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877, 96…
+  "protein => protein" => 63 hydrogen-bonds
 
 julia> hbs["protein => protein"] # Summary
 HBonds data structure with 63 hydrogen-bonds.
@@ -402,8 +402,8 @@ julia> hbs["protein => protein"][1] # first h-bond
 
 julia> hbs = hydrogen_bonds(pdb, "protein", "protein" => "resname SOL"; unitcell=uc) # Multiple selections
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 2 entries:
-  "protein => protein"     => HBonds(Int32[1, 1, 271, 37, 1020, 237, 56, 76, 1060, 204  …  748, 813, 828, 871, 863, 877…
-  "protein => resname SOL" => HBonds(Int32[1, 20, 32, 108, 108, 108, 21392, 29792, 153, 1406  …  34082, 1212, 1217, 122…
+  "protein => protein"     => 63 hydrogen-bonds
+  "protein => resname SOL" => 138 hydrogen-bonds
 
 julia> hbs["protein => protein"]
 HBonds data structure with 63 hydrogen-bonds.
@@ -548,6 +548,12 @@ end
             Last hbond: (D-H---A) = (D = 1169, H = 1170, A = 619, r = 2.6004055f0, ang = 9.524022f0)
             - r is the distance between Donor and Acceptor atoms (D-A)
             - ang is the angle (degrees) between H-D and A-D.
+        """
+
+    # This show methods is hardly ever reached, adding test to guarantee coverage
+    hbs = hydrogen_bonds(models[1], "protein" => "water")
+    @test parse_show(hbs; context=(:compact => false)) ≈ """
+            OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry: "protein => water" => PDBTools.HBonds(Int 32 [ 128   18.384043 ])
         """
 
     # Test set overlap error
