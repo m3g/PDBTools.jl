@@ -44,3 +44,10 @@ scatter(ram)
 ```
 
 All `scatter` parameters can be customized using the `Plots` keyword syntax. 
+
+## Check the stereochemistry of protein residues
+
+```@docs
+zeta
+zeta_check
+```

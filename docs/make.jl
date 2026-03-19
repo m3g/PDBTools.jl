@@ -16,7 +16,7 @@ makedocs(
             "Read and Write" => "readwrite.md",
             "Selections" => "selections.md",
             "Iterators" => "iterators.md",
-            "Atom and element properties" => "elements.md",
+            "Atomic and molecular properties" => "elements.md",
         ],
         "Structure" => Any[
             "Contact maps" => "contacts.md",
@@ -24,13 +24,13 @@ makedocs(
             "Secondary structures" => "secondary_structure.md",
             "Hydrogen bonds" => "hydrogen_bonds.md",
             "Solvent Accessible Area" => "sasa.md",
+            "Coordinate manipulations" => "coordinates.md"
         ],
         "m-values" => Any[
             "Transfer Free Energy" => "mvalue.md",
         ],
         "Other" => Any[
             "Auxiliary functions" => "auxiliary.md",
-            "Tools" => "tools.md",
             "Examples" => "examples.md",
             "Experimental" => Any[ 
                 "Structure" => "structure.md",
