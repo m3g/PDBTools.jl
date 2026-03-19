@@ -10,8 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.20.3-DEV
+Version 3.21.0-DEV
 --------------
+- ![FEATURE][badge-feature] Rename `coor` to `positions` and `position` (keep `coor` as a legacy alias for backwards compatibility).
 
 Version 3.20.2
 --------------

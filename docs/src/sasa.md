@@ -42,11 +42,11 @@ In some situations, it might be useful to visualize the surface. The dots that f
 atom_sasa = sasa_particles(prot; n_dots=100, output_dots=true) 
 ```
 
-Where the `atom_sasa.dots` field contais the dots that are accessible to the surface for each atom. These can be plotted, for example, with:
+Where the `atom_sasa.dots` field contains the dots that are accessible to the surface for each atom. These can be plotted, for example, with:
 ```@example sasa
 using Plots
 dots = reduce(vcat, atom_sasa.dots)
-scatter(Tuple.(coor.(prot)); color=:orange, msw=0, label="") # atom coordinates
+scatter(Tuple.(positions(prot)); color=:orange, msw=0, label="") # atom coordinates
 scatter!(Tuple.(dots); # surface dots
     color=:blue, ms=1, msw=0, ma=0.5, # marker properties
     label="",

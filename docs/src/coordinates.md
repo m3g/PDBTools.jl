@@ -6,12 +6,49 @@ CollapsedDocStrings = true
 
 ## Atom positions
 
-The `positions` and `set_positions!` functions are used to retrive of set the coordinates of an atom (following the `AtomBase.jl` convention):
+The `position`, `positions` and `set_positions!` functions are used to retrieve of set the coordinates of an atom (following the `AtomBase.jl` convention):
 
 ```@docs
 position
 set_position!
 ```
+
+## Positions of arrays of Atoms
+
+Use the `positions` function:
+
+```@docs
+positions(::AbstractVector{<:Atom})
+```
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> positions(atoms[1:2])
+2-element Vector{StaticArraysCore.SVector{3, Float32}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]
+```
+
+The `positions` function accepts selections:
+
+C``\alpha`` coordinates:
+
+```julia-repl
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> positions(atoms, "name CA")
+3-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [-8.483, -14.912, -6.726]
+ [-5.113, -13.737, -5.466]
+ [-3.903, -11.262, -8.062]
+```
+
+The coordinates are output as arrays of static arrays (more specifically, as a `Vector{SVector{3,Float64}}`, from `StaticArrays`). 
 
 ## Move atoms and center of mass
 
@@ -81,49 +118,6 @@ julia> distance(ligand[43],protein[3684])
 
 ```@docs
 closest
-```
-
-## Obtain arrays with coordinates
-
-Use the `coor` function:
-
-```jldoctest
-julia> using PDBTools
-
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
-
-julia> coor(atoms[1])
-3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
-  -9.229
- -14.861
-  -5.481
-
-julia> coor(atoms[1:2])
-2-element Vector{StaticArraysCore.SVector{3, Float32}}:
- [-9.229, -14.861, -5.481]
- [-10.048, -15.427, -5.569]
-```
-
-The `coor` function accepts selections:
-
-C``\alpha`` coordinates:
-
-```julia-repl
-julia> using PDBTools
-
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
-
-julia> coor(atoms, "name CA")
-3-element Vector{StaticArraysCore.SVector{3, Float64}}:
- [-8.483, -14.912, -6.726]
- [-5.113, -13.737, -5.466]
- [-3.903, -11.262, -8.062]
-```
-
-The coordinates are output as arrays of static arrays (more specifically, as a `Vector{SVector{3,Float64}}`, from `StaticArrays`). 
-
-```@docs
-coor
 ```
 
 ## Maximum and minimum coordinates of the atoms
