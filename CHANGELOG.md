@@ -13,6 +13,7 @@ PDBTools.jl Changelog
 Version 3.21.0-DEV
 --------------
 - ![FEATURE][badge-feature] Rename `coor` to `positions` and `position` (keep `coor` as a legacy alias for backwards compatibility).
+- ![INFO][badge-info] `get_atoms` is now imported from `MolSimToolkitShared`.
 
 Version 3.20.2
 --------------

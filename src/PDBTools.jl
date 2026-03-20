@@ -12,7 +12,7 @@ using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: InlineString, String1, String15
-import MolSimToolkitShared: center_of_mass, wrap, dihedral
+import MolSimToolkitShared: center_of_mass, wrap, dihedral, get_atoms
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
