@@ -20,7 +20,7 @@ julia> phi = dihedral(C1, N2, CA2, C2)
 
 """
 dihedral(at1::Atom, at2::Atom, at3::Atom, at4::Atom) =
-    dihedral(coor(at1), coor(at2), coor(at3), coor(at4))
+    dihedral(position(at1), position(at2), position(at3), position(at4))
 
 @testitem "dihedral" begin
     using PDBTools

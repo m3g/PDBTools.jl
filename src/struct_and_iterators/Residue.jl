@@ -93,7 +93,7 @@ function zeta(r::Residue)
         iN = findfirst(at -> name(at) == "N", r)
         iC = findfirst(at -> name(at) == "C", r)
         iCB = findfirst(at -> name(at) == "CB", r)
-        zeta = dihedral(coor(r[iCA]), coor(r[iN]), coor(r[iC]), coor(r[iCB]))
+        zeta = dihedral(position(r[iCA]), position(r[iN]), position(r[iC]), position(r[iCB]))
         return zeta
     else
         return NaN

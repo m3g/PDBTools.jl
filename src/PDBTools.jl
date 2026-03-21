@@ -12,7 +12,7 @@ using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: InlineString, String1, String15
-import MolSimToolkitShared: center_of_mass, wrap, dihedral
+import MolSimToolkitShared: center_of_mass, wrap, dihedral, get_atoms
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
@@ -35,7 +35,7 @@ export Chain, eachchain, chain
 export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
-export coor, maxmin, distance, closest, dihedral, Ramachandran
+export positions, maxmin, distance, closest, dihedral, Ramachandran
 export element, mass, element_name, element_symbol, element_symbol_string, element_vdw_radius
 export formula, stoichiometry
 export Sequence
@@ -106,7 +106,7 @@ include("./properties/formula.jl")
 include("./properties/getseq.jl")
 
 # Coordinates-dependent functions
-include("./coordinates/coor.jl")
+include("./coordinates/positions.jl")
 include("./coordinates/distance.jl")
 include("./coordinates/maxmin.jl")
 include("./coordinates/contacts.jl")

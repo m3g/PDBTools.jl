@@ -340,7 +340,7 @@ function contact_map(
     index_residue = assign_index_residue(atoms1, residues)
     map_matrix = MapMatrix(Int[], Int[], T[])
     sys = CellListMap.ParticleSystem(
-        positions=isnothing(positions) ? coor.(atoms1) : positions,
+        positions=isnothing(positions) ? PDBTools.positions(atoms1) : positions,
         cutoff=dmax,
         unitcell=unitcell,
         output=map_matrix,
@@ -398,8 +398,8 @@ function contact_map(
     index_residue2 = assign_index_residue(atoms2, residues2)
     map_matrix = MapMatrix(Int[], Int[], T[])
     sys = CellListMap.ParticleSystem(
-        xpositions=isnothing(positions1) ? coor.(atoms1) : positions1,
-        ypositions=isnothing(positions2) ? coor.(atoms2) : positions2,
+        xpositions=isnothing(positions1) ? PDBTools.positions(atoms1) : positions1,
+        ypositions=isnothing(positions2) ? PDBTools.positions(atoms2) : positions2,
         cutoff=dmax,
         unitcell=unitcell,
         output=map_matrix,

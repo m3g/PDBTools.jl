@@ -8,3 +8,7 @@ writePDB(atoms::AbstractVector{<:Atom}, filename::String, args...; kargs...) =
 
 export atomic_sasa
 const atomic_sasa = sasa_particles
+
+export coor
+const coor = positions
+coor(at::Atom) = position(at)
