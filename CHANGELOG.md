@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.21.1-DEV
 --------------
+- ![INFO][badge-info] Organize SASA docs.
+- ![INFO][badge-info] Suppress GKS output in documentation generation.
 
 Version 3.21.0
 --------------
