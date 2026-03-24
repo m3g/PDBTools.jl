@@ -40,7 +40,7 @@ function Select(query_string::AbstractString)
     return Select(query_string, query)
 end
 Select(query_function::Function) = Select("custom function", query_function)
-(s::Select)(at) = apply_query(s.query, at)
+(s::Select)(at) = s.query(at)
 Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
 #
@@ -248,9 +248,10 @@ const macro_keywords = [
 ]
 
 #
-# parse_query and apply_query are a very gentle contribution given by 
+# Initial implementations of 
+# parse_query apply_query (deprecated) are a very gentle contribution given by 
 # CameronBieganek in https://discourse.julialang.org/t/parsing-selection-syntax/43632/9
-# while explaining to me how to creat a syntex interpreter
+# while explaining to me how to create a syntax interpreter
 #
 #=
     has_key(key::String, s::AbstractVector{<:AbstractString})
@@ -290,15 +291,28 @@ function parse_query(selection::String)
     return parse_query_vector(split(s))
 end
 
-function apply_query(q, a)
-    if !(q isa Tuple)
-        q(a)
-    else
-        f, args = Iterators.peel(q)
-        f(apply_query.(args, Ref(a))...)
-    end
+#
+# Typed query nodes replace the previous plain-tuple representation.
+# Each node is a callable struct, so the full query tree is type-stable and
+# Julia can specialise / inline it completely.  Short-circuit evaluation
+# (&&/||) additionally skips the right branch when not needed.
+#
+struct AndQuery{L,R} <: Function
+    left::L
+    right::R
 end
+(q::AndQuery)(a) = q.left(a) && q.right(a)
 
+struct OrQuery{L,R} <: Function
+    left::L
+    right::R
+end
+(q::OrQuery)(a) = q.left(a) || q.right(a)
+
+struct NotQuery{Q} <: Function
+    query::Q
+end
+(q::NotQuery)(a) = !q.query(a)
 parse_error(str) = throw(ArgumentError(str))
 
 #
@@ -378,7 +392,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
         if isempty(left_tokens) || isempty(right_tokens)
             parse_error("Syntax error near 'or'. Missing operand.")
         end
-        return (|, parse_query_vector(left_tokens), parse_query_vector(right_tokens))
+        return OrQuery(parse_query_vector(left_tokens), parse_query_vector(right_tokens))
 
     elseif (i = find_operator_at_level_zero("and", s_vec)) > 0
         left_tokens = s_vec[begin:i-1]
@@ -386,7 +400,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
         if isempty(left_tokens) || isempty(right_tokens)
             parse_error("Syntax error near 'and'. Missing operand.")
         end
-        return (&, parse_query_vector(left_tokens), parse_query_vector(right_tokens))
+        return AndQuery(parse_query_vector(left_tokens), parse_query_vector(right_tokens))
 
     elseif s_vec[begin] == "not"
         if length(s_vec) == 1
@@ -400,7 +414,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
         if is_operator(remaining_tokens[begin]) && remaining_tokens[begin] != "not" # allow "not not" if desired, though unusual
              parse_error("Operator '$(remaining_tokens[begin])' cannot directly follow 'not'.")
         end
-        return (!, parse_query_vector(remaining_tokens))
+        return NotQuery(parse_query_vector(remaining_tokens))
 
     # Base case: No top-level logical operators. Must be a keyword phrase.
     else
@@ -428,7 +442,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
                         parse_error("Could not parse range bounds for keyword '$(key_obj.name)'. Expected $(key_obj.ValueType)")
                     end
                     # Build an AND expression: keyword >= start AND keyword <= end
-                    return (&, key_obj([">=", keyword_args[1]]), key_obj(["<=", keyword_args[3]]))
+                    return AndQuery(key_obj([">=", keyword_args[1]]), key_obj(["<=", keyword_args[3]]))
                 end
 
                 is_operator_syntax_match = false
@@ -487,7 +501,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
                         # keyword_args = ["ARG", "GLU", "ASP"]
                         current_expr_tree = key_obj([keyword_args[end]]) # Process the last value
                         for k_idx in (length(keyword_args)-1):-1:firstindex(keyword_args) # Iterate remaining values
-                            current_expr_tree = (|, key_obj([keyword_args[k_idx]]), current_expr_tree)
+                            current_expr_tree = OrQuery(key_obj([keyword_args[k_idx]]), current_expr_tree)
                         end
                         return current_expr_tree
                     end
