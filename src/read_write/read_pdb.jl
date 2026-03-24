@@ -49,8 +49,7 @@ julia> ALA = read_pdb(PDBTools.TESTPDB, atom -> atom.resname == "ALA")
 function read_pdb end
 
 function read_pdb(file::Union{String,IOBuffer}, selection::String)
-    query = parse_query(selection)
-    return read_pdb(file, atom -> apply_query(query, atom))
+    return read_pdb(file, parse_query(selection))
 end
 
 function read_pdb(pdbdata::IOBuffer, selection_function::Function=all)

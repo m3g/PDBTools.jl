@@ -27,9 +27,10 @@ julia> maxmin(protein)
 
 """
 function maxmin(atoms::AbstractVector{<:Atom}, selection::String)
-    query = parse_query(selection)
-    return maxmin(atoms, atom -> apply_query(query, atom))
+    return maxmin(atoms, parse_query(selection))
 end
+
+
 
 function maxmin(atoms::AbstractVector{<:Atom}, selection_function::Function=all)
     xmin = [+Inf, +Inf, +Inf]

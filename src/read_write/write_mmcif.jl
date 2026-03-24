@@ -88,8 +88,7 @@ function write_mmcif(
     selection::String;
     field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
-    query = parse_query(selection)
-    write_mmcif(filename, atoms, atom -> apply_query(query, atom); field_assignment)
+    write_mmcif(filename, atoms, parse_query(selection); field_assignment)
 end
 
 const _fmt_string = generate_formatter("%$(_length(StringType))s ")

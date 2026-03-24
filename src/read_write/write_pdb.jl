@@ -28,8 +28,7 @@ function write_pdb(
     footer=:auto,
     append=false,
 )
-    query = parse_query(selection)
-    write_pdb(filename, atoms, atom -> apply_query(query, atom); header, footer, append)
+    write_pdb(filename, atoms, parse_query(selection); header, footer, append)
 end
 
 function write_pdb(
