@@ -15,10 +15,19 @@ end
 #! format: off
 const nucleoside_residues = OrderedDict{String,NucleosideResidue}(
     "ADO" => NucleosideResidue("Adenosine", "ADO", "A", "Purine",     267.094691, 267.094691, 0, false),
+    "DA" => NucleosideResidue("Adenosine", "ADO", "A", "Purine",     267.094691, 267.094691, 0, false),
+    "A" => NucleosideResidue("Adenosine", "ADO", "A", "Purine",     267.094691, 267.094691, 0, false),
     "GUO" => NucleosideResidue("Guanosine", "GUO", "G", "Purine",     283.090169, 283.090169, 0, false),
+    "DG" => NucleosideResidue("Guanosine", "GUO", "G", "Purine",     283.090169, 283.090169, 0, false),
+    "G" => NucleosideResidue("Guanosine", "GUO", "G", "Purine",     283.090169, 283.090169, 0, false),
     "URD" => NucleosideResidue("Uridine",   "URD", "U", "Pyrimidine", 244.068163, 244.068163, 0, false),
+    "U" => NucleosideResidue("Uridine",   "URD", "U", "Pyrimidine", 244.068163, 244.068163, 0, false),
     "CYD" => NucleosideResidue("Cytidine",  "CYD", "C", "Pyrimidine", 244.068163, 244.068163, 0, false),
+    "DC" => NucleosideResidue("Cytidine",  "CYD", "C", "Pyrimidine", 244.068163, 244.068163, 0, false),
+    "C" => NucleosideResidue("Cytidine",  "CYD", "C", "Pyrimidine", 244.068163, 244.068163, 0, false),
     "THD" => NucleosideResidue("Thymidine", "THD", "T", "Pyrimidine", 244.068163, 244.068163, 0, false),
+    "DT" => NucleosideResidue("Thymidine", "THD", "T", "Pyrimidine", 244.068163, 244.068163, 0, false),
+    "T" => NucleosideResidue("Thymidine", "THD", "T", "Pyrimidine", 244.068163, 244.068163, 0, false),
     "INO" => NucleosideResidue("Inosine",   "INO", "I", "Purine",     268.090169, 268.090169, 0, false),
 )
 #! format: on
@@ -125,4 +134,14 @@ remove_custom_nucleoside_residues!() = filter!(r -> !last(r).custom, nucleoside_
     # string selection
     pdb = read_pdb(PDBTools.TESTPDB)
     @test length(select(pdb, "nucleoside")) == 0  # no nucleosides in protein test structure
+
+    s = wget("7YWH")
+    @test length(s) == 6108
+    @test length(select(s, "nucleoside")) == 6108
+    @test length(select(s, "pyrimidine")) == 3400
+    @test length(select(s, "purine")) == 2708
+    @test residuename(resname(s[1])) == "Adenosine"
+    r = collect(eachresidue(s))
+    @test resname(r[1]) == "DA"
+    @test residuename(r[1]) == "Adenosine"
 end

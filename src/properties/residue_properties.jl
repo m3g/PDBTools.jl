@@ -80,7 +80,7 @@ function _resname(residue; residue_classes=keys(PDBTools.residue_classes))
         end
     end
     !isnothing(rname) && return rname, cl
-    # Input: some code that matches exactly a three-letter code
+    # Input: some code that matches exactly a residue name
     rname = nothing
     cl = nothing
     for class in residue_classes
