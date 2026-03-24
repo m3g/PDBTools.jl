@@ -65,8 +65,7 @@ function positions(atoms::AbstractVector{<:Atom}, selection_function::Function)
     return x
 end
 function positions(atoms::AbstractVector{<:Atom}, selection::String)
-    query = parse_query(selection)
-    return positions(atoms, atom -> apply_query(query, atom))
+    return positions(atoms, parse_query(selection))
 end
 
 

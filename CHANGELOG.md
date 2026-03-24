@@ -12,8 +12,10 @@ PDBTools.jl Changelog
 
 Version 3.21.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Much faster string selection by type-stable queries.
 - ![INFO][badge-info] Organize SASA docs.
 - ![INFO][badge-info] Suppress GKS output in documentation generation.
+- ![INFO][badge-info] `parse_query` returns a function, no need for `apply_query` anymore.
 
 Version 3.21.0
 --------------
