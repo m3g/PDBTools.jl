@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.22.0-DEV
+Version 3.22.0
 --------------
 - ![FEATURE][badge-feature] Add `isnucleoside`, `ispurine`, and `ispyrimidine` functions for atoms and residues, mirroring the existing protein-property predicates.
 - ![FEATURE][badge-feature] Add `add_nucleoside_residue!`, `remove_custom_nucleoside_residues!`, and `custom_nucleoside_residues!(SIRAH)` to support custom and force-field-specific nucleoside residues (SIRAH DNA: DAX, DGX, DTX, DCX).
