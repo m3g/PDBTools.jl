@@ -545,13 +545,16 @@ end
 #
 # Deal with alternate conformers with the second test
 #
-isprotein(residue::Residue) = 
-    haskey(protein_residues, resname(residue)) || 
+isprotein(residue::Residue) =
+    haskey(protein_residues, resname(residue)) ||
     (length(resname(residue)) == 4 && haskey(protein_residues, @view(resname(residue)[2:4])))
 
-export isprotein
+isnucleoside(residue::Residue) = haskey(nucleoside_residues, resname(residue))
+
+export isprotein, isnucleoside
 export isacidic, isaliphatic, isaromatic, isbasic, ischarged
 export ishydrophobic, isneutral, isnonpolar, ispolar
+export ispurine, ispyrimidine
 export iswater
 
 isacidic(r::Residue) = isprotein(r) && protein_residues[r.resname].type == "Acidic"
@@ -573,6 +576,11 @@ isneutral(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].charge
 ishydrophobic(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].hydrophobic
 ispolar(atom::Atom) = isprotein(atom) && protein_residues[atom.resname].polar
 isnonpolar(atom::Atom) = isprotein(atom) && !ispolar(atom)
+
+ispurine(r::Residue) = isnucleoside(r) && nucleoside_residues[r.resname].type == "Purine"
+ispyrimidine(r::Residue) = isnucleoside(r) && nucleoside_residues[r.resname].type == "Pyrimidine"
+ispurine(atom::Atom) = isnucleoside(atom) && nucleoside_residues[atom.resname].type == "Purine"
+ispyrimidine(atom::Atom) = isnucleoside(atom) && nucleoside_residues[atom.resname].type == "Pyrimidine"
 
 const water_residues = ["HOH", "OH2", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
 iswater(r::Residue; water_residues=water_residues) = r.resname in water_residues

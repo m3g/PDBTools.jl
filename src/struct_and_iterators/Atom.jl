@@ -912,8 +912,10 @@ end
 # atom properties on the structure
 #
 export isprotein, isbackbone, issidechain
-isprotein(atom::Atom) = 
+export isnucleoside
+isprotein(atom::Atom) =
     haskey(protein_residues, atom.resname) || haskey(protein_residues, @view(atom.resname[2:end]))
+isnucleoside(atom::Atom) = haskey(nucleoside_residues, atom.resname)
 
 const backbone_atoms = StringType["N", "CA", "C", "O"]
 isbackbone(atom::Atom; backbone_atoms=backbone_atoms) = 

@@ -106,6 +106,16 @@ function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
     nothing
 end
 
+function custom_nucleoside_residues!(::Type{SIRAH}; nucleoside_residues=PDBTools.nucleoside_residues)
+    #! format: off
+    add_nucleoside_residue!("DAX", nucleoside_residues["ADO"])
+    add_nucleoside_residue!("DGX", nucleoside_residues["GUO"])
+    add_nucleoside_residue!("DTX", nucleoside_residues["THD"])
+    add_nucleoside_residue!("DCX", nucleoside_residues["CYD"])
+    #! format: on
+    return nothing
+end
+
 @testitem "SIRAH" begin
     using PDBTools
     remove_custom_protein_residues!()
@@ -136,6 +146,21 @@ end
     @test length(sc) == 7
     remove_custom_protein_residues!()
     remove_custom_elements!()
+
+    # nucleoside residues
+    remove_custom_nucleoside_residues!()
+    @test !isnucleoside(Atom(resname="DAX"))
+    custom_nucleoside_residues!(SIRAH)
+    @test isnucleoside(Atom(resname="DAX"))
+    @test isnucleoside(Atom(resname="DGX"))
+    @test isnucleoside(Atom(resname="DTX"))
+    @test isnucleoside(Atom(resname="DCX"))
+    @test ispurine(Atom(resname="DAX"))
+    @test ispurine(Atom(resname="DGX"))
+    @test ispyrimidine(Atom(resname="DTX"))
+    @test ispyrimidine(Atom(resname="DCX"))
+    remove_custom_nucleoside_residues!()
+    @test !isnucleoside(Atom(resname="DAX"))
 end
 
 #= 
