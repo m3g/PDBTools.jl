@@ -75,8 +75,7 @@ julia> ats = read_mmcif(PDBTools.TESTCIF, at -> name(at) == "CA")
 function read_mmcif end
 
 function read_mmcif(file::Union{String,IOBuffer}, selection::String; kargs...)
-    query = parse_query(selection)
-    return read_mmcif(file, atom -> apply_query(query, atom); kargs...)
+    return read_mmcif(file, parse_query(selection); kargs...)
 end
 
 function read_mmcif(cifdata::IOBuffer, selection_function::Function=all; kargs...)
