@@ -52,6 +52,8 @@ export mvalue
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
+export custom_nucleoside_residues!, add_nucleoside_residue!, remove_custom_nucleoside_residues!
+export isnucleoside, ispurine, ispyrimidine
 export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
@@ -75,6 +77,8 @@ const CIF_2C_CHAIN = joinpath(src_dir, "../test/6CO8.cif")
 # Basic chemistry
 include("./properties/elements.jl")
 include("./properties/protein_residues.jl")
+include("./properties/nucleoside_residues.jl")
+include("./properties/residue_properties.jl")
 
 #
 # Data structures and their iterators

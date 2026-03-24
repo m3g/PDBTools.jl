@@ -230,6 +230,9 @@ const keywords = [
 const macro_keywords = [
     MacroKeyword("water", iswater),
     MacroKeyword("protein", isprotein),
+    MacroKeyword("nucleoside", isnucleoside),
+    MacroKeyword("purine", ispurine),
+    MacroKeyword("pyrimidine", ispyrimidine),
     MacroKeyword("polar", ispolar),
     MacroKeyword("nonpolar", isnonpolar),
     MacroKeyword("basic", isbasic),
