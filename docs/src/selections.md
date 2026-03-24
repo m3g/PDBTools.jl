@@ -59,19 +59,17 @@ The accepted keywords for the selection are:
     while `index` is the sequential index of the atom in the file. 
 
 
-## Special macros: proteins, water
+## Special macros: proteins, nucleosides, water
 
 Just use these keywords to select the residues matching the properties
-desired. 
+desired.
 
 Examples:
 ```julia
-aromatic = select(atoms,"aromatic")
-
+aromatic = select(atoms, "aromatic")
 ```
 ```julia
-aromatic = select(atoms,"charged")
-
+purines = select(atoms, "purine")
 ```
 
 Available keywords:
@@ -85,12 +83,14 @@ Available keywords:
 | `charged`     | `neutral`     |               |
 | `polar`       | `nonpolar`    |               |
 | `hydrophobic` |               |               |
+| `nucleoside`  | `purine`      | `pyrimidine`  |
 |               |               |               |
 
-!!! note  
-    The properties refer to protein residues and will return `false`
-    to every non-protein residue. Thus, be careful with the use of `not`
-    with these selections, as they might retrieve non-protein atoms.
+!!! note
+    The protein-specific keywords (`acidic`, `basic`, `aliphatic`, etc.) return `false`
+    for every non-protein residue, and the nucleoside-specific keywords (`purine`,
+    `pyrimidine`) return `false` for every non-nucleoside residue. Be careful with `not`
+    combined with these selections, as the negation will include atoms of all other types.
 
 ## Retrieving indices, filtering, etc
 
@@ -180,13 +180,14 @@ input, and returns `true` or `false` depending on the conditions required for th
     select(atoms, at -> isprotein(at) && resnum(at) in [ 1, 5, 7 ])
     ```
     Thus, the macro selection functions are:
-    `iswater`, 
+    `iswater`,
     `isprotein`,     `isbackbone`,    `issidechain`,
-    `isacidic`,      `isbasic`,                  
-    `isaliphatic`,   `isaromatic`,               
-    `ischarged`,     `isneutral`,                
-    `ispolar`,       `isnonpolar`,               
-    and `ishydrophobic`.                          
+    `isacidic`,      `isbasic`,
+    `isaliphatic`,   `isaromatic`,
+    `ischarged`,     `isneutral`,
+    `ispolar`,       `isnonpolar`,
+    `ishydrophobic`,
+    `isnucleoside`,  `ispurine`,      `ispyrimidine`.
 
 ## Using VMD
 

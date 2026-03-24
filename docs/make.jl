@@ -1,6 +1,7 @@
 using Documenter
 using Plots
 using PDBTools
+ENV["GKSwstype"] = "100"
 ENV["LINES"] = 10
 ENV["COLUMNS"] = 120
 ENV["GKSwstype"] = "nul"

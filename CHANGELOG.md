@@ -10,8 +10,23 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.20.3-DEV
+Version 3.22.1-DEV
 --------------
+
+Version 3.22.0
+--------------
+- ![FEATURE][badge-feature] Add `isnucleoside`, `ispurine`, and `ispyrimidine` functions for atoms and residues, mirroring the existing protein-property predicates.
+- ![FEATURE][badge-feature] Add `add_nucleoside_residue!`, `remove_custom_nucleoside_residues!`, and `custom_nucleoside_residues!(SIRAH)` to support custom and force-field-specific nucleoside residues (SIRAH DNA: DAX, DGX, DTX, DCX).
+- ![FEATURE][badge-feature] Add `nucleoside`, `purine`, and `pyrimidine` as selection string keywords.
+- ![ENHANCEMENT][badge-enhancement] Much faster string selection by type-stable queries.
+- ![INFO][badge-info] Organize SASA docs.
+- ![INFO][badge-info] Suppress GKS output in documentation generation.
+- ![INFO][badge-info] `parse_query` returns a function, no need for `apply_query` anymore.
+
+Version 3.21.0
+--------------
+- ![FEATURE][badge-feature] Rename `coor` to `positions` and `position` (keep `coor` as a legacy alias for backwards compatibility).
+- ![INFO][badge-info] `get_atoms` is now imported from `MolSimToolkitShared`.
 
 Version 3.20.2
 --------------

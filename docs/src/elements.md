@@ -124,15 +124,17 @@ atomic_symbol
 atomic_mass
 ```
 
-## Custom protein residue types
+## Custom protein and nucleoside residue types
 
 It is possible to add to the list of protein residues, custom residue types. 
-This can be done by simply adding to the `PDBTools.protein_residues` dictionary
-of residues a new `PDBTools.ProteinResidue` entry. 
+This can be done by simply adding to the `PDBTools.protein_residues` and `PDBTools.nucleoside_residues` dictionaries
+of residues, with the following functions:
 
 ```@docs
 add_protein_residue!
+add_nucleoside_residue!
 remove_custom_protein_residues!
+remove_custom_nucleoside_residues!
 ```
 
 For example, here we create
@@ -177,6 +179,7 @@ With those definitions, adding all SIRAH protein residue types and element names
 ```@example sirah
 using PDBTools 
 custom_protein_residues!(SIRAH)
+custom_nucleoside_residues!(SIRAH)
 custom_elements!(SIRAH)
 ```
 
@@ -206,6 +209,7 @@ To remove the custom element types and residues, do:
 
 ```@example sirah
 remove_custom_protein_residues!()
+remove_custom_nucleoside_residues!()
 remove_custom_elements!()
 ```
 

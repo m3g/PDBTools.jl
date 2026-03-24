@@ -242,7 +242,7 @@ function initialize_hbonds_data(
                 inds_sel = index.(ats_sel)
                 polar_bonds = find_hbond_donors(
                     ats_sel,
-                    positions=coor(ats_sel),
+                    positions=PDBTools.positions(ats_sel),
                     unitcell=unitcell,
                     cutoff=donor_acceptor_distance,
                     parallel=parallel,
@@ -275,7 +275,7 @@ function setup_particle_systems(
         if sel1 == sel2
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
-                xpositions=coor.(s1.ats),
+                xpositions=PDBTools.positions(s1.ats),
                 unitcell=unitcell,
                 cutoff=donor_acceptor_distance,
                 output=HBonds(),
@@ -286,8 +286,8 @@ function setup_particle_systems(
             s1 = selection_data[sel1]
             s2 = selection_data[sel2]
             systems[key] = ParticleSystem(
-                xpositions=coor.(s1.ats),
-                ypositions=coor.(s2.ats),
+                xpositions=PDBTools.positions(s1.ats),
+                ypositions=PDBTools.positions(s2.ats),
                 unitcell=unitcell,
                 cutoff=donor_acceptor_distance,
                 output=HBonds(),

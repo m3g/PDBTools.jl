@@ -12,7 +12,7 @@ using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: InlineString, String1, String15
-import MolSimToolkitShared: center_of_mass, wrap, dihedral
+import MolSimToolkitShared: center_of_mass, wrap, dihedral, get_atoms
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
@@ -35,7 +35,7 @@ export Chain, eachchain, chain
 export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
-export coor, maxmin, distance, closest, dihedral, Ramachandran
+export positions, maxmin, distance, closest, dihedral, Ramachandran
 export element, mass, element_name, element_symbol, element_symbol_string, element_vdw_radius
 export formula, stoichiometry
 export Sequence
@@ -52,6 +52,8 @@ export mvalue
 
 # Custom residue and element definitions
 export custom_protein_residues!, add_protein_residue!, remove_custom_protein_residues!
+export custom_nucleoside_residues!, add_nucleoside_residue!, remove_custom_nucleoside_residues!
+export isnucleoside, ispurine, ispyrimidine
 export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
@@ -75,6 +77,8 @@ const CIF_2C_CHAIN = joinpath(src_dir, "../test/6CO8.cif")
 # Basic chemistry
 include("./properties/elements.jl")
 include("./properties/protein_residues.jl")
+include("./properties/nucleoside_residues.jl")
+include("./properties/residue_properties.jl")
 
 #
 # Data structures and their iterators
@@ -106,7 +110,7 @@ include("./properties/formula.jl")
 include("./properties/getseq.jl")
 
 # Coordinates-dependent functions
-include("./coordinates/coor.jl")
+include("./coordinates/positions.jl")
 include("./coordinates/distance.jl")
 include("./coordinates/maxmin.jl")
 include("./coordinates/contacts.jl")

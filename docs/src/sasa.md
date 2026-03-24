@@ -11,6 +11,12 @@ sasa_particles
 sasa
 ```
 
+!!! tip
+    The `sasa_particles` function supports periodic boundary conditions if a unit cell is provided. 
+    See the how to [read the unitcell](@ref read-unitcell)  for further information.
+
+## Complete structure SASA
+
 A typical run of these functions consists in providing the structure of a protein to the first function, `sasa_particles`, to obtain a `SASA` object, which contains the accessible area per atom:
 
 ```@example sasa
@@ -18,6 +24,10 @@ using PDBTools
 prot = read_pdb(PDBTools.TESTPDB, "protein")
 atom_sasa = sasa_particles(prot)
 ```
+
+The output provides the SASA of the complete structure, but the `atoms_sasa` object created contains the SASA of each atom, from which the accessible area of subsets can be retrieved. 
+
+## SASA of structure subsets
 
 The `atom_sasa` object created above can be used to extract the total accessible area or the accessible area of any sub-surface. The `sasa` function provides an interface for those extractions:
 
@@ -36,28 +46,26 @@ sasa(atom_sasa, "backbone")
 sasa(atom_sasa, "resname THR and residue < 50") 
 ```
 
+## Visualization of the surface
+
 In some situations, it might be useful to visualize the surface. The dots that form the surface can be obtained by running `sasa_particles` with the `output_dots` option set to `true`. Here, we use fewer dots for better visualization:
 
 ```@example sasa
 atom_sasa = sasa_particles(prot; n_dots=100, output_dots=true) 
 ```
 
-Where the `atom_sasa.dots` field contais the dots that are accessible to the surface for each atom. These can be plotted, for example, with:
+Where the `atom_sasa.dots` field contains the dots that are accessible to the surface for each atom. These can be plotted, for example, with:
 ```@example sasa
 using Plots
 dots = reduce(vcat, atom_sasa.dots)
-scatter(Tuple.(coor.(prot)); color=:orange, msw=0, label="") # atom coordinates
+scatter(Tuple.(positions(prot)); color=:orange, msw=0, label="") # atom coordinates
 scatter!(Tuple.(dots); # surface dots
     color=:blue, ms=1, msw=0, ma=0.5, # marker properties
     label="",
 )
 ```
 
-!!! note
-    The `sasa_particles` function supports periodic boundary conditions if a unit cell is provided. 
-    See the how to [read the unitcell](@ref read-unitcell)  for further information.
-
-## Computing SIRAH solvent accessible area
+## SIRAH solvent accessible area
 
 To compute the solvent accessible surface area of SIRAH models, call the `sasa_particles(SIRAH, ...)` method, after [loading the custom protein residues](@ref sirah) and elements of the SIRAH force field:
 

@@ -229,7 +229,7 @@ function sasa_particles(
     end
 
     system = ParticleSystem(
-        xpositions=coor.(atoms),
+        xpositions=positions(atoms),
         unitcell=unitcell,
         cutoff=2 * (maximum(atom_radius_from_type(type) for type in atom_types) + probe_radius),
         output=AtomDotMatrix(ones(Bool, n_dots, length(atoms))),
