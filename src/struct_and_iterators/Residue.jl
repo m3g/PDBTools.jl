@@ -241,6 +241,27 @@ resname(residue::Residue) = residue.resname
 
 Returns the full residue name of the residue.
 
+# Positional Arguments
+
+- `residue::Residue`: A `Residue` object.
+
+# Returns
+
+- `String`: The full residue name.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia> residues = collect(eachresidue(atoms));
+
+julia> residuename(residues[1])
+"Alanine"
+```
+
 """
 residuename(r::Residue) = residuename(resname(r))
 
