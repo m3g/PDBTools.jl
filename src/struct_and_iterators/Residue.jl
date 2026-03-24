@@ -237,6 +237,14 @@ julia> resname(residues[1])
 resname(residue::Residue) = residue.resname
 
 """
+    residuename(r::Residue)
+
+Returns the full residue name of the residue.
+
+"""
+residuename(r::Residue) = residuename(resname(r))
+
+"""
     residue(residue::Residue)
 
 Returns the sequential residue (molecule) number of the residue in the structure.
