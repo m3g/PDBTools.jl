@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.23.1-DEV
 --------------
+- ![FIX][badge-fix] Report the number of *protein* atoms for `CreamerDenaturedModel` show method.
 
 Version 3.23.0
 --------------
