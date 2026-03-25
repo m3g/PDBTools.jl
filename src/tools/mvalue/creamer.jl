@@ -422,7 +422,7 @@ end
 @testitem "CreamerDenaturedModel" begin
     using PDBTools
     using ShowMethodTesting
-    p = read_pdb(PDBTools.TESTPDB)
+    prot = read_pdb(PDBTools.TESTPDB, "protein")
     @test parse_show(CreamerDenaturedModel(prot, 1)) ≈ """
         CreamerDenaturedModel of a 1463-atom protein and minimal denaturation.
     """
@@ -437,7 +437,7 @@ end
     m = mvalue(CreamerDenaturedModel(prot, 2), "urea")
     @test [m.tot, m.bb, m.sc] ≈ [-1.290518033485419, -1.3936301188484532, 0.10311208536303434]
     m = mvalue(CreamerDenaturedModel(prot, 3), "urea")
-    @test [m.tot, m.bb, m.sc] ≈ (-1.899127986615752, -2.0722927071163655, 0.17316472050061354)
+    @test [m.tot, m.bb, m.sc] ≈ [-1.899127986615752, -2.0722927071163655, 0.17316472050061354]
     m = mvalue(CreamerDenaturedModel(prot, 3), "urea"; model=MoeserHorinek)
     @test [m.tot, m.bb, m.sc] ≈ [-1.8015362919415367, -1.0270235184537553, -0.7745127734877815]
     m = mvalue(CreamerDenaturedModel(prot), "tmao")
