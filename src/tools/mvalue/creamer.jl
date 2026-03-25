@@ -371,6 +371,7 @@ Creamer TP, Srinivasan R, Rose GD. **Modeling unfolded states of proteins and pe
 struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}}
     atoms::T
     type::Int
+    n_protein_atoms::Int
     function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int) 
         if !(type in (1,2,3))
             throw(ArgumentError("""\n
@@ -381,13 +382,13 @@ struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}}
     
             """))
         end
-        return new{typeof(atoms)}(atoms, type)
+        return new{typeof(atoms)}(atoms, type, count(isprotein, atoms))
     end
 end
 CreamerDenaturedModel(atoms::AbstractVector{<:Atom}) = CreamerDenaturedModel(atoms, 2)
 function Base.show(io::IO, m::CreamerDenaturedModel)
     t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal" 
-    print(io, "CreamerDenaturedModel of a $(length(m.atoms))-atom protein and $t denaturation.")
+    print(io, "CreamerDenaturedModel of a $(m.n_protein_atoms)-atom protein and $t denaturation.")
 end
 
 """
@@ -422,7 +423,7 @@ end
 @testitem "CreamerDenaturedModel" begin
     using PDBTools
     using ShowMethodTesting
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.TESTPDB)
     @test parse_show(CreamerDenaturedModel(prot, 1)) ≈ """
         CreamerDenaturedModel of a 1463-atom protein and minimal denaturation.
     """
