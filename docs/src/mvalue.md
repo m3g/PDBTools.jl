@@ -17,14 +17,14 @@ mvalue
 ```
 
 Here we implement the Auton/Bolen and Moeser/Horinek models 
-[[1](https://doi.org/10.1021/jp409934q), 
+([1](https://doi.org/10.1021/jp409934q), 
 [2](https://doi.org/10.1016/s0076-6879(07)28023-1), 
-[3](https://www.pnas.org/doi/10.1073/pnas.0706251104)]). 
+[3](https://www.pnas.org/doi/10.1073/pnas.0706251104)). 
 Typically, these models are used to obtain the effect of cosolvent on the structural stability of proteins,
 but the current implementation allows the practical use of these functions to compute *m*-values of 
 more general transformations, as described in the examples.
 
-## Transfer free energy
+# Transfer free energy
 
 The transfer free energy of a protein from water to a 1M solution of a cosolvent can be estimated
 with the `transfer_free_energy` function:
@@ -47,10 +47,34 @@ tfe.residue_contributions_sc[1]
 When multiple protein conformations are of interest, the `mvalue` methods provide a direct way to compute the 
 variations in transfer free energies associated to the states involved, as shown in the following examples.
 
-## Protein denaturation
+# Protein denaturation
 
-Consider these two states of a model protein, a native and a denatured (straight chain) state, for
-which we compute the SASA:
+The estimate of the m-value associated to protein denaturation (the change in transfer free energy when a protein undergoes denaturation) can be (and is usually) computed using the estimates of exposed residue surface area obtained by [Creamer](https://doi.org/10.1021/bi962819o). 
+
+Here, we compute the m-value estimates using the Creamer model, but first wrapping the atom array in the `CreamerDenaturedModel` type, which defines also the denaturation extent to be considered, by default, "mean":
+
+```@example mvalue
+prot = read_pdb(PDBTools.TESTPDB)
+model = CreamerDenaturedModel(prot)
+```
+A second argument of the constructor defines the extent to the "minimal", "mean", "maximal", as described in the docstring below. 
+
+The m-value of denaturation in a cosolvent can be computed, then, with:
+
+```@example mvalue
+m = mvalue(model, "urea"; model=AutonBolen)
+println("m-value of denaturation = ", m.tot)
+```
+where the output is a dictionary containing the total, backbone, side-chain, and residue-type specific contributions to the transfer free energies, in `kcal/mol`. 
+
+```@docs
+CreamerDenaturedModel
+mvalue(::CreamerDenaturedModel, ::String)
+```
+
+# Protein conformational changes
+
+Consider these two states of a model protein, a native and a denatured (straight chain) state, obtained from  a simulation. Here the conformational change could be of any kind. We compute the SASA of the two states:
 ```@example mvalue
 native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/1MJC_native.pdb", "protein")
 sasa_native = sasa_particles(native_state)
@@ -90,7 +114,7 @@ to the transfer free energies:
 <img src="../assets/mvalue.png" width=30%>
 ```
 
-## Cofactor binding
+# Cofactor binding
 
 The `1BSX` protein-data-bank structure contains a nuclear hormone receptor bound to a cofactor:
 ```@example mvalue
@@ -138,7 +162,7 @@ mvalue(cAB, cB_free, "Sucrose"; sel="chain B")
 and thus Sucrose can stabilize cofactor binding. We remark that the values obtained here
 are very small, and this is intended to be only an illustrative example.
 
-## Alternative m-value calculations
+# Alternative m-value calculations
 
 The following functions can be used to compute *m*-values from the variation of the SASA per residue 
 type, which allow the use of external tools to compute the SASA. This is used mostly for testing 
