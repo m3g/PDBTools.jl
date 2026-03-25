@@ -47,7 +47,7 @@ export moveto!
 export sasa_particles, sasa
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
-export mvalue
+export mvalue, CreamerDenaturedModel
 @compat public parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype, creamer_delta_sasa
 
 # Custom residue and element definitions
