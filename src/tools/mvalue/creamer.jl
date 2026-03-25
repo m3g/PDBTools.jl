@@ -406,7 +406,7 @@ julia> m = mvalue(CreamerDenaturedModel(prot), "urea");
 
 julia> m.tot
 -1.290518033485419
-````
+```
 
 """
 function mvalue(m::CreamerDenaturedModel, cosolvent::String; model=AutonBolen)
