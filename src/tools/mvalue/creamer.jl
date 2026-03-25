@@ -1,4 +1,4 @@
-const creamer_atomic_radii = OrderedDict{StringType, Float32}(
+const creamer_atomic_radii = OrderedDict{StringType,Float32}(
     "Nsp2" => 1.64,
     "Nsp3" => 1.64,
     "Csp2" => 1.76,
@@ -9,190 +9,190 @@ const creamer_atomic_radii = OrderedDict{StringType, Float32}(
     "H" => 0.0,
 )
 
-const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType, OrderedDict{StringType,StringType}}(
+const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,StringType}}(
     # --- Backbone Atoms (Common to all amino acids, except Gly) ---
     "bb" => OrderedDict(
-        "N"    => "Nsp2", # Backbone Amide Nitrogen (peptide bond is N-C=O, typically sp2/sp3 intermediate)
-        "CA"   => "Csp3", # Alpha Carbon
-        "C"    => "Csp2", # Backbone Carbonyl Carbon
-        "O"    => "Osp2", # Backbone Carbonyl Oxygen
-        "OXT"  => "Osp2", # C-terminal Oxygen (in the last residue)
-        "OT1"  => "Osp2", # C-terminal Oxygen (in the last residue)
-        "OT2"  => "Osp2", # C-terminal Oxygen (in the last residue)
+        "N" => "Nsp2", # Backbone Amide Nitrogen (peptide bond is N-C=O, typically sp2/sp3 intermediate)
+        "CA" => "Csp3", # Alpha Carbon
+        "C" => "Csp2", # Backbone Carbonyl Carbon
+        "O" => "Osp2", # Backbone Carbonyl Oxygen
+        "OXT" => "Osp2", # C-terminal Oxygen (in the last residue)
+        "OT1" => "Osp2", # C-terminal Oxygen (in the last residue)
+        "OT2" => "Osp2", # C-terminal Oxygen (in the last residue)
     ),
 
     # --- Glycine (GLY) Side Chain ---
     # Glycine has no side chain beyond CA, but sometimes the H is named H2 or H3
     "GLY" => OrderedDict(
-        "HA2"  => "H",    # Alpha Hydrogen
-        "HA3"  => "H",    # Alpha Hydrogen
+        "HA2" => "H",    # Alpha Hydrogen
+        "HA3" => "H",    # Alpha Hydrogen
     ),
 
     # --- Alanine (ALA) Side Chain ---
     "ALA" => OrderedDict(
-        "CB"   => "Csp3", # Beta Carbon
+        "CB" => "Csp3", # Beta Carbon
     ),
- 
+
     # --- Valine (VAL) Side Chain ---
     "VAL" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG1"  => "Csp3",
-        "CG2"  => "Csp3",
+        "CB" => "Csp3",
+        "CG1" => "Csp3",
+        "CG2" => "Csp3",
     ),
 
     # --- Leucine (LEU) Side Chain ---
     "LEU" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp3",
-        "CD1"  => "Csp3",
-        "CD2"  => "Csp3",
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "CD1" => "Csp3",
+        "CD2" => "Csp3",
     ),
 
     # --- Isoleucine (ILE) Side Chain ---
     "ILE" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG1"  => "Csp3",
-        "CG2"  => "Csp3",
-        "CD"   => "Csp3",
-        "CD1"  => "Csp3",
+        "CB" => "Csp3",
+        "CG1" => "Csp3",
+        "CG2" => "Csp3",
+        "CD" => "Csp3",
+        "CD1" => "Csp3",
     ),
 
     # --- Serine (SER) Side Chain ---
     "SER" => OrderedDict(
-        "CB"   => "Csp3",
-        "OG"   => "Osp3", # Gamma Oxygen (Alcohol)
+        "CB" => "Csp3",
+        "OG" => "Osp3", # Gamma Oxygen (Alcohol)
     ),
 
     # --- Threonine (THR) Side Chain ---
     "THR" => OrderedDict(
-        "CB"   => "Csp3",
-        "OG1"  => "Osp3", # Gamma 1 Oxygen (Alcohol)
-        "CG2"  => "Csp3",
+        "CB" => "Csp3",
+        "OG1" => "Osp3", # Gamma 1 Oxygen (Alcohol)
+        "CG2" => "Csp3",
     ),
 
     # --- Cysteine (CYS) Side Chain ---
     "CYS" => OrderedDict(
-        "CB"   => "Csp3",
-        "SG"   => "Ssp3", # Gamma Sulfur (Thiol)
+        "CB" => "Csp3",
+        "SG" => "Ssp3", # Gamma Sulfur (Thiol)
     ),
 
     # --- Methionine (MET) Side Chain ---
     "MET" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp3",
-        "SD"   => "Ssp3", # Delta Sulfur (Thioether)
-        "CE"   => "Csp3",
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "SD" => "Ssp3", # Delta Sulfur (Thioether)
+        "CE" => "Csp3",
     ),
 
     # --- Proline (PRO) Side Chain (Cyclic with backbone N) ---
     # The backbone N in Proline is an sp3 tertiary amine.
     # N is often considered Nsp3 in Proline, unlike other residues.
     "PRO" => OrderedDict(
-        "N"   => "Nsp3", # Specific for Proline's N
-        "CB"  => "Csp3",
-        "CG"  => "Csp3",
-        "CD"  => "Csp3", # Delta Carbon
+        "N" => "Nsp3", # Specific for Proline's N
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "CD" => "Csp3", # Delta Carbon
     ),
 
     # --- Phenylalanine (PHE) Side Chain ---
     "PHE" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp2", # Benzene ring attachment
-        "CD1"  => "Csp2", # Ring Carbons
-        "CD2"  => "Csp2",
-        "CE1"  => "Csp2",
-        "CE2"  => "Csp2",
-        "CZ"   => "Csp2",
+        "CB" => "Csp3",
+        "CG" => "Csp2", # Benzene ring attachment
+        "CD1" => "Csp2", # Ring Carbons
+        "CD2" => "Csp2",
+        "CE1" => "Csp2",
+        "CE2" => "Csp2",
+        "CZ" => "Csp2",
     ),
 
     # --- Tyrosine (TYR) Side Chain ---
     "TYR" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp2",
-        "CD1"  => "Csp2",
-        "CD2"  => "Csp2",
-        "CE1"  => "Csp2",
-        "CE2"  => "Csp2",
-        "CZ"   => "Csp2",
-        "OH"   => "Osp3", # Hydroxyl Oxygen
+        "CB" => "Csp3",
+        "CG" => "Csp2",
+        "CD1" => "Csp2",
+        "CD2" => "Csp2",
+        "CE1" => "Csp2",
+        "CE2" => "Csp2",
+        "CZ" => "Csp2",
+        "OH" => "Osp3", # Hydroxyl Oxygen
     ),
 
     # --- Tryptophan (TRP) Side Chain (Indole Ring) ---
     "TRP" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp2",
-        "CD1"  => "Csp2",
-        "CD2"  => "Csp2",
-        "NE1"  => "Nsp2", # Indole Nitrogen
-        "CE2"  => "Csp2",
-        "CE3"  => "Csp2",
-        "CZ2"  => "Csp2",
-        "CZ3"  => "Csp2",
-        "CH2"  => "Csp2",
+        "CB" => "Csp3",
+        "CG" => "Csp2",
+        "CD1" => "Csp2",
+        "CD2" => "Csp2",
+        "NE1" => "Nsp2", # Indole Nitrogen
+        "CE2" => "Csp2",
+        "CE3" => "Csp2",
+        "CZ2" => "Csp2",
+        "CZ3" => "Csp2",
+        "CH2" => "Csp2",
     ),
 
     # --- Aspartic Acid (ASP) Side Chain ---
     "ASP" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp2", # Carboxyl Carbon
-        "OD1"  => "Osp2", # Carboxyl Oxygen
-        "OD2"  => "Osp2", # Carboxyl Oxygen
+        "CB" => "Csp3",
+        "CG" => "Csp2", # Carboxyl Carbon
+        "OD1" => "Osp2", # Carboxyl Oxygen
+        "OD2" => "Osp2", # Carboxyl Oxygen
     ),
 
     # --- Asparagine (ASN) Side Chain ---
     "ASN" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp2", # Amide Carbon
-        "OD1"  => "Osp2", # Amide Oxygen
-        "ND2"  => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+        "CB" => "Csp3",
+        "CG" => "Csp2", # Amide Carbon
+        "OD1" => "Osp2", # Amide Oxygen
+        "ND2" => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
     ),
 
     # --- Glutamic Acid (GLU) Side Chain ---
     "GLU" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp3",
-        "CD"   => "Csp2", # Carboxyl Carbon
-        "OE1"  => "Osp2", # Carboxyl Oxygen
-        "OE2"  => "Osp2", # Carboxyl Oxygen
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "CD" => "Csp2", # Carboxyl Carbon
+        "OE1" => "Osp2", # Carboxyl Oxygen
+        "OE2" => "Osp2", # Carboxyl Oxygen
     ),
 
     # --- Glutamine (GLN) Side Chain ---
     "GLN" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp3",
-        "CD"   => "Csp2", # Amide Carbon
-        "OE1"  => "Osp2", # Amide Oxygen
-        "NE2"  => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "CD" => "Csp2", # Amide Carbon
+        "OE1" => "Osp2", # Amide Oxygen
+        "NE2" => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
     ),
 
     # --- Lysine (LYS) Side Chain (Like your example) ---
     "LYS" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp3",
-        "CD"   => "Csp3",
-        "CE"   => "Csp3",
-        "NZ"   => "Nsp3", # Zeta Nitrogen (Primary Amine/Ammonium)
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "CD" => "Csp3",
+        "CE" => "Csp3",
+        "NZ" => "Nsp3", # Zeta Nitrogen (Primary Amine/Ammonium)
     ),
 
     # --- Arginine (ARG) Side Chain (Guanidinium Group) ---
     "ARG" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp3",
-        "CD"   => "Csp3",
-        "NE"   => "Nsp2", # Epsilon Nitrogen (Part of the delocalized system)
-        "CZ"   => "Csp2", # Guanidinium Carbon
-        "NH1"  => "Nsp2", # Guanidinium Nitrogen
-        "NH2"  => "Nsp2", # Guanidinium Nitrogen
+        "CB" => "Csp3",
+        "CG" => "Csp3",
+        "CD" => "Csp3",
+        "NE" => "Nsp2", # Epsilon Nitrogen (Part of the delocalized system)
+        "CZ" => "Csp2", # Guanidinium Carbon
+        "NH1" => "Nsp2", # Guanidinium Nitrogen
+        "NH2" => "Nsp2", # Guanidinium Nitrogen
     ),
 
     # --- Histidine (HIS) Side Chain (Imidazole Ring) ---
     "HIS" => OrderedDict(
-        "CB"   => "Csp3",
-        "CG"   => "Csp2", # Ring attachment
-        "ND1"  => "Nsp2", # Delta 1 Nitrogen (Pyridine-like, or N-H Imidazole form)
-        "CE1"  => "Csp2",
-        "NE2"  => "Nsp2", # Epsilon 2 Nitrogen (Pyrole-like, or N Imidazole form)
-        "CD2"  => "Csp2",
+        "CB" => "Csp3",
+        "CG" => "Csp2", # Ring attachment
+        "ND1" => "Nsp2", # Delta 1 Nitrogen (Pyridine-like, or N-H Imidazole form)
+        "CE1" => "Csp2",
+        "NE2" => "Nsp2", # Epsilon 2 Nitrogen (Pyrole-like, or N Imidazole form)
+        "CD2" => "Csp2",
     ),
 )
 
@@ -204,7 +204,7 @@ function creamer_atom_type(at::Atom)
             return PDB_ATOM_HYBRIDIZATION[rname][atname]
         elseif haskey(PDB_ATOM_HYBRIDIZATION["bb"], atname)
             return PDB_ATOM_HYBRIDIZATION["bb"][atname]
-        elseif element(at) == "H" 
+        elseif element(at) == "H"
             return "H"
         end
     end
@@ -297,8 +297,8 @@ Creamer TP, Srinivasan R, Rose GD. **Modeling unfolded states of proteins and pe
 function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
     sasas = OrderedDict{String,OrderedDict}()
     sasa_atoms = sasa_particles(atoms;
-        atom_type = creamer_atom_type,
-        atom_radius_from_type = type -> creamer_atomic_radii[type]
+        atom_type=creamer_atom_type,
+        atom_radius_from_type=type -> creamer_atomic_radii[type]
     )
     sel_bb = _Selector(isbackbone, Ref(first(eachresidue(atoms))))
     sel_sc = _Selector(issidechain, Ref(first(eachresidue(atoms))))
@@ -332,3 +332,118 @@ function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
     end
     return sasas
 end
+
+"""
+    CreamerDenaturedModel
+
+Type that specifies that a m-value calculation will consider a Creamer model of protein
+denaturation. This type is used as the first input variable of the `mvalue` function.
+
+Construction:
+
+```
+CreamerDenaturedModel(atoms::AbstractVector{<:Atom})
+```
+
+and, optinally, the second argument is the type of denatured model to be used, for example: 
+
+```
+CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, 1)
+```
+
+where the `type` parameter can be 1, 2, or 3, for the minimal, average, and maximal denatured 
+estimated accessible surface ares of Creamer.
+
+Use the `CreamerDenaturedModel` model as the first input argument of `mvalue`, for example:
+
+```
+mvalue(CreamerDenaturedModel(prot), "urea")
+```
+
+to obtain the estimated m-value of denaturation in "urea".
+
+Reference:
+
+Creamer TP, Srinivasan R, Rose GD. **Modeling unfolded states of proteins and peptides. II. Backbone solvent accessibility.**
+*Biochemistry.* 1997;36:2832–2835. doi: 10.1021/bi962819o.
+
+"""
+struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}}
+    atoms::T
+    type::Int
+    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int) 
+        if !(type in (1,2,3))
+            throw(ArgumentError("""\n
+                Type of Creamer denaturation model must be either:
+                    1: minimal denaturation.
+                    2: mean denaturation.
+                    3: maximal denaturation.
+    
+            """))
+        end
+        return new{typeof(atoms)}(atoms, type)
+    end
+end
+CreamerDenaturedModel(atoms::AbstractVector{<:Atom}) = CreamerDenaturedModel(atoms, 2)
+function Base.show(io::IO, m::CreamerDenaturedModel)
+    t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal" 
+    print(io, "CreamerDenaturedModel of a $(length(m.atoms))-atom protein and $t denaturation.")
+end
+
+"""
+    mvalue(m::CreamerDenaturedModel, cosolvent::String; model=AutonBolen)
+
+Computes an estimate of the effect of a cosolvent on the m-value of denaturation of a protein.
+
+## Example
+
+```jldoctest; filter = r"(\\d*)\\.(\\d{2})\\d+" => s"\\1.\\2***"
+julia> using PDBTools
+
+julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+
+julia> m = mvalue(CreamerDenaturedModel(prot), "urea");
+
+julia> m.tot
+-1.290518033485419
+```
+
+"""
+function mvalue(m::CreamerDenaturedModel, cosolvent::String; model=AutonBolen)
+    return mvalue_delta_sasa(;
+        cosolvent=cosolvent,
+        model=model,
+        atoms=m.atoms,
+        sasas=creamer_delta_sasa(select(m.atoms, isprotein)),
+        type=m.type
+    )
+end
+
+@testitem "CreamerDenaturedModel" begin
+    using PDBTools
+    using ShowMethodTesting
+    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    @test parse_show(CreamerDenaturedModel(prot, 1)) ≈ """
+        CreamerDenaturedModel of a 1463-atom protein and minimal denaturation.
+    """
+    @test parse_show(CreamerDenaturedModel(prot, 2)) ≈ """
+        CreamerDenaturedModel of a 1463-atom protein and mean denaturation.
+    """
+    @test parse_show(CreamerDenaturedModel(prot, 3)) ≈ """
+        CreamerDenaturedModel of a 1463-atom protein and maximal denaturation.
+    """
+    m = mvalue(CreamerDenaturedModel(prot, 1), "urea")
+    @test [m.tot, m.bb, m.sc] ≈ [-0.6819081277036511, -0.7149675621180843, 0.0330594344144333]
+    m = mvalue(CreamerDenaturedModel(prot, 2), "urea")
+    @test [m.tot, m.bb, m.sc] ≈ [-1.290518033485419, -1.3936301188484532, 0.10311208536303434]
+    m = mvalue(CreamerDenaturedModel(prot, 3), "urea")
+    @test [m.tot, m.bb, m.sc] ≈ [-1.899127986615752, -2.0722927071163655, 0.17316472050061354]
+    m = mvalue(CreamerDenaturedModel(prot, 3), "urea"; model=MoeserHorinek)
+    @test [m.tot, m.bb, m.sc] ≈ [-1.8015362919415367, -1.0270235184537553, -0.7745127734877815]
+    m = mvalue(CreamerDenaturedModel(prot), "tmao")
+    @test [m.tot, m.bb, m.sc] ≈ [2.0265626662789282, 3.216069534867667, -1.1895068685887387]
+
+    @test_throws "Type of Creamer" CreamerDenaturedModel(prot, 4)
+end
+
+
