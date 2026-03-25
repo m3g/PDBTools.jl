@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Coordinate manipulations · PDBTools.jl</title><meta name="title" content="Coordinate manipulations · PDBTools.jl"/><meta property="og:title" content="Coordinate manipulations · PDBTools.jl"/><meta property="twitter:title" content="Coordinate manipulations · PDBTools.jl"/><meta name="description" content="Documentation for PDBTools.jl."/><meta property="og:description" content="Documentation for PDBTools.jl."/><meta property="twitter:description" content="Documentation for PDBTools.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div class="has-top-menu" id="documenter"><nav class="docs-top-menu"><div class="container"><ul class="docs-top-menu-list"><li class="docs-top-dropdown"><a class="docs-top-menu-link" href="../">Home<span class="docs-top-dropdown-caret">▾</span></a><ul class="docs-top-dropdown-menu"><li><a class="docs-top-dropdown-item" href="../">PDBTools.jl</a></li></ul></li><li class="docs-top-dropdown"><a class="docs-top-menu-link" href="../readwrite/">Getting started<span class="docs-top-dropdown-caret">▾</span></a><ul class="docs-top-dropdown-menu"><li><a class="docs-top-dropdown-item" href="../readwrite/">Read and Write</a></li><li><a class="docs-top-dropdown-item" href="../selections/">Selections</a></li><li><a class="docs-top-dropdown-item" href="../iterators/">Iterators</a></li><li><a class="docs-top-dropdown-item" href="../elements/">Atomic and molecular properties</a></li></ul></li><li class="docs-top-dropdown is-active"><a class="docs-top-menu-link" href="../contacts/">Structure<span class="docs-top-dropdown-caret">▾</span></a><ul class="docs-top-dropdown-menu"><li><a class="docs-top-dropdown-item" href="../contacts/">Contact maps</a></li><li><a class="docs-top-dropdown-item" href="../dihedrals/">Dihedrals and Ramachandran</a></li><li><a class="docs-top-dropdown-item" href="../secondary_structure/">Secondary structures</a></li><li><a class="docs-top-dropdown-item" href="../hydrogen_bonds/">Hydrogen bonds</a></li><li><a class="docs-top-dropdown-item" href="../sasa/">Solvent Accessible Area</a></li><li><a class="docs-top-dropdown-item" href>Coordinate manipulations</a></li></ul></li><li class="docs-top-dropdown"><a class="docs-top-menu-link" href="../mvalue/">m-values<span class="docs-top-dropdown-caret">▾</span></a><ul class="docs-top-dropdown-menu"><li><a class="docs-top-dropdown-item" href="../mvalue/">Transfer Free Energy</a></li></ul></li><li class="docs-top-dropdown"><a class="docs-top-menu-link" href="../auxiliary/">Other<span class="docs-top-dropdown-caret">▾</span></a><ul class="docs-top-dropdown-menu"><li><a class="docs-top-dropdown-item" href="../auxiliary/">Auxiliary functions</a></li><li><a class="docs-top-dropdown-item" href="../examples/">Examples</a></li><li><a class="docs-top-dropdown-item" href="../structure/">Experimental</a></li></ul></li></ul></div></nav><div class="docs-content-wrapper"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="PDBTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">PDBTools.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../contacts/">Contact maps</a></li><li><a class="tocitem" href="../dihedrals/">Dihedrals and Ramachandran</a></li><li><a class="tocitem" href="../secondary_structure/">Secondary structures</a></li><li><a class="tocitem" href="../hydrogen_bonds/">Hydrogen bonds</a></li><li><a class="tocitem" href="../sasa/">Solvent Accessible Area</a></li><li class="is-active"><a class="tocitem" href>Coordinate manipulations</a><ul class="internal"><li><a class="tocitem" href="#Atom-positions"><span>Atom positions</span></a></li><li><a class="tocitem" href="#Positions-of-arrays-of-Atoms"><span>Positions of arrays of Atoms</span></a></li><li><a class="tocitem" href="#Move-atoms-and-center-of-mass"><span>Move atoms and center of mass</span></a></li><li><a class="tocitem" href="#Distance-between-sets-of-atoms"><span>Distance between sets of atoms</span></a></li><li><a class="tocitem" href="#Closest-atoms-and-their-distance"><span>Closest atoms and their distance</span></a></li><li><a class="tocitem" href="#Maximum-and-minimum-coordinates-of-the-atoms"><span>Maximum and minimum coordinates of the atoms</span></a></li><li><a class="tocitem" href="#read-unitcell"><span>Read and convert unit cells</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Coordinate manipulations</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Coordinate manipulations</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/m3g/PDBTools.jl/blob/main/docs/src/coordinates.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Coordinate-manipulation"><a class="docs-heading-anchor" href="#Coordinate-manipulation">Coordinate manipulation</a><a id="Coordinate-manipulation-1"></a><a class="docs-heading-anchor-permalink" href="#Coordinate-manipulation" title="Permalink"></a></h1><h2 id="Atom-positions"><a class="docs-heading-anchor" href="#Atom-positions">Atom positions</a><a id="Atom-positions-1"></a><a class="docs-heading-anchor-permalink" href="#Atom-positions" title="Permalink"></a></h2><p>The <code>position</code>, <code>positions</code> and <code>set_positions!</code> functions are used to retrieve of set the coordinates of an atom (following the <code>AtomBase.jl</code> convention):</p><article><details class="docstring"><summary id="Base.position"><a class="docstring-binding" href="#Base.position"><code>Base.position</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">position(atom::Atom)</code></pre><p>Returns the position of an atom given the <code>Atom</code> structure.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/struct_and_iterators/Atom.jl#L633-L638">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.set_position!"><a class="docstring-binding" href="#PDBTools.set_position!"><code>PDBTools.set_position!</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">set_position!(atom::Atom, x::Union{Tuple,AbstractVector})</code></pre><p>Sets the position (x,y,z coordinates) of the atom, given a vector or tuple of coordinates.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/struct_and_iterators/Atom.jl#L641-L646">source</a></section></details></article><h2 id="Positions-of-arrays-of-Atoms"><a class="docs-heading-anchor" href="#Positions-of-arrays-of-Atoms">Positions of arrays of Atoms</a><a id="Positions-of-arrays-of-Atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Positions-of-arrays-of-Atoms" title="Permalink"></a></h2><p>Use the <code>positions</code> function:</p><article><details class="docstring"><summary id="MolSimToolkitShared.positions-Tuple{AbstractVector{&lt;:Atom}}"><a class="docstring-binding" href="#MolSimToolkitShared.positions-Tuple{AbstractVector{&lt;:Atom}}"><code>MolSimToolkitShared.positions</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">positions(atoms::AbstractVector{&lt;:Atom}; selection)</code></pre><p>Returns the coordinates of the atoms. The input may be one atom (type <code>Atom</code>), a vector of atoms, or a <code>Residue</code>.  The coordinates are returned as a vector of static vectors (from <code>StaticArrays</code>), more specifically as a <code>Vector{SVector{3,Float64}}</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools, StaticArrays 
+
+julia&gt; protein = wget(&quot;1LBD&quot;);
+
+julia&gt; positions(protein[1])
+3-element SVector{3, Float64} with indices SOneTo(3):
+ 45.228
+ 84.358
+ 70.638
+
+julia&gt; positions(protein[1], as=SVector{3,Float32})
+3-element SVector{3, Float32} with indices SOneTo(3):
+ 45.228
+ 84.358
+ 70.638
+
+julia&gt; positions(protein, &quot;index &lt;= 2&quot;)
+2-element Vector{SVector{3, Float64}}:
+ [45.228, 84.358, 70.638]
+ [46.08, 83.165, 70.327]
+
+julia&gt; positions(protein, at -&gt; at.resname == &quot;ALA&quot;)
+110-element Vector{SVector{3, Float64}}:
+ [43.94, 81.982, 70.474]
+ [43.02, 80.825, 70.455]
+ [41.996, 80.878, 69.34]
+ ⋮
+ [-17.866, 84.088, 51.741]
+ [-18.496, 83.942, 52.777]
+ [-15.888, 82.583, 51.706]
+  
+julia&gt; residues = collect(eachresidue(protein));
+
+julia&gt; positions(residues[1])
+6-element Vector{SVector{3, Float64}}:
+ [45.228, 84.358, 70.638]
+ [46.08, 83.165, 70.327]
+ [45.257, 81.872, 70.236]
+ [45.823, 80.796, 69.974]
+ [47.147, 82.98, 71.413]
+ [46.541, 82.639, 72.662]
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/coordinates/positions.jl#L3-L57">source</a></section></details></article><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; positions(atoms[1:2])
+2-element Vector{StaticArraysCore.SVector{3, Float32}}:
+ [-9.229, -14.861, -5.481]
+ [-10.048, -15.427, -5.569]</code></pre><p>The <code>positions</code> function accepts selections:</p><p>C<span>$\alpha$</span> coordinates:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; positions(atoms, &quot;name CA&quot;)
+3-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [-8.483, -14.912, -6.726]
+ [-5.113, -13.737, -5.466]
+ [-3.903, -11.262, -8.062]</code></pre><p>The coordinates are output as arrays of static arrays (more specifically, as a <code>Vector{SVector{3,Float64}}</code>, from <code>StaticArrays</code>). </p><h2 id="Move-atoms-and-center-of-mass"><a class="docs-heading-anchor" href="#Move-atoms-and-center-of-mass">Move atoms and center of mass</a><a id="Move-atoms-and-center-of-mass-1"></a><a class="docs-heading-anchor-permalink" href="#Move-atoms-and-center-of-mass" title="Permalink"></a></h2><p>The <code>center_of_mass</code> function can be used to compute the center of mass of set of atoms, and the  <code>moveto!</code> function can be used to move the center of mass of the atoms to the origin (by default)  or to a specified position:</p><article><details class="docstring"><summary id="MolSimToolkitShared.center_of_mass"><a class="docstring-binding" href="#MolSimToolkitShared.center_of_mass"><code>MolSimToolkitShared.center_of_mass</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">center_of_mass(atoms::AbstractVector{&lt;:Atom})</code></pre><p>Calculate the center of mass of the atoms.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
+  -5.5844226
+ -13.1104145
+  -7.1399713</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/tools/tools.jl#L91-L110">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.moveto!"><a class="docstring-binding" href="#PDBTools.moveto!"><code>PDBTools.moveto!</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">moveto!(atoms::AbstractVector{&lt;:Atom}; center::AbstractVector{&lt;:Real}=SVector(0.0, 0.0, 0.0))</code></pre><p>Move the center of mass of the atoms to the specified <code>center</code> position, which defaults to the origin.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
+  -5.5844226
+ -13.1104145
+  -7.1399713
+
+julia&gt; moveto!(atoms; center = [1.0, 2.0, 3.0]);
+
+julia&gt; center_of_mass(atoms)
+3-element StaticArraysCore.SVector{3, Float32} with indices SOneTo(3):
+ 1.0
+ 2.0000014
+ 3.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/tools/tools.jl#L129-L155">source</a></section></details></article><h2 id="Distance-between-sets-of-atoms"><a class="docs-heading-anchor" href="#Distance-between-sets-of-atoms">Distance between sets of atoms</a><a id="Distance-between-sets-of-atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Distance-between-sets-of-atoms" title="Permalink"></a></h2><p>The distance between atoms, or sets of atoms, can be computed with the <code>distance</code> function. This function returns the <em>minimum distance</em> between the atoms of the sets involved. For example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; distance(protein,ligand)
+2.7775834820937417</code></pre><article><details class="docstring"><summary id="PDBTools.distance"><a class="docstring-binding" href="#PDBTools.distance"><code>PDBTools.distance</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">distance(x,y)</code></pre><p>Computes the minimum distance between two sets of atoms, between an atom and a set of atoms, or simply  the distance between two atoms, or from the coordinates or sets of coordinates. </p><p>The input may be an <code>Atom</code> vector of <code>Atom</code>s, or a 3D vector, or a vector of 3D vector of coordinates, for examples as output by the <code>positions</code> function.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; distance(protein,ligand)
+2.7775834820937417
+
+julia&gt; distance(protein[1],ligand[3])
+36.453551075306784
+
+julia&gt; distance(positions(ligand),protein)
+2.7775834820937417
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/coordinates/distance.jl#L1-L30">source</a></section></details></article><p>A special related function to compute the distance between a pair of residues is:</p><article><details class="docstring"><summary id="PDBTools.residue_residue_distance"><a class="docstring-binding" href="#PDBTools.residue_residue_distance"><code>PDBTools.residue_residue_distance</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">residue_residue_distance(
+    r1::PDBTools.Residue, 
+    r2::PDBTools.Residue; 
+    positions::AbstractVector{AbstractVector{T}}=nothing; 
+    unitcell=nothing
+)</code></pre><p>Calculate the minimum distance between two residues in a protein structure.  If the <code>positions</code> argument is not provided, the function calculates the distance using the coordinates of the atoms in the residues. If <code>positions</code> is provided, the function uses the coordinates in the positions array. </p><p><strong>Arguments</strong></p><ul><li><code>r1::PDBTools.Residue</code>: Residue 1</li><li><code>r2::PDBTools.Residue</code>: Residue 2</li><li><code>positions::AbstractVector{AbstractVector{T}}</code>: Optional alternate positions of the atoms in the structure.</li><li><code>unitcell=nothing</code>: Optional unit cell dimensions for periodic boundary conditions.</li></ul><div class="admonition is-info" id="Note-9a8d22dc50f9814d"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-9a8d22dc50f9814d" title="Permalink"></a></header><div class="admonition-body"><p>The index of the atoms in the residues must match the index of the atoms in the positions array. </p></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; ats = read_pdb(PDBTools.DIMERPDB);
+
+julia&gt; residues = collect(eachresidue(ats));
+
+julia&gt; r1 = residues[1]; r10 = residues[10];
+
+julia&gt; println(name(r1), resnum(r1), &quot; and &quot;, name(r10), resnum(r10))
+LYS211 and GLU220
+
+julia&gt; d = residue_residue_distance(r1, r10)
+16.16511f0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/coordinates/distance.jl#L199-L241">source</a></section></details></article><h2 id="Closest-atoms-and-their-distance"><a class="docs-heading-anchor" href="#Closest-atoms-and-their-distance">Closest atoms and their distance</a><a id="Closest-atoms-and-their-distance-1"></a><a class="docs-heading-anchor-permalink" href="#Closest-atoms-and-their-distance" title="Permalink"></a></h2><p>A function similar to the one above is <code>closest</code>, which returns the shortest distance between atoms but also the identity of the atom or pair of atoms that satisfy that shortest distance:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; closest(ligand,protein)
+(43, 3684, 2.7775834820937417)
+
+julia&gt; ligand[43]
+    4037   O1      T3     B        2      512  -22.568   81.625    3.159  1.00 36.59     1       -      4041
+
+julia&gt; protein[3684]
+    3684  NE2     HIS     B      435      472  -21.539   82.145    5.686  1.00 44.44     1       -      3686
+
+julia&gt; distance(ligand[43],protein[3684])
+2.7775834820937417</code></pre><article><details class="docstring"><summary id="PDBTools.closest"><a class="docstring-binding" href="#PDBTools.closest"><code>PDBTools.closest</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">closest(x,y)</code></pre><p>Computes the minimum distance between two sets of atoms and returns the indices of the atoms  and their distance. Both vector of atoms or vectors of coordinates can be used as input.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; model = wget(&quot;1BSX&quot;);
+
+julia&gt; protein = select(model,&quot;protein&quot;);
+
+julia&gt; ligand = select(model,&quot;resname T3&quot;);
+
+julia&gt; closest(ligand,protein)
+(43, 3684, 2.7775834820937417)
+
+julia&gt; ligand[43]
+    4037   O1      T3     B        2      512  -22.568   81.625    3.159 36.59  1.00     1       -      4041
+
+julia&gt; closest(ligand[43],protein)
+(1, 3684, 2.7775834820937417)
+
+julia&gt; x = positions(protein)
+3994-element Vector{SVector{3, Float64}}:
+ [52.884, 24.022, 35.587]
+ [52.916, 24.598, 36.993]
+ ⋮
+ [-46.887, 86.925, 13.235]
+ [-47.164, 83.593, 15.25]
+
+julia&gt; closest(ligand,x)
+(43, 3684, 2.7775834820937417)
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/coordinates/distance.jl#L37-L74">source</a></section></details></article><h2 id="Maximum-and-minimum-coordinates-of-the-atoms"><a class="docs-heading-anchor" href="#Maximum-and-minimum-coordinates-of-the-atoms">Maximum and minimum coordinates of the atoms</a><a id="Maximum-and-minimum-coordinates-of-the-atoms-1"></a><a class="docs-heading-anchor-permalink" href="#Maximum-and-minimum-coordinates-of-the-atoms" title="Permalink"></a></h2><p>Use <code>maxmin(atoms)</code>, or <code>maxmin(atoms,&quot;resname CA&quot;)</code>, for example:</p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; atoms = read_pdb(PDBTools.SMALLPDB);
+
+julia&gt; maxmin(atoms, &quot;residue &gt; 1&quot;)
+ Minimum atom coordinates: xmin = [-6.974, -16.785, -10.863]
+ Maximum atom coordinates: xmax = [-1.94, -9.552, -3.844]
+ Length in each direction: xlength = [5.034000000000001, 7.2330000000000005, 7.019]</code></pre><p><code>m</code> is a structure containing the three vectors with minimum and maximum coordinates, and lengths.</p><article><details class="docstring"><summary id="PDBTools.maxmin"><a class="docstring-binding" href="#PDBTools.maxmin"><code>PDBTools.maxmin</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">maxmin(atoms::AbstractVector{&lt;:Atom}; selection)</code></pre><p>Returns the maximum and minimum coordinates of an atom vector, and the length (maximum minus minimum) in each direction. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; protein = wget(&quot;1LBD&quot;);
+
+julia&gt; maxmin(protein)
+ 
+ Minimum atom coordinates: xmin = [-29.301, 57.178, 45.668]
+ Maximum atom coordinates: xmax = [47.147, 99.383, 86.886]
+ Length in each direction: xlength = [76.448, 42.205, 41.217999999999996]
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/coordinates/maxmin.jl#L10-L28">source</a></section></details></article><h2 id="read-unitcell"><a class="docs-heading-anchor" href="#read-unitcell">Read and convert unit cells</a><a id="read-unitcell-1"></a><a class="docs-heading-anchor-permalink" href="#read-unitcell" title="Permalink"></a></h2><article><details class="docstring"><summary id="PDBTools.read_unitcell"><a class="docstring-binding" href="#PDBTools.read_unitcell"><code>PDBTools.read_unitcell</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">read_unitcell(file::AbstractString)</code></pre><p>Reads the lattice parameters of unitcell from a PDB (<code>CRYST1</code> field) or mmCIF file, and converts it to a unitcell matrix with the <code>lattice_to_matrix</code> function. The unitcell matrix contains the lattice vectors as the <em>columns</em> of the matrix. </p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using PDBTools
+
+julia&gt; m = read_unitcell(PDBTools.TESTPBC)
+3×3 StaticArraysCore.SMatrix{3, 3, Float32, 9} with indices SOneTo(3)×SOneTo(3):
+ 85.0  -3.71547f-6  -3.71547f-6
+  0.0  85.0         -3.71547f-6
+  0.0   0.0         85.
+
+julia&gt; matrix_to_lattice(m)
+(a = 85.0f0, b = 85.0f0, c = 85.0f0, α = 90.0f0, β = 90.0f0, γ = 90.0f0)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/tools/read_unitcell.jl#L1-L22">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.lattice_to_matrix"><a class="docstring-binding" href="#PDBTools.lattice_to_matrix"><code>PDBTools.lattice_to_matrix</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">lattice_to_matrix(a, b, c, α, β, γ)</code></pre><p>Converts unit cell lattice parameters and convert them to a 3x3 unit cell matrix (orthogonalization matrix), where the lattice vectors are the <em>columns</em> of the matrix.</p><p>The resulting matrix has the lattice vectors as its columns, with vector &#39;a&#39; aligned along the x-axis and vector &#39;b&#39; in the xy-plane. This matrix can be used to transform fractional coordinates to Cartesian coordinates.</p><p><strong>Arguments</strong></p><ul><li><code>a::Real</code>: Length of side a in Ångströms.</li><li><code>b::Real</code>: Length of side b in Ångströms.</li><li><code>c::Real</code>: Length of side c in Ångströms.</li><li><code>α::Real</code>: Angle alpha in degrees.</li><li><code>β::Real</code>: Angle beta in degrees.</li><li><code>γ::Real</code>: Angle gamma in degrees.</li></ul><p><strong>Returns</strong></p><ul><li>A 3x3 static matrix representing the unit cell vectors.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/tools/read_unitcell.jl#L69-L92">source</a></section></details></article><article><details class="docstring"><summary id="PDBTools.matrix_to_lattice"><a class="docstring-binding" href="#PDBTools.matrix_to_lattice"><code>PDBTools.matrix_to_lattice</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">matrix_to_lattice(M::AbstractMatrix)</code></pre><p>Converts a 3x3 unit cell matrix where the lattice vectors are the <em>columns</em>, back into the six  lattice parameters (sides a, b, c and angles α, β, γ).</p><p><strong>Arguments</strong></p><ul><li><code>M::AbstractMatrix</code>: A 3x3 matrix where columns are the lattice vectors.</li></ul><p><strong>Returns</strong></p><ul><li><code>NamedTuple</code>: A named tuple containing the six parameters: <code>(a, b, c, α, β, γ)</code>. Lengths are in the matrix&#39;s original units (typically Ångströms), and angles are in degrees.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/m3g/PDBTools.jl/blob/d1e88fb48bb6e1903e1da6547154fe99779fc123/src/tools/read_unitcell.jl#L123-L137">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../sasa/">« Solvent Accessible Area</a><a class="docs-footer-nextpage" href="../mvalue/">Transfer Free Energy »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 25 March 2026 02:34">Wednesday 25 March 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
