@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.23.1-DEV
+Version 3.23.1
 --------------
 - ![FIX][badge-fix] Report the number of *protein* atoms for `CreamerDenaturedModel` show method.
 
