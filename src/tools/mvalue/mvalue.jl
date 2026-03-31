@@ -45,7 +45,7 @@ _AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
     mvalue(
         sasa_initial::SASA{3,<:AbstractVector{<:Atom}},    
         sasa_final::SASA{3,<:AbstractVector{<:Atom}},
-        cosolvent::String;
+        cosolvent::AbstractString;
         sel::Union{String,Function}=all,
         model::Type{<:MValueModel}=AutonBolen,
         backbone::Function = isbackbone,
@@ -60,7 +60,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
 - `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
-- `cosolvent::String`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
+- `cosolvent::AbstractString`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
 
 # Keyword Arguments
 
@@ -80,7 +80,7 @@ A `MValue` object, with fields:
 - `sc::Float32`: Side chain contribution to the m-value (kcal/mol/M).
 - `residue_contributions_bb::Vector{Float32}`: Backbone contributions of each residue to the m-value.
 - `residue_contributions_sc::Vector{Float32}`: Side-chain contributions of each residue to the m-value.
-- `cosolvent::String`: The cosolvent considered.
+- `cosolvent::AbstractString`: The cosolvent considered.
 
 ## Example
 
@@ -106,7 +106,7 @@ mvalue(sasa_initial, sasa_final, "chain A"; model=AutonBolen, cosolvent="TMAO")
 function mvalue(
     sasa_initial::SASA{3,<:AbstractVector{<:Atom}},
     sasa_final::SASA{3,<:AbstractVector{<:Atom}},
-    cosolvent::String;
+    cosolvent::AbstractString;
     sel::Union{String,Function}=all,
     model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,
@@ -180,7 +180,7 @@ as implemented by Auton and Bolen or Moeser and Horinek (https://pubs.acs.org/do
 =#
 function tfe_asa(
     model::Type{<:MValueModel},
-    cosolvent::String,
+    cosolvent::AbstractString,
     restype::AbstractString;
 )
     col = cosolvent_column[cosolvent]

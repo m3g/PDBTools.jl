@@ -35,6 +35,7 @@ struct Select{Q} <: Function
     query_string::String
     query::Q
 end
+Select(query_string::AbstractString, query) = Select(string(query_string), query)
 function Select(query_string::AbstractString)
     query = parse_query(query_string)
     return Select(query_string, query)
@@ -86,7 +87,7 @@ all(atoms) = true
 end
 
 """
-    select(atoms::AbstractVector{<:Atom}, selection_string::String)
+    select(atoms::AbstractVector{<:Atom}, selection_string::AbstractString)
     select(atoms::AbstractVector{<:Atom}, selection_function::Function)
 
 Selects atoms from a vector of atoms using a string query, or a function.
@@ -117,11 +118,11 @@ julia> select(atoms, at -> name(at) == "CA" && 1 < residue(at) < 3)
 function select end
 
 # Main function: receives the atoms vector and a julia function to select
-select(set::AbstractVector{<:Atom}, by::String) = filter(Select(by), set)
+select(set::AbstractVector{<:Atom}, by::AbstractString) = filter(Select(by), set)
 select(set::AbstractVector{<:Atom}, by::Function) = filter(by, set)
 
 # Select indices of atoms (this is identical to findall)
-selindex(set::AbstractVector{<:Atom}, by::String) = findall(Select(by), set)
+selindex(set::AbstractVector{<:Atom}, by::AbstractString) = findall(Select(by), set)
 selindex(set::AbstractVector{<:Atom}, by::Function) = findall(by, set)
 
 # These two methods probably will be deprecated
@@ -187,7 +188,7 @@ end
 (key::MacroKeyword)(s::AbstractVector{<:AbstractString}) = key.getter
 
 #=
-    parse_to_type(key::Keyword, val::String)
+    parse_to_type(key::Keyword, val::AbstractString)
 
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
@@ -254,7 +255,7 @@ const macro_keywords = [
 # while explaining to me how to create a syntax interpreter
 #
 #=
-    has_key(key::String, s::AbstractVector{<:AbstractString})
+    has_key(key::AbstractString, s::AbstractVector{<:AbstractString})
 
 Returns the first index of the vector `s` in which where `key` is found, or 0. 
 
@@ -271,7 +272,7 @@ julia> PDBTools.has_key("and",["name","CA","or","index","1"])
 ```
 
 =#
-function has_key(key::String, s::AbstractVector{<:AbstractString})
+function has_key(key::AbstractString, s::AbstractVector{<:AbstractString})
     i = findfirst(isequal(key), s)
     if isnothing(i)
         0
@@ -281,12 +282,12 @@ function has_key(key::String, s::AbstractVector{<:AbstractString})
 end
 
 #=
-    parse_query(selection:String)
+    parse_query(selection:AbstractString)
 
 Calls `parse_query_vector` after splitting the selection string.
 
 =#
-function parse_query(selection::String) 
+function parse_query(selection::AbstractString) 
     s = replace(selection, "(" => " ( ", ")" => " ) ")
     return parse_query_vector(split(s))
 end
@@ -344,7 +345,7 @@ function is_fully_enclosed(tokens::AbstractVector{<:AbstractString})
     return level == 1
 end
 
-function find_operator_at_level_zero(op_str::String, tokens::AbstractVector{<:AbstractString})
+function find_operator_at_level_zero(op_str::AbstractString, tokens::AbstractVector{<:AbstractString})
     level = 0
     # Find first occurrence from left to right (maintaining current style)
     for i in eachindex(tokens)

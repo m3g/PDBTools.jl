@@ -118,7 +118,7 @@ const elements = Dict{String,Element}([
 const element_names = sort(collect(keys(elements)))
 
 """ 
-    add_element!(symbol::String, reference_element::PDBTools.Element; elements=PDBTools.elements)
+    add_element!(symbol::AbstractString, reference_element::PDBTools.Element; elements=PDBTools.elements)
 
 Add a new element to the elements dictionary. If the element already exists, overwrite it.
 
@@ -155,7 +155,7 @@ Here we repeteadly call `remove_custom_elements!()` to guarantee the proper exec
 test codes, without any custom elements predefined.
 
 """
-function add_element!(symbol::String, reference_element::Element; elements=elements, kargs...)
+function add_element!(symbol::AbstractString, reference_element::Element; elements=elements, kargs...)
     if symbol in keys(elements)
         @warn """\n
             Element $symbol already exists. Overwriting.

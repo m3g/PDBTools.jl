@@ -22,7 +22,7 @@ julia> protein = wget("1LBD","chain A")
 
 ```
 """
-function wget(pdb_id::String, selection::String; format::AbstractString="mmCIF")
+function wget(pdb_id::AbstractString, selection::AbstractString; format::AbstractString="mmCIF")
     return wget(pdb_id, parse_query(selection); format)
 end
 
@@ -50,7 +50,7 @@ function _wget(pdb_id, selection_function::Function; format)
 end
 
 
-function wget(pdb_id::String, selection_function::Function=all; format::Union{AbstractString,Nothing}=nothing)
+function wget(pdb_id::AbstractString, selection_function::Function=all; format::Union{AbstractString,Nothing}=nothing)
     atoms = if format == "PDB"
         _wget(pdb_id, selection_function; format="pdb")
     elseif isnothing(format) || format == "mmCIF"

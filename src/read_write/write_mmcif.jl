@@ -85,7 +85,7 @@ The optional `field_assignment` argument is a dictionary that can be used to ass
 function write_mmcif(
     filename::AbstractString,
     atoms::AbstractVector{<:Atom},
-    selection::String;
+    selection::AbstractString;
     field_assignment::Union{Nothing,Dict{String,Symbol}}=nothing,
 )
     write_mmcif(filename, atoms, parse_query(selection); field_assignment)
