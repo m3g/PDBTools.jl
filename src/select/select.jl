@@ -526,7 +526,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
 end
 
 @testitem "Selections" begin
-
+    using PDBTools
     atoms = read_pdb(PDBTools.TESTPDB)
 
     @test length(select(atoms, "name CA")) == 104
@@ -534,6 +534,8 @@ end
     @test length(sel) == 1
     @test sel[1].index == 13
     @test sel[1].index_pdb == 13
+    @test selindex(atoms, "residue 1") == 1:12
+    @test selindex(atoms, at  -> residue(at) == 1) == 1:12
 
     @test length(select(atoms, "index > 1 and index < 13")) == 11
     @test length(select(atoms, at -> at.index > 1 && at.index < 13)) == 11
