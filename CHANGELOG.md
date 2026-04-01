@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.24.0-DEV
+Version 3.24.0
 --------------
 - ![FEATURE][badge-feature] Support for `AbstractString` instead of `String` in several input signatures, notably for selections and file names.
 
