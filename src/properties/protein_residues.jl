@@ -51,7 +51,7 @@ const protein_residues = OrderedDict{String,ProteinResidue}(
 
 
 """
-    add_protein_residue!(resname::String, reference_residue::PDBTools.ProteinResidue)
+    add_protein_residue!(resname::AbstractString, reference_residue::PDBTools.ProteinResidue)
 
 Function to add a custom protein residue to the list of protein residues. The function will
 return the `ProteinResidue` object that was added. To remove all custom protein residues
@@ -77,7 +77,7 @@ Here we repeatedly call `remove_custom_residues!()` to guarantee the proper exec
 test codes, without any custom residues in the list of protein residues.
 
 """
-function add_protein_residue!(resname::String, reference_residue::PDBTools.ProteinResidue)
+function add_protein_residue!(resname::AbstractString, reference_residue::PDBTools.ProteinResidue)
     if haskey(PDBTools.protein_residues, resname)
         @warn """\n
             Residue $resname already exists in the list of protein residues. Overwriting.

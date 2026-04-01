@@ -1,8 +1,8 @@
 """
-    read_pdb(pdbfile::String, selection::String)
-    read_pdb(pdbfile::String, selection_function::Function = all)
+    read_pdb(pdbfile::AbstractString, selection::AbstractString)
+    read_pdb(pdbfile::AbstractString, selection_function::Function = all)
 
-    read_pdb(pdbdata::IOBuffer, selection::String)
+    read_pdb(pdbdata::IOBuffer, selection::AbstractString)
     read_pdb(pdbdata::IOBuffer, selection_function::Function = all)
 
 Reads a PDB file and stores the data in a vector of type `Atom`. 
@@ -48,7 +48,7 @@ julia> ALA = read_pdb(PDBTools.TESTPDB, atom -> atom.resname == "ALA")
 """
 function read_pdb end
 
-function read_pdb(file::Union{String,IOBuffer}, selection::String)
+function read_pdb(file::Union{String,IOBuffer}, selection::AbstractString)
     return read_pdb(file, parse_query(selection))
 end
 
@@ -57,7 +57,7 @@ function read_pdb(pdbdata::IOBuffer, selection_function::Function=all)
     return atoms
 end
 
-function read_pdb(filename::String, selection_function::Function=all)
+function read_pdb(filename::AbstractString, selection_function::Function=all)
     atoms = open(expanduser(filename), "r") do f
         _parse_pdb(f, selection_function)
     end
@@ -90,7 +90,7 @@ function _parse_pdb(pdbdata::Union{IOStream,IOBuffer}, selection_function::Funct
 end
 
 # read atom from PDB file
-function read_atom_pdb(record::String, lastatom::Atom=Atom{Nothing}(), imodel::Int=1)
+function read_atom_pdb(record::AbstractString, lastatom::Atom=Atom{Nothing}(), imodel::Int=1)
     atom = Atom{Nothing}(; index=index(lastatom) + 1, residue=residue(lastatom), model=imodel, flag=0)
     record[1:6] == "HETATM" && (atom.flag = 1)
     inds_and_names = (
@@ -207,4 +207,14 @@ end
     @test a.index == 1
     @test a.index_pdb == 249388
     @test a.resnum == 65535
+end
+
+@testitem "abstract string" begin
+    file = PDBTools.TESTPDB * "abc"
+    s = read_pdb(@view(file[1:end-3]))
+    @test length(s) == 62026
+    @test length(select(s, @view("resname ALAabc"[1:end-3]))) == 72
+    tmpfile = tempname()
+    write_pdb(tmpfile, s)
+    @test isfile(tmpfile)
 end

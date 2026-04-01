@@ -69,7 +69,7 @@ where the output is a dictionary containing the total, backbone, side-chain, and
 
 ```@docs
 CreamerDenaturedModel
-mvalue(::CreamerDenaturedModel, ::String)
+mvalue(::CreamerDenaturedModel, ::AbstractString)
 ```
 
 # Protein conformational changes

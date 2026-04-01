@@ -19,8 +19,8 @@ function Base.show(io::IO, ::MIME"text/plain", t::TransferFreeEnergy)
 end
 
 """
-    transfer_free_energy(atoms::AbstractVector{<:PDBTools.Atom}, cosolvent::String; kargs...)
-    transfer_free_energy(sasa_atoms::SASA{3,<:AbstractVector{<:Atom}}, cosolvent::String; kargs...)
+    transfer_free_energy(atoms::AbstractVector{<:PDBTools.Atom}, cosolvent::AbstractString; kargs...)
+    transfer_free_energy(sasa_atoms::SASA{3,<:AbstractVector{<:Atom}}, cosolvent::AbstractString; kargs...)
 
 Calculates the transfer free energy (in 1M solution, in `kcal/mol`) using the Tanford transfer model,
 as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
@@ -35,7 +35,7 @@ or
 
 and
 
-- `cosolvent::String`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
+- `cosolvent::AbstractString`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
 
 # Keyword Arguments (optional)
 
@@ -55,7 +55,7 @@ A `TransferFreeEnergy` object, with fields:
 - `sc::Float32`: Side chain contribution to the m-value (kcal/mol/M).
 - `residue_contributions_bb::Vector{Float32}`: Backbone contributions of each residue to the m-value.
 - `residue_contributions_sc::Vector{Float32}`: Side-chain contributions of each residue to the m-value.
-- `cosolvent::STring`: The cosolvent considered.
+- `cosolvent::String`: The cosolvent considered.
 
 ## Example
 
@@ -84,7 +84,7 @@ transfer_free_energy(sasa_prot, "urea")
 """
 function transfer_free_energy(
     atoms::AbstractVector{<:Atom},
-    cosolvent::String;
+    cosolvent::AbstractString;
     parallel=true,
     kargs...
 )
@@ -99,7 +99,7 @@ end
 
 function transfer_free_energy(
     sasa_ats::SASA{3,<:AbstractVector{<:Atom}},
-    cosolvent::String;
+    cosolvent::AbstractString;
     sel::Union{String,Function}=all,
     model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,

@@ -1,8 +1,8 @@
 """
-    read_mmcif(mmCIF_file::String, selection::String; field_assignment)
-    read_mmcif(mmCIF_file::String, selection_function::Function = all, field_assignment)
+    read_mmcif(mmCIF_file::AbstractString, selection::AbstractString; field_assignment)
+    read_mmcif(mmCIF_file::AbstractString, selection_function::Function = all, field_assignment)
 
-    read_mmcif(mmCIF_data::IOBuffer, selection::String; field_assignment)
+    read_mmcif(mmCIF_data::IOBuffer, selection::AbstractString; field_assignment)
     read_mmcif(mmCIF_data::IOBuffer, selection_function::Function = all, field_assignment)
 
 Reads a mmCIF file and stores the data in a vector of type `Atom`. 
@@ -74,7 +74,7 @@ julia> ats = read_mmcif(PDBTools.TESTCIF, at -> name(at) == "CA")
 """
 function read_mmcif end
 
-function read_mmcif(file::Union{String,IOBuffer}, selection::String; kargs...)
+function read_mmcif(file::Union{AbstractString,IOBuffer}, selection::AbstractString; kargs...)
     return read_mmcif(file, parse_query(selection); kargs...)
 end
 
@@ -83,7 +83,7 @@ function read_mmcif(cifdata::IOBuffer, selection_function::Function=all; kargs..
     return atoms
 end
 
-function read_mmcif(filename::String, selection_function::Function=all; kargs...)
+function read_mmcif(filename::AbstractString, selection_function::Function=all; kargs...)
     atoms = open(expanduser(filename), "r") do f
         _parse_mmCIF(f, selection_function; kargs...)
     end

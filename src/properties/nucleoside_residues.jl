@@ -33,7 +33,7 @@ const nucleoside_residues = OrderedDict{String,NucleosideResidue}(
 #! format: on
 
 """
-    add_nucleoside_residue!(resname::String, reference_residue::PDBTools.NucleosideResidue)
+    add_nucleoside_residue!(resname::AbstractString, reference_residue::PDBTools.NucleosideResidue)
 
 Add a custom nucleoside residue to the list of nucleoside residues. Returns the added
 `NucleosideResidue`. Use `remove_custom_nucleoside_residues!()` to undo.
@@ -55,7 +55,7 @@ julia> remove_custom_nucleoside_residues!(); # clean up
 ```
 
 """
-function add_nucleoside_residue!(resname::String, reference_residue::PDBTools.NucleosideResidue)
+function add_nucleoside_residue!(resname::AbstractString, reference_residue::PDBTools.NucleosideResidue)
     if haskey(PDBTools.nucleoside_residues, resname)
         @warn """\n
             Residue $resname already exists in the list of nucleoside residues. Overwriting.

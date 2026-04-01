@@ -1,17 +1,17 @@
 """
-    write_pdb(filename::String, atoms::AbstractVector{<:Atom}, [selection]; header=:auto, footer=:auto, append=false)
+    write_pdb(filename::AbstractString, atoms::AbstractVector{<:Atom}, [selection]; header=:auto, footer=:auto, append=false)
 
 Write a PDB file with the atoms in `atoms` to `filename`. The `selection` argument is a string or function
 that can be used to select a subset of the atoms in `atoms`. For example, `write_pdb("test.pdb", atoms, "name CA")`.
 
 # Arguments
 
-- `filename::String`: The name of the file to write.
+- `filename::AbstractString`: The name of the file to write.
 - `atoms::AbstractVector{<:Atom}`: The atoms to write to the file.
 
 # Optional positional argument 
 
-- `selection::String`: A selection string to select a subset of the atoms in `atoms`.
+- `selection::AbstractString`: A selection string to select a subset of the atoms in `atoms`.
 
 # Keyword arguments
 
@@ -21,9 +21,9 @@ that can be used to select a subset of the atoms in `atoms`. For example, `write
 
 """
 function write_pdb(
-    filename::String,
+    filename::AbstractString,
     atoms::AbstractVector{<:Atom},
-    selection::String;
+    selection::AbstractString;
     header=:auto,
     footer=:auto,
     append=false,
@@ -32,7 +32,7 @@ function write_pdb(
 end
 
 function write_pdb(
-    filename::String, 
+    filename::AbstractString, 
     atoms::AbstractVector{<:Atom},
     selection_function::Function=all;
     append=false,

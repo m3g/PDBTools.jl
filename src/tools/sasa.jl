@@ -303,7 +303,7 @@ julia> sasa(at_sasa[1]) # single atom SASA
 function sasa end
 sasa(p::SASA) = sum(i -> p[i], eachindex(p); init=0.f0)
 sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]); init=0.f0)
-sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::String) where {N} = sasa(p, Select(sel))
+sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {N} = sasa(p, Select(sel))
 
 @testitem "sasa" begin
     using PDBTools

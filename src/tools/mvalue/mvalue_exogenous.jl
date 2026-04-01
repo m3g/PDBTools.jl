@@ -16,7 +16,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `model`: The model to be used. Must be `MoeserHorinek` or `AutonBolen`. `MoeserHorinek` is only implemented for `cosolvent="urea"`,
    and should be more precise in that case. Other solvents are available for `AutonBolen`.
-- `cosolvent::String`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
+- `cosolvent::AbstractString`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
 - `sasas::AbstractDict{String, AbstractDict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the `creamer_delta_sasa` function, the m-value server, or calculated using GROMACS:
@@ -77,7 +77,7 @@ mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sas
 """
 function mvalue_delta_sasa(;
     model::Type{<:MValueModel}=MoeserHorinek,
-    cosolvent::String="urea",
+    cosolvent::AbstractString="urea",
     atoms::AbstractVector{<:PDBTools.Atom}, sasas, type=1
 )
     protein = select(atoms, "protein")
@@ -208,13 +208,13 @@ function parse_mvalue_server_sasa(string::AbstractString)
 end
 
 #=
-    read_gmx_delta_sasa_per_restype_values(filename::String, n)
+    read_gmx_delta_sasa_per_restype_values(filename::AbstractString, n)
 
 Reads the output of `gmx sasa` and returns the SASA values.
 `n` is the number of surfaces calculated (1 for BB only, 2 for SC and BB, for example).
 
 =#
-function read_gmx_delta_sasa_per_restype_values(filename::String, n)
+function read_gmx_delta_sasa_per_restype_values(filename::AbstractString, n)
     local sasa_values
     open(filename, "r") do io
         for line in eachline(io)

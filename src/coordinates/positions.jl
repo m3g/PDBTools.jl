@@ -64,7 +64,7 @@ function positions(atoms::AbstractVector{<:Atom}, selection_function::Function)
     end
     return x
 end
-function positions(atoms::AbstractVector{<:Atom}, selection::String)
+function positions(atoms::AbstractVector{<:Atom}, selection::AbstractString)
     return positions(atoms, parse_query(selection))
 end
 
@@ -73,7 +73,7 @@ end
 # Coordinates of the atoms of a residue/molecule
 #
 positions(residue::Residue, selection_function::Function=all) = positions(residue.atoms[residue.range], selection_function)
-positions(residue::Residue, selection::String) = positions(residue.atoms[residue.range], selection)
+positions(residue::Residue, selection::AbstractString) = positions(residue.atoms[residue.range], selection)
 
 @testitem "positions" begin
     atoms = read_pdb(PDBTools.TESTPDB)
