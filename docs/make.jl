@@ -9,8 +9,8 @@ makedocs(
         PDBTools, 
         isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :Plotting) : PDBTools.Plotting
     ],
+    format = Documenter.HTML(top_menu = true),
     sitename = "PDBTools.jl",
-    top_menu = true,
     pages = [
         "Home" => "index.md",
         "Getting started" => Any[
