@@ -57,6 +57,8 @@ function _supported_write_cif_fields(field_assignment)
     return replace_custom_fields!(_atom_symbol_for_cif_field, field_assignment)
 end
 
+_dot_for_empty(val) = val
+_dot_for_empty(val::AbstractString) = isnothing(findfirst(!isspace, val)) ? "." : val
 function _get_mmcif_field(atom, field_name)
     field_name == :_print_atom && return "ATOM"
     field_name == :_print_dot && return "."
@@ -68,7 +70,7 @@ function _get_mmcif_field(atom, field_name)
         return 3
     end
     if field_name in fieldnames(typeof(atom))
-        return getfield(atom, field_name)
+        return _dot_for_empty(getfield(atom, field_name))
     end
     throw(ArgumentError(":$field_name not found for printing mmcif field in atom"))
 end
