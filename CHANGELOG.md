@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.24.1-DEV
 --------------
+- ![FIX][badge-fix] Missing data is printed as dot in mmCIF files, avoiding missing columns, and the dot is recognized as a missing `pdb_element` field by the `element` function.
 
 Version 3.24.0
 --------------
