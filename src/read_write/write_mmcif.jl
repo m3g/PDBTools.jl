@@ -224,4 +224,10 @@ end
     @test isfile(tmpfile)
     ats_cif = read_mmcif(tmpfile)
     @test all(position(at1) ≈ position(at2) for (at1, at2) in zip(cA, ats_cif))
+
+    at = Atom(name="HC", pdb_element="")
+    write_mmcif(tmpfile, [at])
+    ats = read_mmcif(tmpfile)
+    @test element(ats[1]) == "H"
+
 end
