@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.24.2-DEV
+Version 3.24.2
 --------------
 - ![ENHANCEMENT][badge-enhancement] Improve error message associated with SASA atom types. Fix some typos.
 
