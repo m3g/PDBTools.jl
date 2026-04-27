@@ -28,7 +28,7 @@ julia> getseq(protein, "residue < 3"; code=3)
 ```
 
 """
-function getseq(atoms::AbstractVector{<:Atom}, selection::String; code::Int=1)
+function getseq(atoms::AbstractVector{<:Atom}, selection::AbstractString; code::Int=1)
     return getseq(atoms, parse_query(selection); code)
 end
 

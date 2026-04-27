@@ -994,7 +994,7 @@ julia> element(at)
 function element(atom::Atom)
     # First, check if it was defined in pdb_element
     element_name = pdb_element(atom)
-    if !isempty(element_name) && element_name != "X"
+    if !isempty(element_name) && !(element_name in ("X", "."))
         return StringType(element_name)
     end
     # if there is match, just return the name

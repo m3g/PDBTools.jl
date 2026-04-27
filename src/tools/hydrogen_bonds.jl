@@ -356,7 +356,7 @@ contain Hydrogen atoms.
 
 - `atoms`: Vector of atoms, or structure component (model, chain, segment, residue) to be analyzed.
 and, optionally, the selections or selection pairs for which the hydrogen bonds must be computed:
-- `sel::String`: Selection string, e. g. `"protein"`.
+- `sel::AbstractString`: Selection string, e. g. `"protein"`.
 - `sel1 => sel2::Pair{String,String}`: Pair of selection strings, e. g. `"resname ARG" => "resname GLU"`.
 
 The two selections of each pair, if different, must not have overlapping atoms (and error will the thrown).

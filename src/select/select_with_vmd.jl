@@ -1,6 +1,6 @@
 """ 
-    select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
-    select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing)
+    select_with_vmd(atoms::AbstractVector{<:Atom}, selection::AbstractString; vmd="vmd", srcload=nothing)
+    select_with_vmd(inputfile::AbstractString, selection::AbstractString; vmd="vmd", srcload=nothing)
 
 Select atoms using vmd selection syntax, with vmd in background. The input can be a file or a list of atoms.
 
@@ -9,7 +9,7 @@ Select atoms using vmd selection syntax, with vmd in background. The input can b
 - `atoms::AbstractVector{<:Atom}`: A vector of `PDBTools.Atom` objects to select from. In this case, the
   output will be a vector of `PDBTools.Atom` objects that match the selection.
   
-- `inputfile::String`: Path to the input file (e.g., PDB, PSF, GRO, etc.) or a temporary file containing atom data.
+- `inputfile::AbstractString`: Path to the input file (e.g., PDB, PSF, GRO, etc.) or a temporary file containing atom data.
   In this case, two vectors will be returned: one with the indices of the selected atoms and another with their names.
 
 *The outputs are different in each case because `VMD` supports selections on files like PSF, GRO, etc., which do not 
@@ -17,8 +17,8 @@ carry the full atom information like PDB files do.*
 
 # Additional arguments:
 
-- `selection::String`: A string containing the selection criteria in VMD syntax, e.g., `"protein and residue 1"`.
-- `vmd::String`: The command to run VMD. Default is `"vmd"`, but can be set to the full path if VMD is not in the system PATH.
+- `selection::AbstractString`: A string containing the selection criteria in VMD syntax, e.g., `"protein and residue 1"`.
+- `vmd::AbstractString`: The command to run VMD. Default is `"vmd"`, but can be set to the full path if VMD is not in the system PATH.
 - `srcload::Union{Nothing, AbstractString, Vector{AbstractString}}`: A script or a list of VMD scripts to load before executing the selection,
   for example with macros to define custom selection keywords.
 
@@ -27,7 +27,7 @@ carry the full atom information like PDB files do.*
     If you want to suppress this warning, set `index_warning=false` in the function call.
 
 """
-function select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcload=nothing, index_warning=true)
+function select_with_vmd(inputfile::AbstractString, selection::AbstractString; vmd="vmd", srcload=nothing, index_warning=true)
 
     if index_warning
         if occursin("index", selection)
@@ -119,7 +119,7 @@ function select_with_vmd(inputfile::String, selection::String; vmd="vmd", srcloa
     return selection_indices, selection_names
 end
 
-function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::String; vmd="vmd", srcload=nothing)
+function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::AbstractString; vmd="vmd", srcload=nothing)
     tmp_file = tempname()
     write_pdb(tmp_file, atoms)
     inds, _ = select_with_vmd(tmp_file, selection; vmd=vmd, srcload=srcload)

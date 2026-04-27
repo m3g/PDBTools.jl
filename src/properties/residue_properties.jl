@@ -107,7 +107,7 @@ function _resname(residue; residue_classes=keys(PDBTools.residue_classes))
 end
 
 """
-    threeletter(residue::String; residue_classes=nothing) 
+    threeletter(residue::AbstractString; residue_classes=nothing) 
 
 Function to return the three-letter natural-amino acid or nucleoside residue code from the one-letter 
 code or residue name. The function is case-insensitive.

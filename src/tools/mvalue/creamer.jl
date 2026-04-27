@@ -392,7 +392,7 @@ function Base.show(io::IO, m::CreamerDenaturedModel)
 end
 
 """
-    mvalue(m::CreamerDenaturedModel, cosolvent::String; model=AutonBolen)
+    mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=AutonBolen)
 
 Computes an estimate of the effect of a cosolvent on the m-value of denaturation of a protein.
 
@@ -410,7 +410,7 @@ julia> m.tot
 ```
 
 """
-function mvalue(m::CreamerDenaturedModel, cosolvent::String; model=AutonBolen)
+function mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=AutonBolen)
     return mvalue_delta_sasa(;
         cosolvent=cosolvent,
         model=model,
