@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.24.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Improve error message associated with SASA atom types. Fix some typos.
 
 Version 3.24.1
 --------------
