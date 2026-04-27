@@ -1004,7 +1004,6 @@ function element(atom::Atom)
         return elements[element_name].symbol_string
     end
     # Now try to inferr from the atom name
-    element_name = name(atom)
     if isempty(element_name) || element_name == "X"
         return nothing
     end
@@ -1182,7 +1181,7 @@ function mass(atoms::AbstractVector{<:Atom})
     totmass = 0.0f0
     for at in atoms
         if isnothing(mass(at))
-            throw(ArgumentError("Atom $(name(at)) does not have a mass defined"))
+            throw(ArgumentError("Atom $(name(at)) does not have a mass defined."))
         end
         totmass += mass(at)
     end

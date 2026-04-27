@@ -207,7 +207,7 @@ function sasa_particles(
     output_dots::Bool=false,
     unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
     parallel=true,
-    N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tunned for maximum performance.
+    N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tuned for maximum performance.
 ) where {N}
     probe_radius = Float32(probe_radius)
 
@@ -222,6 +222,10 @@ function sasa_particles(
             throw(ArgumentError("""\n
                 Atom of type $type does not have a vdW radius defined.
                 Use custom `atom_type` and `atom_radius_from_type` input parameters if needed. 
+
+                By default, sasa_particles uses the element of the atom to define the atom type,
+                deducing the element from the atom name. Please verify the provided atom names.
+
             """))
         end
         dot_cache[type] = generate_dots(atom_radius_from_type(type), probe_radius, n_dots)
@@ -324,7 +328,7 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {N
     )
     at_sasa = sasa_particles(prot; n_dots=N, atom_radius_from_type=type -> vmd_radii[type])
     @test sasa(at_sasa) ≈ 5365.55029296875 rtol = 0.01
-    # Accessiblity of groups within the structure
+    # Accessibility of groups within the structure
     @test sasa(at_sasa, "backbone") ≈ 1130.37646484375 rtol = 0.05
     @test sasa(at_sasa, "resname GLU LYS") ≈ 797.8261108398438 rtol = 0.05
     @test sasa(at_sasa, "residue 1") ≈ 124.57905578613281 rtol = 0.05
