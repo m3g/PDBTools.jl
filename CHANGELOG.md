@@ -10,8 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.24.3-DEV
+Version 3.25.0
 --------------
+- ![FEATURE][badge-feature] Make `PDBTools.MacroKeyword`, `PDBTools.Keyword`, `PDBTools.macro_keywords`, and `PDBTools.keyword` public, to allow the user to define custom macros for the selection syntax. 
 
 Version 3.24.2
 --------------
