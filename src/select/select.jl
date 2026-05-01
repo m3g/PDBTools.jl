@@ -4,6 +4,7 @@
 #
 export select, selindex
 export Select, @sel_str
+@compat public MacroKeyword, Keyword, macro_keywords, keywords
 
 """
     Select
@@ -148,7 +149,6 @@ function selindex(set::AbstractVector; by=all)
 end
 
 # Comparison operators
-
 const operators = (
     "=" => (x, y) -> isequal(x, y),
     "<" => (x, y) -> isless(x, y),
@@ -160,12 +160,29 @@ const operators = (
 #
 # Keywords
 #
+"""
+    PDBTools.Keyword(ValueType::Type, name::String, getter::Function)
+
+Structure that defines a keyword of the selection syntax.
+Here we illustrate how to select atom from the definition of a custom
+charge field. 
+
+```julia
+import PDBTools: keywords, Keyword
+charges = rand(length(pdb))
+pdb_charges = add_custom_field.(pdb, charges) # add charge values to custom field
+push!(keywords, Keyword(Float64, "new_charge", at -> at.custom));
+select(pdb_charges, "new_charge < 0.5") # will select all atom custom field < 0.5
+```
+
+"""
 struct Keyword{F<:Function}
     ValueType::Type
     name::String
     getter::F
     operators::Tuple
 end
+Keyword(T::Type, name::String, getter::Function) = Keyword(T, name, getter, operators)
 
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
     (; getter, operators) = key
@@ -181,6 +198,24 @@ end
 #
 # Macro keywords (functions without parameters)
 #
+"""
+    PDBTools.MacroKeyword(name::String, getter::Function)
+
+Structrure that carries the string name and function that defines a macro keyword for 
+string selection syntax. 
+
+To add a new string macro keyword, use, for example:
+
+```julia
+import PDBTools: macro_keywords, MacroKeyword
+push!(macro_keywords, MacroKeyword("glycerol", at -> resname(at) == "GLYC"));
+select(pdb, "glycerol") # will select all atoms with resname == GLYC
+```
+
+where we added the "glycerol" macro to the selection syntax, associated with the 
+`at -> resname(at) == "GLYC"` function.
+
+"""
 struct MacroKeyword{F<:Function}
     name::String
     getter::F
@@ -210,24 +245,38 @@ end
 #
 # Keywords for PDBTools
 #
+"""
+    PDBTools.keywords
+
+Vector of `Keyword` objects, defining the the string macros of the selection syntax.
+Can be incremented by `push!`ing new `Keyword` objects. 
+
+"""
 const keywords = [
-    Keyword(Int, "index", index, operators),
-    Keyword(Int, "index_pdb", index_pdb, operators),
-    Keyword(Int, "resnum", resnum, operators),
-    Keyword(Int, "residue", residue, operators),
-    Keyword(Float64, "beta", beta, operators),
-    Keyword(Float64, "occup", occup, operators),
-    Keyword(Float64, "x", at -> getfield(at, :x), operators),
-    Keyword(Float64, "y", at -> getfield(at, :y), operators),
-    Keyword(Float64, "z", at -> getfield(at, :z), operators),
-    Keyword(Int, "model", model, operators),
-    Keyword(String, "name", name, operators),
-    Keyword(String, "segname", segname, operators),
-    Keyword(String, "resname", resname, operators),
-    Keyword(String, "chain", chain, operators),
-    Keyword(String, "element", element, operators),
+    Keyword(Int, "index", index),
+    Keyword(Int, "index_pdb", index_pdb),
+    Keyword(Int, "resnum", resnum),
+    Keyword(Int, "residue", residue),
+    Keyword(Float64, "beta", beta),
+    Keyword(Float64, "occup", occup),
+    Keyword(Float64, "x", at -> getfield(at, :x)),
+    Keyword(Float64, "y", at -> getfield(at, :y)),
+    Keyword(Float64, "z", at -> getfield(at, :z)),
+    Keyword(Int, "model", model),
+    Keyword(String, "name", name),
+    Keyword(String, "segname", segname),
+    Keyword(String, "resname", resname),
+    Keyword(String, "chain", chain),
+    Keyword(String, "element", element),
 ]
 
+"""
+    PDBTools.macro_keywords
+
+Vector of `MacroKeyword` objects, defining the the string macros of the selection syntax.
+Can be incremented by `push!`ing new `MacroKeyword` objects. 
+
+"""
 const macro_keywords = [
     MacroKeyword("water", iswater),
     MacroKeyword("protein", isprotein),
@@ -645,5 +694,12 @@ end
     @test resname.(eachresidue(lessresidues)) == ["ALA", "CYS", "SER", "SER"]
     @test chain.(eachresidue(lessresidues)) == ["A", "A", "A", "A"]
     @test model.(eachresidue(lessresidues)) == [1, 1, 1, 1]
+
+    # Add custom keywords and macro_keywords
+    pdb_c = [ add_custom_field(at, name(at) == "CA" ? 1.0 : 0.0) for at in atoms] 
+    push!(PDBTools.keywords, PDBTools.Keyword(Float64, "new_charge", at -> at.custom))
+    @test length(select(pdb_c, "new_charge > 0.5")) == 104
+    push!(PDBTools.macro_keywords, PDBTools.MacroKeyword("new_charged", at -> at.custom > 0.0))
+    @test (length(select(pdb_c, "new_charged"))) == 104
 
 end # testitem

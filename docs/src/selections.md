@@ -189,6 +189,107 @@ input, and returns `true` or `false` depending on the conditions required for th
     `ishydrophobic`,
     `isnucleoside`,  `ispurine`,      `ispyrimidine`.
 
+## Adding custom keywords and macro-keywords
+
+The selection syntax can be extended with user-defined keywords and macro-keywords.
+This is useful, for example, when atoms carry custom fields (see [Custom fields](@ref custom-atom-fields))
+and you want to select atoms based on those values, or define new short identifier for new
+residue names or combinations of properties.
+
+```@docs
+PDBTools.Keyword
+PDBTools.keywords
+PDBTools.MacroKeyword
+PDBTools.macro_keywords
+``` 
+
+### Custom keywords
+
+A `Keyword` associates a string token with a getter function that extracts a value from
+an atom. Once registered, the keyword supports all comparison operators (`=`, `<`, `>`,
+`<=`, `>=`) as well as implicit equality and multi-value `or` shorthand.
+
+The constructor is:
+
+```julia
+PDBTools.Keyword(ValueType::Type, name::String, getter::Function)
+```
+
+where `ValueType` is the type of the value returned by `getter` (`Int`, `Float64`, or
+`String`), `name` is the token that will appear in the selection string, and `getter` is
+a one-argument function that receives an `Atom` and returns the value.
+
+To register the new keyword, push it into `PDBTools.keywords`:
+
+```julia
+using PDBTools
+
+# Build a vector of atoms that carry a custom "charge" field
+atoms = read_pdb("file.pdb")
+charges = rand(length(atoms))
+atoms_charged = add_custom_field.(atoms, charges)
+
+# Register the new keyword
+push!(PDBTools.keywords, PDBTools.Keyword(Float64, "custom_charge", at -> at.custom))
+
+# Now use it in selections
+select(atoms_charged, "custom_charge < 0.5")
+select(atoms_charged, "custom_charge >= 0.8")
+```
+
+### Custom macro-keywords
+
+A `MacroKeyword` associates a string token with a boolean predicate on an atom.
+Unlike a `Keyword`, it takes no arguments in the selection string — it simply evaluates
+to `true` or `false` for each atom.
+
+The constructor is:
+
+```julia
+PDBTools.MacroKeyword(name::String, getter::Function)
+```
+
+where `name` is the token and `getter` is a one-argument function that receives an `Atom`
+and returns a `Bool`.
+
+To register the new macro-keyword, push it into `PDBTools.macro_keywords`:
+
+```julia
+using PDBTools
+atoms = read_pdb("file.pdb")
+
+# Register a macro keyword that selects glycerol molecules
+push!(PDBTools.macro_keywords, PDBTools.MacroKeyword("glycerol", at -> resname(at) == "GLYC"))
+
+# Use it in selections, alone or combined with other keywords
+select(atoms, "glycerol")
+select(atoms, "glycerol and name O1")
+```
+
+### Combining with custom fields
+
+A common pattern is to attach per-atom numerical data as a custom field and then
+filter with a custom `Keyword`:
+
+```julia
+using PDBTools
+
+atoms = read_pdb("file.pdb")
+scores = rand(length(atoms)) # one score per atom
+atoms_scored = add_custom_field.(atoms, scores)
+
+push!(PDBTools.keywords, PDBTools.Keyword(Float64, "score", at -> at.custom))
+
+high_score = select(atoms_scored, "score > 0.9")
+```
+
+!!! note
+    The custom keywords and macro-keywords added to `PDBTools.keywords` and
+    `PDBTools.macro_keywords` persist for the lifetime of the Julia session.
+    Adding them more than once (e.g. in a loop) will register duplicate entries.
+    Check the current content of the vectors with, for example,
+    `[k.name for k in PDBTools.keywords]` before pushing.
+
 ## Using VMD
 
 [VMD](https://www.ks.uiuc.edu/Research/vmd/) is a very popular and
