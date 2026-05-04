@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.25.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Improve allocations and performance of contact map computation.
 - ![ENHANCEMENT][badge-enhancement] Improve allocations and performance of SASA computation.
 
 Version 3.25.0
