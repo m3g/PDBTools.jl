@@ -241,6 +241,32 @@ function sasa_particles(
         parallel=parallel,
     )
 
+    # Compute sasa (function barrier for specialization on the output type)
+    return _compute_sasa_particles(
+        system,
+        atoms,
+        n_dots,
+        dot_cache,
+        output_dots,
+        atom_type,
+        atom_radius_from_type,
+        probe_radius,
+        N_SIMD,
+    )
+end
+
+function _compute_sasa_particles(
+    system,
+    atoms,
+    n_dots,
+    dot_cache,
+    output_dots,
+    atom_type,
+    atom_radius_from_type,
+    probe_radius,
+    N_SIMD,
+)
+
     pairwise!(
         (pair, surface_dots) -> update_pair_dot_exposure!(
                 pair, surface_dots;
