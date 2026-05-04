@@ -347,6 +347,29 @@ function contact_map(
         output_name=:map_matrix,
         parallel=parallel,
     )
+    # function barrier for specialization on sys type
+    return _compute_contact_map(
+        T,
+        sys,
+        residues,
+        map_matrix,
+        index_residue,
+        gap,
+        discrete,
+        dmax,
+    )
+end
+
+function _compute_contact_map(
+    T,
+    sys,
+    residues,
+    map_matrix,
+    index_residue,
+    gap,
+    discrete,
+    dmax,
+)
     CellListMap.map_pairwise!(
         (x, y, i, j, d2, map_matrix) -> update_map_matrix(i, j, d2, map_matrix, index_residue, gap, discrete),
         sys
@@ -406,6 +429,31 @@ function contact_map(
         output_name=:map_matrix,
         parallel=parallel,
     )
+    # function barrier for specialization on sys type
+    return _compute_contact_map2(
+        T,
+        sys,
+        map_matrix,
+        index_residue1,
+        index_residue2,
+        discrete,
+        residues1,
+        residues2,
+        dmax,
+    )
+end
+
+function _compute_contact_map2(
+    T,
+    sys,
+    map_matrix,
+    index_residue1,
+    index_residue2,
+    discrete,
+    residues1,
+    residues2,
+    dmax,
+)
     CellListMap.map_pairwise!(
         (x, y, i, j, d2, map_matrix) -> update_map_matrix(i, j, d2, map_matrix, index_residue1, index_residue2, discrete),
         sys
