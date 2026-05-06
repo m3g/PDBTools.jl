@@ -59,6 +59,7 @@ end
 @testitem "ramachandran plots" begin
     using PDBTools
     using Plots
+    ENV["GKSwstype"] = "nul"
     tmpplot = tempname()*".png"
     prot = read_pdb(PDBTools.TESTPDB, "protein")
     ram = Ramachandran(prot)

@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.25.2-DEV
 --------------
+- ![INFO][badge-info] Requires CellListMap 0.10.0.
 
 Version 3.25.1
 --------------

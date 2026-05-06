@@ -110,6 +110,7 @@ function heatmap(
 end
 
 @testitem "contact plots" begin
+    ENV["GKSwstype"] = "nul"
     using PDBTools
     using Plots
     tmpplot = tempname() * ".png"
