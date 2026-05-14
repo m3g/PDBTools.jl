@@ -48,18 +48,50 @@ julia> ALA = read_pdb(PDBTools.TESTPDB, atom -> atom.resname == "ALA")
 """
 function read_pdb end
 
-function read_pdb(file::Union{String,IOBuffer}, selection::AbstractString)
-    return read_pdb(file, parse_query(selection))
+function _switch_to_mmcif(pdbdata::Union{IOStream, IOBuffer})
+    switch = false
+    for line in eachline(pdbdata)
+        if startswith(line, "loop_")
+            switch = true
+            break
+        else
+            try
+                if startswith(line, r"ATOM|HETATM")
+                    read_atom_pdb(line)
+                    break
+                end
+            catch
+                @warn "Failed reading ATOM line in PDB format, trying mmCIF reader." _line = nothing _file = nothing
+                switch = true
+                break
+            end
+        end
+    end
+    seekstart(pdbdata)
+    return switch
 end
 
-function read_pdb(pdbdata::IOBuffer, selection_function::Function=all)
-    atoms = _parse_pdb(pdbdata, selection_function)
+read_pdb(pdbdata::IOBuffer, selection::AbstractString; kargs...) =
+    read_pdb(file, parse_query(selection); kargs...)
+read_pdb(file::AbstractString, selection::AbstractString; kargs...) =
+    read_pdb(file, parse_query(selection); kargs...)
+
+function read_pdb(pdbdata::IOBuffer, selection_function::Function=all; kargs...)
+    atoms = if _switch_to_mmcif(pdbdata) 
+        _parse_mmCIF(pdbdata, selection_function; kargs...)
+    else
+        _parse_pdb(pdbdata, selection_function)
+    end
     return atoms
 end
 
-function read_pdb(filename::AbstractString, selection_function::Function=all)
+function read_pdb(filename::AbstractString, selection_function::Function=all; kargs...)
     atoms = open(expanduser(filename), "r") do f
-        _parse_pdb(f, selection_function)
+        if _switch_to_mmcif(f)
+            _parse_mmCIF(f, selection_function; kargs...)
+        else
+            _parse_pdb(f, selection_function)
+        end
     end
     return atoms
 end
@@ -217,4 +249,14 @@ end
     tmpfile = tempname()
     write_pdb(tmpfile, s)
     @test isfile(tmpfile)
+end
+
+@testitem "switch to mmCIF" begin
+    p1 = read_mmcif(PDBTools.CIF_2C_CHAIN)
+    p2 = read_pdb(PDBTools.CIF_2C_CHAIN)
+    @test p1 == p2
+
+    p1 = read_mmcif(PDBTools.TESTCIF)
+    p2 = read_pdb(PDBTools.TESTCIF)
+    @test p1 == p2
 end
