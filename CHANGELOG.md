@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.26.1-DEV
+--------------
+
 Version 3.26.0
 --------------
 - ![FEATURE][badge-feature] `read_pdb` auto-detects if a file is of `mmCIF/PDBx` format and switches the parser. Therefore, `read_pdb` can be used instead of `read_mmcif` on all structures.
