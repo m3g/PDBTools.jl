@@ -5,12 +5,20 @@
     read_pdb(pdbdata::IOBuffer, selection::AbstractString)
     read_pdb(pdbdata::IOBuffer, selection_function::Function = all)
 
-Reads a PDB file and stores the data in a vector of type `Atom`. 
+Reads a PDB file (in legacy PDB or mmCIF/PDBx formats) and stores the data in a vector of type `Atom`. 
 
 If a selection is provided, only the atoms matching the selection will be read. 
 For example, `resname ALA` will select all the atoms in the residue ALA.
 
 If a selection function keyword is provided, only the atoms for which `selection_function(atom)` is true will be read.
+
+The function automatically detects mmCIF format and switches to the mmCIF reader if the `loop_` keyword is found in the file, 
+or if an `ATOM`/`HETATM` line cannot be parsed in PDB format.
+
+When reading an mmCIF file, the following keyword arguments are forwarded to the mmCIF reader:
+- `field_assignment::Union{Nothing,Dict{String,Symbol}} = nothing`: custom mapping from mmCIF `_atom_site` field names to `Atom` fields. See [`read_mmcif`](@ref) for details.
+- `memory_available::Real = 0.8`: fraction of available memory the reader is allowed to use.
+- `stop_at = nothing`: stop reading after this many atoms (useful for large files).
 
 ### Examples
 
@@ -48,18 +56,50 @@ julia> ALA = read_pdb(PDBTools.TESTPDB, atom -> atom.resname == "ALA")
 """
 function read_pdb end
 
-function read_pdb(file::Union{String,IOBuffer}, selection::AbstractString)
-    return read_pdb(file, parse_query(selection))
+function _switch_to_mmcif(pdbdata::Union{IOStream, IOBuffer})
+    switch = false
+    for line in eachline(pdbdata)
+        if startswith(line, "loop_")
+            switch = true
+            break
+        else
+            try
+                if startswith(line, r"ATOM|HETATM")
+                    read_atom_pdb(line)
+                    break
+                end
+            catch
+                @warn "Failed reading ATOM line in PDB format, trying mmCIF reader." _line = nothing _file = nothing
+                switch = true
+                break
+            end
+        end
+    end
+    seekstart(pdbdata)
+    return switch
 end
 
-function read_pdb(pdbdata::IOBuffer, selection_function::Function=all)
-    atoms = _parse_pdb(pdbdata, selection_function)
+read_pdb(pdbdata::IOBuffer, selection::AbstractString; kargs...) =
+    read_pdb(pdbdata, parse_query(selection); kargs...)
+read_pdb(file::AbstractString, selection::AbstractString; kargs...) =
+    read_pdb(file, parse_query(selection); kargs...)
+
+function read_pdb(pdbdata::IOBuffer, selection_function::Function=all; kargs...)
+    atoms = if _switch_to_mmcif(pdbdata) 
+        _parse_mmCIF(pdbdata, selection_function; kargs...)
+    else
+        _parse_pdb(pdbdata, selection_function)
+    end
     return atoms
 end
 
-function read_pdb(filename::AbstractString, selection_function::Function=all)
+function read_pdb(filename::AbstractString, selection_function::Function=all; kargs...)
     atoms = open(expanduser(filename), "r") do f
-        _parse_pdb(f, selection_function)
+        if _switch_to_mmcif(f)
+            _parse_mmCIF(f, selection_function; kargs...)
+        else
+            _parse_pdb(f, selection_function)
+        end
     end
     return atoms
 end
@@ -139,6 +179,12 @@ end
     @test length(atoms) == 104
     atoms = read_pdb(pdb_file, at -> isprotein(at) && name(at) == "CA")
     @test length(atoms) == 104
+
+    cif_file = PDBTools.TESTCIF
+    pdbdata = read(cif_file, String)
+    atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
+    atoms_ref = read_mmcif(cif_file, "protein and name CA")
+    @test atoms == atoms_ref
 end
 
 @testitem "read_atom_pdb" begin
@@ -217,4 +263,14 @@ end
     tmpfile = tempname()
     write_pdb(tmpfile, s)
     @test isfile(tmpfile)
+end
+
+@testitem "switch to mmCIF" begin
+    p1 = read_mmcif(PDBTools.CIF_2C_CHAIN)
+    p2 = read_pdb(PDBTools.CIF_2C_CHAIN)
+    @test p1 == p2
+
+    p1 = read_mmcif(PDBTools.TESTCIF)
+    p2 = read_pdb(PDBTools.TESTCIF)
+    @test p1 == p2
 end

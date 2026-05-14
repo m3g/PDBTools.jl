@@ -237,6 +237,8 @@ end
     @test_throws ArgumentError PDBTools._supported_read_cif_fields(field_assignment)
     @test length(read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)) == 8
     @test length(read_mmcif(PDBTools.LONG_NAME_STRING_CIF)) == 1
+    @test length(read_pdb(PDBTools.LONG_CHAIN_STRING_CIF)) == 8
+    @test length(read_pdb(PDBTools.LONG_NAME_STRING_CIF)) == 1
 end
 
 function _new_cif_token(line)
@@ -342,7 +344,7 @@ end
     ats = read_mmcif(PDBTools.TESTCIF, "resname HOH")
     @test length(ats) == 5
 
-    # peformance tests for innner functions for reading cif fields into Atoms
+    # performance tests for inner functions for reading cif fields into Atoms
     record = "ATOM   1    N  N   . VAL A 1 1   ? 6.204   16.869  4.854   1.00 49.05 ? 1   VAL A N   1"
     inds_and_names = ((2, Val{:index_pdb}()), (4, Val{:name}()), (6, Val{:resname}()), (7, Val{:chain}()), (9, Val{:resnum}()), (11, Val{:x}()), (12, Val{:y}()), (13, Val{:z}()), (14, Val{:occup}()), (15, Val{:beta}()), (16, Val{:charge}()), (17, Val{:resnum}()), (18, Val{:resname}()), (19, Val{:chain}()), (20, Val{:name}()), (21, Val{:model}()))
     lastatom = Atom()
@@ -376,6 +378,15 @@ end
     @test resnum.(filter(iswater, ats0)) == Int32[60, 61, 62, 63, 64]
     @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0]
 
+    ats1 = read_pdb(PDBTools.TESTCIF; field_assignment)
+    @test all(name.(ats1) .== pdb_element.(ats0))
+    @test all(resname.(ats1) .== resname.(ats0))
+    @test all(chain.(ats1) .== chain.(ats0))
+    @test all(resnum.(filter(isprotein, ats1)) .== resnum.(filter(isprotein, ats0)))
+    @test resnum.(filter(iswater, ats0)) == Int32[60, 61, 62, 63, 64]
+    @test resnum.(filter(iswater, ats1)) == Int32[0, 0, 0, 0, 0]
+
     # Throw error if no ATOM fields were found
-    @test_throws ArgumentError read_mmcif(PDBTools.BROKENCIF)
+    @test_throws "no ATOM or HETATM fields" read_mmcif(PDBTools.BROKENCIF)
+    @test_throws "no ATOM or HETATM fields" read_pdb(PDBTools.BROKENCIF)
 end

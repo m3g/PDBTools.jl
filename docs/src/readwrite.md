@@ -2,26 +2,24 @@
 CollapsedDocStrings = true
 ```
 
-# Read and write files
+# Read and Write
 
-PDBTools can read and write `PDB` and `mmCIF` files. The relevant functions are:
+## Read PDB/mmCIF files
 
 ```@docs
 read_pdb
-read_mmcif
 ```
 
-!!! note 
-    In the following examples, the `read_pdb` function will be illustrated. The usage is
-    similar to that of `read_mmcif`, to read `mmCIF (PDBx)` files. 
-
-## Read a PDB/mmCIF file
-
-To read a PDB file and return a vector of atoms of
+To read a PDB or mmCIF file and return a vector of atoms of
 type `Atom`, do:
 ```@example read_write
 using PDBTools
 atoms = read_pdb(PDBTools.test_dir*"/structure.pdb")
+```
+
+The format is detected automatically, so the same function can be used for mmCIF files:
+```julia
+atoms = read_pdb("structure.cif")
 ```
 
 `Atom{Nothing}` is the default structure of data containing the atom index, name,
@@ -51,22 +49,28 @@ Atom
     ```
     The same is valid for the `write` function, below. 
 
-## Write a PDB/mmCIF file
+!!! note
+    Since version 3.26.0, `read_pdb` automatically detects mmCIF format by checking for the `loop_` keyword or
+    by falling back to the mmCIF reader when an `ATOM`/`HETATM` line cannot be parsed in
+    PDB format. It is therefore the recommended function for reading both `PDB` and `mmCIF` files.
+    The `read_mmcif` function is kept for backwards compatibility only.
+
+## Write PDB/mmCIF files
 
 To write a PDB file use the `write_pdb` function, as:
 
 ```julia
 write_pdb("file.pdb", atoms)
 ```
-where `atoms` contain a list of atoms with the `Atom` structures.
+where `atoms` is a list of atoms with the `Atom` structure.
 
 ```@docs
 write_pdb
 write_mmcif
 ```
 
-The use of the `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section
-is possible in the call to `write_mmcif`. 
+The `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section,
+can also be used with `write_mmcif`.
 
 ## Get structure from the Protein Data Bank
 
@@ -82,6 +86,9 @@ atoms = wget("1LBD","name CA")
 ```
 
 ## [Atom field assignment in mmCIF files](@id field_assignment)
+
+When reading an mmCIF file — either directly or via `read_pdb` with auto-detection — the `field_assignment` keyword
+can be used to customize how `_atom_site` fields are mapped to `Atom` fields.
 
 By default, the assignment of the `_atom_site` fields of the mmCIF format to the fields of the `Atom` data structure 
 follows the [standard mmCIF convention](https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html):
@@ -104,19 +111,19 @@ Dict{String,Symbol}(
 )
 ```
 
-This assignment can be customized by providing the `field_assignment` keyword parameter to the `read_mmcif` function. 
-In the following example, we exemplify the possibility of reading `_atom_site.type_symbol` field of the mmCIF file into the `name` field of the
+This assignment can be customized by providing the `field_assignment` keyword to `read_pdb` (or `read_mmcif`).
+In the following example, we illustrate reading the `_atom_site.type_symbol` field of the mmCIF file into the `name` field of the
 atom data structure:
 
 ```@example read_write
-atoms = read_mmcif(PDBTools.test_dir*"/small.cif", "index <= 5");
+atoms = read_pdb(PDBTools.test_dir*"/small.cif", "index <= 5");
 name.(atoms)
 ```
 
 If, however, we attribute the `name` field to the `type_symbol` mmCIF field, which contains the element symbols, we get:
 
 ```@example read_write
-atoms = read_mmcif(PDBTools.TESTCIF, "index <= 5"; 
+atoms = read_pdb(PDBTools.TESTCIF, "index <= 5"; 
    field_assignment=Dict("type_symbol" => :name)
 )
 name.(atoms)
@@ -124,16 +131,15 @@ name.(atoms)
 
 The custom entries set in the `field_assignment` keyword will overwrite the default 
 assignments for entries sharing keys or fields. For instance, in the example above,
-the `label_atom_id` fields which is by default assigned to `:name` is not being read
-anymore.
+the `label_atom_id` field, which is by default assigned to `:name`, is no longer read.
 
-# Read from string buffer
+## Read from string buffer
 
-In some cases a PDB file data may be available as a string and not a regular file. For example,
-when reading the output of a zipped file. In these cases, it is possible to obtain the array
-of atoms by reading directly the string buffer with, for example:
+In some cases, file data may be available as a string rather than a regular file — for example,
+when reading from a zipped archive. In these cases, the atom array can be obtained by wrapping
+the string in an `IOBuffer`.
 
-The following `read` returns a string with the PDB file data, not parsed, to exemplify:
+The following `read` call returns the raw PDB file contents as a string:
 ```@example read_write
 pdbdata = read(PDBTools.test_dir*"/small.pdb", String);
 ```
@@ -166,8 +172,8 @@ julia> printatom(atoms[1])
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    ABCD         1
 ```
 
-Additionally, With the `edit!` function, you can directly edit or view the data in a
-vector of `Atoms` in your preferred text editor. 
+Additionally, with the `edit!` function, you can directly edit or view the data in a
+vector of atoms in your preferred text editor.
 
 ```julia-repl
 julia> edit!(atoms)
@@ -205,6 +211,16 @@ segname
 charge
 pdb_element
 get_atoms
+```
+
+## Backwards compatibility: `read_mmcif`
+
+The `read_mmcif` function is kept for backwards compatibility. It reads mmCIF files explicitly
+and supports the `field_assignment` keyword. For new code, prefer `read_pdb`, which detects
+the format automatically.
+
+```@docs
+read_mmcif
 ```
 
 
