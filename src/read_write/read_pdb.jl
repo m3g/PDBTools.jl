@@ -179,6 +179,12 @@ end
     @test length(atoms) == 104
     atoms = read_pdb(pdb_file, at -> isprotein(at) && name(at) == "CA")
     @test length(atoms) == 104
+
+    cif_file = PDBTools.TESTCIF
+    pdbdata = read(cif_file, String)
+    atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
+    atoms_ref = read_mmcif(cif_file, "protein and name CA")
+    @test atoms == atoms_ref
 end
 
 @testitem "read_atom_pdb" begin
