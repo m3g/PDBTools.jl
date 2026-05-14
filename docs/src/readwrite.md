@@ -2,21 +2,11 @@
 CollapsedDocStrings = true
 ```
 
-# Read and write files
-
-PDBTools can read and write `PDB` and `mmCIF` files. The relevant functions are:
+## Read a PDB/mmCIF file
 
 ```@docs
 read_pdb
 ```
-
-!!! note
-    `read_pdb` automatically detects mmCIF format by checking for the `loop_` keyword or
-    by falling back to the mmCIF reader when an `ATOM`/`HETATM` line cannot be parsed in
-    PDB format. It is therefore the recommended function for reading both `PDB` and `mmCIF` files.
-    The `read_mmcif` function is kept for backwards compatibility only.
-
-## Read a PDB/mmCIF file
 
 To read a PDB or mmCIF file and return a vector of atoms of
 type `Atom`, do:
@@ -56,6 +46,12 @@ Atom
     arginines = read_pdb("file.pdb", atom -> atom.resname == "ARG")
     ```
     The same is valid for the `write` function, below. 
+
+!!! note
+    Since version 3.26.0, `read_pdb` automatically detects mmCIF format by checking for the `loop_` keyword or
+    by falling back to the mmCIF reader when an `ATOM`/`HETATM` line cannot be parsed in
+    PDB format. It is therefore the recommended function for reading both `PDB` and `mmCIF` files.
+    The `read_mmcif` function is kept for backwards compatibility only.
 
 ## Write a PDB/mmCIF file
 
