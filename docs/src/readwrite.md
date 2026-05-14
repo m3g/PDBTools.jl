@@ -8,20 +8,26 @@ PDBTools can read and write `PDB` and `mmCIF` files. The relevant functions are:
 
 ```@docs
 read_pdb
-read_mmcif
 ```
 
-!!! note 
-    In the following examples, the `read_pdb` function will be illustrated. The usage is
-    similar to that of `read_mmcif`, to read `mmCIF (PDBx)` files. 
+!!! note
+    `read_pdb` automatically detects mmCIF format by checking for the `loop_` keyword or
+    by falling back to the mmCIF reader when an `ATOM`/`HETATM` line cannot be parsed in
+    PDB format. It is therefore the recommended function for reading both `PDB` and `mmCIF` files.
+    The `read_mmcif` function is kept for backwards compatibility only.
 
 ## Read a PDB/mmCIF file
 
-To read a PDB file and return a vector of atoms of
+To read a PDB or mmCIF file and return a vector of atoms of
 type `Atom`, do:
 ```@example read_write
 using PDBTools
 atoms = read_pdb(PDBTools.test_dir*"/structure.pdb")
+```
+
+The format is detected automatically, so the same function can be used for mmCIF files:
+```julia
+atoms = read_pdb("structure.cif")
 ```
 
 `Atom{Nothing}` is the default structure of data containing the atom index, name,
@@ -65,8 +71,18 @@ write_pdb
 write_mmcif
 ```
 
-The use of the `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section
-is possible in the call to `write_mmcif`. 
+The use of the `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section,
+is possible in the call to `write_mmcif`.
+
+## Backwards compatibility: `read_mmcif`
+
+The `read_mmcif` function is kept for backwards compatibility. It reads mmCIF files explicitly
+and supports the `field_assignment` keyword. For new code, prefer `read_pdb`, which detects
+the format automatically.
+
+```@docs
+read_mmcif
+```
 
 ## Get structure from the Protein Data Bank
 
@@ -82,6 +98,9 @@ atoms = wget("1LBD","name CA")
 ```
 
 ## [Atom field assignment in mmCIF files](@id field_assignment)
+
+When reading an mmCIF file — either directly or via `read_pdb` with auto-detection — the `field_assignment` keyword
+can be used to customise how `_atom_site` fields are mapped to `Atom` fields.
 
 By default, the assignment of the `_atom_site` fields of the mmCIF format to the fields of the `Atom` data structure 
 follows the [standard mmCIF convention](https://mmcif.wwpdb.org/docs/tutorials/content/atomic-description.html):
@@ -104,19 +123,19 @@ Dict{String,Symbol}(
 )
 ```
 
-This assignment can be customized by providing the `field_assignment` keyword parameter to the `read_mmcif` function. 
+This assignment can be customized by providing the `field_assignment` keyword parameter to `read_pdb` (or `read_mmcif`).
 In the following example, we exemplify the possibility of reading `_atom_site.type_symbol` field of the mmCIF file into the `name` field of the
 atom data structure:
 
 ```@example read_write
-atoms = read_mmcif(PDBTools.test_dir*"/small.cif", "index <= 5");
+atoms = read_pdb(PDBTools.test_dir*"/small.cif", "index <= 5");
 name.(atoms)
 ```
 
 If, however, we attribute the `name` field to the `type_symbol` mmCIF field, which contains the element symbols, we get:
 
 ```@example read_write
-atoms = read_mmcif(PDBTools.TESTCIF, "index <= 5"; 
+atoms = read_pdb(PDBTools.TESTCIF, "index <= 5"; 
    field_assignment=Dict("type_symbol" => :name)
 )
 name.(atoms)

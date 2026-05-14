@@ -5,12 +5,20 @@
     read_pdb(pdbdata::IOBuffer, selection::AbstractString)
     read_pdb(pdbdata::IOBuffer, selection_function::Function = all)
 
-Reads a PDB file and stores the data in a vector of type `Atom`. 
+Reads a PDB file (in legacy PDB or mmCIF/PDBx formats) and stores the data in a vector of type `Atom`. 
 
 If a selection is provided, only the atoms matching the selection will be read. 
 For example, `resname ALA` will select all the atoms in the residue ALA.
 
 If a selection function keyword is provided, only the atoms for which `selection_function(atom)` is true will be read.
+
+The function automatically detects mmCIF format and switches to the mmCIF reader if the `loop_` keyword is found in the file, 
+or if an `ATOM`/`HETATM` line cannot be parsed in PDB format.
+
+When reading an mmCIF file, the following keyword arguments are forwarded to the mmCIF reader:
+- `field_assignment::Union{Nothing,Dict{String,Symbol}} = nothing`: custom mapping from mmCIF `_atom_site` field names to `Atom` fields. See [`read_mmcif`](@ref) for details.
+- `memory_available::Real = 0.8`: fraction of available memory the reader is allowed to use.
+- `stop_at = nothing`: stop reading after this many atoms (useful for large files).
 
 ### Examples
 
@@ -72,7 +80,7 @@ function _switch_to_mmcif(pdbdata::Union{IOStream, IOBuffer})
 end
 
 read_pdb(pdbdata::IOBuffer, selection::AbstractString; kargs...) =
-    read_pdb(file, parse_query(selection); kargs...)
+    read_pdb(pdbdata, parse_query(selection); kargs...)
 read_pdb(file::AbstractString, selection::AbstractString; kargs...) =
     read_pdb(file, parse_query(selection); kargs...)
 
