@@ -60,7 +60,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
 - `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
-- `cosolvent::AbstractString`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
+- `cosolvent::AbstractString`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinek))) .* '"'; by=lowercase),", ")) (case insensitive).
 
 # Keyword Arguments
 
@@ -170,6 +170,9 @@ function mvalue(
     return MValue{model}(length(residues_initial), tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cosolvent)
 end
 
+tfe_sc_bb(::Type{MoeserHorinek}) = tfe_sc_bb_moeser_and_horinek
+tfe_sc_bb(::Type{AutonBolen}) = tfe_sc_bb_auton_and_bolen
+
 #=
     tfe_asa(::Type{Urea}, restype::AbstractString)
 
@@ -182,22 +185,23 @@ function tfe_asa(
     model::Type{<:MValueModel},
     cosolvent::AbstractString,
     restype::AbstractString;
+    tfe_sc_bb = tfe_sc_bb(model),
 )
-    col = cosolvent_column[cosolvent]
+    col = cosolvent_column(model)[cosolvent]
     if model == MoeserHorinek
         # united model: all bb ASA contributions are the same
-        bb_contribution = tfe_sc_bb_moeser_and_horinek["BB"][col] / first(isolated_ASA["GLY"])
+        bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"
             0.0f0
         else
-            tfe_sc_bb_moeser_and_horinek[restype][col] / last(isolated_ASA[restype])
+            tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
         end
     elseif model == AutonBolen
-        bb_contribution = tfe_sc_bb_auton_and_bolen["BB"][col] / first(isolated_ASA[restype])
+        bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA[restype])
         sc_contribution = if restype == "GLY"
             0.0f0
         else
-            sc_contribution = tfe_sc_bb_auton_and_bolen[restype][col] / last(isolated_ASA[restype])
+            sc_contribution = tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
         end
     end
     # convert to kcal / nm^2 and return
