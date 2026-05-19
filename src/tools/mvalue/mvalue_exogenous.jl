@@ -16,7 +16,7 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `model`: The model to be used. Must be `MoeserHorinek` or `AutonBolen`. `MoeserHorinek` is only implemented for `cosolvent="urea"`,
    and should be more precise in that case. Other solvents are available for `AutonBolen`.
-- `cosolvent::AbstractString`: One of $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", "))
+- `cosolvent::AbstractString`.
 - `atoms::AbstractVector{<:PDBTools.Atom}`: Vector containing the atoms of the structure.
 - `sasas::AbstractDict{String, AbstractDict{Symbol, Float64}}`: A dictionary containing the change in solvent accessible surface area (SASA)
   upon denaturation for each amino acid type. This data can be obtained from the `creamer_delta_sasa` function, the m-value server, or calculated using GROMACS:
@@ -28,6 +28,8 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 - `type::Int`: Specifies which SASA value to use from the provided data, because the server provides minimum, average, and maximum values,
     according to different denatured models for the protein. The recommended value is `2` for comparison with experimental data.
     Normally, GROMACS calculations will provide a single value, so `type=1` should be used in that case.
+
+$(_available_cosolvents())
 
 # Returns
 

@@ -1,14 +1,23 @@
 import ChunkSplitters
 
 export mvalue
-export MoeserHorinek, AutonBolen
+export MoeserHorinek, AutonBolen, MoeserHorinekFit
 
 abstract type MValueModel end
 struct MoeserHorinek <: MValueModel end
 struct AutonBolen <: MValueModel end
+struct MoeserHorinekFit <: MValueModel end
 
 include("./data.jl")
 
+# Available-cosolvents string for docstring entries:
+_available_cosolvents() = """ 
+Available cosolvents are, for each model:
+
+- `MoeserHorinek`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinek))) .* '"'; by=lowercase),", ")) 
+- `AutonBolen`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(AutonBolen))) .* '"'; by=lowercase),", ")) 
+- `MoeserHorinekFit`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinekFit))) .* '"'; by=lowercase),", ")) 
+"""
 struct MValue{T}
     nresidues::Int
     tot::Float32
@@ -60,12 +69,14 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 - `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
 - `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
-- `cosolvent::AbstractString`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinek))) .* '"'; by=lowercase),", ")) (case insensitive).
+- `cosolvent::AbstractString`: The cosolvent to consider (case insensitive).
+
+$(_available_cosolvents())
 
 # Keyword Arguments
 
 - `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
-- `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
+- `model::Type{<:MValueModel}=AutonBolen`. 
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
@@ -170,9 +181,6 @@ function mvalue(
     return MValue{model}(length(residues_initial), tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cosolvent)
 end
 
-tfe_sc_bb(::Type{MoeserHorinek}) = tfe_sc_bb_moeser_and_horinek
-tfe_sc_bb(::Type{AutonBolen}) = tfe_sc_bb_auton_and_bolen
-
 #=
     tfe_asa(::Type{Urea}, restype::AbstractString)
 
@@ -187,8 +195,8 @@ function tfe_asa(
     restype::AbstractString;
     tfe_sc_bb = tfe_sc_bb(model),
 )
-    col = cosolvent_column(model)[cosolvent]
-    if model == MoeserHorinek
+    col = cosolvent_column(model)[lowercase(cosolvent)]
+    if model in (MoeserHorinek, MoeserHorinekFit)
         # united model: all bb ASA contributions are the same
         bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"

@@ -35,7 +35,9 @@ or
 
 and
 
-- `cosolvent::AbstractString`: The cosolvent to consider. One of: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column)) .* '"'; by=lowercase),", ")) (case insensitive).
+- `cosolvent::AbstractString`: The cosolvent to consider. 
+
+$(_available_cosolvents())
 
 # Keyword Arguments (optional)
 
