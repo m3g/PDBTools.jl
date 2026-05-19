@@ -1,6 +1,6 @@
 # PDBTools.jl
 
-A lightweight and flexible Julia package for handling structure files with ease.
+A Lightweight and High-Performance Julia Package for Molecular Structure File Handling and Analysis.
 
 ## Installation
 
@@ -70,4 +70,10 @@ Use of Julia functions for selection can also improve performance if dynamic sel
     - Basic PDB/mmCIF file manipulation
 
     For comprehensive PDB/mmCIF format support, check out [BioStructures.jl](https://github.com/BioJulia/BioStructures.jl) from [BioJulia](https://github.com/BioJulia).
+
+## Citation
+
+If this package was useful in a scientific publication, please cite:
+
+- L. Martínez and A. B. B. Lima, **PDBTools.jl: A Lightweight and High-Performance Julia Package for Molecular Structure File Handling and Analysis**, *J. Chem. Inf. Model.* 2026 [[Full Text]](https://doi.org/10.1021/acs.jcim.6c00847).
   
