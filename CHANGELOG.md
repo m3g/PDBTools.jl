@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.26.1-DEV
 --------------
+- ![FEATURE][badge-feature] Add `MoeserHorinekFit` parameterizations, which introduce the Gly-activity correction to all models, by fitting the apparent TFEs to obtain the total predicted TFEs of Auton&Bolen.
 
 Version 3.26.0
 --------------
