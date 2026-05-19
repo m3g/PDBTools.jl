@@ -26,6 +26,9 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 [weakdeps]
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
+[sources]
+Documenter = {rev = "top_menu_from_pages", url = "https://github.com/lmiq/Documenter.jl"}
+
 [extensions]
 Plotting = "Plots"
 
@@ -71,7 +74,3 @@ TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
 test = ["Test", "TestItemRunner", "StaticArrays", "Aqua", "Documenter", "DelimitedFiles", "Plots", "ShowMethodTesting", "Chairmarks"]
-
-[sources]
-Documenter = {rev = "top_menu_from_pages", url = "https://github.com/lmiq/Documenter.jl"}
-
