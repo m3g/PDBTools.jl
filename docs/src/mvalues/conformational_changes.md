@@ -42,5 +42,5 @@ And with that get an image (here produced with VMD) of the contributions of the 
 to the transfer free energies:
 
 ```@raw html
-<img src="../assets/mvalue.png" width=30%>
+<img src="../../assets/mvalue.png" width=30%>
 ```
