@@ -466,6 +466,11 @@ end
         Side-chain contributions: 0.4451674 kcal mol⁻¹
         """
 
+    # Test transfer free energy computed with MoeserHorinekFit model
+    t = transfer_free_energy(p, "urea"; model=MoeserHorinekFit)
+    @test t.tot ≈ 1e-3*server_result["urea"].tot atol=0.5
+    @test t.bb ≈ t.sc atol=0.2
+
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
