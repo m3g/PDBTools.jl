@@ -473,6 +473,7 @@ end
     @test_throws "non-protein residue" transfer_free_energy(s, "urea")
 
     # Test available cossolvents string, for all solvents
+    using InteractiveUtils: subtypes
     @test all(occursin(model_name,PDBTools._available_cosolvents()) for model_name in string.(subtypes(PDBTools.MValueModel)))
 
 end
