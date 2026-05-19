@@ -474,6 +474,7 @@ end
 
     # Test available cossolvents string, for all solvents
     using InteractiveUtils: subtypes
-    @test all(occursin(model_name,PDBTools._available_cosolvents()) for model_name in string.(subtypes(PDBTools.MValueModel)))
+    models = replace.(string.(subtypes(PDBTools.MValueModel)), "PDBTools." => "")
+    @test all(occursin(model_name,PDBTools._available_cosolvents()) for model_name in models)
 
 end
