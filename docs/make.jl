@@ -28,8 +28,13 @@ makedocs(
             "Solvent Accessible Area" => "sasa.md",
             "Coordinate manipulations" => "coordinates.md"
         ],
-        "m-values" => Any[
-            "Transfer Free Energy" => "mvalue.md",
+        "Transfer Free Energy" => Any[
+            "Transfer Free Energy" => "mvalues/mvalue.md",
+            "Protein Denaturation" => "mvalues/protein_denaturation.md",
+            "Conformational Changes" => "mvalues/conformational_changes.md",
+            "Cofactor Binding" => "mvalues/cofactor_binding.md",
+            "MoeserHorinekFit Model" => "mvalues/moeserhorinek_fit.md",
+            "Alternative Calculations" => "mvalues/alternative_mvalues.md",
         ],
         "Other" => Any[
             "Auxiliary functions" => "auxiliary.md",

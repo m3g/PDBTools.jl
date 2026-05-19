@@ -12,7 +12,7 @@ include("./data.jl")
 
 # Available-cosolvents string for docstring entries:
 _available_cosolvents() = """ 
-Available cosolvents are, for each model:
+Available models and cosolvents for each model:
 
 - `MoeserHorinek`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinek))) .* '"'; by=lowercase),", ")) 
 - `AutonBolen`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(AutonBolen))) .* '"'; by=lowercase),", ")) 

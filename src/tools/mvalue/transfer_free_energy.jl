@@ -41,7 +41,7 @@ $(_available_cosolvents())
 
 # Keyword Arguments (optional)
 
-- `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. Either `MoeserHorinek` or `AutonBolen`.
+- `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. 
 - `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
