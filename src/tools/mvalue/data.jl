@@ -140,8 +140,10 @@ const cosolvent_column_MoeserHorinekFit = Dict(
 )
 cosolvent_column(::Type{MoeserHorinekFit}) = cosolvent_column_MoeserHorinekFit
 
-#                 TMAO    Sarcosine     Betaine     Proline    Sorbitol    Sucrose       Urea
-const γG =   ( 48.1006,    27.4219,     35.625,    25.8594,    18.4863,   33.1836,     14.078)
+# These where obtained by minmizing the sum of squared residues relative to AutonBolen predictions
+# using: BlackBoxOptim.jl - BlackBoxOptim.AdaptiveDiffEvoRandBin{3}
+#               TMAO  Sarcosine   Betaine    Proline    Sorbitol    Sucrose       Urea
+const γG =   ( 47.74,     27.57,    35.57,     25.44,      18.57,     32.91,     14.74)
 
 const tfe_sc_bb_MoeserHorinekFit = Dict{String, NTuple{7,Float32}}(
 #                TMAO    Sarcosine     Betaine     Proline    Sorbitol    Sucrose       Urea 

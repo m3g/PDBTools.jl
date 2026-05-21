@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.27.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Update glycine non-ideality corrections in `MoeserHorinekFit` model, after exhaustive fitting.
 
 Version 3.27.0
 --------------
