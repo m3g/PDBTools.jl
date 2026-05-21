@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.27.2-DEV
+--------------
+
 Version 3.27.1
 --------------
 - ![ENHANCEMENT][badge-enhancement] Update glycine non-ideality corrections in `MoeserHorinekFit` model, after exhaustive fitting.
