@@ -260,6 +260,7 @@ end
     end
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
+    # http://best.bio.jhu.edu/mvalue/
     data_mvalue_server_auton_and_bolen_1MJC = Dict(
         "tmao" => (224, 1160, 2095),
         "sarcosine" => (406, 1010, 1614),
@@ -434,10 +435,10 @@ end
         "sarcosine" => (bb=2065, sc=-715, tot=1349),
         "betaine" => (bb=2660, sc=-3334, tot=-674),
         "proline" => (bb=1906, sc=-2207, tot=-301),
-        #"Glycerol" => (bb=556, sc=-1093, tot=-537),
+        "Glycerol" => (bb=556, sc=-1093, tot=-537),
         "sorbitol" => (bb=1390, sc=-1011, tot=379),
         "sucrose" => (bb=2462, sc=-1698, tot=764),
-        #"Trehalose" => (bb=2462, sc=-1341, tot=1121),
+        "Trehalose" => (bb=2462, sc=-1341, tot=1121),
         "urea" => (bb=-1548, sc=445, tot=-1104),
     )
     p = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
