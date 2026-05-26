@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.28.0-DEV
+Version 3.28.0
 --------------
 - ![FEATURE][badge-feature] Add data tables for `trehalose` and `glycerol` for the computation of transfer free energies with `AutonBolen` and `MoeserHorinekFit` models.
 
