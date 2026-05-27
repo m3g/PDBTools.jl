@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.29.1-DEV
+--------------
+
 Version 3.29.0
 --------------
 - ![FEATURE][badge-feature] Add `:cath_s20` and `:original` (default - unchanged) options to `creamer_sasas` and `CreamerDenaturedModel`, to use the parameterization of the denatured SASAs from the original or CATH S20 model sets. 
