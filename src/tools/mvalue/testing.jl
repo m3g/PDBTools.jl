@@ -467,10 +467,13 @@ end
         Side-chain contributions: 0.4451674 kcal mol⁻¹
         """
 
-    # Test transfer free energy computed with MoeserHorinekFit model
-    t = transfer_free_energy(p, "urea"; model=MoeserHorinekFit)
-    @test t.tot ≈ 1e-3*server_result["urea"].tot atol=0.5
-    @test t.bb ≈ t.sc atol=0.2
+    # add tests for MoeserHorinekApp model
+    cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
+    for c in filter(!=("urea"), keys(PDBTools.cosolvent_column(MoeserHorinekApp)))
+        c_ab = mvalue(mc, c; model=AutonBolen)
+        c_mhapp = mvalue(mc, c; model=MoeserHorinekApp)
+        @test c_ab.tot ≈ c_mhapp.tot atol=0.25
+    end
 
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")

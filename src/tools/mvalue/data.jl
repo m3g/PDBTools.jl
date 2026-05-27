@@ -125,55 +125,55 @@ const tfe_sc_bb_AutonBolen = Dict{String,NTuple{10,Float32}}(
 )
 tfe_sc_bb(::Type{AutonBolen}) = tfe_sc_bb_AutonBolen
 
+#=
 
+Here we have the apparent GTFEs reported by Auton and Bolen in
+Supplementary Table 1 of https://doi.org/10.1073/pnas.0507053102
 
-#
-# MoserHorinekFit consists of parameters to be used in the Moeser&Horinek model, but with Gly transfer free energy
-# corrections that are obtained by fitting the predicted m-values of the Auton&Bolen model.
-#
+However, we apply the universal backbone description of Moeser and Horinek, but without the error 
+compensation of Gly-activity that they applied. 
+
+# Compute proper universal backbone side-chain TFEs
+# GTFE^UB_aa = GTFE^est_aa + TFE_bb × (1 - ASA^bb_aa / 88.1)
+
+=#
 
 # Do not user underscores (_) in the following names:
-const cosolvent_column_MoeserHorinekFit = Dict(
+const cosolvent_column_MoeserHorinekApp = Dict(
     "tmao" => 1,
-    "sarcosine"=> 2,    
-    "betaine"=> 3,    
-    "proline" => 4,    
-    "sorbitol" => 5,   
+    "sarcosine"=> 2,
+    "betaine"=> 3,
+    "proline" => 4,
+    "sorbitol" => 5,
     "sucrose" => 6,
     "urea" => 7,
-    "glycerol" => 8, 
-    "trehalose" => 9, 
+    "glycerol" => 8,
+    "trehalose" => 9,
 )
-cosolvent_column(::Type{MoeserHorinekFit}) = cosolvent_column_MoeserHorinekFit
+cosolvent_column(::Type{MoeserHorinekApp}) = cosolvent_column_MoeserHorinekApp
 
-# These where obtained by minmizing the sum of squared residues relative to AutonBolen predictions
-# using: BlackBoxOptim.jl - BlackBoxOptim.AdaptiveDiffEvoRandBin{3}
-#               TMAO  Sarcosine   Betaine    Proline    Sorbitol    Sucrose       Urea    Glycerol   Threalose
-const γG =   ( 47.74,     27.57,    35.57,     25.44,      18.57,     32.91,     14.74,      7.41,       32.93)
-
-const tfe_sc_bb_MoeserHorinekFit = Dict{String, NTuple{9,Float32}}(
-#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose       Urea   Glycerol  Trehalose
-    "ALA" => ( -14.64,      10.91,       4.77,      -0.07,      16.57,      22.05,    -4.69,      7.76,     33.25) .+ γG,
-    "PHE" => (  -9.32,     -12.64,    -112.93,     -71.26,      26.38,     -96.35,   -83.11,     59.77,    -17.88) .+ γG,
-    "LEU" => (  11.62,      38.33,     -17.73,       4.77,      39.07,      37.11,   -54.57,    -34.42,     96.18) .+ γG,
-    "ILE" => ( -25.43,      39.98,      -1.27,      -2.72,      36.90,      28.12,   -38.43,     36.23,     79.66) .+ γG,
-    "VAL" => (  -1.02,      29.32,     -19.63,       7.96,      24.65,      33.92,   -21.65,     -1.37,     96.79) .+ γG,
-    "PRO" => (-137.73,     -34.23,    -125.16,     -63.96,      -4.48,     -73.02,   -17.65,    -60.55,    -94.67) .+ γG,
-    "MET" => (  -7.65,       8.18,     -14.16,     -35.12,      20.97,      -6.66,   -48.34,     13.87,     29.19) .+ γG,
-    "TRP" => (-152.87,    -113.03,    -369.93,    -198.37,     -67.23,    -215.27,  -141.46,   -122.65,   -206.30) .+ γG,
-    "GLY" => (      0,          0,          0,          0,          0,          0,     0.00,      0.00,      0.00),
-    "SER" => ( -39.04,     -27.98,     -41.85,     -33.49,      -1.58,      -2.79,   -20.56,      6.31,     -0.98) .+ γG,
-    "THR" => (   3.57,      -7.54,       0.33,     -18.33,      13.20,      20.82,   -22.09,     17.53,     26.32) .+ γG,
-    "TYR" => (-114.32,     -26.37,    -213.09,    -138.41,     -53.50,     -78.41,   -45.08,   -149.50,    -80.32) .+ γG,
-    "GLN" => (  41.41,     -10.19,       7.57,     -32.26,     -23.98,     -40.87,   -54.81,     -2.76,    -36.34) .+ γG,
-    "ASN" => (  55.69,     -40.93,      33.17,     -17.71,     -21.21,     -28.28,   -38.79,     51.57,     48.67) .+ γG,
-    "ASP" => ( -66.67,     -14.20,    -116.56,     -90.51,     -83.88,     -37.17,     3.55,    -85.46,    -96.54) .+ γG,
-    "GLU" => ( -83.25,     -12.61,    -112.08,     -89.17,     -70.05,     -41.65,     0.62,    -74.20,    -85.92) .+ γG,
-    "HIS" => (  42.07,     -20.80,     -35.97,     -45.10,     -42.45,    -118.66,   -50.51,    -17.17,    -98.75) .+ γG,
-    "LYS" => (-110.23,     -27.42,    -171.99,     -59.87,     -32.47,     -39.60,   -22.76,    -34.01,    -50.07) .+ γG,
-    "ARG" => (-109.27,     -32.24,    -109.45,     -60.18,     -24.65,     -79.32,   -21.17,    -30.74,    -50.33) .+ γG,
-    "CYS" => (      0,          0,          0,          0,          0,          0,     0.00,      0.00,      0.00), # not reported
-    "BB"  => (     90,         52,         67,         48,         35,         62,      -39,        14,        62),
+const tfe_sc_bb_MoeserHorinekApp = Dict{String,NTuple{9,Float32}}(
+#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose    UreaAPP    Glycerol  Trehalose
+    "ALA" => (   28.16,      35.64,      36.63,      22.76,      33.22,      51.54,    -23.24,     14.42,     62.74),
+    "PHE" => (   41.45,      16.69,     -75.13,     -44.18,      46.12,     -61.37,   -105.11,     67.67,     17.10),
+    "LEU" => (   65.56,      69.49,      22.42,      33.54,      60.05,      74.27,    -77.94,    -26.03,    133.34),
+    "ILE" => (   33.00,      73.74,      42.23,      28.44,      59.62,      68.37,    -63.75,     45.32,    119.91),
+    "VAL" => (   52.10,      60.01,      19.92,      36.29,      45.31,      70.51,    -44.67,      6.89,    133.38),
+    "PRO" => (  -84.10,      -3.24,     -85.23,     -35.36,      16.38,     -36.07,    -40.89,    -52.21,    -57.72),
+    "MET" => (   42.92,      37.40,      23.48,      -8.15,      40.64,      28.18,    -70.25,     21.74,     64.03),
+    "TRP" => ( -101.08,     -83.10,    -331.37,    -170.75,     -47.09,    -179.59,   -163.90,   -114.59,   -170.62),
+    "GLY" => (    0.00,       0.00,       0.00,       0.00,       0.00,       0.00,      0.00,      0.00,      0.00),
+    "SER" => (    6.01,      -1.95,      -8.31,      -9.46,      15.94,      28.25,    -40.08,     13.32,     30.06),
+    "THR" => (   54.85,      22.09,      38.51,       9.02,      33.14,      56.15,    -44.31,     25.51,     61.65),
+    "TYR" => (  -63.85,       2.79,    -175.52,    -111.50,     -33.87,     -43.64,    -66.95,   -141.65,    -45.55),
+    "GLN" => (   92.79,      19.50,      45.82,      -4.85,      -4.00,      -5.47,    -77.08,      5.23,     -0.94),
+    "ASN" => (  104.62,     -12.66,      69.60,       8.39,      -2.18,       5.43,    -59.99,     59.18,     82.38),
+    "ASP" => (  -18.04,      13.90,     -80.36,     -64.58,     -64.97,      -3.67,    -17.52,    -77.90,    -63.04),
+    "GLU" => (  -31.87,      17.08,     -73.83,     -61.76,     -50.07,      -6.25,    -21.65,    -66.21,    -50.52),
+    "HIS" => (   90.80,       7.35,       0.31,     -19.11,     -23.50,     -85.09,    -71.63,     -9.59,    -65.18),
+    "LYS" => (  -59.76,       1.74,    -134.42,     -32.96,     -12.84,      -4.83,    -44.63,    -26.16,    -15.30),
+    "ARG" => (  -59.21,      -3.32,     -72.19,     -33.48,      -5.18,     -44.84,    -42.86,    -22.95,    -15.85),
+    "CYS" => (   46.48,      26.86,      34.60,      24.79,      18.08,      32.02,    -20.14,      7.23,     32.02), # not reported in App; correction applied to zero
+    "BB"  => (      90,         52,         67,         48,         35,         62,       -39,        14,        62),
 )
-tfe_sc_bb(::Type{MoeserHorinekFit}) = tfe_sc_bb_MoeserHorinekFit
-
+tfe_sc_bb(::Type{MoeserHorinekApp}) = tfe_sc_bb_MoeserHorinekApp
