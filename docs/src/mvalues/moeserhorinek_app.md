@@ -8,7 +8,7 @@ The `MoeserHorinekApp` model applies the Moeser & Horinek universal backbone to 
 recalculating the side-chain transfer free energies (SC TFEs) consistently with the universal backbone. No
 glycine-activity correction is applied.
 
-**Background.** In the established transfer model (TM), the side-chain TFE of residue *aa* is obtained as:
+**Background.** In the Auton&Bolen transfer model (TM), the side-chain TFE of residue *aa* is obtained as:
 
 ```math
 \Delta G^\text{est}_\text{sc}(aa) = \text{TFE}_{aa} - \text{TFE}_\text{Gly}
@@ -19,9 +19,10 @@ is 88.1 Å² and the backbone contribution per unit ASA in the universal backbon
 ``\text{TFE}_\text{bb} / 88.1``. For any other residue, however, the backbone ASA ``A^\text{bb}_{aa} \neq 88.1``
 Å², so the backbone contribution is ``A^\text{bb}_{aa} \times \text{TFE}_\text{bb} / 88.1``, which is
 **not** equal to ``\text{TFE}_\text{Gly}`` (unless the residue is glycine itself). The apparent GTFEapp values
-thus embed an incorrect backbone subtraction for every non-glycine residue.
+thus embed an physically unjustified backbone subtraction for every non-glycine residue.
 
-**Correction.** The proper universal-backbone SC TFE is:
+**Correction.** The proper universal-backbone SC TFE proposed by Moeser&Horinek, which leads to a universal backbone
+contribution for all residues is:
 
 ```math
 \Delta G^\text{UB}_\text{sc}(aa) = \text{TFE}_{aa} - A^\text{bb}_{aa} \times \frac{\text{TFE}_\text{bb}}{88.1}
@@ -37,7 +38,7 @@ This correction is amino-acid-specific. For example (urea, ``\text{TFE}_\text{bb
 | Ile | 30.9 | +25.3 |
 
 The `MoeserHorinekApp` model applies this residue-specific correction to the GTFEapp values from Auton & Bolen,
-uses the universal backbone (``A^\text{bb}_{aa} \times \text{TFE}_\text{bb} / 88.1``), and does **not** apply
+uses the universal backbone (``A^\text{bb}_{aa} \times \text{TFE}_\text{bb} / 88.1``), and *does not* apply
 any glycine-activity correction. As a result, for urea specifically, `MoeserHorinekApp` is less accurate than
 `MoeserHorinek`, which includes the Gly-activity correction derived by Moeser & Horinek (2014).
 
