@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.28.1-DEV
 --------------
+- ![FEATURE][badge-feature] Add `:cath_s20` and `:original` (default - unchanged) options to `creamer_sasas` and `CreamerDenaturedModel`, to use the parameterization of the denatured SASAs from the original or CATH S20 model sets. 
+- ![ENHANCEMENT][badge-enhancement] The `delta_sasa` of `CreamerDenaturedModel` is computed upon construction, avoiding repeated evaluations if mvalues are computed for the same model in different cosolvents. 
 
 Version 3.28.0
 --------------
