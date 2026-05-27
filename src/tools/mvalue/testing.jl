@@ -467,11 +467,11 @@ end
         Side-chain contributions: 0.4451674 kcal mol⁻¹
         """
 
-    # add tests for MoeserHorinekApp model
+    # Tests for MoeserHorinekApp model
     cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
     for c in filter(!=("urea"), keys(PDBTools.cosolvent_column(MoeserHorinekApp)))
-        c_ab = mvalue(mc, c; model=AutonBolen)
-        c_mhapp = mvalue(mc, c; model=MoeserHorinekApp)
+        c_ab = mvalue(cm, c; model=AutonBolen)
+        c_mhapp = mvalue(cm, c; model=MoeserHorinekApp)
         @test c_ab.tot ≈ c_mhapp.tot atol=0.25
     end
 
