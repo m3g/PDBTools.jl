@@ -16,7 +16,7 @@ transfer_free_energy
 mvalue
 ```
 
-Here we implement the Moeser/Horinek, Auton/Bolen, and a version of Moeser/Horinek with Gly-non-ideality corrections ([see this section](@ref mh_gly)) models.
+Here we implement the Moeser/Horinek for urea, Auton/Bolen, and a version of Moeser/Horinek without Gly-non-ideality corrections for other cosolvents ([see this section](@ref mh_app)) models.
 ([1](https://doi.org/10.1021/jp409934q), 
 [2](https://doi.org/10.1016/s0076-6879(07)28023-1), 
 [3](https://www.pnas.org/doi/10.1073/pnas.0706251104)). 

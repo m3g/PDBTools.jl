@@ -10,8 +10,10 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.29.1-DEV
+Version 3.30.0-DEV
 --------------
+- ![FEATURE][badge-feature] Add `MoeserHorinekApp` model to use the Gly-activity free `MoeserHorinek` model.
+- ![BREAKING][badge-breaking] This is breaking but is also sort of a bug fix: the `MoeserHorinekFit` model was discontinued, because it was not physically meaningful. 
 
 Version 3.29.0
 --------------

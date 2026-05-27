@@ -1,12 +1,12 @@
 import ChunkSplitters
 
 export mvalue
-export MoeserHorinek, AutonBolen, MoeserHorinekFit
+export MoeserHorinek, AutonBolen, MoeserHorinekApp
 
 abstract type MValueModel end
 struct MoeserHorinek <: MValueModel end
 struct AutonBolen <: MValueModel end
-struct MoeserHorinekFit <: MValueModel end
+struct MoeserHorinekApp <: MValueModel end
 
 include("./data.jl")
 
@@ -16,8 +16,10 @@ Available models and cosolvents for each model:
 
 - `MoeserHorinek`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinek))) .* '"'; by=lowercase),", ")) 
 - `AutonBolen`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(AutonBolen))) .* '"'; by=lowercase),", ")) 
-- `MoeserHorinekFit`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinekFit))) .* '"'; by=lowercase),", ")) 
+- `MoeserHorinekApp`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinekApp))) .* '"'; by=lowercase),", ")) 
+
 """
+
 struct MValue{T}
     nresidues::Int
     tot::Float32
@@ -196,7 +198,7 @@ function tfe_asa(
     tfe_sc_bb = tfe_sc_bb(model),
 )
     col = cosolvent_column(model)[lowercase(cosolvent)]
-    if model in (MoeserHorinek, MoeserHorinekFit)
+    if model in (MoeserHorinek, MoeserHorinekApp)
         # united model: all bb ASA contributions are the same
         bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"
