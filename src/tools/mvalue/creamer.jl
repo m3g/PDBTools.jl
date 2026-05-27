@@ -214,7 +214,7 @@ function creamer_atom_type(at::Atom)
     """)))
 end
 
-const creamer_sasas = OrderedDict{
+const creamer_sasas_original = OrderedDict{
     String,
     @NamedTuple{bb_lower::Float32, bb_upper::Float32, sc_lower::Float32, sc_upper::Float32}
 }(
@@ -240,6 +240,46 @@ const creamer_sasas = OrderedDict{
     "VAL" => (bb_lower=15.9, bb_upper=24.9, sc_lower=81.8, sc_upper=110.9),
 )
 
+const creamer_sasas_cath_s20 = OrderedDict{
+    String,
+    @NamedTuple{bb_lower::Float32, bb_upper::Float32, sc_lower::Float32, sc_upper::Float32}
+}(
+    "ALA" => (bb_lower=21.1, bb_upper=38.2, sc_lower=43.1, sc_upper=57.7),
+    "ARG" => (bb_lower=18.3, bb_upper=33.9, sc_lower=147.0, sc_upper=164.1),
+    "ASN" => (bb_lower=19.2, bb_upper=35.1, sc_lower=83.8, sc_upper=94.5),
+    "ASP" => (bb_lower=19.2, bb_upper=35.1, sc_lower=78.3, sc_upper=89.0),
+    "CYS" => (bb_lower=20.6, bb_upper=36.8, sc_lower=51.9, sc_upper=70.7),
+    "GLN" => (bb_lower=17.2, bb_upper=33.7, sc_lower=102.4, sc_upper=117.1),
+    "GLU" => (bb_lower=17.6, bb_upper=34.1, sc_lower=100.9, sc_upper=112.1),
+    "GLY" => (bb_lower=53.2, bb_upper=74.5, sc_lower=0.0, sc_upper=0.0),
+    "HIS" => (bb_lower=18.4, bb_upper=33.1, sc_lower=106.9, sc_upper=117.5),
+    "ILE" => (bb_lower=15.1, bb_upper=31.5, sc_lower=94.5, sc_upper=114.8),
+    "LEU" => (bb_lower=14.7, bb_upper=32.2, sc_lower=96.7, sc_upper=116.0),
+    "LYS" => (bb_lower=19.2, bb_upper=34.4, sc_lower=125.6, sc_upper=134.3),
+    "MET" => (bb_lower=16.4, bb_upper=32.8, sc_lower=100.0, sc_upper=122.0),
+    "PHE" => (bb_lower=17.0, bb_upper=32.0, sc_lower=118.1, sc_upper=134.0),
+    "PRO" => (bb_lower=20.7, bb_upper=27.8, sc_lower=78.8, sc_upper=95.4),
+    "SER" => (bb_lower=22.4, bb_upper=37.3, sc_lower=51.8, sc_upper=66.3),
+    "THR" => (bb_lower=19.0, bb_upper=32.4, sc_lower=71.3, sc_upper=86.2),
+    "TRP" => (bb_lower=15.8, bb_upper=30.1, sc_lower=150.6, sc_upper=167.9),
+    "TYR" => (bb_lower=17.1, bb_upper=31.9, sc_lower=131.0, sc_upper=144.5),
+    "VAL" => (bb_lower=16.9, bb_upper=31.8, sc_lower=77.8, sc_upper=94.1),
+)
+
+function _sasa_parameterization(s::Symbol)
+    p = if s == :cath_s20
+        creamer_sasas_cath_s20
+    elseif s == :original
+        creamer_sasas_original
+    else
+        throw(ArgumentError("""\n
+            sasa_parameterization parameter must be either :cath_s20 or :original
+            
+        """))
+    end
+    return p
+end
+
 struct _Selector{F,T} <: Function
     f::F
     residue::Ref{T}
@@ -247,7 +287,7 @@ end
 (s::_Selector)(at::Atom) = s.f(at) && (at in s.residue[])
 
 """
-    creamer_delta_sasa(atoms::AbstractVector{<:Atom})
+    creamer_delta_sasa(atoms::AbstractVector{<:Atom}; sasa_parameterization=:original
 
 Computes, for a vector of protein atoms, the predicted changes in SASA upon denaturation, using the 
 Creamer model. Returns a dictionary that can be directly used as input to the `mvalue_delta_sasa`
@@ -255,6 +295,10 @@ function. The output is in kcal mol⁻¹.
     
 Three estimates are provided: 1) low-denaturation, 2) mean denaturation, 3) high denaturation.
 Usually the experimental data is better reproduced with the mean denaturation SASA estimate.
+
+The optional `sasa_parameterization` keyword defines which denatured SASA parameterization will
+be used, with the published Creamer SASAs (`:original` - default) or
+the recomputed parameters based on the CATH S20 classification (`:cath_s20`).
 
 # Example
 
@@ -294,7 +338,10 @@ Creamer TP, Srinivasan R, Rose GD. **Modeling unfolded states of proteins and pe
 *Biochemistry.* 1997;36:2832–2835. doi: 10.1021/bi962819o.
 
 """
-function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
+function creamer_delta_sasa(
+    atoms::AbstractVector{<:Atom};
+    sasa_parameterization=:original
+)
     sasas = OrderedDict{String,OrderedDict}()
     sasa_atoms = sasa_particles(atoms;
         atom_type=creamer_atom_type,
@@ -314,7 +361,7 @@ function creamer_delta_sasa(atoms::AbstractVector{<:Atom})
         sasa_res_bb = sasa(sasa_atoms, sel_bb)
         sasa_res_sc = sasa(sasa_atoms, sel_sc)
         rname = threeletter(resname(res))
-        cr = creamer_sasas[rname]
+        cr = _sasa_parameterization(sasa_parameterization)[rname]
         csc = sasas[rname][:sc]
         cbb = sasas[rname][:bb]
         sasas[rname] = OrderedDict(
@@ -345,7 +392,7 @@ Construction:
 CreamerDenaturedModel(atoms::AbstractVector{<:Atom})
 ```
 
-and, optinally, the second argument is the type of denatured model to be used, for example: 
+and, optionally, the second argument is the type of denatured model to be used, for example: 
 
 ```
 CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, 1)
@@ -367,12 +414,17 @@ Reference:
 Creamer TP, Srinivasan R, Rose GD. **Modeling unfolded states of proteins and peptides. II. Backbone solvent accessibility.**
 *Biochemistry.* 1997;36:2832–2835. doi: 10.1021/bi962819o.
 
+The optional `sasa_parameterization` keyword defines which denatured SASA parameterization will
+be used, with the published Creamer SASAs (`:original` - default) or
+the recomputed parameters based on the CATH S20 classification (`:cath_s20`).
+
 """
-struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}}
+struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, DS}
     atoms::T
     type::Int
     n_protein_atoms::Int
-    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int) 
+    delta_sasa::DS
+    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int; sasa_parameterization=:original) 
         if !(type in (1,2,3))
             throw(ArgumentError("""\n
                 Type of Creamer denaturation model must be either:
@@ -382,10 +434,16 @@ struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}}
     
             """))
         end
-        return new{typeof(atoms)}(atoms, type, count(isprotein, atoms))
+        delta_sasa = creamer_delta_sasa(select(atoms, isprotein); sasa_parameterization)
+        return new{typeof(atoms), typeof(delta_sasa)}(atoms, type, count(isprotein, atoms), delta_sasa)
     end
 end
-CreamerDenaturedModel(atoms::AbstractVector{<:Atom}) = CreamerDenaturedModel(atoms, 2)
+function CreamerDenaturedModel(
+    atoms::AbstractVector{<:Atom}; 
+    sasa_parameterization=:original
+)
+    return CreamerDenaturedModel(atoms, 2; sasa_parameterization)
+end
 function Base.show(io::IO, m::CreamerDenaturedModel)
     t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal" 
     print(io, "CreamerDenaturedModel of a $(m.n_protein_atoms)-atom protein and $t denaturation.")
@@ -415,7 +473,7 @@ function mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=Auton
         cosolvent=cosolvent,
         model=model,
         atoms=m.atoms,
-        sasas=creamer_delta_sasa(select(m.atoms, isprotein)),
+        sasas=m.delta_sasa,
         type=m.type
     )
 end
@@ -433,18 +491,34 @@ end
     @test parse_show(CreamerDenaturedModel(prot, 3)) ≈ """
         CreamerDenaturedModel of a 1463-atom protein and maximal denaturation.
     """
-    m = mvalue(CreamerDenaturedModel(prot, 1), "urea")
+
+    # With original Creamer SASA parameterization (default)
+    m = mvalue(CreamerDenaturedModel(prot, 1; sasa_parameterization=:original), "urea")
     @test [m.tot, m.bb, m.sc] ≈ [-0.6819081277036511, -0.7149675621180843, 0.0330594344144333]
-    m = mvalue(CreamerDenaturedModel(prot, 2), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 2; sasa_parameterization=:original), "urea")
     @test [m.tot, m.bb, m.sc] ≈ [-1.290518033485419, -1.3936301188484532, 0.10311208536303434]
-    m = mvalue(CreamerDenaturedModel(prot, 3), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:original), "urea")
     @test [m.tot, m.bb, m.sc] ≈ [-1.899127986615752, -2.0722927071163655, 0.17316472050061354]
-    m = mvalue(CreamerDenaturedModel(prot, 3), "urea"; model=MoeserHorinek)
+    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:original), "urea"; model=MoeserHorinek)
     @test [m.tot, m.bb, m.sc] ≈ [-1.8015362919415367, -1.0270235184537553, -0.7745127734877815]
-    m = mvalue(CreamerDenaturedModel(prot), "tmao")
+    m = mvalue(CreamerDenaturedModel(prot; sasa_parameterization=:original), "tmao")
     @test [m.tot, m.bb, m.sc] ≈ [2.0265626662789282, 3.216069534867667, -1.1895068685887387]
 
     @test_throws "Type of Creamer" CreamerDenaturedModel(prot, 4)
+    @test_throws "either :cath_s20 or :original" CreamerDenaturedModel(prot; sasa_parameterization=:wrong)
+
+    # With :cath_s20 ASA parameterization
+    m = mvalue(CreamerDenaturedModel(prot, 1; sasa_parameterization=:cath_s20), "urea")
+    @test [m.tot, m.bb, m.sc] ≈ [-0.7723286405787043, -0.75794495873702,-0.014383681841684322]
+    m = mvalue(CreamerDenaturedModel(prot, 2; sasa_parameterization=:cath_s20), "urea")
+    @test [m.tot, m.bb, m.sc] ≈ [-1.4574226968785555, -1.49763370887446, 0.04021101199590444]
+    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:cath_s20), "urea")
+    @test [m.tot, m.bb, m.sc] ≈ [-2.1425168076484304, -2.2373225098073335, 0.09480570215890308]
+    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:cath_s20), "urea"; model=MoeserHorinek)
+    @test [m.tot, m.bb, m.sc] ≈ [-1.833589330598673, -1.0959043204679502, -0.7376850101307229]
+    m = mvalue(CreamerDenaturedModel(prot; sasa_parameterization=:cath_s20), "tmao")
+    @test [m.tot, m.bb, m.sc] ≈ [2.4056443218395076, 3.45607782276105, -1.0504335009215424]
+
 end
 
 
