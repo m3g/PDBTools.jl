@@ -214,6 +214,9 @@ function creamer_atom_type(at::Atom)
     """)))
 end
 
+#
+# Table 1 of: https://pubs.acs.org/doi/10.1021/bi962819o - 17-mer fragments.
+#
 const creamer_sasas_original = OrderedDict{
     String,
     @NamedTuple{bb_lower::Float32, bb_upper::Float32, sc_lower::Float32, sc_upper::Float32}
@@ -240,6 +243,10 @@ const creamer_sasas_original = OrderedDict{
     "VAL" => (bb_lower=15.9, bb_upper=24.9, sc_lower=81.8, sc_upper=110.9),
 )
 
+#
+# This intends to reproduce the above data, recomputing the accessibilities throughout the
+# complete CATH S20 dataset of non-homologous protein structures.
+#
 const creamer_sasas_cath_s20 = OrderedDict{
     String,
     @NamedTuple{bb_lower::Float32, bb_upper::Float32, sc_lower::Float32, sc_upper::Float32}
