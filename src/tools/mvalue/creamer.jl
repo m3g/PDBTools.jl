@@ -468,10 +468,10 @@ julia> using PDBTools
 
 julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
 
-julia> m = mvalue(CreamerDenaturedModel(prot), "urea");
+julia> m = mvalue(CreamerDenaturedModel(prot), "tmao"; model=AutonBolen);
 
 julia> m.tot
--1.290518033485419
+2.0265626662789282
 ```
 
 """
