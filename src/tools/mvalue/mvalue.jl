@@ -4,21 +4,25 @@ export mvalue
 export MoeserHorinek, AutonBolen, MoeserHorinekApp
 
 abstract type MValueModel end
-struct MoeserHorinek <: MValueModel end
-struct AutonBolen <: MValueModel end
-struct MoeserHorinekApp <: MValueModel end
 
-include("./data.jl")
+include("./isolated_ASA.jl")
+include("./MoeserHorinek.jl")
+include("./AutonBolen.jl")
+include("./MoeserHorinekApp.jl")
 
 # Available-cosolvents string for docstring entries:
-_available_cosolvents() = """ 
-Available models and cosolvents for each model:
-
-- `MoeserHorinek`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinek))) .* '"'; by=lowercase),", ")) 
-- `AutonBolen`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(AutonBolen))) .* '"'; by=lowercase),", ")) 
-- `MoeserHorinekApp`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(MoeserHorinekApp))) .* '"'; by=lowercase),", ")) 
-
-"""
+function _available_cosolvents() 
+    s = """ 
+        Available models and cosolvents for each model:
+    
+    """
+    for model in subtypes(MValueModel)
+        s = s * """
+            - `$(modelname(model))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(model))) .* '"'; by=lowercase),", ")) 
+        """
+    end
+    return s
+end
 
 struct MValue{T}
     nresidues::Int
@@ -198,7 +202,7 @@ function tfe_asa(
     tfe_sc_bb = tfe_sc_bb(model),
 )
     col = cosolvent_column(model)[lowercase(cosolvent)]
-    if model in (MoeserHorinek, MoeserHorinekApp)
+    if modeltype(model) == MoeserHorinek 
         # united model: all bb ASA contributions are the same
         bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA["GLY"])
         sc_contribution = if restype == "GLY"
@@ -206,7 +210,7 @@ function tfe_asa(
         else
             tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
         end
-    elseif model == AutonBolen
+    elseif modeltype(model) == AutonBolen
         bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA[restype])
         sc_contribution = if restype == "GLY"
             0.0f0

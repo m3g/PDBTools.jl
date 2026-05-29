@@ -2,9 +2,9 @@ module PDBTools
 
 import Dates
 import Downloads
-import InteractiveUtils
 import PrecompileTools
 using Compat: @compat
+using InteractiveUtils: subtypes
 using Format: format, generate_formatter
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
