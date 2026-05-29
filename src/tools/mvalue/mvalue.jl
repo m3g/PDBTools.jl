@@ -4,6 +4,7 @@ export mvalue
 export MoeserHorinek, AutonBolen, MoeserHorinekApp
 
 abstract type MValueModel end
+modelname(m::Type{<:MValueModel}) = replace(string(m), "PDBTools." => "")
 
 include("./isolated_ASA.jl")
 include("./MoeserHorinek.jl")

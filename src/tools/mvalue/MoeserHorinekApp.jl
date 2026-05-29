@@ -13,7 +13,6 @@ compensation of Gly-activity that they applied.
 
 export MoeserHorinekApp
 struct MoeserHorinekApp <: MValueModel end
-modelname(::Type{MoeserHorinekApp}) = "MoeserHorinekApp"
 modeltype(::Type{MoeserHorinekApp}) = MoeserHorinek
 
 # Do not user underscores (_) in the following names:

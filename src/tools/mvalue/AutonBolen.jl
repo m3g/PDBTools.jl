@@ -11,7 +11,6 @@ The "urea" column selection points to "UreaWrong" which is what is output from t
 
 export AutonBolen
 struct AutonBolen <: MValueModel end
-modelname(::Type{AutonBolen}) = "AutonBolen"
 modeltype(::Type{AutonBolen}) = AutonBolen
 
 # Do not user underscores (_) in the following names:

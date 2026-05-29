@@ -9,7 +9,6 @@ Only Urea values are available for this model for now.
 
 export MoeserHorinek
 struct MoeserHorinek <: MValueModel end
-modelname(::Type{MoeserHorinek}) = "MoeserHorinek"
 modeltype(::Type{MoeserHorinek}) = MoeserHorinek
 
 # Do not user underscores (_) in the following names:
