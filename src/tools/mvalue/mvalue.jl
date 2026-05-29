@@ -14,7 +14,7 @@ include("./MoeserHorinekApp.jl")
 # Available-cosolvents string for docstring entries:
 function _available_cosolvents() 
     s = """ 
-        Available models and cosolvents for each model:
+    Available models and cosolvents for each model:
     
     """
     for model in subtypes(MValueModel)
