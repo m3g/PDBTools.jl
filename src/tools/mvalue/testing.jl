@@ -486,4 +486,9 @@ end
     models = replace.(string.(subtypes(PDBTools.MValueModel)), "PDBTools." => "")
     @test all(occursin(model_name,PDBTools._available_cosolvents()) for model_name in models)
 
+    # Test modelname definitions
+    @test PDBTools.modelname(MoeserHorinek) == "MoeserHorinek"
+    @test PDBTools.modelname(AutonBolen) == "AutonBolen"
+    @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
+
 end

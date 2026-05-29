@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.30.1-DEV
 --------------
+- ![INFO][badge-info] Organize mvalue model code. Improve documentation of `MoeserHorinekApp` model.
 
 Version 3.30.0
 --------------
