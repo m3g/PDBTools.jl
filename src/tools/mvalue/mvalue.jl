@@ -10,6 +10,7 @@ include("./isolated_ASA.jl")
 include("./MoeserHorinek.jl")
 include("./AutonBolen.jl")
 include("./MoeserHorinekApp.jl")
+include("./UniversalPure.jl")
 
 # Available-cosolvents string for docstring entries:
 function _available_cosolvents() 
