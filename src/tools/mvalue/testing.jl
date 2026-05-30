@@ -469,7 +469,7 @@ end
 
     # Tests for MoeserHorinekApp model
     cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
-    for c in filter(!=("urea"), keys(PDBTools.cosolvent_column(MoeserHorinekApp)))
+    for c in filter(!=("urea"), keys(PDBTools.cosolvent_column_MoeserHorinekApp))
         c_ab = mvalue(cm, c; model=AutonBolen)
         c_mhapp = mvalue(cm, c; model=MoeserHorinekApp)
         @test c_ab.tot ≈ c_mhapp.tot atol=0.25
@@ -481,7 +481,7 @@ end
     s = sasa_particles(pdb)
     @test_throws "non-protein residue" transfer_free_energy(s, "urea")
 
-    # Test available cossolvents string, for all solvents
+    # Test available cossolvents string
     using InteractiveUtils: subtypes
     models = replace.(string.(subtypes(PDBTools.MValueModel)), "PDBTools." => "")
     @test all(occursin(model_name,PDBTools._available_cosolvents()) for model_name in models)
