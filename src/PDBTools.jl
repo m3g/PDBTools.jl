@@ -4,7 +4,6 @@ import Dates
 import Downloads
 import PrecompileTools
 using Compat: @compat
-using InteractiveUtils: subtypes
 using Format: format, generate_formatter
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf

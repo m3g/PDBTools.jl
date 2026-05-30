@@ -11,7 +11,6 @@ The "urea" column selection points to "UreaWrong" which is what is output from t
 
 export AutonBolen
 struct AutonBolen <: MValueModel end
-modeltype(::Type{AutonBolen}) = AutonBolen
 
 # Do not user underscores (_) in the following names:
 const cosolvent_column_AutonBolen = Dict(
@@ -26,7 +25,6 @@ const cosolvent_column_AutonBolen = Dict(
     "glycerol" => 9,
     "trehalose" => 10,
 )
-cosolvent_column(::Type{AutonBolen}) = cosolvent_column_AutonBolen
 
 const tfe_sc_bb_AutonBolen = Dict{String,NTuple{10,Float32}}(
 #                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose      UreaWrong   UreaAPP    Glycerol  Trehalose
@@ -52,4 +50,15 @@ const tfe_sc_bb_AutonBolen = Dict{String,NTuple{10,Float32}}(
     "CYS" => (      0,          0,          0,          0,          0,          0,       0.00,        0.00,      0.00,      0.00), # not reported
     "BB"  => (     90,         52,         67,         48,         35,         62,        -39,         -39,        14,        62),
 )
-tfe_sc_bb(::Type{AutonBolen}) = tfe_sc_bb_AutonBolen
+
+function model_combination_rule(::Type{AutonBolen}, cosolvent, restype)
+    tfe_sc_bb = tfe_sc_bb_AutonBolen 
+    col = cosolvent_column_AutonBolen[lowercase(cosolvent)]
+    bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA[restype])
+    sc_contribution = if restype == "GLY"
+        0.0f0
+    else
+        sc_contribution = tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
+    end
+    return bb_contribution, sc_contribution
+end

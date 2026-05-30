@@ -17,11 +17,15 @@ function _available_cosolvents()
     Available models and cosolvents for each model:
     
     """
-    for model in subtypes(MValueModel)
-        s = s * """
-            - `$(modelname(model))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column(model))) .* '"'; by=lowercase),", ")) 
-        """
-    end
+    s = s * """
+        - `$(modelname(AutonBolen))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_AutonBolen)) .* '"'; by=lowercase),", ")) 
+    """
+    s = s * """
+        - `$(modelname(MoeserHorinek))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_MoeserHorinek)) .* '"'; by=lowercase),", ")) 
+    """
+    s = s * """
+        - `$(modelname(MoeserHorinekApp))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_MoeserHorinekApp)) .* '"'; by=lowercase),", ")) 
+    """
     return s
 end
 
@@ -200,26 +204,8 @@ function tfe_asa(
     model::Type{<:MValueModel},
     cosolvent::AbstractString,
     restype::AbstractString;
-    tfe_sc_bb = tfe_sc_bb(model),
 )
-    col = cosolvent_column(model)[lowercase(cosolvent)]
-    if modeltype(model) == MoeserHorinek 
-        # united model: all bb ASA contributions are the same
-        bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA["GLY"])
-        sc_contribution = if restype == "GLY"
-            0.0f0
-        else
-            tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
-        end
-    elseif modeltype(model) == AutonBolen
-        bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA[restype])
-        sc_contribution = if restype == "GLY"
-            0.0f0
-        else
-            sc_contribution = tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
-        end
-    end
-    # convert to kcal / nm^2 and return
+    bb_contribution, sc_contribution = model_combination_rule(model, cosolvent, restype)
     return bb_contribution / 1000, sc_contribution / 1000
 end
 

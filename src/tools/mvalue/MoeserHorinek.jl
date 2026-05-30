@@ -9,13 +9,11 @@ Only Urea values are available for this model for now.
 
 export MoeserHorinek
 struct MoeserHorinek <: MValueModel end
-modeltype(::Type{MoeserHorinek}) = MoeserHorinek
 
 # Do not user underscores (_) in the following names:
 const cosolvent_column_MoeserHorinek = Dict(
     "urea" => 1,
 )
-cosolvent_column(::Type{MoeserHorinek}) = cosolvent_column_MoeserHorinek
 
 const tfe_sc_bb_MoeserHorinek = Dict{String, NTuple{1,Float32}}(
 #               Urea 
@@ -41,4 +39,16 @@ const tfe_sc_bb_MoeserHorinek = Dict{String, NTuple{1,Float32}}(
     "CYS" => (   0.00, ),
     "BB"  => (    -39, ),
 )
-tfe_sc_bb(::Type{MoeserHorinek}) = tfe_sc_bb_MoeserHorinek
+
+# united model: all bb ASA contributions are the same
+function model_combination_rule(::Type{MoeserHorinek}, cosolvent, restype)
+    tfe_sc_bb = tfe_sc_bb_MoeserHorinek
+    col = cosolvent_column_MoeserHorinek[lowercase(cosolvent)]
+    bb_contribution = tfe_sc_bb["BB"][col] / first(isolated_ASA["GLY"])
+    sc_contribution = if restype == "GLY"
+        0.0f0
+    else
+        tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
+    end
+    return bb_contribution, sc_contribution
+end
