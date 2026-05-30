@@ -219,6 +219,14 @@ function tfe_asa(
         else
             sc_contribution = tfe_sc_bb[restype][col] / last(isolated_ASA[restype])
         end
+    elseif modeltype(model) == MoeserHorinekApp2
+        # united model: all bb ASA contributions are the same
+        bb_contribution = tfe_sc_bb["BB"][col] / bb_sc_exp()[restype][3]
+        sc_contribution = if restype == "GLY"
+            0.0f0
+        else
+            tfe_sc_bb[restype][col] / bb_sc_exp()[restype][5]
+        end
     end
     # convert to kcal / nm^2 and return
     return bb_contribution / 1000, sc_contribution / 1000
