@@ -102,18 +102,24 @@ Dict{String, Tuple{Int64, Vararg{Float32, 6}}}(
 )
 
 #
-# Backbone accessibility parameter
+# Backbone accessibility parameter - [-Infty,1]
+#
+# if acc == 1 -> the accessibility is 1.0 (full access)
+# if acc == 0 -> the accessibility is defined by the ratio of ASAs of actual and pure BBs
+# if acc < 0 -> the accessibility is greater than that of the ASAs ratio
+#
+# acc(f_bb, x) = f_bb^(1 - x)
 #
 acc() = Dict{String,Float32}(
-    "tmao" => 1.0,
-    "sarcosine" => 1.0,
-    "betaine" => 1.0,
-    "proline" => 1.0,
-    "glycerol" => 1.0,
-    "sorbitol" => 1.0,
-    "sucrose" => 1.0,
-    "trehalose" => 1.0,
-    "urea" => 0.0,
+    "tmao" => 0.0,
+    "sarcosine" => 0.0,
+    "betaine" => 0.0,
+    "proline" => 0.0,
+    "glycerol" => 0.0,
+    "sorbitol" => 0.0,
+    "sucrose" => 0.0,
+    "trehalose" => 0.0,
+    "urea" => 1.0,
 )
 
 function tfe_sc_bb_UniversalPure()
@@ -124,12 +130,12 @@ function tfe_sc_bb_UniversalPure()
                 i -> begin 
                     f_sc = bb_sc_exp()[aa][7]
                     f_bb = bb_sc_exp()[aa][6]
-                    _acc = 1 - f_bb * acc()[cs[i]]
+                    _acc = f_bb^(1 - acc()[cs[i]])
                     GTFEapp = tfe_sc_bb_AutonBolenApp[aa][i] # apparent free energy
                     f_bb_gly = bb_sc_exp()["GLY"][6]  # = 1
                     tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][i]
                     γG_val = γG()[cs[i]]              # e.g., +14.47 for urea
-                    tfe_sc = (1/f_sc) * (GTFEapp + γG_val + tfe_bb * (f_bb_gly - f_bb * _acc ))
+                    tfe_sc = (1/f_sc) * (GTFEapp + γG_val + tfe_bb * (f_bb_gly - _acc))
                 end,
             9)
             for aa in keys(bb_sc_exp())  
