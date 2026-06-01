@@ -98,7 +98,7 @@ Dict{String, Tuple{Int64, Vararg{Float32, 6}}}(
     "sorbitol" => 0.0,
     "sucrose" => 0.0,
     "trehalose" => 0.0,
-    "urea" => 14.47,
+    "urea" => -14.47,
 )
 
 #
@@ -135,7 +135,7 @@ function tfe_sc_bb_UniversalPure()
                     f_bb_gly = bb_sc_exp()["GLY"][6]  # = 1
                     tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][i]
                     γG_val = γG()[cs[i]]              # e.g., +14.47 for urea
-                    tfe_sc = (1/f_sc) * (GTFEapp + γG_val + tfe_bb * (f_bb_gly - _acc))
+                    tfe_sc = (1/f_sc) * (GTFEapp - γG_val + tfe_bb * (f_bb_gly - _acc))
                 end,
             9)
             for aa in keys(bb_sc_exp())  
