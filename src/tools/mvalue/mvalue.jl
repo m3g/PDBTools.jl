@@ -7,15 +7,19 @@ abstract type MValueModel end
 modelname(m::Type{<:MValueModel}) = replace(string(m), "PDBTools." => "")
 
 include("./isolated_ASA.jl")
-include("./MoeserHorinek.jl")
-include("./AutonBolen.jl")
-include("./MoeserHorinekApp.jl")
+include("./models/MoeserHorinek.jl")
+include("./models/AutonBolen.jl")
+include("./models/MoeserHorinekApp.jl")
+include("./models/Accessibility.jl")
 
 # Available-cosolvents string for docstring entries:
 function _available_cosolvents() 
     s = """ 
     Available models and cosolvents for each model:
     
+    """
+    s = s * """
+        - `$(modelname(Accessibility))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_Accessibility)) .* '"'; by=lowercase),", ")) 
     """
     s = s * """
         - `$(modelname(AutonBolen))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_AutonBolen)) .* '"'; by=lowercase),", ")) 
@@ -26,6 +30,7 @@ function _available_cosolvents()
     s = s * """
         - `$(modelname(MoeserHorinekApp))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_MoeserHorinekApp)) .* '"'; by=lowercase),", ")) 
     """
+
     return s
 end
 
@@ -212,4 +217,4 @@ end
 include("./transfer_free_energy.jl")
 include("./mvalue_exogenous.jl")
 include("./creamer.jl")
-include("./testing.jl")
+include("./testing/testing.jl")
