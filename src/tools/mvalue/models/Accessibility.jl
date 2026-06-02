@@ -193,6 +193,7 @@ const tfe_gly = Dict{String,Float32}(
 #
 # This function generates the tfe_sc_bb_Accessibility dictionary from the data
 #
+#=
 function _tfe_sc_bb_Accessibility()
     cs = collect(keys(cosolvent_column_Accessibility))
     data = OrderedDict{String,NTuple{9,Float32}}(
@@ -214,3 +215,4 @@ function _tfe_sc_bb_Accessibility()
     data["BB"] = tfe_sc_bb_AutonBolenApp["BB"]
     return data
 end
+=#
