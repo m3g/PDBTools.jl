@@ -2,7 +2,7 @@
 CollapsedDocStrings = true
 ```
 
-!!! warn
+!!! warning
     This is experimental and might be discontinued.
 
 # [The Universal Backbone Moeser & Horinek model](@id mh_app)
