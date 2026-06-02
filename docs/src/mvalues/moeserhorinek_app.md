@@ -2,6 +2,9 @@
 CollapsedDocStrings = true
 ```
 
+!!! warn
+    This is experimental and might be discontinued.
+
 # [The Universal Backbone Moeser & Horinek model](@id mh_app)
 
 The `MoeserHorinekApp` model applies the Moeser & Horinek universal backbone to the Auton & Bolen parameterization,
