@@ -27,7 +27,7 @@ const cosolvent_column_AutonBolen = Dict(
     "urea-mh" => 11, # Correct Gly correction, but causes model failure
 )
 
-const tfe_sc_bb_AutonBolen = Dict{String,NTuple{10,Float32}}(
+const tfe_sc_bb_AutonBolen = Dict{String,NTuple{11,Float32}}(
 #                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose     Glycerol  Trehalose    UreaWrong   UreaAPP     UreaMH        
     "ALA" => ( -14.64,      10.91,       4.77,      -0.07,      16.57,      22.05,       7.76,     33.25,      0.63,       -4.69,     1.01),
     "PHE" => (  -9.32,     -12.64,    -112.93,     -71.26,      26.38,     -96.35,      59.77,    -17.88,    -42.84,      -83.11,   -68.64),
