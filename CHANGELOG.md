@@ -28,15 +28,16 @@ Version 3.29.0
 
 Version 3.28.0
 --------------
-- ![FEATURE][badge-feature] Add data tables for `trehalose` and `glycerol` for the computation of transfer free energies with `AutonBolen` and `MoeserHorinekFit` models.
+- ![FEATURE][badge-feature] Add data tables for `trehalose` and `glycerol` for the computation of transfer free energies with `AutonBolen`.
+- ![EXPERIMENTAL][badge-experimental] Add `MoeserHorinekFit` models.
 
 Version 3.27.1
 --------------
-- ![ENHANCEMENT][badge-enhancement] Update glycine non-ideality corrections in `MoeserHorinekFit` model, after exhaustive fitting.
+- ![EXPERIMENTAL][badge-experimental] Update glycine non-ideality corrections in `MoeserHorinekFit` model, after exhaustive fitting.
 
 Version 3.27.0
 --------------
-- ![FEATURE][badge-feature] Add `MoeserHorinekFit` parameterizations, which introduce the Gly-activity correction to all models, by fitting the apparent TFEs to obtain the total predicted TFEs of Auton&Bolen.
+- ![EXPERIMENTAL][badge-experimental] Add `MoeserHorinekFit` parameterizations, which introduce the Gly-activity correction to all models, by fitting the apparent TFEs to obtain the total predicted TFEs of Auton&Bolen.
 
 Version 3.26.0
 --------------
