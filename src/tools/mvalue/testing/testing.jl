@@ -475,6 +475,14 @@ end
         @test c_ab.tot ≈ c_mhapp.tot atol=0.25
     end
 
+    # Tests for Accessibility model
+    cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
+    for c in keys(PDBTools.cosolvent_column_Accessibility)
+        c_ab = mvalue(cm, c; model=AutonBolen)
+        c_acc = mvalue(cm, c; model=Accessibility)
+        @test c_ab.tot ≈ c_acc.tot atol=0.15
+    end
+
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
@@ -492,3 +500,4 @@ end
     @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
 
 end
+
