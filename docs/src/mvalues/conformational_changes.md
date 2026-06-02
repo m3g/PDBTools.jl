@@ -7,12 +7,12 @@ CollapsedDocStrings = true
 Consider these two states of a model protein, a native and a denatured (straight chain) state, obtained from  a simulation. Here the conformational change could be of any kind. We compute the SASA of the two states:
 ```@example mvalue
 using PDBTools
-native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/1MJC_native.pdb", "protein")
+native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/testing/1MJC_native.pdb", "protein")
 sasa_native = sasa_particles(native_state)
 ```
 
 ```@example mvalue
-desnat_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/1MJC_straight.pdb", "protein")
+desnat_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/testing/1MJC_straight.pdb", "protein")
 sasa_desnat = sasa_particles(desnat_state)
 ```
 
