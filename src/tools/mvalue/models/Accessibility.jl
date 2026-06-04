@@ -132,28 +132,56 @@ const tfe_sc_bb_Accessibility = OrderedDict{String, NTuple{9, Float32}}(
 )
 
 #
-# Backbone accessibility parameter - [-Infty,1]
+# Backbone accessibility parameter - [-Inf,1]
 #
-# if acc == 1 -> the accessibility is 1.0 (full access)
-# if acc == 0 -> the accessibility is defined by the ratio of ASAs of actual and pure BBs
-# if acc < 0 -> the accessibility is greater than that of the ASAs ratio
+# if acc ==  1 -> the accessibility is 1.0 (full access)
+# if acc ==  0 -> the accessibility is defined by the ratio of ASAs of actual and pure BBs
+# if acc == -1 -> the accessibility is zero (full shielding)
 #
-# acc(f_bb, x) = f_bb^(1 - x)
+_acc_f(x, a) = x + (a + abs(a) * (1-2x))/2
 #
-const acc = Dict{String,Float32}(
-    "tmao" => 0.0,
-    "sarcosine" => 0.0,
-    "betaine" => 0.0,
-    "proline" => 0.0,
-    "glycerol" => 0.0,
-    "sorbitol" => 0.0,
-    "sucrose" => 0.0,
-    "trehalose" => 0.0,
-    "urea" => 1.0,
+_acc(x) = Dict{String,Float32}(
+  "ALA" => x, "PHE" => x, "LEU" => x, "ILE" => x, "VAL" => x,
+  "PRO" => x, "MET" => x, "TRP" => x, "GLY" => x, "SER" => x,
+  "THR" => x, "TYR" => x, "GLN" => x, "ASN" => x, "ASP" => x,
+  "GLU" => x, "HIS" => x, "LYS" => x, "ARG" => x, "CYS" => x,
 )
 
+const acc_bb = Dict{String,Dict{String,Float32}}(
+    "tmao" => _acc(0.f0),
+    "sarcosine" => _acc(0.f0),
+    "betaine" => _acc(0.f0),
+    "proline" => _acc(0.f0),
+    "glycerol" => _acc(0.f0),
+    "sorbitol" => _acc(0.f0),
+    "sucrose" => _acc(0.f0),
+    "trehalose" => _acc(0.f0),
+    "urea" => _acc(1.f0),
+)
+
+const acc_sc = Dict{String,Dict{String,Float32}}(
+    "tmao" => _acc(0.f0),
+    "sarcosine" => _acc(0.f0),
+    "betaine" => _acc(0.f0),
+    "proline" => _acc(0.f0),
+    "glycerol" => _acc(0.f0),
+    "sorbitol" => _acc(0.f0),
+    "sucrose" => _acc(0.f0),
+    "trehalose" => _acc(0.f0),
+    "urea" => _acc(0.f0),
+)
+
+function set_acc()
+    acc_bb["tmao"]["THR"] = -0.0 
+    acc_bb["tmao"]["PHE"] = -0.0
+    acc_bb["tmao"]["TRP"] = -0.0
+    acc_bb["tmao"]["TYR"] = -0.0
+end
+
 function model_combination_rule(::Type{Accessibility}, cosolvent, restype)
-    tfe_sc_bb = tfe_sc_bb_Accessibility
+    # voltar
+    #tfe_sc_bb = tfe_sc_bb_Accessibility
+    tfe_sc_bb = _tfe_sc_bb_Accessibility()
     col = cosolvent_column_Accessibility[lowercase(cosolvent)]
     # united model: all bb ASA contributions are the same
     bb_contribution = tfe_sc_bb["BB"][col] / f_acc["GLY"]["bb_pure"]
@@ -193,20 +221,19 @@ const tfe_gly = Dict{String,Float32}(
 #
 # This function generates the tfe_sc_bb_Accessibility dictionary from the data
 #
-#=
 function _tfe_sc_bb_Accessibility()
+    set_acc()
     cs = collect(keys(cosolvent_column_Accessibility))
     data = OrderedDict{String,NTuple{9,Float32}}(
         [ 
             aa => ntuple(
                 i -> begin 
-                    f_sc = f_acc[aa]["f_sc"]
-                    f_bb = f_acc[aa]["f_bb"]
-                    _acc = f_bb^(1 - acc[cs[i]])
+                    f_sc = _acc_f(f_acc[aa]["f_sc"], acc_sc[cs[i]][aa])
+                    f_bb = _acc_f(f_acc[aa]["f_bb"], acc_bb[cs[i]][aa])
                     GTFEapp = tfe_sc_bb_AutonBolenApp[aa][i] # apparent free energy
                     tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][i]
                     γG_val = γG[cs[i]] # -14.47 for urea
-                    tfe_sc = (1/f_sc) * (GTFEapp - γG_val + tfe_bb * (1 - _acc))
+                    tfe_sc = inv(f_sc) * (GTFEapp - γG_val + tfe_bb * (1 - f_bb))
                 end,
             9)
             for aa in keys(f_acc)  
@@ -215,4 +242,3 @@ function _tfe_sc_bb_Accessibility()
     data["BB"] = tfe_sc_bb_AutonBolenApp["BB"]
     return data
 end
-=#
