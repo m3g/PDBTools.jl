@@ -100,8 +100,8 @@ const γG = Dict{String,Float32}(
     "sarcosine" => 0.0,
     "betaine" => 0.0,
     "proline" => 0.0,
-    "glycerol" => 0.0,
-    "sorbitol" => 0.0,
+    "glycerol" => 0.0, # ~ -4
+    "sorbitol" => 0.0, # ~ -0-2
     "sucrose" => 0.0,
     "trehalose" => 0.0,
     "urea" => -14.47,
@@ -156,7 +156,7 @@ const acc_bb = Dict{String,Dict{String,Float32}}(
     "sorbitol" => _acc(0.f0),
     "sucrose" => _acc(0.f0),
     "trehalose" => _acc(0.f0),
-    "urea" => _acc(1.f0),
+    "urea" => _acc(0.f0),
 )
 
 const acc_sc = Dict{String,Dict{String,Float32}}(
@@ -172,10 +172,10 @@ const acc_sc = Dict{String,Dict{String,Float32}}(
 )
 
 function set_acc()
-    acc_bb["tmao"]["THR"] = -0.0 
-    acc_bb["tmao"]["PHE"] = -0.0
-    acc_bb["tmao"]["TRP"] = -0.0
-    acc_bb["tmao"]["TYR"] = -0.0
+    acc_bb["tmao"]["THR"] = 0.0 
+    acc_bb["tmao"]["PHE"] = 0.0
+    acc_bb["tmao"]["TRP"] = 0.0
+    acc_bb["tmao"]["TYR"] = 0.0
 end
 
 function model_combination_rule(::Type{Accessibility}, cosolvent, restype)
