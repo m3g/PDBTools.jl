@@ -156,7 +156,7 @@ const acc_bb = Dict{String,Dict{String,Float32}}(
     "sorbitol" => _acc(0.f0),
     "sucrose" => _acc(0.f0),
     "trehalose" => _acc(0.f0),
-    "urea" => _acc(0.f0),
+    "urea" => _acc(1.f0),
 )
 
 const acc_sc = Dict{String,Dict{String,Float32}}(
