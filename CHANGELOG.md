@@ -18,6 +18,7 @@ Version 3.31.0
 - ![EXPERIMENTAL][badge-experimental] Add `Accessibility` model to transfer free energy calculations.
 - ![DEPRECATION][badge-deprecation] The `MoeserHorinekApp` model was discontinued.
 - ![INFO][badge-info] Organize mvalue model code. Increase modularity of model codes.
+- ![INFO][badge-info] Add `urea-mh` to `AutonBolen` model solvent list.
 
 Version 3.30.0
 --------------
