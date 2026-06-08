@@ -1,16 +1,3 @@
-# Do not user underscores (_) in the following names:
-const data_col = OrderedDict(
-    "tmao" => 1,
-    "sarcosine" => 2,
-    "betaine" => 3,
-    "proline" => 4,
-    "sorbitol" => 5,
-    "sucrose" => 6,
-    "urea" => 7,
-    "glycerol" => 8,
-    "trehalose" => 9,
-)
-
 #
 # These are the GTFEapp (apparent transfer free energies of backbones and side-chains - without corrections for
 # glycine activity or specific side-chain activity)
@@ -43,12 +30,14 @@ const GTFEapp = Dict{String,NTuple{9,Float32}}(
 #
 # Activity corrections for each amino acid in each cosolvent
 #
-# Data for GLY and ALA in urea from Moeser and Horinek.
 # Data for GLY in Sorbitol and Glycerol from Gekko (estimates).
+#
+# The use of -1.01 for urea/ALA is suggested by Moeser and Horinek, although their table
+# of GTFE+is not compatible with that.
 #
 const γ = Dict{String,NTuple{9,Float32}}(
 #                TMAO  Sarcosine  Betaine  Proline  Sorbitol  Sucrose  UreaAPP  Glycerol  Trehalose
-    "ALA" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,    -1.01,      0.0,       0.0),
+    "ALA" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,  0*-1.01,      0.0,       0.0),
     "PHE" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "LEU" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "ILE" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
@@ -56,7 +45,7 @@ const γ = Dict{String,NTuple{9,Float32}}(
     "PRO" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "MET" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "TRP" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
-    "GLY" => (   0.0,       0.0,     0.0,      0.0,      1.0,     0.0,   -14.47,     -4.0,       0.0),
+    "GLY" => (   0.0,       0.0,     0.0,      0.0,    0*1.0,     0.0,   -14.47,  0* -4.0,       0.0),
     "SER" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "THR" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "TYR" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),

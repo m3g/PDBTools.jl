@@ -84,7 +84,8 @@ const acc = Dict{String,Float32}(
 )
 
 function model_combination_rule(::Type{Accessibility}, cosolvent, restype)
-    col = data_col[cosolvent_column_Accessibility[cosolvent]]
+    cosolvent = lowercase(cosolvent)
+    col = cosolvent_column_Accessibility[cosolvent]
     # united model: all bb ASA contributions are the same
     bb_contribution = GTFEapp["BB"][col] / f_acc["GLY"]["bb_pure"]
     sc_contribution = if restype == "GLY"
