@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.31.1-DEV
 --------------
+- ![INFO][badge-info] Organize code of `Accessibility` implementation.
 
 Version 3.31.0
 --------------
