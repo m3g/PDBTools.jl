@@ -23,35 +23,6 @@ const cosolvent_column_Accessibility = OrderedDict(
 )
 
 #
-# These are the GTFEapp (apparent transfer free energies of backbones and side-chains - without corrections for
-# glycine activity or specific side-chain activity)
-#
-const tfe_sc_bb_AutonBolenApp = Dict{String,NTuple{9,Float32}}(
-#                TMAO   Sarcosine     Betaine     Proline    Sorbitol    Sucrose     UreaAPP    Glycerol  Trehalose
-    "ALA" => ( -14.64,      10.91,       4.77,      -0.07,      16.57,      22.05,      -4.69,      7.76,     33.25),
-    "PHE" => (  -9.32,     -12.64,    -112.93,     -71.26,      26.38,     -96.35,     -83.11,     59.77,    -17.88),
-    "LEU" => (  11.62,      38.33,     -17.73,       4.77,      39.07,      37.11,     -54.57,    -34.42,     96.18),
-    "ILE" => ( -25.43,      39.98,      -1.27,      -2.72,      36.90,      28.12,     -38.43,     36.23,     79.66),
-    "VAL" => (  -1.02,      29.32,     -19.63,       7.96,      24.65,      33.92,     -21.65,     -1.37,     96.79),
-    "PRO" => (-137.73,     -34.23,    -125.16,     -63.96,      -4.48,     -73.02,     -17.65,    -60.55,    -94.67),
-    "MET" => (  -7.65,       8.18,     -14.16,     -35.12,      20.97,      -6.66,     -48.34,     13.87,     29.19),
-    "TRP" => (-152.87,    -113.03,    -369.93,    -198.37,     -67.23,    -215.27,    -141.46,   -122.65,   -206.30),
-    "GLY" => (      0,          0,          0,          0,          0,          0,       0.00,      0.00,      0.00),
-    "SER" => ( -39.04,     -27.98,     -41.85,     -33.49,      -1.58,      -2.79,     -20.56,      6.31,     -0.98),
-    "THR" => (   3.57,      -7.54,       0.33,     -18.33,      13.20,      20.82,     -22.09,     17.53,     26.32),
-    "TYR" => (-114.32,     -26.37,    -213.09,    -138.41,     -53.50,     -78.41,     -45.08,   -149.50,    -80.32),
-    "GLN" => (  41.41,     -10.19,       7.57,     -32.26,     -23.98,     -40.87,     -54.81,     -2.76,    -36.34),
-    "ASN" => (  55.69,     -40.93,      33.17,     -17.71,     -21.21,     -28.28,     -38.79,     51.57,     48.67),
-    "ASP" => ( -66.67,     -14.20,    -116.56,     -90.51,     -83.88,     -37.17,       3.55,    -85.46,    -96.54),
-    "GLU" => ( -83.25,     -12.61,    -112.08,     -89.17,     -70.05,     -41.65,       0.62,    -74.20,    -85.92),
-    "HIS" => (  42.07,     -20.80,     -35.97,     -45.10,     -42.45,    -118.66,     -50.51,    -17.17,    -98.75),
-    "LYS" => (-110.23,     -27.42,    -171.99,     -59.87,     -32.47,     -39.60,     -22.76,    -34.01,    -50.07),
-    "ARG" => (-109.27,     -32.24,    -109.45,     -60.18,     -24.65,     -79.32,     -21.17,    -30.74,    -50.33),
-    "CYS" => (      0,          0,          0,          0,          0,          0,       0.00,      0.00,      0.00), # not reported
-    "BB"  => (     90,         52,         67,         48,         35,         62,        -39,        14,        62),
-)
-
-#
 # ASA of backbones and side-chains computed: 
 # bb: accessible surface area of a backbone of the center peptide in a 
 #     tri-peptide, disconsidering the side-chains of the first and last residues 
@@ -91,22 +62,6 @@ const f_acc = OrderedDict{String, OrderedDict{String, Float32}}(
   "CYS" => OrderedDict("n"=>29486, "sc"=>103.039, "sc_pure"=>160.6, "bb"=>46.205, "bb_pure"=>85.928, "f_bb"=>0.537717, "f_sc"=>0.641584),
 )
 
-#
-# Glycine activity corrections
-#
-const γG = Dict{String,Float32}(
-    "water" => 0.0,
-    "tmao" => 0.0,
-    "sarcosine" => 0.0,
-    "betaine" => 0.0,
-    "proline" => 0.0,
-    "glycerol" => 0.0, # ~ -4
-    "sorbitol" => 0.0, # ~ -0-2
-    "sucrose" => 0.0,
-    "trehalose" => 0.0,
-    "urea" => -14.47,
-)
-
 const tfe_sc_bb_Accessibility = OrderedDict{String, NTuple{9, Float32}}(
   "ALA" => (40.5856, 61.0755, 60.652, 36.6777, 59.0326, 90.3858, 18.9989, 25.8121, 112.143),
   "PHE" => (48.1216, 18.2637, -103.547, -61.5004, 58.1674, -85.0998, -90.2562, 87.9847, 18.082),
@@ -132,63 +87,41 @@ const tfe_sc_bb_Accessibility = OrderedDict{String, NTuple{9, Float32}}(
 )
 
 #
-# Backbone accessibility parameter - [-Inf,1]
+# Backbone accessibility parameter - [-Infty,1]
 #
-# if acc ==  1 -> the accessibility is 1.0 (full access)
-# if acc ==  0 -> the accessibility is defined by the ratio of ASAs of actual and pure BBs
-# if acc == -1 -> the accessibility is zero (full shielding)
+# if acc == 1 -> the accessibility is 1.0 (full access)
+# if acc == 0 -> the accessibility is defined by the ratio of ASAs of actual and pure BBs
+# if acc < 0 -> the accessibility is greater than that of the ASAs ratio
 #
-_acc_f(x, a) = x + (a + abs(a) * (1-2x))/2
+# acc(f_bb, x) = f_bb^(1 - x)
 #
-_acc(x) = Dict{String,Float32}(
-  "ALA" => x, "PHE" => x, "LEU" => x, "ILE" => x, "VAL" => x,
-  "PRO" => x, "MET" => x, "TRP" => x, "GLY" => x, "SER" => x,
-  "THR" => x, "TYR" => x, "GLN" => x, "ASN" => x, "ASP" => x,
-  "GLU" => x, "HIS" => x, "LYS" => x, "ARG" => x, "CYS" => x,
+const acc = Dict{String,Float32}(
+    "tmao" => 0.0,
+    "sarcosine" => 0.0,
+    "betaine" => 0.0,
+    "proline" => 0.0,
+    "glycerol" => 0.0,
+    "sorbitol" => 0.0,
+    "sucrose" => 0.0,
+    "trehalose" => 0.0,
+    "urea" => 1.0,
 )
-
-const acc_bb = Dict{String,Dict{String,Float32}}(
-    "tmao" => _acc(0.f0),
-    "sarcosine" => _acc(0.f0),
-    "betaine" => _acc(0.f0),
-    "proline" => _acc(0.f0),
-    "glycerol" => _acc(0.f0),
-    "sorbitol" => _acc(0.f0),
-    "sucrose" => _acc(0.f0),
-    "trehalose" => _acc(0.f0),
-    "urea" => _acc(1.f0),
-)
-
-const acc_sc = Dict{String,Dict{String,Float32}}(
-    "tmao" => _acc(0.f0),
-    "sarcosine" => _acc(0.f0),
-    "betaine" => _acc(0.f0),
-    "proline" => _acc(0.f0),
-    "glycerol" => _acc(0.f0),
-    "sorbitol" => _acc(0.f0),
-    "sucrose" => _acc(0.f0),
-    "trehalose" => _acc(0.f0),
-    "urea" => _acc(0.f0),
-)
-
-function set_acc()
-    acc_bb["tmao"]["THR"] = 0.0 
-    acc_bb["tmao"]["PHE"] = 0.0
-    acc_bb["tmao"]["TRP"] = 0.0
-    acc_bb["tmao"]["TYR"] = 0.0
-end
 
 function model_combination_rule(::Type{Accessibility}, cosolvent, restype)
-    # voltar
-    #tfe_sc_bb = tfe_sc_bb_Accessibility
-    tfe_sc_bb = _tfe_sc_bb_Accessibility()
-    col = cosolvent_column_Accessibility[lowercase(cosolvent)]
+    col = data_col[cosolvent]
     # united model: all bb ASA contributions are the same
     bb_contribution = tfe_sc_bb["BB"][col] / f_acc["GLY"]["bb_pure"]
     sc_contribution = if restype == "GLY"
         0.0f0
     else
-        tfe_sc_bb[restype][col] / f_acc[restype]["sc_pure"]
+        f_sc = f_acc[restype]["f_sc"] # accessibility of the side-chain
+        f_bb = f_acc[restype]["f_bb"] # accessibility of the backbone
+        _acc = f_bb^(1 - acc[cs[i]]) # f_bb (protectant) or 1 (urea)
+        GTFE_sc = GTFEapp[aa][col] # apparent free energy of the backbone
+        tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][col] # apparent free energy of the backbone
+        γAA = γ[restype][icol] # amino-acid activity correction (usually ignored)
+        γG = γ["GLY"][icol] # gly-activitity correction - affects all side-chains
+        (1/f_sc) * (GTFE_sc + γAA - γG + tfe_bb * (1 - _acc))
     end
     return bb_contribution, sc_contribution
 end
@@ -198,42 +131,23 @@ end
 unused data / development
 
 =#
-
-#
-# Transfer free energy of glycine in each cosolvent
-#
-# In molarity scale - cal/mol
-# Data computed from the solubility table of: https://pubs.acs.org/doi/10.1021/bi035908r
-#
-const tfe_gly = Dict{String,Float32}(
-    "water" => 0.0,
-    "tmao" => 182.28,
-    "sarcosine" => 59.84,
-    "betaine" => 167.54,
-    "proline" => 102.80,
-    "glycerol" => 56.18,
-    "sorbitol" => 54.08,
-    "sucrose" => 144.48,
-    "trehalose" => 143.50,
-    "urea" => 18.74,
-)
-
 #
 # This function generates the tfe_sc_bb_Accessibility dictionary from the data
 #
+#=
 function _tfe_sc_bb_Accessibility()
-    set_acc()
     cs = collect(keys(cosolvent_column_Accessibility))
     data = OrderedDict{String,NTuple{9,Float32}}(
         [ 
             aa => ntuple(
                 i -> begin 
-                    f_sc = _acc_f(f_acc[aa]["f_sc"], acc_sc[cs[i]][aa])
-                    f_bb = _acc_f(f_acc[aa]["f_bb"], acc_bb[cs[i]][aa])
+                    f_sc = f_acc[aa]["f_sc"]
+                    f_bb = f_acc[aa]["f_bb"]
+                    _acc = f_bb^(1 - acc[cs[i]])
                     GTFEapp = tfe_sc_bb_AutonBolenApp[aa][i] # apparent free energy
                     tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][i]
                     γG_val = γG[cs[i]] # -14.47 for urea
-                    tfe_sc = inv(f_sc) * (GTFEapp - γG_val + tfe_bb * (1 - f_bb))
+                    tfe_sc = (1/f_sc) * (GTFEapp - γG_val + tfe_bb * (1 - _acc))
                 end,
             9)
             for aa in keys(f_acc)  
@@ -242,3 +156,4 @@ function _tfe_sc_bb_Accessibility()
     data["BB"] = tfe_sc_bb_AutonBolenApp["BB"]
     return data
 end
+=#

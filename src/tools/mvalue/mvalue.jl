@@ -6,7 +6,7 @@ export MoeserHorinek, AutonBolen, MoeserHorinekApp
 abstract type MValueModel end
 modelname(m::Type{<:MValueModel}) = replace(string(m), "PDBTools." => "")
 
-include("./isolated_ASA.jl")
+include("./models/common_data.jl")
 include("./models/MoeserHorinek.jl")
 include("./models/AutonBolen.jl")
 include("./models/MoeserHorinekApp.jl")
