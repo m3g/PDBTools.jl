@@ -62,30 +62,6 @@ const f_acc = OrderedDict{String, OrderedDict{String, Float32}}(
   "CYS" => OrderedDict("n"=>29486, "sc"=>103.039, "sc_pure"=>160.6, "bb"=>46.205, "bb_pure"=>85.928, "f_bb"=>0.537717, "f_sc"=>0.641584),
 )
 
-const tfe_sc_bb_Accessibility = OrderedDict{String, NTuple{9, Float32}}(
-  "ALA" => (40.5856, 61.0755, 60.652, 36.6777, 59.0326, 90.3858, 18.9989, 25.8121, 112.143),
-  "PHE" => (48.1216, 18.2637, -103.547, -61.5004, 58.1674, -85.0998, -90.2562, 87.9847, 18.082),
-  "LEU" => (80.1472, 90.1394, 23.0918, 40.7663, 79.0694, 95.5633, -55.5939, -37.7579, 177.457),
-  "ILE" => (31.7858, 94.3353, 48.2037, 32.0187, 77.3769, 85.3133, -33.2934, 60.7842, 156.93),
-  "VAL" => (67.3601, 82.9165, 22.3867, 48.435, 63.0398, 97.3343, -10.5619, 8.69635, 189.817),
-  "PRO" => (-137.019, -10.4523, -136.29, -58.6876, 21.0876, -61.2657, -4.81861, -80.6002, -94.0717),
-  "MET" => (49.9731, 46.0709, 25.6485, -15.7137, 52.1161, 32.5287, -46.2286, 28.3287, 81.4598),
-  "TRP" => (-132.359, -107.508, -420.274, -217.362, -61.2466, -229.309, -159.522, -144.787, -218.041),
-  "GLY" => (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 14.47, 0.0, 0.0),
-  "SER" => (0.667515, -8.83995, -21.254, -21.1938, 23.3974, 41.4619, -10.3593, 21.1675, 44.5407),
-  "THR" => (74.0381, 28.2891, 51.6053, 8.95793, 46.6141, 78.7066, -11.4971, 37.1284, 87.005),
-  "TYR" => (-88.3386, 0.0347134, -230.495, -146.787, -45.9923, -60.413, -39.3987, -183.277, -62.8714),
-  "GLN" => (117.767, 21.0795, 55.655, -12.0026, -9.38114, -14.4033, -55.5322, 5.65249, -8.16726),
-  "ASN" => (145.884, -22.1609, 96.5345, 8.76978, -5.68575, 3.45808, -35.4121, 85.1697, 115.504),
-  "ASP" => (-31.9228, 17.1044, -121.592, -97.3485, -97.1226, -9.18955, 26.3394, -114.722, -95.9693),
-  "GLU" => (-54.2385, 17.6901, -109.595, -90.7751, -73.1392, -15.6754, 20.8462, -93.0514, -76.8325),
-  "HIS" => (117.87, 6.57968, -4.02962, -29.2524, -34.3753, -120.174, -49.1562, -14.0093, -93.018),
-  "LYS" => (-91.1235, -3.88577, -188.748, -50.0522, -21.4577, -13.9195, -11.146, -36.8474, -27.9965),
-  "ARG" => (-85.7403, -9.7253, -100.048, -48.1802, -10.3476, -64.2786, -8.63445, -31.0476, -26.9185),
-  "CYS" => (64.8481, 37.4678, 48.2758, 34.5856, 25.2187, 44.6731, 22.5536, 10.0875, 44.6731),
-  "BB"  => (90.0, 52.0, 67.0, 48.0, 35.0, 62.0, -39.0, 14.0, 62.0),
-)
-
 #
 # Backbone accessibility parameter - [-Infty,1]
 #
@@ -108,52 +84,21 @@ const acc = Dict{String,Float32}(
 )
 
 function model_combination_rule(::Type{Accessibility}, cosolvent, restype)
-    col = data_col[cosolvent]
+    col = data_col[cosolvent_column_Accessibility[cosolvent]]
     # united model: all bb ASA contributions are the same
-    bb_contribution = tfe_sc_bb["BB"][col] / f_acc["GLY"]["bb_pure"]
+    bb_contribution = GTFEapp["BB"][col] / f_acc["GLY"]["bb_pure"]
     sc_contribution = if restype == "GLY"
         0.0f0
     else
         f_sc = f_acc[restype]["f_sc"] # accessibility of the side-chain
         f_bb = f_acc[restype]["f_bb"] # accessibility of the backbone
-        _acc = f_bb^(1 - acc[cs[i]]) # f_bb (protectant) or 1 (urea)
-        GTFE_sc = GTFEapp[aa][col] # apparent free energy of the backbone
-        tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][col] # apparent free energy of the backbone
-        γAA = γ[restype][icol] # amino-acid activity correction (usually ignored)
-        γG = γ["GLY"][icol] # gly-activitity correction - affects all side-chains
-        (1/f_sc) * (GTFE_sc + γAA - γG + tfe_bb * (1 - _acc))
+        _acc = f_bb^(1 - acc[cosolvent]) # f_bb (protectant) or 1 (urea)
+        GTFE_sc = GTFEapp[restype][col] # apparent free energy of the backbone
+        tfe_bb = GTFEapp["BB"][col] # apparent free energy of the backbone
+        γAA = γ[restype][col] # amino-acid activity correction (usually ignored)
+        γG = γ["GLY"][col] # gly-activitity correction - affects all side-chains
+        TFE_sc = (1/f_sc) * (GTFE_sc + γAA - γG + tfe_bb * (1 - _acc))
+        TFE_sc / f_acc[restype]["sc_pure"]
     end
     return bb_contribution, sc_contribution
 end
-
-#=
-
-unused data / development
-
-=#
-#
-# This function generates the tfe_sc_bb_Accessibility dictionary from the data
-#
-#=
-function _tfe_sc_bb_Accessibility()
-    cs = collect(keys(cosolvent_column_Accessibility))
-    data = OrderedDict{String,NTuple{9,Float32}}(
-        [ 
-            aa => ntuple(
-                i -> begin 
-                    f_sc = f_acc[aa]["f_sc"]
-                    f_bb = f_acc[aa]["f_bb"]
-                    _acc = f_bb^(1 - acc[cs[i]])
-                    GTFEapp = tfe_sc_bb_AutonBolenApp[aa][i] # apparent free energy
-                    tfe_bb = tfe_sc_bb_AutonBolenApp["BB"][i]
-                    γG_val = γG[cs[i]] # -14.47 for urea
-                    tfe_sc = (1/f_sc) * (GTFEapp - γG_val + tfe_bb * (1 - _acc))
-                end,
-            9)
-            for aa in keys(f_acc)  
-        ]...
-    )
-    data["BB"] = tfe_sc_bb_AutonBolenApp["BB"]
-    return data
-end
-=#

@@ -43,9 +43,12 @@ const GTFEapp = Dict{String,NTuple{9,Float32}}(
 #
 # Activity corrections for each amino acid in each cosolvent
 #
+# Data for GLY and ALA in urea from Moeser and Horinek.
+# Data for GLY in Sorbitol and Glycerol from Gekko (estimates).
+#
 const γ = Dict{String,NTuple{9,Float32}}(
 #                TMAO  Sarcosine  Betaine  Proline  Sorbitol  Sucrose  UreaAPP  Glycerol  Trehalose
-    "ALA" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
+    "ALA" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,    -1.01,      0.0,       0.0),
     "PHE" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "LEU" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "ILE" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
@@ -65,7 +68,6 @@ const γ = Dict{String,NTuple{9,Float32}}(
     "LYS" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "ARG" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
     "CYS" => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
-    "BB"  => (   0.0,       0.0,     0.0,      0.0,      0.0,     0.0,      0.0,      0.0,       0.0),
 )
 
 #= 
@@ -100,6 +102,8 @@ const isolated_ASA = Dict{String,Tuple{Float32,Float32}}(
 
 #
 # Transfer free energy of glycine in each cosolvent
+#
+# Not currently in use.
 #
 # In molarity scale - cal/mol
 # Data computed from the solubility table of: https://pubs.acs.org/doi/10.1021/bi035908r
