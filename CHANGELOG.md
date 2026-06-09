@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.31.2-DEV
+--------------
+
 Version 3.31.1
 --------------
 - ![DEPRECATION][badge-deprecation]![][badge-fix] Remove inputs of `mvalue` and `transfer_free_energy` functions with sasa data, because the SASA method cannot be changed while preserving consistency among models.
