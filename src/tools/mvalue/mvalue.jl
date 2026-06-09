@@ -12,6 +12,16 @@ include("./models/MoeserHorinekApp.jl")
 include("./models/Accessibility_data.jl")
 include("./models/Accessibility.jl")
 
+function sasa_particles_creamer_ua(p::AbstractVector{<:Atom}; n_dots=512)
+    p_no_h = select(p, at -> element(at) != "H")
+    s = sasa_particles(p_no_h;
+        atom_type = PDBTools.creamer_atom_type,
+        atom_radius_from_type = at -> PDBTools.creamer_atomic_radii[at],
+        n_dots
+    )
+    return s
+end
+
 # Available-cosolvents string for docstring entries:
 function _available_cosolvents() 
     s = """ 
@@ -68,14 +78,15 @@ _AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
 
 """
     mvalue(
-        sasa_initial::SASA{3,<:AbstractVector{<:Atom}},    
-        sasa_final::SASA{3,<:AbstractVector{<:Atom}},
+        inital_state::AbstractVector{<:Atom},
+        final_state::AbstractVector{<:Atom},
         cosolvent::AbstractString;
         sel::Union{String,Function}=all,
         model::Type{<:MValueModel}=AutonBolen,
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
         parallel:Bool = true,
+        sasa_particles::Function = sasa_particles with Creamer united atom radii and no hydrogens.
     )
 
 Calculates the m-value (transfer free energy of a protein in 1M solution, in `kcal/mol`) using the Tanford transfer model,
@@ -83,8 +94,8 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 
 # Positional Arguments
 
-- `sasa_initial::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the initial state (e.g., native state).
-- `sasa_final::SASA{3,<:AbstractVector{<:Atom}}`: SASA object representing the final state (e.g., denatured state).
+- `initial_state`: Structure of the initial state, as a vector of Atom objects.
+- `final_state`: Structure of the final state, as a vector of Atom objects (e. g. the denatured sate).
 - `cosolvent::AbstractString`: The cosolvent to consider (case insensitive).
 
 $(_available_cosolvents())
@@ -117,10 +128,7 @@ using PDBTools
 initial_state = read_pdb("native.pdb")
 final_state = read_pdb("desnat.pdb")
 
-sasa_initial = sasa_particles(initial_state)
-sasa_final = sasa_particles(final_state)
-
-mvalue(sasa_initial, sasa_final, "chain A"; model=AutonBolen, cosolvent="TMAO")
+mvalue(inital_state, final_state; model=AutonBolen, cosolvent="TMAO")
 ```
 
 ## References
@@ -131,8 +139,8 @@ mvalue(sasa_initial, sasa_final, "chain A"; model=AutonBolen, cosolvent="TMAO")
 
 """
 function mvalue(
-    sasa_initial::SASA{3,<:AbstractVector{<:Atom}},
-    sasa_final::SASA{3,<:AbstractVector{<:Atom}},
+    initial_state::AbstractVector{<:Atom},
+    final_state::AbstractVector{<:Atom},
     cosolvent::AbstractString;
     sel::Union{String,Function}=all,
     model::Type{<:MValueModel}=AutonBolen,
@@ -141,10 +149,10 @@ function mvalue(
     parallel::Bool=true,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    ats_initial = select(sasa_initial.particles, selector)
-    ats_final = select(sasa_final.particles, selector)
-    residues_initial = collect(eachresidue(ats_initial))
-    residues_final = collect(eachresidue(ats_final))
+    sasa_initial = sasa_particles_creamer_ua(initial_state)
+    sasa_final = sasa_particles_creamer_ua(final_state)
+    residues_initial = collect(eachresidue(initial_state))
+    residues_final = collect(eachresidue(final_state))
     cosolvent = lowercase(cosolvent)
     if length(residues_initial) != length(residues_final)
         throw(ArgumentError("""\n
@@ -164,13 +172,6 @@ function mvalue(
             rinit = residues_initial[iresidue]
             rfinal = residues_final[iresidue]
             rtype = threeletter(resname(rinit)) # convert non-standard residue names in types (e. g. HSD -> HIS)
-            if !(haskey(protein_residues, rtype))
-                throw(ArgumentError("""\n
-                    Found non-protein residue ($(resname(rinit))) in the selected atoms of SASA calculation.
-                    m-value calculations are only defined for protein residues.
-    
-                """))
-            end
             if rtype != threeletter(resname(rfinal))
                 throw(ArgumentError("""\n
                     The residues of the initial and final state must be of the same type.

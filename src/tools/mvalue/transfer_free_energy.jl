@@ -20,7 +20,6 @@ end
 
 """
     transfer_free_energy(atoms::AbstractVector{<:PDBTools.Atom}, cosolvent::AbstractString; kargs...)
-    transfer_free_energy(sasa_atoms::SASA{3,<:AbstractVector{<:Atom}}, cosolvent::AbstractString; kargs...)
 
 Calculates the transfer free energy (in 1M solution, in `kcal/mol`) using the Tanford transfer model,
 as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
@@ -28,13 +27,6 @@ as implemented by Moeser and Horinek [1] or by Auton and Bolen [2,3].
 # Positional Arguments
 
 - `atoms`:: Atoms of the system (a vector of PDBTools.Atom objects)
-
-or
-
-- `sasa_atoms::SASA{3,<:AbstractVector{<:Atom}}`: SASA object with solvent accessible surface area of the atoms.
-
-and
-
 - `cosolvent::AbstractString`: The cosolvent to consider. 
 
 $(_available_cosolvents())
@@ -63,20 +55,9 @@ A `TransferFreeEnergy` object, with fields:
 
 ```julia
 using PDBTools
-# directly from the atoms:
 prot = read_pdb("native.pdb")
 transfer_free_energy(prot, "urea")
-# or providing the SASA object:
-sasa_prot = sasa_particles(prot)
-transfer_free_energy(sasa_prot, "urea")
 ```
-
-!!! warning
-    When providing the vector of atoms, the SASA calculation will be performed using 
-    Creamer united atom types. On the other hand, if the SASAs are computed previously,
-    they will correspond to the method used which, by default, consider all atoms of 
-    the structure, including hydrogens, and uses standard vdW atoms.
-
 ## References
 
 1. https://doi.org/10.1021/jp409934q
@@ -87,30 +68,15 @@ transfer_free_energy(sasa_prot, "urea")
 function transfer_free_energy(
     atoms::AbstractVector{<:Atom},
     cosolvent::AbstractString;
-    parallel=true,
-    kargs...
-)
-    sasa_ats = sasa_particles(
-        atoms;
-        atom_type = creamer_atom_type,
-        atom_radius_from_type = at -> creamer_atomic_radii[at],
-        parallel
-    ) 
-    return transfer_free_energy(sasa_ats, cosolvent; parallel, kargs...)
-end
-
-function transfer_free_energy(
-    sasa_ats::SASA{3,<:AbstractVector{<:Atom}},
-    cosolvent::AbstractString;
-    sel::Union{String,Function}=all,
     model::Type{<:MValueModel}=AutonBolen,
     backbone::F1=isbackbone,
+    sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
     parallel::Bool=true,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    ats = select(sasa_ats.particles, selector)
-    residues = collect(eachresidue(ats))
+    sasa_ats = sasa_particles_creamer_ua(atoms)
+    residues = collect(eachresidue(atoms))
     cosolvent = lowercase(cosolvent)
     residue_contributions_bb = zeros(Float32, length(residues))
     residue_contributions_sc = zeros(Float32, length(residues))
@@ -121,13 +87,6 @@ function transfer_free_energy(
             sel_at_sc = _AtomSelector(at -> sidechain(at) & selector(at))
             res = residues[iresidue]
             rtype = threeletter(resname(res)) # convert non-standard residue names in types (e. g. HSD -> HIS)
-            if !(haskey(protein_residues, rtype))
-                throw(ArgumentError("""\n
-                    Found non-protein residue ($(resname(res))) in the selected atoms of SASA calculation.
-                    m-value calculations are only defined for protein residues.
-    
-                """))
-            end
             sel_at_sc.residue[] = res
             sel_at_bb.residue[] = res
             bb_res = sasa(sasa_ats, sel_at_bb) 
