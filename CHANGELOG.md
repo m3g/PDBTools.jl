@@ -10,8 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.31.3-DEV
+Version 3.32.0-DEV
 --------------
+- ![FEATURE][badge-feature] Support for `unitcell` keyword argument in `transfer_free_energy` and `mvalue` functions, which will compute SASAs with periodic boundary conditions. 
 
 Version 3.31.2
 --------------
