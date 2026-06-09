@@ -33,7 +33,7 @@ makedocs(
             "Protein Denaturation" => "mvalues/protein_denaturation.md",
             "Conformational Changes" => "mvalues/conformational_changes.md",
             "Cofactor Binding" => "mvalues/cofactor_binding.md",
-            "MoeserHorinekApp Model" => "mvalues/moeserhorinek_app.md",
+            #"MoeserHorinekApp Model" => "mvalues/moeserhorinek_app.md",
             "Alternative Calculations" => "mvalues/alternative_mvalues.md",
         ],
         "Other" => Any[

@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.31.1-DEV
 --------------
+- ![DEPRECATION][badge-breaking][badge-fix][badge-deprecation] Remove inputs of `mvalue` and `transfer_free_energy` functions with sasa data, because the SASA method cannot be changed while preserving consistency among models.
 - ![ENHANCEMENT][badge-enchancement] Use united atom in the parameterization of `Accessibility` model.
 - ![INFO][badge-info] Organize code of `Accessibility` implementation.
 

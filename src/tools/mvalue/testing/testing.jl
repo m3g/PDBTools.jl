@@ -6,101 +6,69 @@
     MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
     MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
 
-    #
-    # AutonBolen model
-    #
-    n_sasa = sasa_particles(MJC_native)
-    d_sasa = sasa_particles(MJC_desnat)
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea")
-    @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.852; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.066; atol=1e-2)
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea")
+    @test isapprox(r_1MJC.tot, -1.429; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -1.492; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.063; atol=1e-2)
+
     # Confirm that now cosolvent selection is not case-sensitive
-    r_1MJC = mvalue(n_sasa, d_sasa, "Urea")
-    @test isapprox(r_1MJC.tot, -0.786; atol=1e-2)
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "Urea")
+    @test isapprox(r_1MJC.tot, -1.429; atol=1e-2)
+
     # test non-parallel vs. parallel calculations
-    ms = mvalue(n_sasa, d_sasa, "urea"; parallel=false)
-    mp = mvalue(n_sasa, d_sasa, "urea"; parallel=true)
+    ms = mvalue(MJC_native, MJC_desnat, "urea"; parallel=false)
+    mp = mvalue(MJC_native, MJC_desnat, "urea"; parallel=true)
     @test ms.tot ≈ mp.tot
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
-        MValue{AutonBolen} - 69 residues - cosolvent: "urea"
-            Total m-value: -0.7856683 kcal mol⁻¹
-            Backbone contributions: -0.8520461 kcal mol⁻¹
-            Side-chain contributions: 0.06637777 kcal mol⁻¹
+            PDBTools.MValue{AutonBolen} - 69 residues - cosolvent: "urea"
+                Total m-value: -1.4297819 kcal mol⁻¹
+                Backbone contributions: -1.4926115 kcal mol⁻¹
+                Side-chain contributions: 0.0628296 kcal mol⁻¹
         """
 
-    # Without H
-    n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
-    d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea")
-    @test isapprox(r_1MJC.tot, -1.546; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -1.600; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.0539; atol=1e-2)
-
-    r_1MJC = mvalue(n_sasa, d_sasa, "tmao")
-    @test isapprox(r_1MJC.tot, 3.073; atol=1e-2)
-    @test isapprox(r_1MJC.bb, 3.692; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.619; atol=1e-2)
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "tmao")
+    @test isapprox(r_1MJC.tot, 2.773; atol=1e-2)
+    @test isapprox(r_1MJC.bb, 3.444; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.672; atol=1e-2)
 
     #
     # MoeserHorinek model
     # 
-    n_sasa = sasa_particles(MJC_native)
-    d_sasa = sasa_particles(MJC_desnat)
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -0.937; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.391; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.546; atol=1e-2)
-
-    # Without H
-    n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
-    d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -1.222; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.757; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.465; atol=1e-2)
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; model=MoeserHorinek)
+    @test isapprox(r_1MJC.tot, -1.216; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
 
     # Same definitions as Gromacs for side chain and backbone
-    n_sasa = sasa_particles(select(MJC_native, "protein and not element H"))
-    d_sasa = sasa_particles(select(MJC_desnat, "protein and not element H"))
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea";
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea";
         model=MoeserHorinek,
         backbone=at -> name(at) in ("N", "CA", "C", "O"),
         sidechain=at -> !(name(at) in ("N", "CA", "C", "O")),
     )
-    @test isapprox(r_1MJC.tot, -1.227; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.757; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.470; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.215; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
 
     # Provide a selection
-    r_1MJC = mvalue(n_sasa, d_sasa, "urea"; sel="acidic")
-    @test isapprox(r_1MJC.tot, -0.037; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.104; atol=1e-2)
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
+    @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
 
-    # Input file with non-protein atoms
-    pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
-    s1 = sasa_particles(pdb)
-    s2 = sasa_particles(select(pdb, "protein"))
-    # This should work:
-    m = mvalue(s1, s2, "urea"; sel="protein")
-    @test m.tot ≈ 0.0 atol = 1e-2
-    m = mvalue(s2, s1, "urea"; sel="protein")
-    @test m.tot ≈ 0.0 atol = 1e-2
-    # But these should error:
-    @test_throws "same number of residues" mvalue(s2, s1, "urea") # different number of residues
-    s2 = sasa_particles(pdb)
-    @test_throws "non-protein residue" mvalue(s2, s1, "urea") # different number of residues
-    s1 = sasa_particles(select(pdb, "protein"))
-    pdb2 = copy.(pdb)
-    rs = collect(eachresidue(pdb2))
-    for at in rs[2]
+    # Some errors
+    p1 = read_pdb(PDBTools.TESTPDB, "protein and residue < 10")
+    p2 = read_pdb(PDBTools.TESTPDB, "protein and residue < 11")
+    @test_throws "same number of residues" mvalue(p1, p2, "urea") # different number of residues
+
+    p1 = select(p1, "protein")
+    p2 = copy.(p1)
+    rs = collect(eachresidue(p2))
+    for at in rs[7]
         at.resname = "ASP"
     end
-    s2 = sasa_particles(select(pdb2, "protein"))
-    @test_throws "same type" mvalue(s2, s1, "urea") # different number of residues
+    @test_throws "same type" mvalue(p1, p2, "urea") # different number of residues
 
 end
 
@@ -233,6 +201,7 @@ end
     @test isapprox(r_2RN2.tot, -3.13; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.89; rtol=1e-1)
     @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
+
     sasa_2RN2_julia = delta_sasa_per_restype(; native=RN2_native, desnat=RN2_desnat, ignore_hydrogen=false)
     r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_julia)
     @test isapprox(r_2RN2.tot, -2.59; rtol=1e-1)
@@ -276,6 +245,9 @@ end
         for ig in 1:3
             m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=MJC_clean, sasas=sasa_1MJC_clean, type=ig)
             @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
+            cm = CreamerDenaturedModel(MJC_clean, ig)
+            m = mvalue(cm, cos)
+            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
 
@@ -294,6 +266,9 @@ end
         for ig in 1:3
             m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=RN2_clean, sasas=sasa_2RN2_clean, type=ig)
             @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
+            cm = CreamerDenaturedModel(RN2_clean, ig)
+            m = mvalue(cm, cos)
+            @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
 
@@ -411,13 +386,13 @@ end
     # test that hydrogens are properly handled (0 vdw radius)
     pdb = read_pdb(PDBTools.TESTPDB, "protein or name CLA")
     prot = select(pdb, "protein")
-    mH = mvalue_delta_sasa(; atoms=prot, sasas=creamer_delta_sasa(prot))
+    mH = mvalue_delta_sasa(; atoms=prot, sasas=PDBTools.creamer_delta_sasa(prot))
     prot = select(pdb, "protein and not element H")
-    m_not_H = mvalue_delta_sasa(; atoms=prot, sasas=creamer_delta_sasa(prot))
+    m_not_H = mvalue_delta_sasa(; atoms=prot, sasas=PDBTools.creamer_delta_sasa(prot))
     @test mH.tot ≈ m_not_H.tot
 
     # test error for non-recognized element
-    @test_throws "Could not determine" creamer_delta_sasa(pdb)
+    @test_throws "Could not determine" PDBTools.creamer_delta_sasa(pdb)
 
 end
 
@@ -442,23 +417,14 @@ end
         "urea" => (bb=-1548, sc=445, tot=-1104),
     )
     p = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
-    s = sasa_particles(p; 
-        atom_type=PDBTools.creamer_atom_type, 
-        atom_radius_from_type=at -> PDBTools.creamer_atomic_radii[at]
-    )
     for (cosolvent, vals)  in pairs(server_result)
-        t = transfer_free_energy(s, cosolvent)
+        t = transfer_free_energy(p, cosolvent)
         @test t.bb ≈ 1e-3*vals.bb atol=0.1
         @test t.sc ≈ 1e-3*vals.sc atol=0.1
         @test t.tot ≈ 1e-3*vals.tot atol=0.1
     end
 
-    # Call with structure instead of sasas:
     t = transfer_free_energy(p, "urea")
-    @test t.bb ≈ 1e-3*server_result["urea"].bb atol=0.1
-    @test t.sc ≈ 1e-3*server_result["urea"].sc atol=0.1
-    @test t.tot ≈ 1e-3*server_result["urea"].tot atol=0.1
-
     # Test show method
     @test parse_show(t; repl=Dict(r"PDBTools." => "")) ≈ """
         PDBTools.TransferFreeEnergy{AutonBolen} - 155 residues to 1M "urea".
@@ -487,8 +453,7 @@ end
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
-    s = sasa_particles(pdb)
-    @test_throws "non-protein residue" transfer_free_energy(s, "urea")
+    @test_throws "residue TMAO" transfer_free_energy(pdb, "urea")
 
     # Test available cossolvents string
     using InteractiveUtils: subtypes
@@ -499,6 +464,7 @@ end
     @test PDBTools.modelname(MoeserHorinek) == "MoeserHorinek"
     @test PDBTools.modelname(AutonBolen) == "AutonBolen"
     @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
+    @test PDBTools.modelname(Accessibility) == "Accessibility"
 
 end
 

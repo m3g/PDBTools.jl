@@ -4,23 +4,18 @@ CollapsedDocStrings = true
 
 # Protein conformational changes
 
-Consider these two states of a model protein, a native and a denatured (straight chain) state, obtained from  a simulation. Here the conformational change could be of any kind. We compute the SASA of the two states:
+Consider these two states of a model protein, a native and a denatured (straight chain) state, obtained from  a simulation. Here the conformational change could be of any kind. We load the structures of the two states:
 ```@example mvalue
 using PDBTools
 native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/testing/1MJC_native.pdb", "protein")
-sasa_native = sasa_particles(native_state)
-```
-
-```@example mvalue
 desnat_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/testing/1MJC_straight.pdb", "protein")
-sasa_desnat = sasa_particles(desnat_state)
 ```
 
 The denatured state has a greater surface area than the native state. Thus, cosolvents 
 that bind preferentially to the surface, as urea, should promote a stabilization of the
 denatured state. This is obtained with:
 ```@example mvalue
-m = mvalue(sasa_native, sasa_desnat, "urea"; model=MoeserHorinek)
+m = mvalue(native_state, desnat_state, "urea"; model=MoeserHorinek)
 ```
 Where the `tot`, `bb` and `sc` fields contain, respectively, the total, backbone and side-chain contributions.
 The `MValue` object contains, additionally, the contribution of the side chain and backbone of 
