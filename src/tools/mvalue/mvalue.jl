@@ -12,11 +12,13 @@ include("./models/MoeserHorinekApp.jl")
 include("./models/Accessibility_data.jl")
 include("./models/Accessibility.jl")
 
+not_hydrogen(at) = startswith(element(at)) != 'H'
+get_creamer_radius(at) = PDBTools.creamer_atomic_radii[at]
 function sasa_particles_creamer_ua(p::AbstractVector{<:Atom}; n_dots=512)
-    p_no_h = select(p, at -> element(at) != "H")
+    p_no_h = select(p, not_hydrogen)
     s = sasa_particles(p_no_h;
         atom_type = PDBTools.creamer_atom_type,
-        atom_radius_from_type = at -> PDBTools.creamer_atomic_radii[at],
+        atom_radius_from_type = get_creamer_radius,
         n_dots
     )
     return s

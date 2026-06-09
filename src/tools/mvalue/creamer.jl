@@ -197,7 +197,7 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
 )
 
 function creamer_atom_type(at::Atom)
-    rname = threeletter(resname(at))
+    rname = threeletter(StringType, resname(at))
     atname = name(at)
     if haskey(PDB_ATOM_HYBRIDIZATION, rname)
         if haskey(PDB_ATOM_HYBRIDIZATION[rname], atname)

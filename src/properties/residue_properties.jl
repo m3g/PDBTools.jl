@@ -4,6 +4,28 @@ const residue_classes = Dict(
     :nucleoside_residues => nucleoside_residues,
 )
 
+# Fast path for threeletter(::Type{StringType}, residue): maps every known residue
+# code (and one-letter code) directly to the canonical three-letter StringType,
+# avoiding the string(residue) conversion and findfirst closures in _resname.
+# Protein codes take priority over nucleoside codes for ambiguous one-letter codes.
+const _THREELETTER_LOOKUP = let
+    d = Dict{StringType, StringType}()
+    for (code, data) in protein_residues
+        d[StringType(code)] = StringType(data.three_letter_code)
+    end
+    for (code, data) in protein_residues
+        ol = StringType(data.one_letter_code)
+        haskey(d, ol) || (d[ol] = StringType(data.three_letter_code))
+    end
+    for (code, data) in nucleoside_residues
+        sk = StringType(code)
+        haskey(d, sk) || (d[sk] = StringType(data.three_letter_code))
+        ol = StringType(data.one_letter_code)
+        haskey(d, ol) || (d[ol] = StringType(data.three_letter_code))
+    end
+    d
+end
+
 function _input_residue_classes(residue_classes)
     residue_classes = if isnothing(residue_classes)
         keys(PDBTools.residue_classes)
@@ -62,8 +84,10 @@ end
     @test resname("A"; residue_classes=:nucleoside_residues) == "ADO"
 end
 
+const _default_classes = keys(PDBTools.residue_classes)
+
 # This variation returns the class where the code was found, for internal processing
-function _resname(residue; residue_classes=keys(PDBTools.residue_classes))
+function _resname(residue; residue_classes=_default_classes)
     residue_classes = _input_residue_classes(residue_classes)
     code = string(residue)
     # Input: one letter code
@@ -140,6 +164,10 @@ function threeletter(residue; residue_classes=nothing)
     rname, cl = _resname(residue; residue_classes)
     rname = isnothing(rname) ? nothing : PDBTools.residue_classes[cl][rname].three_letter_code
     return rname
+end
+
+function threeletter(::Type{StringType}, residue)
+    return get(_THREELETTER_LOOKUP, StringType(residue), nothing)
 end
 
 @testitem "threeletter" begin

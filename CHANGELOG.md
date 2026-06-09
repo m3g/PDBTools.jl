@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.31.2-DEV
 --------------
+- ![ENHANCEMENT][badge-enhancement] Faster `transfer_free_energy` and `mvalue` calculations with faster Creamer data fetching.
 
 Version 3.31.1
 --------------
