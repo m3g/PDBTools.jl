@@ -73,7 +73,7 @@ function transfer_free_energy(
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
     parallel::Bool=true,
-) where {F1<:Function,F2<:Function,F3<:Function}
+) where {F1<:Function,F2<:Function}
     selector = Select(sel)
     sasa_ats = sasa_particles_creamer_ua(atoms)
     residues = collect(eachresidue(atoms))

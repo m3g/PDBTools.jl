@@ -147,7 +147,7 @@ function mvalue(
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
     parallel::Bool=true,
-) where {F1<:Function,F2<:Function,F3<:Function}
+) where {F1<:Function,F2<:Function}
     selector = Select(sel)
     sasa_initial = sasa_particles_creamer_ua(initial_state)
     sasa_final = sasa_particles_creamer_ua(final_state)
