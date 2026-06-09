@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.31.1-DEV
 --------------
+- ![ENHANCEMENT][badge-enchancement] Use united atom in the parameterization of `Accessibility` model.
+- ![INFO][badge-info] Organize code of `Accessibility` implementation.
 
 Version 3.31.0
 --------------

@@ -478,9 +478,10 @@ end
     # Tests for Accessibility model
     cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
     for c in keys(PDBTools.cosolvent_column_Accessibility)
-        c_ab = mvalue(cm, c; model=AutonBolen)
-        c_acc = mvalue(cm, c; model=Accessibility)
-        @test c_ab.tot ≈ c_acc.tot atol=0.15
+        c_ab = mvalue(cm, c; model=AutonBolen).tot
+        c_acc = mvalue(cm, c; model=Accessibility).tot
+        @test c_ab ≈ c_acc atol = 0.25
+        @test 1 + c_ab ≈ 1 + c_acc rtol = 0.25
     end
 
     # Test error path
