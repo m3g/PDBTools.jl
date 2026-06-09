@@ -84,6 +84,8 @@ end
     @test resname("A"; residue_classes=:nucleoside_residues) == "ADO"
 end
 
+const _default_classes = keys(PDBTools.residue_classes)
+
 # This variation returns the class where the code was found, for internal processing
 function _resname(residue; residue_classes=_default_classes)
     residue_classes = _input_residue_classes(residue_classes)
