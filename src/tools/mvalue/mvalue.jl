@@ -6,23 +6,12 @@ export MoeserHorinek, AutonBolen, MoeserHorinekApp
 abstract type MValueModel end
 modelname(m::Type{<:MValueModel}) = replace(string(m), "PDBTools." => "")
 
+include("./creamer.jl")
 include("./models/MoeserHorinek.jl")
 include("./models/AutonBolen.jl")
 include("./models/MoeserHorinekApp.jl")
 include("./models/Accessibility_data.jl")
 include("./models/Accessibility.jl")
-
-not_hydrogen(at) = startswith(element(at)) != 'H'
-get_creamer_radius(at) = PDBTools.creamer_atomic_radii[at]
-function sasa_particles_creamer_ua(p::AbstractVector{<:Atom}; n_dots=512, unitcell=nothing)
-    p_no_h = select(p, not_hydrogen)
-    s = sasa_particles(p_no_h;
-        atom_type = PDBTools.creamer_atom_type,
-        atom_radius_from_type = get_creamer_radius,
-        n_dots, unitcell,
-    )
-    return s
-end
 
 # Available-cosolvents string for docstring entries:
 function _available_cosolvents() 
@@ -80,7 +69,7 @@ _AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
 
 """
     mvalue(
-        inital_state::AbstractVector{<:Atom},
+        initial_state::AbstractVector{<:Atom},
         final_state::AbstractVector{<:Atom},
         cosolvent::AbstractString;
         sel::Union{String,Function}=all,
@@ -88,6 +77,7 @@ _AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
         parallel:Bool = true,
+        unitcell=nothing,
         sasa_particles::Function = sasa_particles with Creamer united atom radii and no hydrogens.
     )
 
@@ -153,11 +143,65 @@ function mvalue(
     parallel::Bool=true,
     unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
+    sasa_initial = sasa_particles(CreamerUnitedAtomRadii, initial_state; unitcell)
+    sasa_final = sasa_particles(CreamerUnitedAtomRadii, final_state; unitcell)
+    return mvalue(
+        sasa_initial,
+        sasa_final,
+        cosolvent;
+        sel,
+        model,
+        backbone,
+        sidechain,
+        parallel,
+    )
+end
+
+function mvalue(
+    sasa_initial::SASA{T1},
+    sasa_final::SASA{T2},
+    cosolvent; kargs...
+) where {T1,T2}
+    throw(ArgumentError("""\n
+        To computie m-values or transfer free energies the SASA computation 
+        must use CreamerUnitedAtomRadii. For example, use:
+
+            s = sasa_particles(CreamerUnitedAtomRadii, atoms)
+
+        Got atomic radii types: $T1 and $T2
+
+    """))
+end
+
+"""
+    mvalue(
+        sasa_initial::SASA{CreamerUnitedAtomRadii},
+        sasa_final::SASA{CreamerUnitedAtomRadii},
+        cosolvent::AbstractString;
+        sel::Union{String,Function}=all,
+        model::Type{<:MValueModel}=AutonBolen,
+        backbone::F1=isbackbone,
+        sidechain::F2=issidechain,
+        parallel::Bool=true,
+    ) where {F1<:Function,F2<:Function}
+
+Compute m-values from precomputed solvent accessible surface areas. The SASAs must
+have been computed with `CreamerUnitedAtomRadii` radii.
+
+"""
+function mvalue(
+    sasa_initial::SASA{CreamerUnitedAtomRadii},
+    sasa_final::SASA{CreamerUnitedAtomRadii},
+    cosolvent::AbstractString;
+    sel::Union{String,Function}=all,
+    model::Type{<:MValueModel}=AutonBolen,
+    backbone::F1=isbackbone,
+    sidechain::F2=issidechain,
+    parallel::Bool=true,
+) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    sasa_initial = sasa_particles_creamer_ua(initial_state; unitcell)
-    sasa_final = sasa_particles_creamer_ua(final_state; unitcell)
-    residues_initial = collect(eachresidue(initial_state))
-    residues_final = collect(eachresidue(final_state))
+    residues_initial = collect(eachresidue(sasa_initial.particles))
+    residues_final = collect(eachresidue(sasa_final.particles))
     cosolvent = lowercase(cosolvent)
     if length(residues_initial) != length(residues_final)
         throw(ArgumentError("""\n
@@ -222,5 +266,4 @@ end
 
 include("./transfer_free_energy.jl")
 include("./mvalue_exogenous.jl")
-include("./creamer.jl")
 include("./testing/testing.jl")

@@ -3,10 +3,14 @@ using CellListMap: ParticleSystem, pairwise!
 using LinearAlgebra: norm
 using SIMD: VecRange
 
+abstract type AtomicRadiiType end
+struct CustomAtomicRadii <: AtomicRadiiType end
+struct StandardAtomicRadii <: AtomicRadiiType end
+
 #
 # Container for the custom atom filed that will carry the resulting SASA information
 #
-struct SASA{N,V}
+struct SASA{RadiiType<:AtomicRadiiType,N,V}
     particles::V
     sasa::Vector{Float32}
     dots::Vector{Vector{SVector{N,Float32}}}
@@ -203,6 +207,39 @@ function sasa_particles(
     atoms::AbstractVector{<:Atom};
     probe_radius::Real=1.4f0,
     n_dots::Int=512,
+    atom_type::Union{Nothing,Function}=nothing,
+    atom_radius_from_type::Union{Nothing,Function}=nothing,
+    output_dots::Bool=false,
+    unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
+    parallel=true,
+    N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tuned for maximum performance.
+) where {N}
+    # Without defining atom type functions, return default StandardAtomicRadii calculation
+    if isnothing(atom_type) & isnothing(atom_radius_from_type)
+        return sasa_particles(StandardAtomicRadii, atoms;
+            probe_radius, n_dots, output_dots, unitcell, parallel, N_SIMD
+        )
+    else
+        # Return a CustomAtomicRadii structure
+        atom_type = isnothing(atom_type) ? element : atom_type
+        atom_radius_from_type = isnothing(atom_radius_from_type) ? 
+            type -> getproperty(elements[type], :vdw_radius) : atom_radius_from_type
+        return _sasa_particles(CustomAtomicRadii, atoms;
+            atom_type=atom_type,
+            atom_radius_from_type=atom_radius_from_type,
+            probe_radius, n_dots, output_dots, unitcell, parallel, N_SIMD
+        )
+    end
+end 
+
+#
+# Internal main sasa calculation interface 
+#
+function _sasa_particles(
+    RadiiType::Type{<:AtomicRadiiType},
+    atoms::AbstractVector{<:Atom};
+    probe_radius::Real=1.4f0,
+    n_dots::Int=512,
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     output_dots::Bool=false,
@@ -243,6 +280,7 @@ function sasa_particles(
 
     # Compute sasa (function barrier for specialization on the output type)
     return _compute_sasa_particles(
+        RadiiType,
         system,
         atoms,
         n_dots,
@@ -256,6 +294,7 @@ function sasa_particles(
 end
 
 function _compute_sasa_particles(
+    RadiiType::Type{<:AtomicRadiiType},
     system,
     atoms,
     n_dots,
@@ -294,7 +333,24 @@ function _compute_sasa_particles(
             push!(dots, dots_exposed_i)
         end
     end
-    return SASA{3,typeof(atoms)}(atoms, s, dots)
+    return SASA{RadiiType,3,typeof(atoms)}(atoms, s, dots)
+end
+
+"""
+    sasa_particles(StandardAtomicRadii, atoms; kargs...)
+
+Alias for computing `sasa_particles` with the default standard atomistic radii (all-atom
+representation of the structure, assuming the presence of hydrogen atoms). This is 
+similar to calling `sasa_particles(atoms; kargs..)` omittting the first argument.
+
+"""
+function sasa_particles(::Type{StandardAtomicRadii}, atoms; kargs...)
+    return _sasa_particles(
+        StandardAtomicRadii, atoms; 
+        atom_type=element,
+        atom_radius_from_type=type -> getproperty(elements[type], :vdw_radius),
+        kargs...
+    )
 end
 
 """
@@ -332,8 +388,8 @@ julia> sasa(at_sasa[1]) # single atom SASA
 """
 function sasa end
 sasa(p::SASA) = sum(i -> p[i], eachindex(p); init=0.f0)
-sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]); init=0.f0)
-sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {N} = sasa(p, Select(sel))
+sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {T,N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]); init=0.f0)
+sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {T,N} = sasa(p, Select(sel))
 
 @testitem "sasa" begin
     using PDBTools
@@ -390,17 +446,17 @@ sasa(p::SASA{N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {N
 
     # Test show method
     @test parse_show(at_sasa; repl=Dict(r"PDBTools." => "")) ≈ """
-            SASA{3, Vector{Atom{Nothing}}}
+            SASA{StandardAtomicRadii, 3, Vector{Atom{Nothing}}}
                 Number of particles: 104
                 Total SASA: 5856.9966
                 Output of dots: true 
         """
 
     # Test errors
-    @test_throws ArgumentError sasa_particles(prot; probe_radius=-2.0)
-    @test_throws ArgumentError sasa_particles(prot; n_dots=0)
+    @test_throws "probe_radius too small" sasa_particles(prot; probe_radius=-2.0)
+    @test_throws "n_dots incorrectly" sasa_particles(prot; n_dots=0)
     prot[1].name = "Ti"
     prot[1].pdb_element = "Ti"
-    @test_throws ArgumentError sasa_particles(prot)
+    @test_throws "Ti does not have" sasa_particles(prot)
 
 end

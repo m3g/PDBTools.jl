@@ -51,8 +51,22 @@
     @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
     @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
 
+    # Compute using precomputed SASAs
+    sn = sasa_particles(CreamerUnitedAtomRadii, MJC_native)
+    sd = sasa_particles(CreamerUnitedAtomRadii, MJC_desnat)
+    r_1MJC = mvalue(sn, sd, "urea"; model=MoeserHorinek)
+    @test isapprox(r_1MJC.tot, -1.215; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+
     # Provide a selection
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
+    @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+
+    # Provide a selection using SASAs
+    r_1MJC = mvalue(sn, sd, "urea"; sel="acidic")
     @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
@@ -70,13 +84,17 @@
     end
     @test_throws "same type" mvalue(p1, p2, "urea") # different number of residues
 
-    # Support for peridoic boundary conditions
+    # Support for periodic boundary conditions
     no_pbc = read_pdb(PDBTools.TESTNOPBC, "protein")
     pbc = read_pdb(PDBTools.TESTPBC, "protein")
     uc = [107.845, 107.845, 107.845]
     @test transfer_free_energy(no_pbc, "urea").tot ≈ 
           transfer_free_energy(pbc, "urea"; unitcell=uc).tot
     @test mvalue(pbc, pbc, "urea"; unitcell=uc).tot ≈ 0.0 atol=1e-5
+
+    # Error if wrong atomic radii was provided
+    s = sasa_particles(no_pbc)
+    @test_throws "must use CreamerUnitedAtomRadii" mvalue(s, s, "urea")
 
 end
 
@@ -430,6 +448,12 @@ end
         @test t.bb ≈ 1e-3*vals.bb atol=0.1
         @test t.sc ≈ 1e-3*vals.sc atol=0.1
         @test t.tot ≈ 1e-3*vals.tot atol=0.1
+        # from SASAs
+        s = sasa_particles(CreamerUnitedAtomRadii, p)
+        t = transfer_free_energy(s, cosolvent)
+        @test t.bb ≈ 1e-3*vals.bb atol=0.1
+        @test t.sc ≈ 1e-3*vals.sc atol=0.1
+        @test t.tot ≈ 1e-3*vals.tot atol=0.1
     end
 
     t = transfer_free_energy(p, "urea")
@@ -473,6 +497,10 @@ end
     @test PDBTools.modelname(AutonBolen) == "AutonBolen"
     @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
     @test PDBTools.modelname(Accessibility) == "Accessibility"
+
+    # Error if wrong atomic radii was provided
+    s = sasa_particles(pdb)
+    @test_throws "must use CreamerUnitedAtomRadii" transfer_free_energy(s, "urea")
 
 end
 
