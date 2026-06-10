@@ -14,12 +14,12 @@ include("./models/Accessibility.jl")
 
 not_hydrogen(at) = startswith(element(at)) != 'H'
 get_creamer_radius(at) = PDBTools.creamer_atomic_radii[at]
-function sasa_particles_creamer_ua(p::AbstractVector{<:Atom}; n_dots=512)
+function sasa_particles_creamer_ua(p::AbstractVector{<:Atom}; n_dots=512, unitcell=nothing)
     p_no_h = select(p, not_hydrogen)
     s = sasa_particles(p_no_h;
         atom_type = PDBTools.creamer_atom_type,
         atom_radius_from_type = get_creamer_radius,
-        n_dots
+        n_dots, unitcell,
     )
     return s
 end
@@ -109,6 +109,8 @@ $(_available_cosolvents())
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
+- `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
+  the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
 
 # Returns
 
@@ -149,10 +151,11 @@ function mvalue(
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
     parallel::Bool=true,
+    unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    sasa_initial = sasa_particles_creamer_ua(initial_state)
-    sasa_final = sasa_particles_creamer_ua(final_state)
+    sasa_initial = sasa_particles_creamer_ua(initial_state; unitcell)
+    sasa_final = sasa_particles_creamer_ua(final_state; unitcell)
     residues_initial = collect(eachresidue(initial_state))
     residues_final = collect(eachresidue(final_state))
     cosolvent = lowercase(cosolvent)

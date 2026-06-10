@@ -70,6 +70,14 @@
     end
     @test_throws "same type" mvalue(p1, p2, "urea") # different number of residues
 
+    # Support for peridoic boundary conditions
+    no_pbc = read_pdb(PDBTools.TESTNOPBC, "protein")
+    pbc = read_pdb(PDBTools.TESTPBC, "protein")
+    uc = [107.845, 107.845, 107.845]
+    @test transfer_free_energy(no_pbc, "urea").tot ≈ 
+          transfer_free_energy(pbc, "urea"; unitcell=uc).tot
+    @test mvalue(pbc, pbc, "urea"; unitcell=uc).tot ≈ 0.0 atol=1e-5
+
 end
 
 @testitem "mvalue_delta_sasa" begin

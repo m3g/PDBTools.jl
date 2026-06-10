@@ -38,6 +38,8 @@ $(_available_cosolvents())
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
+- `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
+  the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
 
 # Returns
 
@@ -73,9 +75,10 @@ function transfer_free_energy(
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
     parallel::Bool=true,
+    unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    sasa_ats = sasa_particles_creamer_ua(atoms)
+    sasa_ats = sasa_particles_creamer_ua(atoms; unitcell)
     residues = collect(eachresidue(atoms))
     cosolvent = lowercase(cosolvent)
     residue_contributions_bb = zeros(Float32, length(residues))
