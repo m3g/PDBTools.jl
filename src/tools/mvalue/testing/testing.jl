@@ -71,6 +71,14 @@
     r2 = mvalue(MJC_native, MJC_desnat, "urea"; sel="not acidic")
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
+    rbb = mvalue(MJC_native, MJC_desnat, "urea"; sel="backbone")
+    @test r0.bb ≈ rbb.tot
+    @test r0.bb ≈ rbb.bb
+    @test rbb.sc ≈ 0.0 atol=1e-10
+    rsc = mvalue(MJC_native, MJC_desnat, "urea"; sel="sidechain")
+    @test r0.sc ≈ rsc.tot
+    @test r0.sc ≈ rsc.sc
+    @test rsc.bb ≈ 0.0 atol=1e-10
 
     # Provide a selection using SASAs
     r_1MJC = mvalue(sn, sd, "urea"; sel="acidic")
@@ -489,6 +497,14 @@ end
     r2 = transfer_free_energy(s, "urea"; sel="not polar")
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
+    rbb = transfer_free_energy(s, "urea"; sel="backbone")
+    @test r0.bb ≈ rbb.tot
+    @test r0.bb ≈ rbb.bb
+    @test rbb.sc ≈ 0.0 atol=1e-10
+    rsc = transfer_free_energy(s, "urea"; sel="sidechain")
+    @test r0.sc ≈ rsc.tot
+    @test r0.sc ≈ rsc.sc
+    @test rsc.bb ≈ 0.0 atol=1e-10
 
     # Test show method
     t = transfer_free_energy(p, "urea")
