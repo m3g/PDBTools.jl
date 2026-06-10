@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.32.2-DEV
+--------------
+
 Version 3.32.1
 --------------
 - ![FIX][badge-fix] When providing a selection to `mvalue` or `transfer_free_energy`, do not run over all the residues of the object (structure of SASA), but only on the residues of the selection.
