@@ -200,8 +200,8 @@ function mvalue(
     parallel::Bool=true,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
-    residues_initial = collect(eachresidue(sasa_initial.particles))
-    residues_final = collect(eachresidue(sasa_final.particles))
+    residues_initial = collect(eachresidue(select(sasa_initial.particles, selector)))
+    residues_final = collect(eachresidue(select(sasa_final.particles, selector)))
     cosolvent = lowercase(cosolvent)
     if length(residues_initial) != length(residues_final)
         throw(ArgumentError("""\n

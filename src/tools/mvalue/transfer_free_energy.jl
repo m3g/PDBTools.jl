@@ -122,7 +122,7 @@ function transfer_free_energy(
     parallel::Bool=true,
 ) where {F1,F2}
     selector = Select(sel)
-    residues = collect(eachresidue(sasa_ats.particles))
+    residues = collect(eachresidue(select(sasa_ats.particles, selector)))
     cosolvent = lowercase(cosolvent)
     residue_contributions_bb = zeros(Float32, length(residues))
     residue_contributions_sc = zeros(Float32, length(residues))

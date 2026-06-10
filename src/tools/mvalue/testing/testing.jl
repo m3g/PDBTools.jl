@@ -65,11 +65,24 @@
     @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
 
+    # Test selection additivity
+    r0 = mvalue(MJC_native, MJC_desnat, "urea")
+    r1 = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
+    r2 = mvalue(MJC_native, MJC_desnat, "urea"; sel="not acidic")
+    @test r0.nresidues == r1.nresidues + r2.nresidues
+    @test r0.tot ≈ r1.tot + r2.tot
+
     # Provide a selection using SASAs
     r_1MJC = mvalue(sn, sd, "urea"; sel="acidic")
     @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+
+    # Test selection additivity
+    r1 = mvalue(sn, sd, "urea"; sel="acidic")
+    r2 = mvalue(sn, sd, "urea"; sel="not acidic")
+    @test r0.nresidues == r1.nresidues + r2.nresidues
+    @test r0.tot ≈ r1.tot + r2.tot
 
     # Some errors
     p1 = read_pdb(PDBTools.TESTPDB, "protein and residue < 10")
@@ -456,8 +469,29 @@ end
         @test t.tot ≈ 1e-3*vals.tot atol=0.1
     end
 
-    t = transfer_free_energy(p, "urea")
+    # Test selection additivity
+    r0 = transfer_free_energy(p, "urea")
+    r1 = transfer_free_energy(p, "urea"; sel="polar")
+    r2 = transfer_free_energy(p, "urea"; sel="not polar")
+    @test r0.nresidues == r1.nresidues + r2.nresidues
+    @test r0.tot ≈ r1.tot + r2.tot
+
+    # Provide a selection using SASAs
+    s = sasa_particles(CreamerUnitedAtomRadii, p)
+    r0 = transfer_free_energy(s, "urea")
+    r1 = transfer_free_energy(s, "urea"; sel="polar")
+    r2 = transfer_free_energy(s, "urea"; sel="not polar")
+    @test r0.nresidues == r1.nresidues + r2.nresidues
+    @test r0.tot ≈ r1.tot + r2.tot
+
+    # Test selection additivity
+    r1 = transfer_free_energy(s, "urea"; sel="polar")
+    r2 = transfer_free_energy(s, "urea"; sel="not polar")
+    @test r0.nresidues == r1.nresidues + r2.nresidues
+    @test r0.tot ≈ r1.tot + r2.tot
+
     # Test show method
+    t = transfer_free_energy(p, "urea")
     @test parse_show(t; repl=Dict(r"PDBTools." => "")) ≈ """
         PDBTools.TransferFreeEnergy{AutonBolen} - 155 residues to 1M "urea".
         Total transfer free energy: -1.125963 kcal mol⁻¹
