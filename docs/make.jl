@@ -34,6 +34,7 @@ makedocs(
             "Conformational Changes" => "mvalues/conformational_changes.md",
             "Cofactor Binding" => "mvalues/cofactor_binding.md",
             #"MoeserHorinekApp Model" => "mvalues/moeserhorinek_app.md",
+            "SASA precomputation" => "mvalues/sasa_precomputing.md",
             "Alternative Calculations" => "mvalues/alternative_mvalues.md",
         ],
         "Other" => Any[

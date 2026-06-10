@@ -77,9 +77,52 @@ function transfer_free_energy(
     parallel::Bool=true,
     unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
+    sasa_ats = sasa_particles(CreamerUnitedAtomRadii, atoms; unitcell)
+    return transfer_free_energy(
+        sasa_ats, cosolvent;
+        model, backbone, sel, sidechain, parallel
+    )
+end
+
+function transfer_free_energy(sasa_ats::SASA{T1}, cosolvent; kargs...) where {T1}
+    throw(ArgumentError("""\n
+        To computie m-values or transfer free energies the SASA computation 
+        must use CreamerUnitedAtomRadii. For example, use:
+
+            s = sasa_particles(CreamerUnitedAtomRadii, atoms)
+
+        Got atomic radii type: $T1
+
+    """))
+end
+
+"""
+    transfer_free_energy(
+        sasa_ats::SASA{CreamerUnitedAtomRadii},
+        cosolvent::AbstractString;
+        model::Type{<:MValueModel}=AutonBolen,
+        backbone::F1=isbackbone,
+        sel::Union{String,Function}=all,
+        sidechain::F2=issidechain,
+        parallel::Bool=true,
+    )
+    
+
+Compute transfer free energies from precomputed solvent accessible surface areas. The SASAs must
+have been computed with `CreamerUnitedAtomRadii` radii.
+
+"""
+function transfer_free_energy(
+    sasa_ats::SASA{CreamerUnitedAtomRadii},
+    cosolvent::AbstractString;
+    model::Type{<:MValueModel}=AutonBolen,
+    backbone::F1=isbackbone,
+    sel::Union{String,Function}=all,
+    sidechain::F2=issidechain,
+    parallel::Bool=true,
+) where {F1,F2}
     selector = Select(sel)
-    sasa_ats = sasa_particles_creamer_ua(atoms; unitcell)
-    residues = collect(eachresidue(atoms))
+    residues = collect(eachresidue(sasa_ats.particles))
     cosolvent = lowercase(cosolvent)
     residue_contributions_bb = zeros(Float32, length(residues))
     residue_contributions_sc = zeros(Float32, length(residues))

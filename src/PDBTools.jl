@@ -44,6 +44,7 @@ export select_with_vmd
 export center_of_mass
 export moveto!
 export sasa_particles, sasa
+export StandardAtomicRadii, CreamerUnitedAtomRadii, CustomAtomicRadii
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
 export mvalue, CreamerDenaturedModel
@@ -72,6 +73,8 @@ const HETATMPDB = joinpath(src_dir, "../test/hetatm.pdb")
 const TESTPBC = joinpath(src_dir, "../test/pbc.pdb")
 const TESTNOPBC = joinpath(src_dir, "../test/no_pbc.pdb")
 const CIF_2C_CHAIN = joinpath(src_dir, "../test/6CO8.cif")
+const MJC_NATIVE = joinpath(src_dir, "./tools/mvalue/testing/1MJC_native.pdb")
+const MJC_DESNAT = joinpath(src_dir, "./tools/mvalue/testing/1MJC_straight.pdb")
 
 # Basic chemistry
 include("./properties/elements.jl")
@@ -117,7 +120,7 @@ include("./coordinates/dihedrals.jl")
 
 # Miscellaneous tools
 include("./tools/tools.jl")
-include("./tools/sasa.jl")
+include("./tools/sasa/sasa.jl")
 include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
 include("./tools/mvalue/mvalue.jl")

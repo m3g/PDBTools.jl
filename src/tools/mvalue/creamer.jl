@@ -1,3 +1,26 @@
+struct CreamerUnitedAtomRadii <: AtomicRadiiType end
+
+_not_hydrogen(at) = startswith(element(at)) != 'H'
+_get_creamer_radius(at) = PDBTools.creamer_atomic_radii[at]
+
+"""
+    sasa_particles(CreamerUnitedAtomRadii, atoms; kargs...)
+
+Compute the SASA of the structure using Creamer united atom radii. This parameterization
+is essentially available for proteins, and ignores any hydrogen atoms of the structure.
+Used for the computation of transfer free energies and m-values using additive transfer models. 
+
+"""
+function sasa_particles(::Type{CreamerUnitedAtomRadii}, atoms; kargs...)
+    p_no_h = select(atoms, _not_hydrogen)
+    s = _sasa_particles(CreamerUnitedAtomRadii, p_no_h;
+        atom_type = PDBTools.creamer_atom_type,
+        atom_radius_from_type = _get_creamer_radius,
+        kargs...
+    )
+    return s
+end
+
 const creamer_atomic_radii = OrderedDict{StringType,Float32}(
     "Nsp2" => 1.64,
     "Nsp3" => 1.64,

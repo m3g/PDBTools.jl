@@ -29,7 +29,7 @@ with the `transfer_free_energy` function:
 
 ```@example mvalue
 using PDBTools
-native_state = read_pdb(PDBTools.src_dir*"/tools/mvalue/testing/1MJC_native.pdb", "protein")
+native_state = read_pdb(PDBTools.MJC_NATIVE, "protein")
 tfe = transfer_free_energy(native_state, "urea")
 ```
 
