@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.32.0-DEV
+Version 3.32.0
 --------------
 - ![FEATURE][badge-feature] Allow computation of `mvalue`s and `transfer_free_energy`s from precomputed SASA values. For that, dispatch on the `CreamerUnitedAtomRadii` type the SASA calculation, for consistency. Otherwise, an error is thrown.  
 - ![FEATURE][badge-feature] Support for `unitcell` keyword argument in `transfer_free_energy` and `mvalue` functions, which will compute SASAs with periodic boundary conditions. 
