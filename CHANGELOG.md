@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.32.2-DEV
 --------------
+- ![EXPERIMENTAL][badge-experimental] Document the `Accessibility` model.
 
 Version 3.32.1
 --------------
