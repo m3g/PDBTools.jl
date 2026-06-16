@@ -35,15 +35,15 @@ chain, an *isolated* backbone unit, and terminal (capping) groups, weighted by a
 ``\alpha^{sc}_{aa}`` and ``\alpha^{bb}_{aa}`` (``\alpha=1``: fully exposed; ``\alpha=0``: fully shielded):
 
 ```math
-\text{TFE}_{aa} = \alpha^{sc}_{aa}\, \text{TFE}^{i\text{-}sc}_{aa} + \alpha^{bb}_{aa}\, \text{TFE}_\text{bb} + \text{TFE}_\text{TG}.
+\text{TFE}_{aa} = \alpha^{sc}_{aa}\, \text{TFE}^{i\text{-}sc}_{aa} + \alpha^{bb}_{aa}\, \text{TFE}^\text{bb} + \text{TFE}^\text{TG}.
 ```
 
-Since glycine consists only of a backbone and terminal groups, ``\text{TFE}_\text{Gly} = \text{TFE}_\text{bb} + \text{TFE}_\text{TG}``,
-which eliminates the (experimentally inaccessible) ``\text{TFE}_\text{TG}`` term and gives the TFE of the
+Since glycine consists only of a backbone and terminal groups, ``\text{TFE}_\text{Gly} = \text{TFE}^\text{bb} + \text{TFE}^\text{TG}``,
+which eliminates the (experimentally inaccessible) ``\text{TFE}^\text{TG}`` term and gives the TFE of the
 *isolated* side chain:
 
 ```math
-\text{TFE}^{i\text{-}sc}_{aa} = \frac{1}{\alpha^{sc}_{aa}} \left[ \text{TFE}_{aa} - \text{TFE}_\text{Gly} + \left(1 - \alpha^{bb}_{aa}\right)\text{TFE}_\text{bb} \right].
+\text{TFE}^{i\text{-}sc}_{aa} = \frac{1}{\alpha^{sc}_{aa}} \left[ \text{TFE}_{aa} - \text{TFE}_\text{Gly} + \left(1 - \alpha^{bb}_{aa}\right)\text{TFE}^\text{bb} \right].
 ```
 
 Using the apparent, activity-corrected transfer free energies of Auton & Bolen (``\text{TFE}^{sc,app}_{aa}``, with
@@ -51,10 +51,11 @@ the small amino-acid activity corrections ``\gamma_{aa}`` and ``\gamma_\text{Gly
 glycine in urea):
 
 ```math
-\text{TFE}^{i\text{-}sc}_{aa} = \frac{1}{\alpha^{sc}_{aa}} \left[ \text{TFE}^{sc,app}_{aa} + \gamma_{aa} - \gamma_\text{Gly} + \left(1 - \alpha^{bb}_{aa}\right)\text{TFE}_\text{bb} \right].
+\text{TFE}^{i\text{-}sc}_{aa} = \frac{1}{\alpha^{sc}_{aa}} \left[\text{TFE}^{sc,app}_{aa} + 
+  \gamma_{aa} - \gamma_\text{Gly} + \left(1 - \alpha^{bb}_{aa}\right)\text{TFE}^\text{bb} \right].
 ```
 
-The term ``\left(1-\alpha^{bb}_{aa}\right)\text{TFE}_\text{bb}`` corrects for the fact that subtracting
+The term ``\left(1-\alpha^{bb}_{aa}\right)\text{TFE}^\text{bb}`` corrects for the fact that subtracting
 ``\text{TFE}_\text{Gly}`` removes a *full* backbone unit, when only the exposed fraction of the backbone of
 *aa* should be removed.
 
@@ -63,15 +64,15 @@ surface area (ASA) calculations over a non-redundant protein structural database
 
 ```math
 \alpha^{sc}_{aa} = \frac{\text{ASA}^{sc}_{aa}}{\text{ASA}^{i\text{-}sc}_{aa}}, \qquad
-\alpha^{bb}_{aa} = \frac{\text{ASA}^{bb}_{aa}}{\text{ASA}_\text{bb}}
+\alpha^{bb}_{aa} = \frac{\text{ASA}^{bb}_{aa}}{\text{ASA}^\text{bb}}
 ```
 
 where ``\text{ASA}^{sc}_{aa}`` and ``\text{ASA}^{bb}_{aa}`` are the side-chain and backbone ASAs of residue
-*aa* in its normal (attached) context, and ``\text{ASA}^{i\text{-}sc}_{aa}`` and ``\text{ASA}_\text{bb}`` are
+*aa* in its normal (attached) context, and ``\text{ASA}^{i\text{-}sc}_{aa}`` and ``\text{ASA}^\text{bb}`` are
 the ASAs of the side chain detached from the backbone and of the isolated backbone unit (equal to the
-backbone ASA of glycine), respectively. These values are stored in `PDBTools.f_acc`:
+backbone ASA of glycine), respectively:
 
-| Residue | ``\text{ASA}^{sc}`` (Å²) | ``\text{ASA}^{i\text{-}sc}`` (Å²) | ``\text{ASA}^{bb}_{aa}`` (Å²) | ``\text{ASA}_\text{bb}`` (Å²) | ``\alpha^{sc}_{aa}`` | ``\alpha^{bb}_{aa}`` |
+| Residue | ``\text{ASA}^{sc}`` (Å²) | ``\text{ASA}^{i\text{-}sc}`` (Å²) | ``\text{ASA}^{bb}_{aa}`` (Å²) | ``\text{ASA}^\text{bb}`` (Å²) | ``\alpha^{sc}_{aa}`` | ``\alpha^{bb}_{aa}`` |
 |:--------|------:|------:|------:|------:|------:|------:|
 | Ala | 70.88  | 135.35 | 49.01 | 88.89 | 0.5237 | 0.5514 |
 | Phe | 187.59 | 248.85 | 38.66 | 87.37 | 0.7538 | 0.4425 |
@@ -98,7 +99,7 @@ backbone ASA of glycine), respectively. These values are stored in `PDBTools.f_a
 from direct solvent contact. Conversely, ``\alpha^{sc}_{aa}`` shows that the backbone shields at least
 ~20% of even the bulkiest side chains (Trp), an effect that previous models did not consider explicitly.
 
-**Backbone accessibility is mechanism-dependent.** The geometric ratio ``\alpha^{bb}_{aa} = \text{ASA}^{bb}_{aa}/\text{ASA}_\text{bb}``
+**Backbone accessibility is mechanism-dependent.** The geometric ratio ``\alpha^{bb}_{aa} = \text{ASA}^{bb}_{aa}/\text{ASA}^\text{bb}``
 is appropriate when the cosolvent is excluded from, or interacts non-specifically with, the protein surface —
 the case for protecting osmolytes. Urea, however, interacts with the backbone through hydrogen bonds, on the
 face of the peptide unit opposite to the side chain; simulations show that the number of backbone–urea
@@ -106,7 +107,7 @@ hydrogen bonds is nearly independent of residue type, i.e., the side chain does 
 from urea. The model therefore allows a mechanism parameter ``x`` per cosolvent:
 
 ```math
-\alpha^{bb}_{aa}(x) = \left(\text{ASA}^{bb}_{aa}/\text{ASA}_\text{bb}\right)^{1-x}
+\alpha^{bb}_{aa}(x) = \left(\text{ASA}^{bb}_{aa}/\text{ASA}^\text{bb}\right)^{1-x}
 ```
 
 with ``x=0`` recovering the geometric, ASA-based exposure (used for all protecting osmolytes) and ``x=1``
@@ -121,7 +122,7 @@ free energy of a protein:
 ```math
 \text{TFE}^\text{prot} = \sum_{i=1}^{N_r} \left[
 \left(\frac{\text{TFE}^{i\text{-}sc}_{aa}}{\text{ASA}^{i\text{-}sc}_{aa}}\right)\text{ASA}^{sc}_{aa} +
-\left(\frac{\text{TFE}_\text{bb}}{\text{ASA}_{\text{bb,Gly}}}\right)\text{ASA}^{bb}_{aa}
+\left(\frac{\text{TFE}^\text{bb}}{\text{ASA}^\text{bb}_\text{Gly}}\right)\text{ASA}^{bb}_{aa}
 \right]
 ```
 
@@ -146,15 +147,9 @@ m = mvalue(creamer_model, "tmao"; model=Accessibility)
 println("m-value: tot = $(m.tot), bb = $(m.bb), sc=$(m.sc)")
 ```
 
-For protecting osmolytes, `Accessibility` reproduces the total *m*-values predicted by `AutonBolen`, but with
+For protecting osmolytes, `Accessibility` predicts total *m*-values similar to `AutonBolen`, but with
 side-chain contributions that are stabilizing and comparable to, or larger than, the backbone contribution —
 in contrast to the backbone-dominated picture of `AutonBolen`. For urea, it reproduces the balanced
-backbone/side-chain partition of `MoeserHorinek`.
-
-The key distinctions between the four models implemented in PDBTools.jl are:
-
-| Model | Backbone treatment | Side-chain TFE | Shielding accounted for | Cosolvents |
-|:---|:---|:---|:---|:---|
-| `AutonBolen` | per-residue-type ASA (established TM) | apparent GTFE (``\text{TFE}^{sc,app}``) | none | all |
-| `MoeserHorinek` | universal (Gly reference ASA) | GTFE⁺ (Gly-activity corrected) | none | urea only |
-| `Accessibility` | universal (Gly reference ASA); mechanism-dependent exposure | isolated side-chain TFE (``\text{TFE}^{i\text{-}sc}``) | both backbone shielding of side chain and side-chain shielding of backbone | all |
+backbone/side-chain partition of `MoeserHorinek`. The predictions can differ from the models when
+the ratio of backbone and side-chain accessibilities differ substantially from averages, or if the
+exposed surface have very particular amino acid residue compositions. 
