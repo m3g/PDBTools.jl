@@ -17,7 +17,7 @@ mvalue
 ```
 
 Here we implement four additive transfer models: the established Auton/Bolen model, the universal-backbone
-Moeser/Horinek model (and a variant of it without the Gly-activity correction, `MoeserHorinekApp`), and the
+Moeser/Horinek model, and the
 `Accessibility` model, which explicitly accounts for the mutual shielding between backbone and side-chain
 groups ([see this section](@ref accessibility_model)).
 ([1](https://doi.org/10.1021/jp409934q), 
