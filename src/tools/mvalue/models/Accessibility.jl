@@ -81,7 +81,7 @@ const acc = Dict{String,Float32}(
     "sorbitol" => 0.0,
     "sucrose" => 0.0,
     "trehalose" => 0.0,
-    "urea" => 0.0,
+    "urea" => 1.0,
 )
 
 function model_combination_rule(::Type{Accessibility}, cosolvent, restype)
