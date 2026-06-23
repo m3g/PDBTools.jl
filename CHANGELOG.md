@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.32.3-DEV
+Version 3.33.0
 --------------
 - ![FEATURE][badge-feature] Add `save` and `load` functions for `MValue`, `TransferFreeEnergy`, and `SASA` objects. 
 - ![INFO][badge-info] The `MValue`, `TransferFreeEnergy`, and `SASA` types are now exported.
