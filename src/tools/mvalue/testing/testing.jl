@@ -28,6 +28,20 @@
                 Side-chain contributions: 0.0628296 kcal mol⁻¹
         """
 
+    # Test save/load preserves model type and data
+    tmp = tempname() * ".json"
+    save(tmp, r_1MJC)
+    m_load = load(MValue, tmp)
+    @test m_load isa MValue{AutonBolen}
+    @test m_load.nresidues == r_1MJC.nresidues
+    @test m_load.tot == r_1MJC.tot
+    @test m_load.bb == r_1MJC.bb
+    @test m_load.sc == r_1MJC.sc
+    @test m_load.residue_contributions_bb == r_1MJC.residue_contributions_bb
+    @test m_load.residue_contributions_sc == r_1MJC.residue_contributions_sc
+    @test m_load.cosolvent == r_1MJC.cosolvent
+    rm(tmp; force=true)
+
     r_1MJC = mvalue(MJC_native, MJC_desnat, "tmao")
     @test isapprox(r_1MJC.tot, 2.773; atol=1e-2)
     @test isapprox(r_1MJC.bb, 3.444; atol=1e-2)
@@ -40,6 +54,12 @@
     @test isapprox(r_1MJC.tot, -1.216; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
     @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+
+    save(tmp, r_1MJC)
+    m_load = load(MValue, tmp)
+    @test m_load isa MValue{MoeserHorinek}
+    @test m_load.tot == r_1MJC.tot
+    rm(tmp; force=true)
 
     # Same definitions as Gromacs for side chain and backbone
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea";
@@ -514,6 +534,27 @@ end
         Backbone contributions: -1.5711304 kcal mol⁻¹
         Side-chain contributions: 0.4451674 kcal mol⁻¹
         """
+
+    # Test save/load preserves model type and data
+    tmp = tempname() * ".json"
+    save(tmp, t)
+    t_load = load(TransferFreeEnergy, tmp)
+    @test t_load isa TransferFreeEnergy{AutonBolen}
+    @test t_load.nresidues == t.nresidues
+    @test t_load.tot == t.tot
+    @test t_load.bb == t.bb
+    @test t_load.sc == t.sc
+    @test t_load.residue_contributions_bb == t.residue_contributions_bb
+    @test t_load.residue_contributions_sc == t.residue_contributions_sc
+    @test t_load.cosolvent == t.cosolvent
+    rm(tmp; force=true)
+
+    t_mh = transfer_free_energy(p, "sucrose"; model=MoeserHorinek)
+    save(tmp, t_mh)
+    t_mh_load = load(TransferFreeEnergy, tmp)
+    @test t_mh_load isa TransferFreeEnergy{MoeserHorinek}
+    @test t_mh_load.tot == t_mh.tot
+    rm(tmp; force=true)
 
     # Tests for MoeserHorinekApp model
     cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))

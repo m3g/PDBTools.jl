@@ -1,10 +1,19 @@
 import ChunkSplitters
 
-export mvalue
+export MValue, mvalue
 export MoeserHorinek, AutonBolen, MoeserHorinekApp
 
 abstract type MValueModel end
 modelname(m::Type{<:MValueModel}) = replace(string(m), "PDBTools." => "")
+
+# Used to load saved files
+function _model_type(s::String)
+    s == "AutonBolen" && return AutonBolen
+    s == "MoeserHorinek" && return MoeserHorinek
+    s == "MoeserHorinekApp" && return MoeserHorinekApp
+    s == "Accessibility" && return Accessibility
+    throw(ArgumentError("Invalid MValueModel"))
+end
 
 include("./creamer.jl")
 include("./models/data.jl")
@@ -262,6 +271,66 @@ function tfe_asa(
 )
     bb_contribution, sc_contribution = model_combination_rule(model, cosolvent, restype)
     return bb_contribution / 1000, sc_contribution / 1000
+end
+
+"""
+    save(filename::String, m::MValue)
+
+Save `MValue` object data to `filename` (json format).
+Load with `load(MValue, filename)`.
+
+"""
+function save(filename::String, m::MValue{T}) where {T<:MValueModel}
+    data = Dict(
+        "model" => modelname(T),
+        "nresidues" => m.nresidues,
+        "tot" => m.tot,
+        "bb" => m.bb,
+        "sc" => m.sc,
+        "residue_contributions_bb" => m.residue_contributions_bb,
+        "residue_contributions_sc" => m.residue_contributions_sc,
+        "cosolvent" => m.cosolvent,
+    )
+    open(expanduser(filename), "w") do io
+        JSON.print(io, data)
+    end
+    return filename
+end
+
+"""
+    load(MValue, filename::String)
+
+Creates an `MValue` object from the data saved to `filename`, with the
+`save(filename, m)` function.
+
+"""
+function load(::Type{MValue}, filename::String)
+    data = open(expanduser(filename), "r") do io
+        JSON.parse(io)
+    end
+    required_keys = (
+        "model",
+        "nresidues",
+        "tot",
+        "bb",
+        "sc",
+        "residue_contributions_bb",
+        "residue_contributions_sc",
+        "cosolvent",
+    )
+    for k in required_keys
+        haskey(data, k) || throw(ArgumentError("Invalid MValue file: missing key \"$k\"."))
+    end
+    T = _model_type(String(data["model"]))
+    return MValue{T}(
+        Int(data["nresidues"]),
+        Float32(data["tot"]),
+        Float32(data["bb"]),
+        Float32(data["sc"]),
+        Float32.(data["residue_contributions_bb"]),
+        Float32.(data["residue_contributions_sc"]),
+        String(data["cosolvent"]),
+    )
 end
 
 include("./transfer_free_energy.jl")

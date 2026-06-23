@@ -47,3 +47,33 @@ tfe.residue_contributions_sc[1]
 
 When multiple protein conformations are of interest, the `mvalue` methods provide a direct way to compute the 
 variations in transfer free energies associated to the states involved, as shown in the following examples.
+
+## Save and load TFE/m-value data
+
+`TransferFreeEnergy` or `MValue` objects can be saved to a json file with `save` and restored with `load`:
+
+```@example mvalue
+outfile = tempname() * ".json"
+save(outfile, tfe)
+tfe_loaded = load(TransferFreeEnergy, outfile)
+```
+
+The saved file includes the transfer model name (for example, `AutonBolen` or `MoeserHorinek`),
+which is used when loading to reconstruct the original parametric type:
+
+```@example mvalue
+typeof(tfe)
+```
+
+```@example mvalue
+typeof(tfe_loaded)
+```
+
+The same interface can be used for `MValue` objects:
+
+```@example mvalue
+desnat_state = read_pdb(PDBTools.MJC_DESNAT, "protein")
+m = mvalue(native_state, desnat_state, "urea")
+save(outfile, m)
+m_loaded = load(MValue, outfile)
+```
