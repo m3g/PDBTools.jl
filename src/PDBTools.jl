@@ -44,7 +44,7 @@ export select_with_vmd
 # Tools
 export center_of_mass
 export moveto!
-export sasa_particles, sasa
+export sasa_particles, sasa, SASA
 export StandardAtomicRadii, CreamerUnitedAtomRadii, CustomAtomicRadii
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
