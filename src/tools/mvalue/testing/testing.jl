@@ -589,6 +589,13 @@ end
     @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
     @test PDBTools.modelname(Accessibility) == "Accessibility"
 
+    # Model type returns
+    @test PDBTools._model_type("MoeserHorinek") == MoeserHorinek
+    @test PDBTools._model_type("AutonBolen") == AutonBolen
+    @test PDBTools._model_type("MoeserHorinekApp") == MoeserHorinekApp
+    @test PDBTools._model_type("Accessibility") == Accessibility
+    @test_throws "Invalid MValueModel" PDBTools._model_type("ABC") 
+
     # Error if wrong atomic radii was provided
     s = sasa_particles(pdb)
     @test_throws "must use CreamerUnitedAtomRadii" transfer_free_energy(s, "urea")
