@@ -584,11 +584,8 @@ end
 
     # Unsupported save input: custom atom fields are not serializable
     atoms_custom = [Atom(; custom=Dict(:x => 1), name="C", pdb_element="C")]
-    at_sasa_custom = sasa_particles(
-        atoms_custom;
-        atom_type=at -> "X",
-        atom_radius_from_type=type -> 1.5f0,
-        n_dots=20,
+    at_sasa_custom = sasa_particles(atoms_custom;
+        atom_type=at -> "X", atom_radius_from_type=type -> 1.5f0, n_dots=20,
     )
     @test_throws "custom fields is not supported" save(tmp, at_sasa_custom)
 
