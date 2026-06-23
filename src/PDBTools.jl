@@ -2,6 +2,7 @@ module PDBTools
 
 import Dates
 import Downloads
+import JSON
 import PrecompileTools
 using Compat: @compat
 using Format: format, generate_formatter
@@ -43,11 +44,11 @@ export select_with_vmd
 # Tools
 export center_of_mass
 export moveto!
-export sasa_particles, sasa
+export sasa_particles, sasa, SASA
 export StandardAtomicRadii, CreamerUnitedAtomRadii, CustomAtomicRadii
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
-export mvalue, CreamerDenaturedModel
+export mvalue, CreamerDenaturedModel, save, load
 @compat public parse_mvalue_server_sasa, gmx_delta_sasa_per_restype, delta_sasa_per_restype, creamer_delta_sasa
 
 # Custom residue and element definitions

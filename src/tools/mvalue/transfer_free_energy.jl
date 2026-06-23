@@ -1,4 +1,4 @@
-export transfer_free_energy
+export TransferFreeEnergy, transfer_free_energy
 
 struct TransferFreeEnergy{T}
     nresidues::Int
@@ -146,4 +146,64 @@ function transfer_free_energy(
     sc = sum(residue_contributions_sc)
     tot = bb + sc
     return TransferFreeEnergy{model}(length(residues), tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cosolvent)
+end
+
+"""
+    save(filename::AbstractString, tfe::TransferFreeEnergy)
+
+Save `TransferFreeEnergy` object data to `filename` (json format). 
+Load with `load(TransferFreeEnergy, filename)`.
+
+"""
+function save(filename::AbstractString, tfe::TransferFreeEnergy{T}) where {T<:MValueModel}
+    data = Dict(
+        "model" => modelname(T),
+        "nresidues" => tfe.nresidues,
+        "tot" => tfe.tot,
+        "bb" => tfe.bb,
+        "sc" => tfe.sc,
+        "residue_contributions_bb" => tfe.residue_contributions_bb,
+        "residue_contributions_sc" => tfe.residue_contributions_sc,
+        "cosolvent" => tfe.cosolvent,
+    )
+    open(expanduser(filename), "w") do io
+        JSON.print(io, data)
+    end
+    return filename
+end
+
+"""
+    load(TransferFreeEnergy, filename::AbstractString)
+
+Creates a `TransferFreeEnergy` object from the data saved to `filename`, with the 
+`save(filename, tfe)` function.
+
+"""
+function load(::Type{TransferFreeEnergy}, filename::AbstractString)
+    data = open(expanduser(filename), "r") do io
+        JSON.parse(io)
+    end
+    required_keys = (
+        "model",
+        "nresidues",
+        "tot",
+        "bb",
+        "sc",
+        "residue_contributions_bb",
+        "residue_contributions_sc",
+        "cosolvent",
+    )
+    for k in required_keys
+        haskey(data, k) || throw(ArgumentError("Invalid TransferFreeEnergy file: missing key \"$k\"."))
+    end
+    T = _model_type(String(data["model"]))
+    return TransferFreeEnergy{T}(
+        Int(data["nresidues"]),
+        Float32(data["tot"]),
+        Float32(data["bb"]),
+        Float32(data["sc"]),
+        Float32.(data["residue_contributions_bb"]),
+        Float32.(data["residue_contributions_sc"]),
+        String(data["cosolvent"]),
+    )
 end
