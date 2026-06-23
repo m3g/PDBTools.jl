@@ -455,13 +455,13 @@ function _atom_from_json(d::JSON.Object)
 end
 
 """
-    save(filename::String, s::SASA)
+    save(filename::AbstractString, s::SASA)
 
 Save `SASA` object data to `filename` (json format).
 Load with `load(SASA, filename)`.
 
 """
-function save(filename::String, s::SASA{R,N,<:AbstractVector{<:Atom}}) where {R<:AtomicRadiiType,N}
+function save(filename::AbstractString, s::SASA{R,N,<:AbstractVector{<:Atom}}) where {R<:AtomicRadiiType,N}
     dots = [
         [[Float32(x[1]), Float32(x[2]), Float32(x[3])] for x in dotset]
         for dotset in s.dots
@@ -486,7 +486,7 @@ Creates a `SASA` object from the data saved to `filename`, with the
 `save(filename, s)` function.
 
 """
-function load(::Type{SASA}, filename::String)
+function load(::Type{SASA}, filename::AbstractString)
     data = open(expanduser(filename), "r") do io
         JSON.parse(io)
     end

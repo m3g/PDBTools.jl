@@ -52,6 +52,11 @@ variations in transfer free energies associated to the states involved, as shown
 
 `TransferFreeEnergy` or `MValue` objects can be saved to a json file with `save` and restored with `load`:
 
+```@docs
+save(::AbstractString, ::TransferFreeEnergy{T}) where {T<:PDBTools.MValueModel}
+load(::Type{TransferFreeEnergy}, ::AbstractString)
+```
+
 ```@example mvalue
 outfile = tempname() * ".json"
 save(outfile, tfe)
@@ -70,6 +75,11 @@ typeof(tfe_loaded)
 ```
 
 The same interface can be used for `MValue` objects:
+
+```@docs
+save(::AbstractString, ::MValue{T}) where {T<:PDBTools.MValueModel}
+load(::Type{MValue}, ::AbstractString)
+```
 
 ```@example mvalue
 desnat_state = read_pdb(PDBTools.MJC_DESNAT, "protein")

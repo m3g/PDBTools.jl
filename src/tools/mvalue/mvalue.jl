@@ -274,13 +274,13 @@ function tfe_asa(
 end
 
 """
-    save(filename::String, m::MValue)
+    save(filename::AbstractString, m::MValue)
 
 Save `MValue` object data to `filename` (json format).
 Load with `load(MValue, filename)`.
 
 """
-function save(filename::String, m::MValue{T}) where {T<:MValueModel}
+function save(filename::AbstractString, m::MValue{T}) where {T<:MValueModel}
     data = Dict(
         "model" => modelname(T),
         "nresidues" => m.nresidues,
@@ -304,7 +304,7 @@ Creates an `MValue` object from the data saved to `filename`, with the
 `save(filename, m)` function.
 
 """
-function load(::Type{MValue}, filename::String)
+function load(::Type{MValue}, filename::AbstractString)
     data = open(expanduser(filename), "r") do io
         JSON.parse(io)
     end

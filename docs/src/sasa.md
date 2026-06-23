@@ -99,6 +99,11 @@ remove_custom_elements!()
 
 The SASA object can be stored in a file, something that can be useful for very large systems.
 
+```@docs
+save(::AbstractString, ::SASA{R,N,<:AbstractVector{<:Atom}}) where {R<:PDBTools.AtomicRadiiType,N}
+load(::Type{SASA}, ::AbstractString)
+```
+
 ```@example sasa
 outfile = tempname() * ".json"
 save(outfile, atom_sasa)

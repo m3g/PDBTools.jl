@@ -149,13 +149,13 @@ function transfer_free_energy(
 end
 
 """
-    save(filename::String, tfe::TransferFreeEnergy)
+    save(filename::AbstractString, tfe::TransferFreeEnergy)
 
 Save `TransferFreeEnergy` object data to `filename` (json format). 
 Load with `load(TransferFreeEnergy, filename)`.
 
 """
-function save(filename::String, tfe::TransferFreeEnergy{T}) where {T<:MValueModel}
+function save(filename::AbstractString, tfe::TransferFreeEnergy{T}) where {T<:MValueModel}
     data = Dict(
         "model" => modelname(T),
         "nresidues" => tfe.nresidues,
@@ -173,13 +173,13 @@ function save(filename::String, tfe::TransferFreeEnergy{T}) where {T<:MValueMode
 end
 
 """
-    load(TransferFreeEnergy, filename::String)
+    load(TransferFreeEnergy, filename::AbstractString)
 
 Creates a `TransferFreeEnergy` object from the data saved to `filename`, with the 
 `save(filename, tfe)` function.
 
 """
-function load(::Type{TransferFreeEnergy}, filename::String)
+function load(::Type{TransferFreeEnergy}, filename::AbstractString)
     data = open(expanduser(filename), "r") do io
         JSON.parse(io)
     end
