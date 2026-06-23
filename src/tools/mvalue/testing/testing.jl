@@ -315,6 +315,7 @@ end
             cm = CreamerDenaturedModel(MJC_clean, ig)
             m = mvalue(cm, cos)
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
+            @test sum(m.residue_contributions_bb) + sum(m.residue_contributions_sc) ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
 

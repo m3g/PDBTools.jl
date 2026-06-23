@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.33.1-DEV
 --------------
+- ![FIX][badge-fix] `mvalue(::CreamerDenaturedModel)` now returns a proper `MValue` object instead of a tuple of dicts.
 
 Version 3.33.0
 --------------

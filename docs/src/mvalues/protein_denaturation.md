@@ -26,4 +26,4 @@ The m-value of denaturation in a cosolvent can be computed, then, with:
 m = mvalue(model, "urea"; model=AutonBolen)
 println("m-value of denaturation = ", m.tot)
 ```
-where the output is a dictionary containing the total, backbone, side-chain, and residue-type specific contributions to the transfer free energies, in `kcal/mol`. 
+where the output is an `MValue` object containing the total, backbone, and side-chain contributions to the m-value, in `kcal/mol`, along with per-residue contribution vectors (`residue_contributions_bb` and `residue_contributions_sc`).
