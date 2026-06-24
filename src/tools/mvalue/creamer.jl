@@ -494,10 +494,12 @@ julia> using PDBTools
 
 julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
 
-julia> m = mvalue(CreamerDenaturedModel(prot), "urea");
+julia> m = mvalue(CreamerDenaturedModel(prot), "urea")
+MValue{AutonBolen} - 104 residues - cosolvent: "urea"
+    Total m-value: -1.290518 kcal mol⁻¹
+    Backbone contributions: -1.3936301 kcal mol⁻¹
+    Side-chain contributions: 0.10311211 kcal mol⁻¹
 
-julia> m.tot
--1.290518033485419
 ```
 
 """
