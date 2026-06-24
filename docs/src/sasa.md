@@ -94,3 +94,40 @@ Here we remove the custom elements and residues, to guarantee proper execution o
 remove_custom_protein_residues!()
 remove_custom_elements!()
 ```
+
+## Save and load SASA objects
+
+The SASA object can be stored in a file, something that can be useful for very large systems.
+
+```@docs
+save(::AbstractString, ::SASA{R,N,<:AbstractVector{<:Atom}}) where {R<:PDBTools.AtomicRadiiType,N}
+load(::Type{SASA}, ::AbstractString)
+```
+
+```@example sasa
+outfile = tempname() * ".json"
+save(outfile, atom_sasa)
+atom_sasa_loaded = load(SASA, outfile)
+```
+
+The file stores the radii model used in the original calculation, so the loaded object preserves the type parameter:
+
+```@example sasa
+typeof(atom_sasa)
+```
+
+```@example sasa
+typeof(atom_sasa_loaded)
+```
+
+The same works for alternative radii models, such as `CreamerUnitedAtomRadii`:
+
+```@example sasa
+atom_sasa_creamer = sasa_particles(CreamerUnitedAtomRadii, prot)
+save(outfile, atom_sasa_creamer)
+atom_sasa_creamer_loaded = load(SASA, outfile)
+typeof(atom_sasa_creamer_loaded)
+```
+
+
+

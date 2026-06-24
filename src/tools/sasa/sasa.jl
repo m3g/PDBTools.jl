@@ -391,6 +391,124 @@ sasa(p::SASA) = sum(i -> p[i], eachindex(p); init=0.f0)
 sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {T,N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]); init=0.f0)
 sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {T,N} = sasa(p, Select(sel))
 
+#
+# Save and load SASA objects
+#
+function _sasa_radii_type_name(::Type{R}) where {R<:AtomicRadiiType}
+    return replace(string(R), "PDBTools." => "")
+end
+
+function _sasa_radii_type(s::String)
+    s == "StandardAtomicRadii" && return StandardAtomicRadii
+    s == "CustomAtomicRadii" && return CustomAtomicRadii
+    if isdefined(PDBTools, :CreamerUnitedAtomRadii) && s == "CreamerUnitedAtomRadii"
+        return PDBTools.CreamerUnitedAtomRadii
+    end
+    throw(ArgumentError("Invalid SASA radii type: $s"))
+end
+
+function _atom_to_json(at::Atom)
+    if at.custom !== nothing
+        throw(ArgumentError("Saving SASA with atom custom fields is not supported."))
+    end
+    return Dict(
+        "index" => at.index,
+        "index_pdb" => at.index_pdb,
+        "name" => String(at.name),
+        "resname" => String(at.resname),
+        "chain" => String(at.chain),
+        "resnum" => at.resnum,
+        "residue" => at.residue,
+        "x" => at.x,
+        "y" => at.y,
+        "z" => at.z,
+        "beta" => at.beta,
+        "occup" => at.occup,
+        "model" => at.model,
+        "segname" => String(at.segname),
+        "pdb_element" => String(at.pdb_element),
+        "charge" => at.charge,
+        "flag" => at.flag,
+    )
+end
+
+function _atom_from_json(d::JSON.Object)
+    return Atom{Nothing}(;
+        index=Int32(d["index"]),
+        index_pdb=Int32(d["index_pdb"]),
+        name=String(d["name"]),
+        resname=String(d["resname"]),
+        chain=String(d["chain"]),
+        resnum=Int32(d["resnum"]),
+        residue=Int32(d["residue"]),
+        x=Float32(d["x"]),
+        y=Float32(d["y"]),
+        z=Float32(d["z"]),
+        beta=Float32(d["beta"]),
+        occup=Float32(d["occup"]),
+        model=Int32(d["model"]),
+        segname=String(d["segname"]),
+        pdb_element=String(d["pdb_element"]),
+        charge=Float32(d["charge"]),
+        flag=Int8(d["flag"]),
+    )
+end
+
+"""
+    save(filename::AbstractString, s::SASA)
+
+Save `SASA` object data to `filename` (json format).
+Load with `load(SASA, filename)`.
+
+"""
+function save(filename::AbstractString, s::SASA{R,N,<:AbstractVector{<:Atom}}) where {R<:AtomicRadiiType,N}
+    dots = [
+        [[Float32(x[1]), Float32(x[2]), Float32(x[3])] for x in dotset]
+        for dotset in s.dots
+    ]
+    data = Dict(
+        "radii_type" => _sasa_radii_type_name(R),
+        "ndim" => N,
+        "particles" => _atom_to_json.(s.particles),
+        "sasa" => s.sasa,
+        "dots" => dots,
+    )
+    open(expanduser(filename), "w") do io
+        JSON.print(io, data)
+    end
+    return filename
+end
+
+"""
+    load(SASA, filename::String)
+
+Creates a `SASA` object from the data saved to `filename`, with the
+`save(filename, s)` function.
+
+"""
+function load(::Type{SASA}, filename::AbstractString)
+    data = open(expanduser(filename), "r") do io
+        JSON.parse(io)
+    end
+    required_keys = ("radii_type", "ndim", "particles", "sasa", "dots")
+    for k in required_keys
+        haskey(data, k) || throw(ArgumentError("Invalid SASA file: missing key \"$k\"."))
+    end
+    R = _sasa_radii_type(String(data["radii_type"]))
+    N = Int(data["ndim"])
+    particles = _atom_from_json.(data["particles"])
+    sasa_values = Float32.(data["sasa"])
+    if N != 3
+        throw(ArgumentError("Invalid SASA file: only 3D dots are supported, got N = $N."))
+    end
+    dots = Vector{Vector{SVector{3,Float32}}}(undef, length(data["dots"]))
+    for i in eachindex(dots)
+        raw_dotset = data["dots"][i]
+        dots[i] = [SVector{3,Float32}(Float32(v[1]), Float32(v[2]), Float32(v[3])) for v in raw_dotset]
+    end
+    return SASA{R,3,typeof(particles)}(particles, sasa_values, dots)
+end
+
 @testitem "sasa" begin
     using PDBTools
     using ShowMethodTesting
@@ -444,6 +562,48 @@ sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where 
     @test sasa(at_sasa) ≈ 5856.9966f0
     @test sum(length(v) for v in at_sasa.dots) == 970
 
+    # Test save/load for SASA with StandardAtomicRadii
+    tmp = tempname() * ".json"
+    save(tmp, at_sasa)
+    at_sasa_load = load(SASA, tmp)
+    @test at_sasa_load isa PDBTools.SASA{StandardAtomicRadii,3,Vector{Atom{Nothing}}}
+    @test at_sasa_load.particles == at_sasa.particles
+    @test at_sasa_load.sasa == at_sasa.sasa
+    @test at_sasa_load.dots == at_sasa.dots
+    rm(tmp; force=true)
+
+    # Test save/load for SASA with CreamerUnitedAtomRadii
+    at_sasa_creamer = sasa_particles(PDBTools.CreamerUnitedAtomRadii, prot; n_dots=20, output_dots=true)
+    save(tmp, at_sasa_creamer)
+    at_sasa_creamer_load = load(PDBTools.SASA, tmp)
+    @test at_sasa_creamer_load isa PDBTools.SASA{PDBTools.CreamerUnitedAtomRadii,3,Vector{Atom{Nothing}}}
+    @test at_sasa_creamer_load.particles == at_sasa_creamer.particles
+    @test at_sasa_creamer_load.sasa == at_sasa_creamer.sasa
+    @test at_sasa_creamer_load.dots == at_sasa_creamer.dots 
+    rm(tmp; force=true)
+
+    # Unsupported save input: custom atom fields are not serializable
+    atoms_custom = [Atom(; custom=Dict(:x => 1), name="C", pdb_element="C")]
+    at_sasa_custom = sasa_particles(atoms_custom; atom_type=at -> "X", atom_radius_from_type=type -> 1.5f0, n_dots=20)
+    @test_throws "custom fields is not supported" save(tmp, at_sasa_custom)
+
+    # Unsupported load inputs: malformed or invalid serialized files
+    open(tmp, "w") do io
+        write(io, "{\"radii_type\":\"StandardAtomicRadii\"}")
+    end
+    @test_throws "missing key \"ndim\"" load(PDBTools.SASA, tmp)
+
+    open(tmp, "w") do io
+        write(io, "{\"radii_type\":\"InvalidRadii\",\"ndim\":3,\"particles\":[],\"sasa\":[],\"dots\":[]}")
+    end
+    @test_throws "Invalid SASA radii type" load(PDBTools.SASA, tmp)
+
+    open(tmp, "w") do io
+        write(io, "{\"radii_type\":\"StandardAtomicRadii\",\"ndim\":2,\"particles\":[],\"sasa\":[],\"dots\":[]}")
+    end
+    @test_throws "only 3D dots are supported" load(PDBTools.SASA, tmp)
+    rm(tmp; force=true)
+
     # Test show method
     @test parse_show(at_sasa; repl=Dict(r"PDBTools." => "")) ≈ """
             SASA{StandardAtomicRadii, 3, Vector{Atom{Nothing}}}
@@ -460,3 +620,4 @@ sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where 
     @test_throws "Ti does not have" sasa_particles(prot)
 
 end
+
