@@ -449,33 +449,36 @@ be used, with the published Creamer SASAs (`:original` - default) or
 the recomputed parameters based on the CATH S20 classification (`:cath_s20`).
 
 """
-struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, DS}
+struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
     atoms::T
     type::Int
     n_protein_atoms::Int
-    delta_sasa::DS
-    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int; sasa_parameterization=:original) 
+    sasa_atoms::S
+    sasa_parameterization::Symbol
+    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int; sasa_parameterization=:original)
         if !(type in (1,2,3))
             throw(ArgumentError("""\n
                 Type of Creamer denaturation model must be either:
                     1: minimal denaturation.
                     2: mean denaturation.
                     3: maximal denaturation.
-    
+
             """))
         end
-        delta_sasa = creamer_delta_sasa(select(atoms, isprotein); sasa_parameterization)
-        return new{typeof(atoms), typeof(delta_sasa)}(atoms, type, count(isprotein, atoms), delta_sasa)
+        _sasa_parameterization(sasa_parameterization) # validates; throws if invalid
+        protein_atoms = select(atoms, isprotein)
+        sasa_at = sasa_particles(CreamerUnitedAtomRadii, protein_atoms)
+        return new{typeof(atoms), typeof(sasa_at)}(atoms, type, length(protein_atoms), sasa_at, sasa_parameterization)
     end
 end
 function CreamerDenaturedModel(
-    atoms::AbstractVector{<:Atom}; 
+    atoms::AbstractVector{<:Atom};
     sasa_parameterization=:original
 )
     return CreamerDenaturedModel(atoms, 2; sasa_parameterization)
 end
 function Base.show(io::IO, m::CreamerDenaturedModel)
-    t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal" 
+    t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal"
     print(io, "CreamerDenaturedModel of a $(m.n_protein_atoms)-atom protein and $t denaturation.")
 end
 
@@ -491,21 +494,41 @@ julia> using PDBTools
 
 julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
 
-julia> m = mvalue(CreamerDenaturedModel(prot), "urea");
+julia> m = mvalue(CreamerDenaturedModel(prot), "urea")
+MValue{AutonBolen} - 104 residues - cosolvent: "urea"
+    Total m-value: -1.290518 kcal mol⁻¹
+    Backbone contributions: -1.3936301 kcal mol⁻¹
+    Side-chain contributions: 0.10311211 kcal mol⁻¹
 
-julia> m.tot
--1.290518033485419
 ```
 
 """
 function mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=AutonBolen)
-    return mvalue_delta_sasa(;
-        cosolvent=cosolvent,
-        model=model,
-        atoms=m.atoms,
-        sasas=m.delta_sasa,
-        type=m.type
-    )
+    cosolvent = lowercase(cosolvent)
+    creamer_sasas = _sasa_parameterization(m.sasa_parameterization)
+    residues = collect(eachresidue(m.sasa_atoms.particles))
+    n = length(residues)
+    residue_contributions_bb = zeros(Float32, n)
+    residue_contributions_sc = zeros(Float32, n)
+    sel_bb = _Selector(isbackbone, Ref(first(residues)))
+    sel_sc = _Selector(issidechain, Ref(first(residues)))
+    for (i, res) in enumerate(residues)
+        rtype = threeletter(resname(res))
+        sel_bb.residue[] = res
+        sel_sc.residue[] = res
+        bb_folded = sasa(m.sasa_atoms, sel_bb)
+        sc_folded = sasa(m.sasa_atoms, sel_sc)
+        cr = creamer_sasas[rtype]
+        bb_denatured = m.type == 1 ? cr.bb_lower : m.type == 2 ? 0.5f0*(cr.bb_lower + cr.bb_upper) : cr.bb_upper
+        sc_denatured = m.type == 1 ? cr.sc_lower : m.type == 2 ? 0.5f0*(cr.sc_lower + cr.sc_upper) : cr.sc_upper
+        bb_type, sc_type = tfe_asa(model, cosolvent, rtype)
+        residue_contributions_bb[i] = bb_type * (bb_denatured - bb_folded)
+        residue_contributions_sc[i] = sc_type * (sc_denatured - sc_folded)
+    end
+    bb = sum(residue_contributions_bb)
+    sc = sum(residue_contributions_sc)
+    tot = bb + sc
+    return MValue{model}(n, tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cosolvent)
 end
 
 @testitem "CreamerDenaturedModel" begin
