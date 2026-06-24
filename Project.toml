@@ -1,6 +1,6 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
-version = "3.33.2-DEV"
+version = "3.33.2"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
 
 [deps]
@@ -47,7 +47,7 @@ InlineStrings = "1.4.2"
 InteractiveUtils = "1.10"
 JSON = "1.6.1"
 LinearAlgebra = "1.10"
-MolSimToolkitShared = "1.5"
+MolSimToolkitShared = "1.6"
 OrderedCollections = "1.6.3, 2"
 Plots = "1.39"
 PrecompileTools = "1.2.1"
