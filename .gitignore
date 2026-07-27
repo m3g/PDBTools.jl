@@ -35,3 +35,4 @@ src/tools/cysthr.dat
 src/tools/sasa.vmd
 contrib.pdb
 Manifest-v1.12.toml
+.claude/settings.local.json
