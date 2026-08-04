@@ -23,7 +23,7 @@
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
             PDBTools.MValue{AutonBolen} - 69 residues - cosolvent: "urea"
-                Total m-value: -1.4297819 kcal mol⁻¹
+                Total m-value: -1.429gg7819 kcal mol⁻¹
                 Backbone contributions: -1.4926115 kcal mol⁻¹
                 Side-chain contributions: 0.0628296 kcal mol⁻¹
         """
@@ -574,6 +574,25 @@ end
         @test 1 + c_ab ≈ 1 + c_acc rtol = 0.25
     end
 
+    # Tests for MTRecord model
+    RN2 = read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
+    MJC = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
+    # For urea (Data from Table S3 of http://www.pnas.org/cgi/doi/10.1073/pnas.1109372108)
+    rm = MTRecordDenaturedModel(RN2)
+    c_rec = mvalue(rm, "urea").tot
+    @test c_rec ≈ -2.2 rtol = 0.1
+    rm = MTRecordDenaturedModel(MJC)
+    c_rec = mvalue(rm, "urea").tot
+    @test c_rec ≈ -0.94 rtol = 0.1
+    # For betaine (Experimental data from the supplementary material table at: 10.1016/j.bpc.2011.05.012)
+    # type and alpha fitted to better fit the data
+    rm = MTRecordDenaturedModel(wget("1OT8", "protein and chain B and resnum > 116"), 2)
+    c_rec = mvalue(rm, "betaine"; alpha=1.0).tot
+    @test c_rec ≈ 1.57 rtol = 0.2
+    rm = MTRecordDenaturedModel(wget("2BU4", "protein"), 3)
+    c_rec = mvalue(rm, "betaine"; alpha=1.15).tot
+    @test c_rec ≈ 0.44 rtol = 0.2
+
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
@@ -589,12 +608,14 @@ end
     @test PDBTools.modelname(AutonBolen) == "AutonBolen"
     @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
     @test PDBTools.modelname(Accessibility) == "Accessibility"
+    @test PDBTools.modelname(MTRecord) == "MTRecord"
 
     # Model type returns
     @test PDBTools._model_type("MoeserHorinek") == MoeserHorinek
     @test PDBTools._model_type("AutonBolen") == AutonBolen
     @test PDBTools._model_type("MoeserHorinekApp") == MoeserHorinekApp
     @test PDBTools._model_type("Accessibility") == Accessibility
+    @test PDBTools._model_type("MTRecord") == MTRecord
     @test_throws "Invalid MValueModel" PDBTools._model_type("ABC") 
 
     # Error if wrong atomic radii was provided
@@ -603,3 +624,42 @@ end
 
 end
 
+@testitem "Record transfer model atom type mapping" begin
+    using PDBTools
+    using PDBTools: record_surface_type, model_combination_rule
+
+    @test record_surface_type(Atom(resname="LEU", name="CB")) == :aliphatic_carbon
+    @test record_surface_type(Atom(resname="PHE", name="CG")) == :aromatic_carbon
+    @test record_surface_type(Atom(resname="SER", name="OG")) == :hydroxyl_oxygen
+    @test record_surface_type(Atom(resname="ASN", name="OD1")) == :amide_oxygen
+    @test record_surface_type(Atom(resname="ASP", name="OD2")) == :carboxylate_oxygen
+    @test record_surface_type(Atom(resname="GLN", name="NE2")) == :amide_nitrogen
+    @test record_surface_type(Atom(resname="HIS", name="ND1")) == :cationic_nitrogen
+    @test record_surface_type(Atom(resname="TRP", name="NE1")) == :amide_nitrogen
+    @test isnothing(record_surface_type(Atom(resname="MET", name="SD")))
+    @test isnothing(record_surface_type(Atom(resname="CYS", name="SG")))
+
+    # Test macro-keyword integration with selection syntax.
+    ats = [
+        Atom(resname="ALA", name="N"),
+        Atom(resname="ALA", name="CA"),
+        Atom(resname="ALA", name="C"),
+        Atom(resname="ALA", name="O"),
+        Atom(resname="PHE", name="CG"),
+        Atom(resname="SER", name="OG"),
+    ]
+    @test length(select(ats, "record_aliphatic_carbon and backbone")) == 2
+    @test length(select(ats, "record_aromatic_carbon")) == 1
+    @test length(select(ats, "record_hydroxyl_oxygen")) == 1
+
+    m = MTRecordDenaturedModel(ats)
+    @test m.creamer.type == 3
+    @test MTRecordDenaturedModel(ats, 2).creamer.type == 2
+
+    @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.52706414f0; atol=1f-6)
+    @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.1733738f0; atol=1f-6)
+
+    tfe = transfer_free_energy(MTRecord, ats, "urea")
+    @test tfe isa TransferFreeEnergy{MTRecord}
+    @test tfe.nresidues == 2
+end
