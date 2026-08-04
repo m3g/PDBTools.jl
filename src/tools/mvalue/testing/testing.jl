@@ -578,19 +578,19 @@ end
     RN2 = read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
     MJC = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
     # For urea (Data from Table S3 of http://www.pnas.org/cgi/doi/10.1073/pnas.1109372108)
-    rm = MTRecordDenaturedModel(RN2)
-    c_rec = mvalue(rm, "urea").tot
+    rec_m = MTRecordDenaturedModel(RN2)
+    c_rec = mvalue(rec_m, "urea").tot
     @test c_rec ≈ -2.2 rtol = 0.1
-    rm = MTRecordDenaturedModel(MJC)
-    c_rec = mvalue(rm, "urea").tot
+    rec_m = MTRecordDenaturedModel(MJC)
+    c_rec = mvalue(rec_m, "urea").tot
     @test c_rec ≈ -0.94 rtol = 0.1
     # For betaine (Experimental data from the supplementary material table at: 10.1016/j.bpc.2011.05.012)
     # type and alpha fitted to better fit the data
-    rm = MTRecordDenaturedModel(wget("1OT8", "protein and chain B and resnum > 116"), 2)
-    c_rec = mvalue(rm, "betaine"; alpha=1.0).tot
+    rec_m = MTRecordDenaturedModel(wget("1OT8", "protein and chain B and resnum > 116"), 2)
+    c_rec = mvalue(rec_m, "betaine"; alpha=1.0).tot
     @test c_rec ≈ 1.57 rtol = 0.2
-    rm = MTRecordDenaturedModel(wget("2BU4", "protein"), 3)
-    c_rec = mvalue(rm, "betaine"; alpha=1.15).tot
+    rec_m = MTRecordDenaturedModel(wget("2BU4", "protein"), 3)
+    c_rec = mvalue(rec_m, "betaine"; alpha=1.15).tot
     @test c_rec ≈ 0.44 rtol = 0.2
 
     # Test error path
