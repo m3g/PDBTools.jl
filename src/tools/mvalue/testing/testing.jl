@@ -627,6 +627,7 @@ end
 @testitem "Record transfer model atom type mapping" begin
     using PDBTools
     using PDBTools: record_surface_type, model_combination_rule
+    using ShowMethodTesting
 
     @test record_surface_type(Atom(resname="LEU", name="CB")) == :aliphatic_carbon
     @test record_surface_type(Atom(resname="PHE", name="CG")) == :aromatic_carbon
@@ -653,6 +654,9 @@ end
     @test length(select(ats, "record_hydroxyl_oxygen")) == 1
 
     m = MTRecordDenaturedModel(ats)
+    @test parse_show(m) ≈ """
+        MTRecordDenaturedModel wrapping CreamerDenaturedModel of a 6-atom protein and maximal denaturation.
+    """
     @test m.creamer.type == 3
     @test MTRecordDenaturedModel(ats, 2).creamer.type == 2
 
