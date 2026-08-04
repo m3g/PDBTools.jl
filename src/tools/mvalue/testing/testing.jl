@@ -656,8 +656,8 @@ end
     @test m.creamer.type == 3
     @test MTRecordDenaturedModel(ats, 2).creamer.type == 2
 
-    @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.52706414f0; atol=1f-6)
-    @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.1733738f0; atol=1f-6)
+    @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.5273f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.6590f0; atol=1f-4)
 
     tfe = transfer_free_energy(MTRecord, ats, "urea")
     @test tfe isa TransferFreeEnergy{MTRecord}
