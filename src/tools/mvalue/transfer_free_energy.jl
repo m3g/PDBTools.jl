@@ -78,15 +78,27 @@ function transfer_free_energy(
     unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
     sasa_ats = sasa_particles(CreamerUnitedAtomRadii, atoms; unitcell)
-    return transfer_free_energy(
-        sasa_ats, cosolvent;
-        model, backbone, sel, sidechain, parallel
-    )
+    if model == MTRecord
+        return transfer_free_energy(
+            MTRecord,
+            sasa_ats,
+            cosolvent;
+            backbone,
+            sel,
+            sidechain,
+            parallel,
+        )
+    else
+        return transfer_free_energy(
+            sasa_ats, cosolvent;
+            model, backbone, sel, sidechain, parallel
+        )
+    end
 end
 
 function transfer_free_energy(sasa_ats::SASA{T1}, cosolvent; kargs...) where {T1}
     throw(ArgumentError("""\n
-        To computie m-values or transfer free energies the SASA computation 
+        To compute m-values or transfer free energies the SASA computation 
         must use CreamerUnitedAtomRadii. For example, use:
 
             s = sasa_particles(CreamerUnitedAtomRadii, atoms)
@@ -121,6 +133,18 @@ function transfer_free_energy(
     sidechain::F2=issidechain,
     parallel::Bool=true,
 ) where {F1,F2}
+    if model == MTRecord
+        return transfer_free_energy(
+            MTRecord,
+            sasa_ats,
+            cosolvent;
+            backbone,
+            sel,
+            sidechain,
+            parallel,
+        )
+    end
+
     selector = Select(sel)
     residues = collect(eachresidue(select(sasa_ats.particles, selector)))
     cosolvent = lowercase(cosolvent)
