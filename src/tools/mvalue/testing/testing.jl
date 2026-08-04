@@ -23,7 +23,7 @@
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
             PDBTools.MValue{AutonBolen} - 69 residues - cosolvent: "urea"
-                Total m-value: -1.429gg7819 kcal mol⁻¹
+                Total m-value: -1.4297819 kcal mol⁻¹
                 Backbone contributions: -1.4926115 kcal mol⁻¹
                 Side-chain contributions: 0.0628296 kcal mol⁻¹
         """
