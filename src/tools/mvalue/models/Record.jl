@@ -67,7 +67,7 @@ const _record_cationic_nitrogens = Set{Tuple{String,String}}([
     ("HIS", "ND1"), ("HIS", "NE2"), # Explicit exception in the Record model.
 ])
 
-"""
+#=
     record_surface_type(atom::Atom)
 
 Map a protein atom to one of the seven coarse-grained surface types from the
@@ -82,7 +82,7 @@ Record transfer model:
 - `:cationic_nitrogen`
 
 Returns `nothing` for sulfur and hydrogen atoms, which are ignored by this model.
-"""
+=#
 function record_surface_type(at::Atom)
     restype = String(uppercase(threeletter(StringType, resname(at))))
     atname = String(uppercase(name(at)))
@@ -169,12 +169,12 @@ const _record_alpha_surface = Dict{String,Dict{Symbol,Float32}}(
 const _record_R_cal = 1.9872041f0
 const _record_default_T = 298.15f0
 
-"""
+#=
     model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol)
 
 Return the Record surface interaction potential contribution in `cal mol⁻¹ A⁻²` for
 a coarse-grained surface type, computed from Guinn et al. Table 1 and Eq. 4.
-"""
+=#
 function model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol)
     cos = lowercase(cosolvent)
     haskey(_record_alpha_surface, cos) || throw(ArgumentError("Unsupported cosolvent for MTRecord: $cosolvent"))
@@ -191,6 +191,45 @@ function model_combination_rule(::Type{MTRecord}, cosolvent, restype::AbstractSt
     """))
 end
 
+"""
+    MTRecordDenaturedModel
+
+Type that specifies that a m-value calculation will consider the `MTRecord` transfer
+model (Guinn et al., PNAS 2011), combined with a Creamer estimate of the denatured-state
+backbone and side-chain solvent-accessible surface areas. This type is used as the first
+input variable of the `mvalue` function.
+
+Construction:
+
+```
+MTRecordDenaturedModel(atoms::AbstractVector{<:Atom})
+```
+
+and, optionally, the second argument is the type of denatured model to be used, for example:
+
+```
+MTRecordDenaturedModel(atoms::AbstractVector{<:Atom}, 1)
+```
+
+where the `type` parameter can be 1, 2, or 3, for the minimal, average, and maximal denatured
+estimated accessible surface areas of Creamer (see `CreamerDenaturedModel`). A
+`CreamerDenaturedModel` can also be provided directly.
+
+Use the `MTRecordDenaturedModel` model as the first input argument of `mvalue`, for example:
+
+```
+mvalue(MTRecordDenaturedModel(prot), "urea")
+```
+
+to obtain the estimated m-value of denaturation in "urea".
+
+Reference:
+
+Guinn EJ, Pegram LM, Capp MW, Pollock MN, Record MT Jr. **Quantifying why urea is a protein
+denaturant, whereas glycine betaine is a protein stabilizer.** *PNAS.* 2011;108:16932-16937.
+doi: 10.1073/pnas.1109372108.
+
+"""
 struct MTRecordDenaturedModel{C}
     creamer::C
 end

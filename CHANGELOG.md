@@ -13,6 +13,7 @@ PDBTools.jl Changelog
 Version 3.33.3-DEV
 --------------
 - ![EXPERIMENTAL][badge-experimental] Implement `MTRecord` transfer model to compute m-values and transfer free energies, in urea or betaine.
+- ![EXPERIMENTAL][badge-experimental] Document the `MTRecord` model.
 
 Version 3.33.2
 --------------
@@ -114,7 +115,7 @@ Version 3.23.1
 
 Version 3.23.0
 --------------
-- ![FEATURE][badge-feature] Add `CreamerDenaturedModel` type, and `mvalue(::CreamerDenaturedModel)` to comnpute m-values associated with denaturation directly.
+- ![FEATURE][badge-feature] Add `CreamerDenaturedModel` type, and `mvalue(::CreamerDenaturedModel)` to compute m-values associated with denaturation directly.
 
 Version 3.22.0
 --------------
@@ -144,7 +145,7 @@ Version 3.20.0
 --------------
 - ![FEATURE][badge-feature] Add support for `filter(f, ::HBonds)` and slicing `HBonds` objects with `hbonds[1:5]`, or with index vectors.
 - ![FEATURE][badge-feature] Add iteration interface (`iterate`, `keys`, `eachindex`) for `HBonds` data structure, enabling `for` loops, `collect`, `findfirst`, etc.
-- ![INFO][badge-info] Document comprehensivelly the hydrogen-bonds functionality.
+- ![INFO][badge-info] Document comprehensively the hydrogen-bonds functionality.
 - ![INFO][badge-info] Code formatting and small adjustments.
 - ![INFO][badge-info] Replace BenchmarkTools.jl by Chairmarks.jl in allocation tests.
 
