@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.33.3-DEV
 --------------
+- ![EXPERIMENTAL][badge-experimental] Implement `MTRecord` transfer model to compute m-values and transfer free energies, in urea or betaine.
 
 Version 3.33.2
 --------------
