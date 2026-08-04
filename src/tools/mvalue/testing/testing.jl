@@ -661,5 +661,5 @@ end
 
     tfe = transfer_free_energy(MTRecord, ats, "urea")
     @test tfe isa TransferFreeEnergy{MTRecord}
-    @test tfe.nresidues == 2
+    @test tfe.nresidues == 3
 end
