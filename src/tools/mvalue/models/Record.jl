@@ -184,13 +184,6 @@ function model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbo
     return _record_R_cal * _record_default_T * α
 end
 
-function model_combination_rule(::Type{MTRecord}, cosolvent, restype::AbstractString)
-    throw(ArgumentError("""
-        MTRecord is an atom/surface-type model and cannot be combined per-residue type.
-        Use mvalue(MTRecordDenaturedModel(atoms[, type]), cosolvent) instead.
-    """))
-end
-
 """
     MTRecordDenaturedModel
 
@@ -213,7 +206,7 @@ MTRecordDenaturedModel(atoms::AbstractVector{<:Atom}, 1)
 
 where the `type` parameter can be 1, 2, or 3, for the minimal, average, and maximal denatured
 estimated accessible surface areas of Creamer (see `CreamerDenaturedModel`). A
-`CreamerDenaturedModel` can also be provided directly.
+`CreamerDenaturedModel` can also be provided directly. Default is 3.
 
 Use the `MTRecordDenaturedModel` model as the first input argument of `mvalue`, for example:
 
@@ -260,11 +253,16 @@ _record_denatured_sc_bb(c::CreamerDenaturedModel, rtype::String) = begin
 end
 
 """
-    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString)
+    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.15)
 
 Compute Record-model m-values from coarse-grained surface interaction potentials
 using Eq. 4 (Guinn et al. 2011) and folded SASAs from the wrapped
 `CreamerDenaturedModel`.
+
+The optional `alpha` parameter scales the denatured state surface area estimates. The default 1.15
+value optimally fits the available experimental data for urea. For betaine the optimal surface
+area of denatured states appears to be smaller.
+
 """
 function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.15)
     cos = lowercase(cosolvent)
