@@ -641,8 +641,16 @@ end
     @test isnothing(record_surface_type(Atom(resname="CYS", name="SG")))
     @test_throws "unsupported element" record_surface_type(Atom(resname="ALA", name="P", pdb_element="P"))
 
+    # Fallback for usuported types
+    @test record_surface_type(Atom(resname="ARG", name="OAM")) == :amide_oxygen
+    @test record_surface_type(Atom(resname="ARG", name="NAM")) == :amide_nitrogen
+
     # Registering the macro keywords a second time (e.g. on reload) must be a no-op.
     PDBTools._register_record_macro_keywords!()
+    icn = findfirst(k -> k.name == "record_cationic_nitrogen", PDBTools.macro_keywords)
+    popat!(PDBTools.macro_keywords, icn)
+    PDBTools._register_record_macro_keywords!()
+    @test findfirst(k -> k.name == "record_cationic_nitrogen", PDBTools.macro_keywords) !== nothing
 
     # Test macro-keyword integration with selection syntax.
     ats = [
