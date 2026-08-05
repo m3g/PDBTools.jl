@@ -188,9 +188,12 @@ end
     MTRecordDenaturedModel
 
 Type that specifies that a m-value calculation will consider the `MTRecord` transfer
-model (Guinn et al., PNAS 2011), combined with a Creamer estimate of the denatured-state
-backbone and side-chain solvent-accessible surface areas. This type is used as the first
-input variable of the `mvalue` function.
+model (Guinn et al., PNAS 2011). Unlike the other transfer models, `MTRecord` was
+parameterized against, and is meant to be used with, an explicit atomistic model of the
+unfolded state: this type wraps a protein's native (folded) structure together with its
+fully-extended (all-trans, phi = psi = 180°, see `extended_chain`) chain, and the
+atom-resolved SASAs of both, precomputed once at construction. This type is used as the
+first input variable of the `mvalue` function.
 
 Construction:
 
@@ -198,15 +201,7 @@ Construction:
 MTRecordDenaturedModel(atoms::AbstractVector{<:Atom})
 ```
 
-and, optionally, the second argument is the type of denatured model to be used, for example:
-
-```
-MTRecordDenaturedModel(atoms::AbstractVector{<:Atom}, 1)
-```
-
-where the `type` parameter can be 1, 2, or 3, for the minimal, average, and maximal denatured
-estimated accessible surface areas of Creamer (see `CreamerDenaturedModel`). A
-`CreamerDenaturedModel` can also be provided directly. Default is 3.
+builds the extended chain internally (via `extended_chain`) and computes both SASAs.
 
 Use the `MTRecordDenaturedModel` model as the first input argument of `mvalue`, for example:
 
@@ -223,103 +218,72 @@ denaturant, whereas glycine betaine is a protein stabilizer.** *PNAS.* 2011;108:
 doi: 10.1073/pnas.1109372108.
 
 """
-struct MTRecordDenaturedModel{C}
-    creamer::C
+struct MTRecordDenaturedModel{T,S}
+    native_chain::T
+    extended_chain::T
+    sasa_native::S
+    sasa_ext::S
 end
 
-function MTRecordDenaturedModel(c::CreamerDenaturedModel)
-    return MTRecordDenaturedModel{typeof(c)}(c)
-end
-
-function MTRecordDenaturedModel(
-    atoms::AbstractVector{<:Atom},
-    type::Int=3;
-    sasa_parameterization=:original,
-)
-    return MTRecordDenaturedModel(
-        CreamerDenaturedModel(atoms, type; sasa_parameterization)
-    )
+function MTRecordDenaturedModel(p::AbstractVector{<:Atom})
+    p_ext = extended_chain(p)
+    sasa_native = sasa_particles(CreamerUnitedAtomRadii, p)
+    sasa_ext = sasa_particles(CreamerUnitedAtomRadii, p_ext)
+    return MTRecordDenaturedModel(p, p_ext, sasa_native, sasa_ext)
 end
 
 function Base.show(io::IO, m::MTRecordDenaturedModel)
-    print(io, "MTRecordDenaturedModel wrapping $(m.creamer)")
-end
-
-_record_denatured_sc_bb(c::CreamerDenaturedModel, rtype::String) = begin
-    cr = _sasa_parameterization(c.sasa_parameterization)[rtype]
-    bb = c.type == 1 ? cr.bb_lower : c.type == 2 ? 0.5f0 * (cr.bb_lower + cr.bb_upper) : cr.bb_upper
-    sc = c.type == 1 ? cr.sc_lower : c.type == 2 ? 0.5f0 * (cr.sc_lower + cr.sc_upper) : cr.sc_upper
-    return bb, sc
+    print(io, "MTRecordDenaturedModel wrapping a $(length(m.native_chain))-atom native/extended chain pair")
 end
 
 """
-    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.15)
+    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString)
 
-Compute Record-model m-values from coarse-grained surface interaction potentials
-using Eq. 4 (Guinn et al. 2011) and folded SASAs from the wrapped
-`CreamerDenaturedModel`.
-
-The optional `alpha` parameter scales the denatured state surface area estimates. The default 1.15
-value optimally fits the available experimental data for urea. For betaine the optimal surface
-area of denatured states appears to be smaller.
+Compute Record-model m-values from coarse-grained surface interaction potentials, using
+Eq. 4 (Guinn et al. 2011) and the atom-resolved ΔASA between the native and fully-extended
+chains wrapped in `m` (that is, ASA of the extended chain minus ASA of the native chain, for
+each atom), following the original Record model.
 
 """
-function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.15)
+function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString)
     cos = lowercase(cosolvent)
     haskey(cosolvent_column_MTRecord, cos) || throw(ArgumentError("Unsupported cosolvent for MTRecord: $cosolvent"))
 
-    c = m.creamer
-    residues = collect(eachresidue(c.sasa_atoms.particles))
+    native = m.native_chain
+    extended = m.extended_chain
+    length(native) == length(extended) || throw(ArgumentError("""\n
+        The native and extended chains wrapped by MTRecordDenaturedModel have a different
+        number of atoms ($(length(native)) vs $(length(extended))).
+    """))
+
+    residues = collect(eachresidue(native))
+    ext_residues = collect(eachresidue(extended))
+    length(residues) == length(ext_residues) || throw(ArgumentError("""\n
+        The native and extended chains wrapped by MTRecordDenaturedModel have a different
+        number of residues ($(length(residues)) vs $(length(ext_residues))).
+    """))
+
     n = length(residues)
     residue_contributions_bb = zeros(Float32, n)
     residue_contributions_sc = zeros(Float32, n)
 
-    for (i, res) in enumerate(residues)
-        rtype = threeletter(resname(res))
-        bb_denatured, sc_denatured = alpha .* _record_denatured_sc_bb(c, rtype)
-
-        bb_atoms = [at for at in res if isbackbone(at)]
-        sc_atoms = [at for at in res if issidechain(at)]
-
-        bb_folded = 0.0f0
-        sc_folded = 0.0f0
-        sasa_at = Dict{Atom,Float32}()
-
-        for at in bb_atoms
-            s = sasa(c.sasa_atoms, x -> x === at)
-            sasa_at[at] = s
-            bb_folded += s
-        end
-        for at in sc_atoms
-            s = sasa(c.sasa_atoms, x -> x === at)
-            sasa_at[at] = s
-            sc_folded += s
-        end
-
-        bb_scale = iszero(bb_folded) ? 0.0f0 : bb_denatured / bb_folded
-        sc_scale = iszero(sc_folded) ? 0.0f0 : sc_denatured / sc_folded
-
+    for (ires, (res, res_ext)) in enumerate(zip(residues, ext_residues))
         bb_contrib = 0.0f0
         sc_contrib = 0.0f0
-
-        for at in bb_atoms
+        for (at, at_ext) in zip(res, res_ext)
             stype = record_surface_type(at)
             isnothing(stype) && continue
             σ = model_combination_rule(MTRecord, cos, stype)
-            ΔASA = sasa_at[at] * (bb_scale - 1f0)
-            bb_contrib += σ * ΔASA
+            ΔASA = sasa(m.sasa_ext, x -> x === at_ext) - sasa(m.sasa_native, x -> x === at)
+            contrib = σ * ΔASA
+            if isbackbone(at)
+                bb_contrib += contrib
+            elseif issidechain(at)
+                sc_contrib += contrib
+            end
         end
-
-        for at in sc_atoms
-            stype = record_surface_type(at)
-            isnothing(stype) && continue
-            σ = model_combination_rule(MTRecord, cos, stype)
-            ΔASA = sasa_at[at] * (sc_scale - 1f0)
-            sc_contrib += σ * ΔASA
-        end
-
-        residue_contributions_bb[i] = bb_contrib / 1000f0
-        residue_contributions_sc[i] = sc_contrib / 1000f0
+        residue_contributions_bb[ires] = bb_contrib / 1000f0
+        residue_contributions_sc[ires] = sc_contrib / 1000f0
     end
 
     bb = sum(residue_contributions_bb)
