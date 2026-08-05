@@ -639,6 +639,10 @@ end
     @test record_surface_type(Atom(resname="TRP", name="NE1")) == :amide_nitrogen
     @test isnothing(record_surface_type(Atom(resname="MET", name="SD")))
     @test isnothing(record_surface_type(Atom(resname="CYS", name="SG")))
+    @test_throws "unsupported element" record_surface_type(Atom(resname="ALA", name="P", pdb_element="P"))
+
+    # Registering the macro keywords a second time (e.g. on reload) must be a no-op.
+    PDBTools._register_record_macro_keywords!()
 
     # Test macro-keyword integration with selection syntax.
     ats = [
@@ -648,14 +652,22 @@ end
         Atom(resname="ALA", name="O"),
         Atom(resname="PHE", name="CG"),
         Atom(resname="SER", name="OG"),
+        Atom(resname="ASN", name="OD1"),
+        Atom(resname="ASP", name="OD2"),
+        Atom(resname="GLN", name="NE2"),
+        Atom(resname="HIS", name="ND1"),
     ]
     @test length(select(ats, "record_aliphatic_carbon and backbone")) == 2
     @test length(select(ats, "record_aromatic_carbon")) == 1
     @test length(select(ats, "record_hydroxyl_oxygen")) == 1
+    @test length(select(ats, "record_amide_oxygen")) == 2
+    @test length(select(ats, "record_carboxylate_oxygen")) == 1
+    @test length(select(ats, "record_amide_nitrogen")) == 2
+    @test length(select(ats, "record_cationic_nitrogen")) == 1
 
     m = MTRecordDenaturedModel(ats)
     @test parse_show(m) ≈ """
-        MTRecordDenaturedModel wrapping CreamerDenaturedModel of a 6-atom protein and maximal denaturation.
+        MTRecordDenaturedModel wrapping CreamerDenaturedModel of a 10-atom protein and maximal denaturation.
     """
     @test m.creamer.type == 3
     @test MTRecordDenaturedModel(ats, 2).creamer.type == 2
@@ -665,5 +677,5 @@ end
 
     tfe = transfer_free_energy(MTRecord, ats, "urea")
     @test tfe isa TransferFreeEnergy{MTRecord}
-    @test tfe.nresidues == 3
+    @test tfe.nresidues == 7
 end
