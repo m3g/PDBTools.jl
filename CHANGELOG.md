@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.33.3-DEV
 --------------
+- ![FEATURE][badge-feature] Add `set_phi!` and `set_psi!` to set backbone dihedral angles of a protein structure.
+- ![FEATURE][badge-feature] Add `extended_chain` and `extended_chain!` to build the fully-extended (all-trans) conformation of a protein.
 - ![EXPERIMENTAL][badge-experimental] Implement `MTRecord` transfer model to compute m-values and transfer free energies, in urea or betaine.
 - ![EXPERIMENTAL][badge-experimental] Document the `MTRecord` model.
 

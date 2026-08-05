@@ -97,12 +97,17 @@ respectively.
 
 ## Denaturation *m*-values
 
-Because `MTRecord` requires atom-resolved SASAs on both the folded and the denatured state, and the
-denatured state has no explicit atomic structure, *m*-values of denaturation are computed by
-wrapping the atoms (or an existing `CreamerDenaturedModel`) in a `MTRecordDenaturedModel`, which
-reuses the Creamer backbone/side-chain denatured-state ASA estimates (as in
-[`CreamerDenaturedModel`](protein_denaturation.md)) to scale the folded, atom-resolved
-``\Delta``ASA of each residue:
+Unlike the other transfer models, which pair a native structure with a *parametric* estimate of the
+denatured-state backbone/side-chain ASA (the Creamer model, see
+[`CreamerDenaturedModel`](protein_denaturation.md)), `MTRecord` is meant to be used with an explicit
+*atomistic* model of the unfolded state, since it needs a real ``\Delta``ASA for every atom and
+surface type, not just per-residue backbone/side-chain totals. The unfolded-state reference used
+here is the fully extended (all-trans, ``\phi = \psi = 180°``) chain, obtained with
+[`extended_chain`](@ref) - this is the same "extended β" reference state that Guinn et al.
+themselves use in their own validation (Table S3 of the paper).
+
+`MTRecordDenaturedModel` wraps a protein's native structure together with its extended chain (built
+automatically) and the atom-resolved SASAs of both, computed once at construction:
 
 ```@docs
 MTRecordDenaturedModel
@@ -115,11 +120,10 @@ m = mvalue(model, "urea")
 println("m-value: tot = $(m.tot), bb = $(m.bb), sc = $(m.sc)")
 ```
 
-The `alpha` keyword of `mvalue` (default `1.15`) rescales the Creamer denatured-state backbone and
-side-chain ASA estimates before they are combined with the Record surface-type potentials. This
-empirical correction accounts for the fact that Creamer's denatured-state ASAs were calibrated for
-use with amino-acid-based additive models (`AutonBolen`), and are not, without adjustment, on the
-same scale as the atom-resolved ``\Delta``ASA required by `MTRecord`. The default value was found to
-reproduce the urea benchmarks of Guinn et al. (Table S3) well; for other cosolvents or particularly
-unusual proteins, `alpha` (and the denaturation `type`, `1`, `2`, or `3`, of `MTRecordDenaturedModel`)
-may need to be adjusted to match experimental data, as illustrated in the package tests for betaine.
+The *m*-value is obtained directly from Eq. 4, using the real, atom-by-atom ``\Delta``ASA between
+the extended and native chains (extended minus native). By default (`alpha=1.0`), the extended-chain
+ASA is used as computed, with no adjustment; for urea, this reproduces the *m*-values reported in
+Table S3 of Guinn et al. well. Glycine betaine has no equivalent extended-chain validation set in the
+paper (Table S3 is urea-only), so predictions for `"betaine"` should be interpreted with more
+caution; the `alpha` keyword is available to empirically rescale the extended-chain ASA, if needed
+to better match experimental betaine data.

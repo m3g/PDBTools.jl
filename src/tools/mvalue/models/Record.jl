@@ -237,15 +237,22 @@ function Base.show(io::IO, m::MTRecordDenaturedModel)
 end
 
 """
-    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString)
+    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0)
 
 Compute Record-model m-values from coarse-grained surface interaction potentials, using
 Eq. 4 (Guinn et al. 2011) and the atom-resolved ΔASA between the native and fully-extended
 chains wrapped in `m` (that is, ASA of the extended chain minus ASA of the native chain, for
 each atom), following the original Record model.
 
+The optional `alpha` keyword scales the extended-chain (denatured-state) ASA of each atom
+before taking the difference with the native-state ASA. The default, `alpha=1.0`, uses the
+extended-chain ASA as computed, with no adjustment; this reproduces the urea benchmarks of
+Guinn et al. (Table S3) well. There is no equivalent extended-chain validation set for
+betaine in the paper, so `alpha` is exposed to allow empirically fitting the denatured-state
+ASA scale to experimental betaine data, if needed.
+
 """
-function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString)
+function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0)
     cos = lowercase(cosolvent)
     haskey(cosolvent_column_MTRecord, cos) || throw(ArgumentError("Unsupported cosolvent for MTRecord: $cosolvent"))
 
@@ -274,7 +281,7 @@ function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString)
             stype = record_surface_type(at)
             isnothing(stype) && continue
             σ = model_combination_rule(MTRecord, cos, stype)
-            ΔASA = sasa(m.sasa_ext, x -> x === at_ext) - sasa(m.sasa_native, x -> x === at)
+            ΔASA = alpha * sasa(m.sasa_ext, x -> x === at_ext) - sasa(m.sasa_native, x -> x === at)
             contrib = σ * ΔASA
             if isbackbone(at)
                 bb_contrib += contrib
