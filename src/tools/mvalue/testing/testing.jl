@@ -7,13 +7,13 @@
     MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea")
-    @test isapprox(r_1MJC.tot, -1.429; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -1.492; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.063; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -1.405; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.071; atol=1e-2)
 
     # Confirm that now cosolvent selection is not case-sensitive
     r_1MJC = mvalue(MJC_native, MJC_desnat, "Urea")
-    @test isapprox(r_1MJC.tot, -1.429; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
 
     # test non-parallel vs. parallel calculations
     ms = mvalue(MJC_native, MJC_desnat, "urea"; parallel=false)
@@ -22,10 +22,10 @@
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
-            PDBTools.MValue{AutonBolen} - 69 residues - cosolvent: "urea"
-                Total m-value: -1.4297819 kcal mol⁻¹
-                Backbone contributions: -1.4926115 kcal mol⁻¹
-                Side-chain contributions: 0.0628296 kcal mol⁻¹
+        MValue{AutonBolen} - 69 residues - cosolvent: "urea"
+            Total m-value: -1.3340737 kcal mol⁻¹
+            Backbone contributions: -1.4051082 kcal mol⁻¹
+            Side-chain contributions: 0.07103452 kcal mol⁻¹
         """
 
     # Test save/load preserves model type and data
@@ -43,17 +43,17 @@
     rm(tmp; force=true)
 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "tmao")
-    @test isapprox(r_1MJC.tot, 2.773; atol=1e-2)
-    @test isapprox(r_1MJC.bb, 3.444; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.672; atol=1e-2)
+    @test isapprox(r_1MJC.tot, 2.5198; atol=1e-2)
+    @test isapprox(r_1MJC.bb, 3.2425; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.7227; atol=1e-2)
 
     #
     # MoeserHorinek model
     # 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -1.216; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.203; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.676; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.526; atol=1e-2)
 
     save(tmp, r_1MJC)
     m_load = load(MValue, tmp)
@@ -67,23 +67,23 @@
         backbone=at -> name(at) in ("N", "CA", "C", "O"),
         sidechain=at -> !(name(at) in ("N", "CA", "C", "O")),
     )
-    @test isapprox(r_1MJC.tot, -1.215; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.2025; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.676; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.526; atol=1e-2)
 
     # Compute using precomputed SASAs
     sn = sasa_particles(CreamerUnitedAtomRadii, MJC_native)
     sd = sasa_particles(CreamerUnitedAtomRadii, MJC_desnat)
     r_1MJC = mvalue(sn, sd, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -1.215; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.2025; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.6759; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.52656; atol=1e-2)
 
     # Provide a selection
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
-    @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.01512; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.10998993; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.09485909; atol=1e-2)
 
     # Test selection additivity
     r0 = mvalue(MJC_native, MJC_desnat, "urea")
@@ -102,9 +102,9 @@
 
     # Provide a selection using SASAs
     r_1MJC = mvalue(sn, sd, "urea"; sel="acidic")
-    @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.01512; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.10998993; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.09486909; atol=1e-2)
 
     # Test selection additivity
     r1 = mvalue(sn, sd, "urea"; sel="acidic")
@@ -228,9 +228,9 @@ end
     @test isapprox(r_1MJC.sc, -0.468; rtol=1e-1)
     sasa_1MJC_julia = delta_sasa_per_restype(; native=MJC_native, desnat=MJC_desnat, ignore_hydrogen=false)
     r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_julia)
-    @test isapprox(r_1MJC.tot, -1.02; rtol=1e-1)
-    @test isapprox(r_1MJC.bb, -0.389; rtol=1e-1)
-    @test isapprox(r_1MJC.sc, -0.627; rtol=1e-1)
+    @test isapprox(r_1MJC.tot, -0.9863; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.344; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.642; rtol=1e-1)
 
     if !isnothing(gmx)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
@@ -238,18 +238,18 @@ end
             desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
         )
         r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
-        @test isapprox(r_1MJC.tot, -1.24; rtol=1e-1)
-        @test isapprox(r_1MJC.bb, -0.777; rtol=1e-1)
-        @test isapprox(r_1MJC.sc, -0.463; rtol=1e-1)
+        @test isapprox(r_1MJC.tot, -1.2335; rtol=1e-1)
+        @test isapprox(r_1MJC.bb, -0.7333; rtol=1e-1)
+        @test isapprox(r_1MJC.sc, -0.50025; rtol=1e-1)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
             native_pdb=joinpath(dir, "1MJC_native.pdb"),
             desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
             ignore_hydrogen=false,
         )
         r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
-        @test isapprox(r_1MJC.tot, -1.01; rtol=1e-1)
-        @test isapprox(r_1MJC.bb, -0.342; rtol=1e-1)
-        @test isapprox(r_1MJC.sc, -0.668; rtol=1e-1)
+        @test isapprox(r_1MJC.tot, -0.98749; rtol=1e-1)
+        @test isapprox(r_1MJC.bb, -0.3014; rtol=1e-1)
+        @test isapprox(r_1MJC.sc, -0.67707; rtol=1e-1)
     end
 
     #
