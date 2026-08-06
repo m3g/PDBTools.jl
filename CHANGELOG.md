@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.33.3-DEV
+Version 3.34.0
 --------------
 - ![FEATURE][badge-feature] Add `set_phi!` and `set_psi!` to set backbone dihedral angles of a protein structure.
 - ![FEATURE][badge-feature] Add `extended_chain` and `extended_chain!` to build the fully-extended (all-trans) conformation of a protein.
