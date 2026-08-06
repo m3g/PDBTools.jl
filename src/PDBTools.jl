@@ -35,7 +35,7 @@ export Chain, eachchain, chain
 export residue_ticks
 export Segment, eachsegment
 export Model, eachmodel
-export positions, maxmin, distance, closest, dihedral, Ramachandran
+export positions, maxmin, distance, closest, dihedral, Ramachandran, set_phi!, set_psi!, extended_chain!, extended_chain
 export element, mass, element_name, element_symbol, element_symbol_string, element_vdw_radius
 export formula, stoichiometry
 export Sequence

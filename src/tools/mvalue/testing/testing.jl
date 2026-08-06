@@ -7,13 +7,13 @@
     MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea")
-    @test isapprox(r_1MJC.tot, -1.429; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -1.492; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.063; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -1.405; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.071; atol=1e-2)
 
     # Confirm that now cosolvent selection is not case-sensitive
     r_1MJC = mvalue(MJC_native, MJC_desnat, "Urea")
-    @test isapprox(r_1MJC.tot, -1.429; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
 
     # test non-parallel vs. parallel calculations
     ms = mvalue(MJC_native, MJC_desnat, "urea"; parallel=false)
@@ -22,10 +22,10 @@
 
     # Test show method
     @test parse_show(r_1MJC; repl=Dict(r"PDBTools." => "")) ≈ """
-            PDBTools.MValue{AutonBolen} - 69 residues - cosolvent: "urea"
-                Total m-value: -1.4297819 kcal mol⁻¹
-                Backbone contributions: -1.4926115 kcal mol⁻¹
-                Side-chain contributions: 0.0628296 kcal mol⁻¹
+        MValue{AutonBolen} - 69 residues - cosolvent: "urea"
+            Total m-value: -1.3340737 kcal mol⁻¹
+            Backbone contributions: -1.4051082 kcal mol⁻¹
+            Side-chain contributions: 0.07103452 kcal mol⁻¹
         """
 
     # Test save/load preserves model type and data
@@ -43,17 +43,17 @@
     rm(tmp; force=true)
 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "tmao")
-    @test isapprox(r_1MJC.tot, 2.773; atol=1e-2)
-    @test isapprox(r_1MJC.bb, 3.444; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.672; atol=1e-2)
+    @test isapprox(r_1MJC.tot, 2.5198; atol=1e-2)
+    @test isapprox(r_1MJC.bb, 3.2425; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.7227; atol=1e-2)
 
     #
     # MoeserHorinek model
     # 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -1.216; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.203; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.676; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.526; atol=1e-2)
 
     save(tmp, r_1MJC)
     m_load = load(MValue, tmp)
@@ -67,23 +67,23 @@
         backbone=at -> name(at) in ("N", "CA", "C", "O"),
         sidechain=at -> !(name(at) in ("N", "CA", "C", "O")),
     )
-    @test isapprox(r_1MJC.tot, -1.215; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.2025; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.676; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.526; atol=1e-2)
 
     # Compute using precomputed SASAs
     sn = sasa_particles(CreamerUnitedAtomRadii, MJC_native)
     sd = sasa_particles(CreamerUnitedAtomRadii, MJC_desnat)
     r_1MJC = mvalue(sn, sd, "urea"; model=MoeserHorinek)
-    @test isapprox(r_1MJC.tot, -1.215; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.713; atol=1e-2)
-    @test isapprox(r_1MJC.sc, -0.502; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -1.2025; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.6759; atol=1e-2)
+    @test isapprox(r_1MJC.sc, -0.52656; atol=1e-2)
 
     # Provide a selection
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
-    @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.01512; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.10998993; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.09485909; atol=1e-2)
 
     # Test selection additivity
     r0 = mvalue(MJC_native, MJC_desnat, "urea")
@@ -102,9 +102,9 @@
 
     # Provide a selection using SASAs
     r_1MJC = mvalue(sn, sd, "urea"; sel="acidic")
-    @test isapprox(r_1MJC.tot, -0.022; atol=1e-2)
-    @test isapprox(r_1MJC.bb, -0.090; atol=1e-2)
-    @test isapprox(r_1MJC.sc, 0.067; atol=1e-2)
+    @test isapprox(r_1MJC.tot, -0.01512; atol=1e-2)
+    @test isapprox(r_1MJC.bb, -0.10998993; atol=1e-2)
+    @test isapprox(r_1MJC.sc, 0.09486909; atol=1e-2)
 
     # Test selection additivity
     r1 = mvalue(sn, sd, "urea"; sel="acidic")
@@ -228,9 +228,9 @@ end
     @test isapprox(r_1MJC.sc, -0.468; rtol=1e-1)
     sasa_1MJC_julia = delta_sasa_per_restype(; native=MJC_native, desnat=MJC_desnat, ignore_hydrogen=false)
     r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_julia)
-    @test isapprox(r_1MJC.tot, -1.02; rtol=1e-1)
-    @test isapprox(r_1MJC.bb, -0.389; rtol=1e-1)
-    @test isapprox(r_1MJC.sc, -0.627; rtol=1e-1)
+    @test isapprox(r_1MJC.tot, -0.9863; rtol=1e-1)
+    @test isapprox(r_1MJC.bb, -0.344; rtol=1e-1)
+    @test isapprox(r_1MJC.sc, -0.642; rtol=1e-1)
 
     if !isnothing(gmx)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
@@ -238,18 +238,18 @@ end
             desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
         )
         r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
-        @test isapprox(r_1MJC.tot, -1.24; rtol=1e-1)
-        @test isapprox(r_1MJC.bb, -0.777; rtol=1e-1)
-        @test isapprox(r_1MJC.sc, -0.463; rtol=1e-1)
+        @test isapprox(r_1MJC.tot, -1.2335; rtol=1e-1)
+        @test isapprox(r_1MJC.bb, -0.7333; rtol=1e-1)
+        @test isapprox(r_1MJC.sc, -0.50025; rtol=1e-1)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
             native_pdb=joinpath(dir, "1MJC_native.pdb"),
             desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
             ignore_hydrogen=false,
         )
         r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
-        @test isapprox(r_1MJC.tot, -1.01; rtol=1e-1)
-        @test isapprox(r_1MJC.bb, -0.342; rtol=1e-1)
-        @test isapprox(r_1MJC.sc, -0.668; rtol=1e-1)
+        @test isapprox(r_1MJC.tot, -0.98749; rtol=1e-1)
+        @test isapprox(r_1MJC.bb, -0.3014; rtol=1e-1)
+        @test isapprox(r_1MJC.sc, -0.67707; rtol=1e-1)
     end
 
     #
@@ -574,6 +574,61 @@ end
         @test 1 + c_ab ≈ 1 + c_acc rtol = 0.25
     end
 
+    # Tests for MTRecord model (native structure vs. its own fully-extended chain).
+    # For urea, Guinn et al. (Table S3) themselves use this exact "extended beta (all-trans)"
+    # reference state, so these reproduce the paper's own predicted m-values well.
+    RN2 = read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
+    MJC = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
+    rec_m = MTRecordDenaturedModel(RN2)
+    c_rec = mvalue(rec_m, "urea").tot
+    @test c_rec ≈ -2.2 rtol = 0.15
+    rec_m = MTRecordDenaturedModel(MJC)
+    c_rec = mvalue(rec_m, "urea").tot
+    @test c_rec ≈ -0.94 rtol = 0.1
+
+    # Test providing models or chains to MTRecordDenaturedModel
+    MJC_m = collect(eachmodel(MJC))[1]
+    MJC_c = collect(eachchain(MJC))[1]
+    @test mvalue(MTRecordDenaturedModel(MJC_m), "urea").tot ≈ c_rec
+    @test mvalue(MTRecordDenaturedModel(MJC_c), "urea").tot ≈ c_rec
+
+    # Test consistency of the TFE path: mvalue(MTRecordDenaturedModel(MJC), ...) must agree
+    # with manually differencing the transfer free energies of MJC and its extended chain.
+    c_rec_mjc = mvalue(MTRecordDenaturedModel(MJC), "urea").tot
+    tfe_n = transfer_free_energy(MJC, "urea"; model=MTRecord)
+    tfe_d = transfer_free_energy(extended_chain(MJC), "urea"; model=MTRecord)
+    m_tfe = tfe_d.tot - tfe_n.tot
+    @test c_rec_mjc ≈ m_tfe
+
+    # Test path of TFE from SASA
+    tfe = transfer_free_energy(MJC, "urea"; model=MTRecord)
+    tfe_sasa = transfer_free_energy(sasa_particles(CreamerUnitedAtomRadii, MJC), "urea"; model=MTRecord)
+    @test tfe.tot ≈ tfe_sasa.tot
+
+    # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
+    # urea-only), so these are regression checks against the model's own output, not
+    # literature-validated targets.
+    rec_m = MTRecordDenaturedModel(RN2)
+    c_rec = mvalue(rec_m, "betaine").tot
+    @test c_rec ≈ 1.20 rtol = 0.05
+    rec_m = MTRecordDenaturedModel(MJC)
+    c_rec = mvalue(rec_m, "betaine").tot
+    @test c_rec ≈ 0.54 rtol = 0.05
+
+    # Tests for arithmetic operations on TFEs
+    tfe_n = transfer_free_energy(MJC, "urea"; model=MTRecord)
+    tfe_test = 2 * tfe_n - tfe_n
+    @test tfe_test.tot ≈ tfe_n.tot
+    @test tfe_test.bb ≈ tfe_n.bb
+    @test tfe_test.sc ≈ tfe_n.sc
+    @test tfe_test.residue_contributions_bb ≈ tfe_n.residue_contributions_bb
+    @test tfe_test.residue_contributions_sc ≈ tfe_n.residue_contributions_sc
+    @test tfe_test.cosolvent == tfe_n.cosolvent
+    tfe_n2 = transfer_free_energy(RN2, "urea"; model=MTRecord)
+    @test_throws "number of residues" tfe_n2 + tfe_n
+    tfe_n2 = transfer_free_energy(MJC, "betaine"; model=MTRecord)
+    @test_throws "cosolvents" tfe_n2 + tfe_n
+
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
     @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
@@ -589,12 +644,14 @@ end
     @test PDBTools.modelname(AutonBolen) == "AutonBolen"
     @test PDBTools.modelname(MoeserHorinekApp) == "MoeserHorinekApp"
     @test PDBTools.modelname(Accessibility) == "Accessibility"
+    @test PDBTools.modelname(MTRecord) == "MTRecord"
 
     # Model type returns
     @test PDBTools._model_type("MoeserHorinek") == MoeserHorinek
     @test PDBTools._model_type("AutonBolen") == AutonBolen
     @test PDBTools._model_type("MoeserHorinekApp") == MoeserHorinekApp
     @test PDBTools._model_type("Accessibility") == Accessibility
+    @test PDBTools._model_type("MTRecord") == MTRecord
     @test_throws "Invalid MValueModel" PDBTools._model_type("ABC") 
 
     # Error if wrong atomic radii was provided
@@ -603,3 +660,70 @@ end
 
 end
 
+@testitem "Record transfer model atom type mapping" begin
+    using PDBTools
+    using PDBTools: record_surface_type, model_combination_rule
+    using ShowMethodTesting
+
+    @test record_surface_type(Atom(resname="LEU", name="CB")) == :aliphatic_carbon
+    @test record_surface_type(Atom(resname="PHE", name="CG")) == :aromatic_carbon
+    @test record_surface_type(Atom(resname="SER", name="OG")) == :hydroxyl_oxygen
+    @test record_surface_type(Atom(resname="ASN", name="OD1")) == :amide_oxygen
+    @test record_surface_type(Atom(resname="ASP", name="OD2")) == :carboxylate_oxygen
+    @test record_surface_type(Atom(resname="GLN", name="NE2")) == :amide_nitrogen
+    @test record_surface_type(Atom(resname="HIS", name="ND1")) == :cationic_nitrogen
+    @test record_surface_type(Atom(resname="TRP", name="NE1")) == :amide_nitrogen
+    @test isnothing(record_surface_type(Atom(resname="MET", name="SD")))
+    @test isnothing(record_surface_type(Atom(resname="CYS", name="SG")))
+    @test_throws "unsupported element" record_surface_type(Atom(resname="ALA", name="P", pdb_element="P"))
+
+    # Fallback for usuported types
+    @test record_surface_type(Atom(resname="ARG", name="OAM")) == :amide_oxygen
+    @test record_surface_type(Atom(resname="ARG", name="NAM")) == :amide_nitrogen
+
+    # Registering the macro keywords a second time (e.g. on reload) must be a no-op.
+    PDBTools._register_record_macro_keywords!()
+    icn = findfirst(k -> k.name == "record_cationic_nitrogen", PDBTools.macro_keywords)
+    popat!(PDBTools.macro_keywords, icn)
+    PDBTools._register_record_macro_keywords!()
+    @test findfirst(k -> k.name == "record_cationic_nitrogen", PDBTools.macro_keywords) !== nothing
+
+    # Test macro-keyword integration with selection syntax.
+    ats = [
+        Atom(resname="ALA", name="N"),
+        Atom(resname="ALA", name="CA"),
+        Atom(resname="ALA", name="C"),
+        Atom(resname="ALA", name="O"),
+        Atom(resname="PHE", name="CG"),
+        Atom(resname="SER", name="OG"),
+        Atom(resname="ASN", name="OD1"),
+        Atom(resname="ASP", name="OD2"),
+        Atom(resname="GLN", name="NE2"),
+        Atom(resname="HIS", name="ND1"),
+    ]
+    @test length(select(ats, "record_aliphatic_carbon and backbone")) == 2
+    @test length(select(ats, "record_aromatic_carbon")) == 1
+    @test length(select(ats, "record_hydroxyl_oxygen")) == 1
+    @test length(select(ats, "record_amide_oxygen")) == 2
+    @test length(select(ats, "record_carboxylate_oxygen")) == 1
+    @test length(select(ats, "record_amide_nitrogen")) == 2
+    @test length(select(ats, "record_cationic_nitrogen")) == 1
+
+    # MTRecordDenaturedModel needs a real backbone (to build the extended chain from),
+    # unlike the synthetic, disconnected `ats` used above.
+    pep = read_pdb(PDBTools.TESTPDB, "protein and residue 1 to 5")
+    m = MTRecordDenaturedModel(pep)
+    @test parse_show(m) ≈ "MTRecordDenaturedModel wrapping a $(length(pep))-atom native/extended chain pair"
+    @test length(m.native_chain) == length(pep)
+    @test length(m.extended_chain) == length(pep)
+    ram_ext = Ramachandran(m.extended_chain)
+    @test all(x -> isapprox(x, 180.0; atol=1e-2) || isapprox(abs(x), 180.0; atol=1e-2), ram_ext.phi)
+    @test all(x -> isapprox(x, 180.0; atol=1e-2) || isapprox(abs(x), 180.0; atol=1e-2), ram_ext.psi)
+
+    @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.5273f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.6590f0; atol=1f-4)
+
+    tfe = transfer_free_energy(MTRecord, ats, "urea")
+    @test tfe isa TransferFreeEnergy{MTRecord}
+    @test tfe.nresidues == 7
+end
