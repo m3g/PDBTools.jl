@@ -586,6 +586,12 @@ end
     c_rec = mvalue(rec_m, "urea").tot
     @test c_rec ≈ -0.94 rtol = 0.1
 
+    # Test consistency of the TFE path
+    tfe_n = transfer_free_energy(RN2, "urea"; model=MTRecord)
+    tfe_d = transfer_free_energy(extended_chain(RN2), "urea"; model=MTRecord)
+    m_tfe = tfe_d.tot - tfe_n.tot
+    @test c_rec ≈ m_tfe
+
     # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
     # urea-only), so these are regression checks against the model's own output, not
     # literature-validated targets.
