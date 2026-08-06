@@ -1,7 +1,7 @@
 import ChunkSplitters
 
 export MValue, mvalue
-export MoeserHorinek, AutonBolen, MoeserHorinekApp
+export MoeserHorinek, AutonBolen, MoeserHorinekApp, MTRecord
 
 abstract type MValueModel end
 modelname(m::Type{<:MValueModel}) = replace(string(m), "PDBTools." => "")
@@ -12,6 +12,7 @@ function _model_type(s::String)
     s == "MoeserHorinek" && return MoeserHorinek
     s == "MoeserHorinekApp" && return MoeserHorinekApp
     s == "Accessibility" && return Accessibility
+    s == "MTRecord" && return MTRecord
     throw(ArgumentError("Invalid MValueModel"))
 end
 
@@ -21,6 +22,7 @@ include("./models/MoeserHorinek.jl")
 include("./models/AutonBolen.jl")
 include("./models/MoeserHorinekApp.jl")
 include("./models/Accessibility.jl")
+include("./models/Record.jl")
 
 # Available-cosolvents string for docstring entries:
 function _available_cosolvents() 
@@ -39,6 +41,9 @@ function _available_cosolvents()
     """
     s = s * """
         - `$(modelname(MoeserHorinekApp))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_MoeserHorinekApp)) .* '"'; by=lowercase),", ")) 
+    """
+    s = s * """
+        - `$(modelname(MTRecord))`: $(join('"' .* sort!(unique(keys(PDBTools.cosolvent_column_MTRecord)) .* '"'; by=lowercase),", ")) 
     """
 
     return s
