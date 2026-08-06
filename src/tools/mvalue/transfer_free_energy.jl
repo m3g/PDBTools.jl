@@ -18,6 +18,70 @@ function Base.show(io::IO, ::MIME"text/plain", t::TransferFreeEnergy)
     """))
 end
 
+import Base: *, +, -
+
+"""
+    *(alpha::Real, t::TransferFreeEnergy)
+
+Scales a `TransferFreeEnergy` (total, backbone, side-chain, and per-residue contributions)
+by `alpha`, keeping the same model type and cosolvent.
+
+"""
+function *(alpha::Real, t::TransferFreeEnergy{T}) where {T}
+    return TransferFreeEnergy{T}(
+        t.nresidues,
+        alpha * t.tot,
+        alpha * t.bb,
+        alpha * t.sc,
+        alpha * t.residue_contributions_bb,
+        alpha * t.residue_contributions_sc,
+        t.cosolvent,
+    )
+end
+
+"""
+    +(t1::TransferFreeEnergy, t2::TransferFreeEnergy)
+
+Adds two `TransferFreeEnergy` objects computed for the same model and cosolvent,
+element-wise (total, backbone, side-chain, and per-residue contributions). Throws an
+`ArgumentError` if `t1` and `t2` have different numbers of residues or cosolvents.
+
+"""
+function +(t1::TransferFreeEnergy{T}, t2::TransferFreeEnergy{T}) where {T}
+    if t1.nresidues != t2.nresidues
+        throw(ArgumentError("""\n
+            The number of residues of the added TransferFreeEnergy objects differ:
+            $(t1.nresidues) vs $(t2.nresidues).
+
+        """))
+    end
+    if t1.cosolvent != t2.cosolvent
+        throw(ArgumentError("""\n
+            The cosolvents of the added TransferFreeEnergy objects differ:
+            "$(t1.cosolvent)" vs "$(t2.cosolvent)".
+
+        """))
+    end
+    return TransferFreeEnergy{T}(
+        t1.nresidues,
+        t1.tot + t2.tot,
+        t1.bb + t2.bb,
+        t1.sc + t2.sc,
+        t1.residue_contributions_bb .+ t2.residue_contributions_bb,
+        t1.residue_contributions_sc .+ t2.residue_contributions_sc,
+        t1.cosolvent,
+    )
+end
+
+"""
+    -(t1::TransferFreeEnergy, t2::TransferFreeEnergy)
+
+Subtracts two `TransferFreeEnergy` objects computed for the same model and cosolvent
+(equivalent to `t1 + (-1)*t2`).
+
+"""
+-(t1::TransferFreeEnergy, t2::TransferFreeEnergy) = t1 + (-1 * t2)
+
 """
     transfer_free_energy(atoms::AbstractVector{<:PDBTools.Atom}, cosolvent::AbstractString; kargs...)
 

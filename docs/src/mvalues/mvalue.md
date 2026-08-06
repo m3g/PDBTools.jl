@@ -48,6 +48,29 @@ tfe.residue_contributions_sc[1]
 When multiple protein conformations are of interest, the `mvalue` methods provide a direct way to compute the 
 variations in transfer free energies associated to the states involved, as shown in the following examples.
 
+## Combining transfer free energies
+
+`TransferFreeEnergy` objects (total, backbone, side-chain, and per-residue contributions) can be scaled and
+combined directly with `*`, `+`, and `-`. Adding or subtracting two of them requires both to share the same
+model type and cosolvent, or an `ArgumentError` is thrown:
+
+```@docs
+*(::Real, ::TransferFreeEnergy)
++(::TransferFreeEnergy{T}, ::TransferFreeEnergy{T}) where {T}
+-(::TransferFreeEnergy, ::TransferFreeEnergy)
+```
+
+This is convenient for models whose *m*-value is naturally defined as a difference (or scaled difference) of
+transfer free energies of two independent structures, instead of a per-residue comparison of a single pair of
+states. The [`MTRecord`](@ref record_model) model, for example, computes its *m*-value this way, from the
+transfer free energies of the native structure and of its fully-extended chain:
+
+```@example mvalue
+tfe_native = transfer_free_energy(native_state, "urea"; model=MTRecord)
+tfe_extended = transfer_free_energy(extended_chain(native_state), "urea"; model=MTRecord)
+tfe_extended - tfe_native
+```
+
 ## Save and load TFE/m-value data
 
 `TransferFreeEnergy` or `MValue` objects can be saved to a json file with `save` and restored with `load`:

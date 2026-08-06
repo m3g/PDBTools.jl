@@ -252,51 +252,15 @@ betaine in the paper, so `alpha` is exposed to allow empirically fitting the den
 ASA scale to experimental betaine data, if needed.
 
 """
-function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0)
-    cos = lowercase(cosolvent)
-    haskey(cosolvent_column_MTRecord, cos) || throw(ArgumentError("Unsupported cosolvent for MTRecord: $cosolvent"))
-
-    native = m.native_chain
-    extended = m.extended_chain
-    length(native) == length(extended) || throw(ArgumentError("""\n
-        The native and extended chains wrapped by MTRecordDenaturedModel have a different
-        number of atoms ($(length(native)) vs $(length(extended))).
-    """))
-
-    residues = collect(eachresidue(native))
-    ext_residues = collect(eachresidue(extended))
-    length(residues) == length(ext_residues) || throw(ArgumentError("""\n
-        The native and extended chains wrapped by MTRecordDenaturedModel have a different
-        number of residues ($(length(residues)) vs $(length(ext_residues))).
-    """))
-
-    n = length(residues)
-    residue_contributions_bb = zeros(Float32, n)
-    residue_contributions_sc = zeros(Float32, n)
-
-    for (ires, (res, res_ext)) in enumerate(zip(residues, ext_residues))
-        bb_contrib = 0.0f0
-        sc_contrib = 0.0f0
-        for (at, at_ext) in zip(res, res_ext)
-            stype = record_surface_type(at)
-            isnothing(stype) && continue
-            σ = model_combination_rule(MTRecord, cos, stype)
-            ΔASA = alpha * sasa(m.sasa_ext, x -> x === at_ext) - sasa(m.sasa_native, x -> x === at)
-            contrib = σ * ΔASA
-            if isbackbone(at)
-                bb_contrib += contrib
-            elseif issidechain(at)
-                sc_contrib += contrib
-            end
-        end
-        residue_contributions_bb[ires] = bb_contrib / 1000f0
-        residue_contributions_sc[ires] = sc_contrib / 1000f0
-    end
-
-    bb = sum(residue_contributions_bb)
-    sc = sum(residue_contributions_sc)
-    tot = bb + sc
-    return MValue{MTRecord}(n, tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cos)
+function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0, kargs...)
+    tfe_n = transfer_free_energy(MTRecord, m.sasa_native, cosolvent; kargs...)
+    tfe_d = transfer_free_energy(MTRecord, m.sasa_ext, cosolvent; kargs...)
+    mval = alpha * tfe_d - tfe_n
+    return MValue{MTRecord}(
+        mval.nresidues, mval.tot, mval.bb, mval.sc,
+        mval.residue_contributions_bb, mval.residue_contributions_sc,
+        mval.cosolvent
+    )
 end
 
 """
