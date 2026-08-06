@@ -218,11 +218,11 @@ denaturant, whereas glycine betaine is a protein stabilizer.** *PNAS.* 2011;108:
 doi: 10.1073/pnas.1109372108.
 
 """
-struct MTRecordDenaturedModel{T,S}
-    native_chain::T
-    extended_chain::T
-    sasa_native::S
-    sasa_ext::S
+struct MTRecordDenaturedModel{T1,T2,S1,S2}
+    native_chain::T1
+    extended_chain::T2
+    sasa_native::S1
+    sasa_ext::S2
 end
 
 function MTRecordDenaturedModel(p::AbstractVector{<:Atom})
