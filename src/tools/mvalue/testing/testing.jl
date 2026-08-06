@@ -594,6 +594,11 @@ end
     m_tfe = tfe_d.tot - tfe_n.tot
     @test c_rec_mjc ≈ m_tfe
 
+    # Test path of TFE from SASA
+    tfe = transfer_free_energy(MJC, "urea"; model=MTRecord)
+    tfe_sasa = transfer_free_energy(sasa_particles(CreamerUnitedAtomRadii, MJC), "urea"; model=MTRecord)
+    @test tfe.tot ≈ tfe_sasa.tot
+
     # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
     # urea-only), so these are regression checks against the model's own output, not
     # literature-validated targets.
@@ -603,6 +608,20 @@ end
     rec_m = MTRecordDenaturedModel(MJC)
     c_rec = mvalue(rec_m, "betaine").tot
     @test c_rec ≈ 0.54 rtol = 0.05
+
+    # Tests for arithmetic operations on TFEs
+    tfe_n = transfer_free_energy(MJC, "urea"; model=MTRecord)
+    tfe_test = 2 * tfe_n - tfe_n
+    @test tfe_test.tot ≈ tfe_n.tot
+    @test tfe_test.bb ≈ tfe_n.bb
+    @test tfe_test.sc ≈ tfe_n.sc
+    @test tfe_test.residue_contributions_bb ≈ tfe_n.residue_contributions_bb
+    @test tfe_test.residue_contributions_sc ≈ tfe_n.residue_contributions_sc
+    @test tfe_test.cosolvent == tfe_n.cosolvent
+    tfe_n2 = transfer_free_energy(RN2, "urea"; model=MTRecord)
+    @test_throws "number of residues" tfe_n2 + tfe_n
+    tfe_n2 = transfer_free_energy(MJC, "betaine"; model=MTRecord)
+    @test_throws "cosolvents" tfe_n2 + tfe_n
 
     # Test error path
     pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
