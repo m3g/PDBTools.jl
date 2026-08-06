@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.34.1-DEV
+Version 3.35.0
 --------------
 - ![FEATURE][badge-feature] Generalize the type parameters of `MTRecordDenaturedModel` so that its native and extended chains (and their SASAs) need not share the same concrete type, allowing `MTRecordDenaturedModel` to be built directly from a `Model`, `Chain`, or other `AbstractVector{<:Atom}` subtype.
 
