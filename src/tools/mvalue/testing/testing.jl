@@ -586,6 +586,12 @@ end
     c_rec = mvalue(rec_m, "urea").tot
     @test c_rec ≈ -0.94 rtol = 0.1
 
+    # Test providing models or chains to MTRecordDenaturedModel
+    MJC_m = collect(eachmodel(MJC))[1]
+    MJC_c = collect(eachchain(MJC))[1]
+    @test mvalue(MTRecordDenaturedModel(MJC_m), "urea").tot ≈ c_rec
+    @test mvalue(MTRecordDenaturedModel(MJC_c), "urea").tot ≈ c_rec
+
     # Test consistency of the TFE path: mvalue(MTRecordDenaturedModel(MJC), ...) must agree
     # with manually differencing the transfer free energies of MJC and its extended chain.
     c_rec_mjc = mvalue(MTRecordDenaturedModel(MJC), "urea").tot
