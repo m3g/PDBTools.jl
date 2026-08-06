@@ -17,7 +17,7 @@ scatter(::Ramachandran)
 The `dihedral` function computes the dihedral angle given four atoms:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, Plots
 
 julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
 
@@ -67,7 +67,7 @@ prot = read_pdb(PDBTools.TESTPDB, "protein");
 nres = length(collect(eachresidue(prot)));
 set_phi!(prot, fill(-60.0, nres - 1); unit="deg")
 set_psi!(prot, fill(-45.0, nres - 1); unit="deg")
-ram = Ramachandran(prot)
+scatter(Ramachandran(prot))
 ```
 
 ## Fully extended chain
@@ -85,7 +85,7 @@ extended_chain
 
 ```@example ramachandran
 ext = extended_chain(prot)
-ram_ext = Ramachandran(ext)
+scatter(Ramachandran(ext))
 ```
 
 ## Check the stereochemistry of protein residues

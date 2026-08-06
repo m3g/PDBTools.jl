@@ -14,7 +14,7 @@ and Record ([PNAS 2011](https://doi.org/10.1073/pnas.1109372108)), which explain
 denatures proteins while glycine betaine (a protecting osmolyte) stabilizes them. Unlike the
 `AutonBolen`, `MoeserHorinek`, and `Accessibility` models, which are built from amino-acid transfer
 free energies (TFEs) split into backbone and side-chain contributions, the `MTRecord` model is
-parameterized directly on **atomic surface types**: it does not use amino-acid TFE data at all.
+parameterized directly on **atomic surface types**.
 
 **Motivation.** Guinn et al. measured preferential interactions (osmometry and solubility) of urea
 and glycine betaine (GB) with 44 small model compounds (amino acids, peptides, sugars, polyols,
@@ -24,6 +24,54 @@ carboxylate O, amide N, and cationic N. Because the surface types are transferab
 compounds and proteins, the resulting interaction potentials can be applied directly to a protein
 structure's atom-resolved solvent-accessible surface area (SASA), without ever forming an
 amino-acid-level TFE.
+
+## Fixed-state transfer free energies
+
+The transfer free energy of a single (fixed) structure can be computed directly from its
+atom-resolved SASA with `transfer_free_energy`, by requesting the `MTRecord` model:
+
+```@example mvalue
+using PDBTools
+native_state = read_pdb(PDBTools.MJC_NATIVE, "protein")
+tfe = transfer_free_energy(native_state, "urea"; model=MTRecord)
+```
+
+As with the other models, the result is split into backbone and side-chain contributions, here
+obtained by summing the atom-resolved surface-type contributions of backbone and side-chain atoms,
+respectively.
+
+## Denaturation *m*-values
+
+Unlike the other transfer models, which pair a native structure with a *parametric* estimate of the
+denatured-state backbone/side-chain ASA (the Creamer model, see
+[`CreamerDenaturedModel`](protein_denaturation.md)), `MTRecord` is meant to be used with an explicit
+*atomistic* model of the unfolded state, since it needs a real ``\Delta``ASA for every atom and
+surface type, not just per-residue backbone/side-chain totals. The unfolded-state reference used
+here is the fully extended (all-trans, ``\phi = \psi = 180°``) chain, obtained with
+[`extended_chain`](@ref) - this is the same "extended β" reference state that Guinn et al.
+themselves use in their own validation (Table S3 of the paper).
+
+`MTRecordDenaturedModel` wraps a protein's native structure together with its extended chain (built
+automatically) and the atom-resolved SASAs of both, computed once at construction:
+
+```@docs
+MTRecordDenaturedModel
+mvalue(::MTRecordDenaturedModel, ::AbstractString)
+```
+
+```@example mvalue
+model = MTRecordDenaturedModel(native_state)
+m = mvalue(model, "urea")
+```
+
+The *m*-value is obtained directly from Eq. 4, using the real, atom-by-atom ``\Delta``ASA between
+the extended and native chains (extended minus native). By default (`alpha=1.0`), the extended-chain
+ASA is used as computed, with no adjustment; for urea, this reproduces the *m*-values reported in
+Table S3 of Guinn et al. well. Glycine betaine has no equivalent extended-chain validation set in the
+paper (Table S3 is urea-only), so predictions for `"betaine"` should be interpreted with more
+caution; the `alpha` keyword is available to empirically rescale the extended-chain ASA, if needed
+to better match experimental betaine data.
+## Model details
 
 **The additive model.** Guinn et al.'s Eq. 4 expresses the chemical potential derivative
 ``\mu_{23}/RT`` (essentially the preferential-interaction *m*-value per unit of exposed area) of a
@@ -79,51 +127,3 @@ from Table 1 of Guinn et al., are:
 
 Only `"urea"` and `"betaine"` are currently supported, since these are the two cosolvents for which
 Guinn et al. report a full set of surface-type potentials.
-
-## Fixed-state transfer free energies
-
-The transfer free energy of a single (fixed) structure can be computed directly from its
-atom-resolved SASA with `transfer_free_energy`, by requesting the `MTRecord` model:
-
-```@example mvalue
-using PDBTools
-native_state = read_pdb(PDBTools.MJC_NATIVE, "protein")
-tfe = transfer_free_energy(native_state, "urea"; model=MTRecord)
-```
-
-As with the other models, the result is split into backbone and side-chain contributions, here
-obtained by summing the atom-resolved surface-type contributions of backbone and side-chain atoms,
-respectively.
-
-## Denaturation *m*-values
-
-Unlike the other transfer models, which pair a native structure with a *parametric* estimate of the
-denatured-state backbone/side-chain ASA (the Creamer model, see
-[`CreamerDenaturedModel`](protein_denaturation.md)), `MTRecord` is meant to be used with an explicit
-*atomistic* model of the unfolded state, since it needs a real ``\Delta``ASA for every atom and
-surface type, not just per-residue backbone/side-chain totals. The unfolded-state reference used
-here is the fully extended (all-trans, ``\phi = \psi = 180°``) chain, obtained with
-[`extended_chain`](@ref) - this is the same "extended β" reference state that Guinn et al.
-themselves use in their own validation (Table S3 of the paper).
-
-`MTRecordDenaturedModel` wraps a protein's native structure together with its extended chain (built
-automatically) and the atom-resolved SASAs of both, computed once at construction:
-
-```@docs
-MTRecordDenaturedModel
-mvalue(::MTRecordDenaturedModel, ::AbstractString)
-```
-
-```@example mvalue
-model = MTRecordDenaturedModel(native_state)
-m = mvalue(model, "urea")
-println("m-value: tot = $(m.tot), bb = $(m.bb), sc = $(m.sc)")
-```
-
-The *m*-value is obtained directly from Eq. 4, using the real, atom-by-atom ``\Delta``ASA between
-the extended and native chains (extended minus native). By default (`alpha=1.0`), the extended-chain
-ASA is used as computed, with no adjustment; for urea, this reproduces the *m*-values reported in
-Table S3 of Guinn et al. well. Glycine betaine has no equivalent extended-chain validation set in the
-paper (Table S3 is urea-only), so predictions for `"betaine"` should be interpreted with more
-caution; the `alpha` keyword is available to empirically rescale the extended-chain ASA, if needed
-to better match experimental betaine data.
