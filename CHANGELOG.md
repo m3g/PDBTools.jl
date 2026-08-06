@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.34.1-DEV
+--------------
+
 Version 3.34.0
 --------------
 - ![FEATURE][badge-feature] Add `set_phi!` and `set_psi!` to set backbone dihedral angles of a protein structure.
