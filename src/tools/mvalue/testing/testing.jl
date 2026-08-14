@@ -727,3 +727,24 @@ end
     @test tfe isa TransferFreeEnergy{MTRecord}
     @test tfe.nresidues == 7
 end
+
+@testitem "tfe_dimer_tests" begin
+    using PDBTools
+    dir = @__DIR__
+    dimer = read_pdb(joinpath(dir, "2rmm_dimer.pdb"))
+    tfe = transfer_free_energy(dimer, "tmao"; model=Accessibility)
+    @test tfe.tot ≈ 1.4553362
+
+    # Remove chain identifiers
+    dimer_nochain = copy.(dimer)
+    for at in dimer_nochain
+        at.chain = ""
+    end
+    tfe = transfer_free_energy(dimer_nochain, "tmao"; model=Accessibility)
+    @test tfe.tot ≈ 1.4553362
+
+    # Test single chains
+    tfe1 = transfer_free_energy(select(dimer, "chain A"), "tmao"; model=Accessibility)
+    tfe2 = transfer_free_energy(select(dimer_nochain, "residue <= 56"), "tmao"; model=Accessibility)
+    @test tfe1.tot ≈ tfe2.tot
+end

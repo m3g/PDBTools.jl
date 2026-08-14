@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.35.1-DEV
 --------------
+- ![FIX][badge-fix] Fix `in` comparison of two residues, which now returns true if the `residue` identifier differs. 
 
 Version 3.35.0
 --------------
