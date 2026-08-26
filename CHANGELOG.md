@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.35.2-DEV
 --------------
+- ![FEATURE][badge-feature] Support "tmao", "proline" and "trehalose" as new cosolvents in `MTRecord` model.
 
 Version 3.35.1
 --------------
