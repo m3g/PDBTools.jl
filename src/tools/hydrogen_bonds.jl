@@ -545,7 +545,7 @@ end
     @test parse_show(hbs["protein => protein"]) ≈ """
         HBonds data structure with 63 hydrogen-bonds.
             First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
-            Last hbond: (D-H---A) = (D = 1169, H = 1170, A = 619, r = 2.6004055f0, ang = 9.524022f0)
+            Last hbond: (D-H---A) = (D = 669, H = 670, A = 788, r = 2.7721112f0, ang = 10.052214f0)
             - r is the distance between Donor and Acceptor atoms (D-A)
             - ang is the angle (degrees) between H-D and A-D.
         """
