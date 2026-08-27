@@ -15,6 +15,9 @@ export MTRecordDenaturedModel
 const cosolvent_column_MTRecord = OrderedDict(
     "betaine" => 1,
     "urea" => 2,
+    "tmao" => 3, 
+    "proline" => 4,
+    "trehalose" => 5,
 )
 
 #=
@@ -163,6 +166,36 @@ const _record_alpha_surface = Dict{String,Dict{Symbol,Float32}}(
         :hydroxyl_oxygen => 1.0f0,
         :aliphatic_carbon => 3.0f0,
         :cationic_nitrogen => -12.0f0,
+    ),
+    # TMAO data from: https://doi.org/10.1016/j.bpj.2016.09.035
+    "tmao" => Dict{Symbol,Float32}( 
+        :aromatic_carbon => 22.6f0,
+        :amide_oxygen => 9.3f0,
+        :carboxylate_oxygen => 52.3f0,
+        :amide_nitrogen => 11.6f0,
+        :hydroxyl_oxygen => 9.9f0,
+        :aliphatic_carbon => 17.8f0,
+        :cationic_nitrogen => -4.6f0,
+    ),
+    # Proline data from: https://doi.org/10.1021/bi400683y
+    "proline" => Dict{Symbol,Float32}( 
+        :aromatic_carbon => -9.2f0,
+        :amide_oxygen => 14.5f0,
+        :carboxylate_oxygen => 16.6f0,
+        :amide_nitrogen => -11.8f0,
+        :hydroxyl_oxygen => -0.7f0,
+        :aliphatic_carbon => 5.3f0,
+        :cationic_nitrogen => -12.6f0,
+    ),
+    # Trehalose data from: https://doi.org/10.1016/j.bpj.2015.05.037
+    "trehalose" => Dict{Symbol,Float32}( 
+        :aromatic_carbon => 5.9,
+        :amide_oxygen => -19.6,
+        :carboxylate_oxygen => -28.2,
+        :amide_nitrogen => -4.7,
+        :hydroxyl_oxygen => -0.8,
+        :aliphatic_carbon => 22.4,
+        :cationic_nitrogen => 12.9,
     ),
 )
 

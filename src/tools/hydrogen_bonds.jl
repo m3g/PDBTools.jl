@@ -465,7 +465,9 @@ function hydrogen_bonds(
             s2 = selection_data[sel2]
             compute_hbonds!(sys, s1, s2, sel1, sel2, angle_cutoff, electronegative_elements)
         end
-        hbonds[key] = sys.hydrogen_bonds
+        hb = sys.hydrogen_bonds
+        order = sortperm(1:length(hb); by=i -> (hb.D[i], hb.A[i]))
+        hbonds[key] = hb[order]
     end
     return hbonds
 end
@@ -545,7 +547,7 @@ end
     @test parse_show(hbs["protein => protein"]) ≈ """
         HBonds data structure with 63 hydrogen-bonds.
             First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
-            Last hbond: (D-H---A) = (D = 1169, H = 1170, A = 619, r = 2.6004055f0, ang = 9.524022f0)
+            Last hbond: (D-H---A) = (D = 1212, H = 1214, A = 618, r = 2.6903327f0, ang = 9.57599f0)
             - r is the distance between Donor and Acceptor atoms (D-A)
             - ang is the angle (degrees) between H-D and A-D.
         """

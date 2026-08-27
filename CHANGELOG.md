@@ -12,6 +12,8 @@ PDBTools.jl Changelog
 
 Version 3.35.2-DEV
 --------------
+- ![FEATURE][badge-feature] Support "tmao", "proline" and "trehalose" as new cosolvents in `MTRecord` model.
+- ![INFO][badge-info] The hydrogen-bonds are returned sorted by donor and then acceptor. 
 
 Version 3.35.1
 --------------
