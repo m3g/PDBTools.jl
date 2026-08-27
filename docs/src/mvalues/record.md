@@ -112,18 +112,22 @@ folding is negligible in the reference dataset. These surface types are also exp
 macro keywords, so that, for example, `select(atoms, "record_aromatic_carbon")` selects the atoms
 assigned to the aromatic-carbon surface type.
 
-**Interaction potentials.** The values of ``10^4\,\alpha_i`` (in `m⁻¹ Å⁻²`) currently implemented,
-from Table 1 of Guinn et al., are:
+**Interaction potentials.** The values of ``10^4\,\alpha_i`` (in `m⁻¹ Å⁻²`) currently implemented
+are, for urea and betaine, from Table 1 of Guinn et al., and, for the other cosolvents, from the
+surface-type potentials reported in the references below:
 
-| Surface type | ``10^4\alpha_i`` (urea) | ``10^4\alpha_i`` (betaine) |
-|:-------------|------:|------:|
-| Aliphatic carbon    | -1.1 |  3.0 |
-| Aromatic carbon     | -8.9 | -23.0 |
-| Hydroxyl oxygen     | -2.5 |  1.0 |
-| Amide oxygen        | -8.7 | 28.0 |
-| Carboxylate oxygen  | -4.0 | 29.0 |
-| Amide nitrogen      | -3.2 | -20.0 |
-| Cationic nitrogen   |  1.8 | -12.0 |
+| Surface type | ``10^4\alpha_i`` (urea) | ``10^4\alpha_i`` (betaine) | ``10^4\alpha_i`` (TMAO) | ``10^4\alpha_i`` (proline) | ``10^4\alpha_i`` (trehalose) |
+|:-------------|------:|------:|------:|------:|------:|
+| Aliphatic carbon    | -1.1 |  3.0 | 17.8 |  5.3 | 22.4 |
+| Aromatic carbon     | -8.9 | -23.0 | 22.6 | -9.2 |  5.9 |
+| Hydroxyl oxygen     | -2.5 |  1.0 |  9.9 | -0.7 | -0.8 |
+| Amide oxygen        | -8.7 | 28.0 |  9.3 | 14.5 | -19.6 |
+| Carboxylate oxygen  | -4.0 | 29.0 | 52.3 | 16.6 | -28.2 |
+| Amide nitrogen      | -3.2 | -20.0 | 11.6 | -11.8 | -4.7 |
+| Cationic nitrogen   |  1.8 | -12.0 | -4.6 | -12.6 | 12.9 |
 
-Only `"urea"` and `"betaine"` are currently supported, since these are the two cosolvents for which
-Guinn et al. report a full set of surface-type potentials.
+`"urea"` and `"betaine"` come from Guinn et al. (PNAS 2011, Table 1); `"tmao"` from
+[doi:10.1016/j.bpj.2016.09.035](https://doi.org/10.1016/j.bpj.2016.09.035); `"proline"` from
+[doi:10.1021/bi400683y](https://doi.org/10.1021/bi400683y); and `"trehalose"` from
+[doi:10.1016/j.bpj.2015.05.037](https://doi.org/10.1016/j.bpj.2015.05.037). These are currently
+the five cosolvents for which a full set of surface-type potentials is available.
