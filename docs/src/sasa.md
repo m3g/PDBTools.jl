@@ -129,5 +129,33 @@ atom_sasa_creamer_loaded = load(SASA, outfile)
 typeof(atom_sasa_creamer_loaded)
 ```
 
+## Richards' radii
+
+This parameterization uses
+the classic united-atom radii of Richards (1977) and Richmond & Richards (1978), assigning each
+heavy atom to a group (tetrahedral/sp3 or trigonal/sp2 carbon, nitrogen, or oxygen, plus thiol or
+thioether sulfur) based on the same hybridization classification used for the Creamer radii above.
+Hydrogens are ignored, as in the Creamer parameterization:
+
+```@example sasa
+atom_sasa_richards = sasa_particles(RichardsUnitedAtomRadii, prot)
+sasa(atom_sasa_richards)
+```
+
+Two alternative radii sets, both taken from the same source table, are available through the
+`radii_set` keyword:
+
+```@example sasa
+sasa(sasa_particles(RichardsUnitedAtomRadii, prot; radii_set=:set2)) # Richmond & Richards, 1978 (default)
+```
+
+```@example sasa
+sasa(sasa_particles(RichardsUnitedAtomRadii, prot; radii_set=:set1)) # Richards, 1977
+```
+
+This parameterization reproduces the SASA calculations of
+[SurfaceRacer](https://doi.org/10.1002/prot.10250) (Tsodikov,
+Record & Sergeev) with a mean absolute error of about 2%.
+
 
 

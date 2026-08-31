@@ -5,11 +5,14 @@ CollapsedDocStrings = true
 # High-throughput calculations with precomputed SASAs
 
 The m-value and transfer free energy calculations both require computing the solvent
-accessible surface area (SASA) of the protein atoms using Creamer united-atom radii.
-By default, each call to `mvalue` or `transfer_free_energy` recomputes the SASA from
-scratch, which dominates the runtime. When only the cosolvent, selection, or model
-changes between calls — but the atomic coordinates stay fixed — the SASA can be computed
-once and reused.
+accessible surface area (SASA) of the protein atoms. Every model except `MTRecord` (see
+[the Record model](@ref record_model)) is parameterized with Creamer united-atom radii;
+`MTRecord` was parameterized against, and expects, Richards united-atom radii instead (to
+match SurfaceRacer, which was used to compute its own ASA reference values). By default,
+each call to `mvalue` or `transfer_free_energy` recomputes the SASA from scratch, using
+whichever radii the requested `model` needs, which dominates the runtime. When only the
+cosolvent, selection, or model changes between calls — but the atomic coordinates stay
+fixed — the SASA can be computed once and reused.
 
 ## Computing the SASA with Creamer radii
 
@@ -66,8 +69,36 @@ t_urea = transfer_free_energy(sasa_native2, "urea")
 t_tmao = transfer_free_energy(sasa_native2, "tmao")
 ```
 
+## Reusing precomputed SASAs with the Record model (`MTRecord`)
+
+`MTRecord` needs Richards, not Creamer, united-atom radii, so precompute the SASA with
+`RichardsUnitedAtomRadii` instead:
+
+```@example mvalue
+sasa_native_richards = sasa_particles(RichardsUnitedAtomRadii, native_state)
+```
+
+The resulting `SASA{RichardsUnitedAtomRadii}` object can be reused across cosolvents, exactly
+as with the Creamer-radii SASAs above, by passing `model=MTRecord`:
+
+```@example mvalue
+t_urea_record = transfer_free_energy(sasa_native_richards, "urea"; model=MTRecord)
+```
+
+```@example mvalue
+t_betaine_record = transfer_free_energy(sasa_native_richards, "betaine"; model=MTRecord)
+```
+
+The same applies to `MTRecordDenaturedModel`, which is itself just a pair of
+`SASA{RichardsUnitedAtomRadii}` objects (native and fully-extended chain) computed once at
+construction and reused for every cosolvent passed to `mvalue` — see
+[Denaturation *m*-values](@ref record_model).
+
 ## Enforced radii compatibility
 
-Passing a `SASA` object computed with any other radii parameterization raises an
-informative error, ensuring that m-values and transfer free energies are never silently computed from
-incompatible surface areas.
+Passing a `SASA` object computed with the wrong radii parameterization for the requested model
+raises an informative error (naming the model and the radii type it expects), ensuring that
+m-values and transfer free energies are never silently computed from incompatible surface areas.
+For example, `MTRecord` requires `RichardsUnitedAtomRadii`, while every other model requires
+`CreamerUnitedAtomRadii`; passing one where the other is expected raises an `ArgumentError`
+instead of silently returning a wrong result.

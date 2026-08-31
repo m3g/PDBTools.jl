@@ -129,5 +129,27 @@ surface-type potentials reported in the references below:
 `"urea"` and `"betaine"` come from Guinn et al. (PNAS 2011, Table 1); `"tmao"` from
 [doi:10.1016/j.bpj.2016.09.035](https://doi.org/10.1016/j.bpj.2016.09.035); `"proline"` from
 [doi:10.1021/bi400683y](https://doi.org/10.1021/bi400683y); and `"trehalose"` from
-[doi:10.1016/j.bpj.2015.05.037](https://doi.org/10.1016/j.bpj.2015.05.037). These are currently
-the five cosolvents for which a full set of surface-type potentials is available.
+[doi:10.1016/j.bpj.2015.05.037](https://doi.org/10.1016/j.bpj.2015.05.037).
+
+**`"tetraeg"` and `"glycerol"`.** Two more cosolvents, tetraethylene glycol (TetraEG) and glycerol,
+are available from [doi:10.1021/acs.biochem.5b00246](https://doi.org/10.1021/acs.biochem.5b00246).
+Unlike the cosolvents above, this reference reports the group interaction potentials ``\alpha_i``
+directly in `cal mol⁻¹ molal⁻¹ Å⁻²`, rather than as ``10^4\alpha_i`` in `m⁻¹ Å⁻²`, so `PDBTools`
+uses them as-is (no `RT` rescaling):
+
+| Surface type | ``\alpha_i`` (TetraEG) | ``\alpha_i`` (glycerol) |
+|:-------------|------:|------:|
+| Aliphatic carbon    | -0.349 | 0.0548 |
+| Aromatic carbon     | -2.66  | -0.431 |
+| Hydroxyl oxygen     |  0.843 | 0.0305 |
+| Amide oxygen        |  2.94  | 0.826  |
+| Carboxylate oxygen  |  3.59  | 0.467  |
+| Amide nitrogen      | -1.67  | -0.491 |
+| Cationic nitrogen   | -0.805 | -0.245 |
+
+The reference also reports a "carboxylic acid oxygen" surface type (protonated, neutral -COOH),
+which has no counterpart in `record_surface_type` (following Guinn et al., only a single,
+deprotonated `:carboxylate_oxygen` class is used), and is therefore not included here.
+
+These are currently the seven cosolvents for which a full set of surface-type potentials is
+available.

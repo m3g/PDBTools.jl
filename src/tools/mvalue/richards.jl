@@ -14,7 +14,7 @@ function _richards_resname(at::Atom)
     return rname
 end
 
-"""
+#=
     richards_atom_type(at::Atom)
 
 Classifies a protein atom into one of the Richards united-atom groups, reusing the same
@@ -31,8 +31,7 @@ Richards papers:
 - `Osp2` -> `"OH3"` (trigonal/sp2 oxygen, e.g. carbonyl oxygen)
 - sulfur is split by residue instead of hybridization: Cys `SG` -> `"SH"` (thiol), Met `SD` -> `"ST"` (thioether)
 - `Zn` and `Fe` hetero ions are mapped to `"ZN"` and `"FE"`, respectively.
-
-"""
+=#
 function richards_atom_type(at::Atom)
     el = element(at)
     (el == "Zn" || el == "ZN") && return "ZN"

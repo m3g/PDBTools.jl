@@ -139,12 +139,10 @@ Proline, Sorbitol, Sucrose, Urea, Glycerol, and Trehalose):
 using PDBTools
 creamer_model = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
 m = mvalue(creamer_model, "urea"; model=Accessibility)
-println("m-value: tot = $(m.tot), bb = $(m.bb), sc=$(m.sc)")
 ```
 
 ```@example mvalue
 m = mvalue(creamer_model, "tmao"; model=Accessibility)
-println("m-value: tot = $(m.tot), bb = $(m.bb), sc=$(m.sc)")
 ```
 
 For protecting osmolytes, `Accessibility` predicts total *m*-values similar to `AutonBolen`, but with
