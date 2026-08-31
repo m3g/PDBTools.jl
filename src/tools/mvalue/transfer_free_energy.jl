@@ -82,6 +82,14 @@ Subtracts two `TransferFreeEnergy` objects computed for the same model and cosol
 """
 -(t1::TransferFreeEnergy, t2::TransferFreeEnergy) = t1 + (-1 * t2)
 
+#
+# MTRecord was parameterized against, and expects, Richards united-atom radii (to match
+# SurfaceRacer, which was used to compute its ASA reference values); every other model
+# was parameterized with, and expects, Creamer united-atom radii.
+#
+_radii_of_model(::Type{MTRecord}) = RichardsUnitedAtomRadii
+_radii_of_model(::Type{<:MValueModel}) = CreamerUnitedAtomRadii
+
 """
     transfer_free_energy(atoms::AbstractVector{<:PDBTools.Atom}, cosolvent::AbstractString; kargs...)
 
@@ -141,7 +149,7 @@ function transfer_free_energy(
     parallel::Bool=true,
     unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
-    sasa_ats = sasa_particles(CreamerUnitedAtomRadii, atoms; unitcell)
+    sasa_ats = sasa_particles(_radii_of_model(model), atoms; unitcell)
     if model == MTRecord
         return transfer_free_energy(
             MTRecord,
@@ -161,13 +169,18 @@ function transfer_free_energy(
 end
 
 function transfer_free_energy(sasa_ats::SASA{T1}, cosolvent; kargs...) where {T1}
+    model = get(kargs, :model, AutonBolen)
+    expected = nameof(_radii_of_model(model))
     throw(ArgumentError("""\n
-        To compute m-values or transfer free energies the SASA computation 
-        must use CreamerUnitedAtomRadii. For example, use:
+        To compute transfer free energies with the $(modelname(model)) model, the SASA computation
+        must use $expected. For example, use:
 
-            s = sasa_particles(CreamerUnitedAtomRadii, atoms)
+            s = sasa_particles($expected, atoms)
 
-        Got atomic radii type: $T1
+        (every model requires CreamerUnitedAtomRadii, except MTRecord, which requires
+        RichardsUnitedAtomRadii.)
+
+        Got atomic radii type: $(nameof(T1))
 
     """))
 end

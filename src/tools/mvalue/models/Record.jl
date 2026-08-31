@@ -15,9 +15,11 @@ export MTRecordDenaturedModel
 const cosolvent_column_MTRecord = OrderedDict(
     "betaine" => 1,
     "urea" => 2,
-    "tmao" => 3, 
+    "tmao" => 3,
     "proline" => 4,
     "trehalose" => 5,
+    "tetraeg" => 6,
+    "glycerol" => 7,
 )
 
 #=
@@ -188,7 +190,7 @@ const _record_alpha_surface = Dict{String,Dict{Symbol,Float32}}(
         :cationic_nitrogen => -12.6f0,
     ),
     # Trehalose data from: https://doi.org/10.1016/j.bpj.2015.05.037
-    "trehalose" => Dict{Symbol,Float32}( 
+    "trehalose" => Dict{Symbol,Float32}(
         :aromatic_carbon => 5.9,
         :amide_oxygen => -19.6,
         :carboxylate_oxygen => -28.2,
@@ -199,6 +201,40 @@ const _record_alpha_surface = Dict{String,Dict{Symbol,Float32}}(
     ),
 )
 
+#
+# TetraEG (tetraethylene glycol) and glycerol group interaction potentials, from
+# Table 1 ("Group Interaction Potentials (α_solute,i, cal mol⁻¹ molal⁻¹ Å⁻²)") of the
+# paper reporting interactions of TetraEG, glycerol, and end/interior groups of PEG with
+# protein groups and salt ions. Unlike `_record_alpha_surface` above (Guinn et al.
+# convention, stored as 10^4 * alpha_i and rescaled by R*T in `model_combination_rule`),
+# these values are already given directly in cal mol⁻¹ molal⁻¹ Å⁻², so they are used as-is.
+# The table's "carboxylic acid O" row has no counterpart in `record_surface_type` (which,
+# following Guinn et al., only has a single, deprotonated `:carboxylate_oxygen` class) and
+# is therefore omitted here.
+#
+# Data from: https://doi.org/10.1021/acs.biochem.5b00246
+#
+const _record_alpha_surface_cal = Dict{String,Dict{Symbol,Float32}}(
+    "tetraeg" => Dict{Symbol,Float32}(
+        :aliphatic_carbon => -0.349f0,
+        :aromatic_carbon => -2.66f0,
+        :hydroxyl_oxygen => 0.843f0,
+        :amide_oxygen => 2.94f0,
+        :carboxylate_oxygen => 3.59f0,
+        :amide_nitrogen => -1.67f0,
+        :cationic_nitrogen => -0.805f0,
+    ),
+    "glycerol" => Dict{Symbol,Float32}(
+        :aliphatic_carbon => 0.0548f0,
+        :aromatic_carbon => -0.431f0,
+        :hydroxyl_oxygen => 0.0305f0,
+        :amide_oxygen => 0.826f0,
+        :carboxylate_oxygen => 0.467f0,
+        :amide_nitrogen => -0.491f0,
+        :cationic_nitrogen => -0.245f0,
+    ),
+)
+
 const _record_R_cal = 1.9872041f0
 const _record_default_T = 298.15f0
 
@@ -206,10 +242,17 @@ const _record_default_T = 298.15f0
     model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol)
 
 Return the Record surface interaction potential contribution in `cal mol⁻¹ A⁻²` for
-a coarse-grained surface type, computed from Guinn et al. Table 1 and Eq. 4.
+a coarse-grained surface type, computed from Guinn et al. Table 1 and Eq. 4 (for
+`_record_alpha_surface` cosolvents), or read directly from `_record_alpha_surface_cal`
+(TetraEG and glycerol, already in cal mol⁻¹ molal⁻¹ Å⁻²).
 =#
 function model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol)
     cos = lowercase(cosolvent)
+    if haskey(_record_alpha_surface_cal, cos)
+        α = get(_record_alpha_surface_cal[cos], surface_type, nothing)
+        isnothing(α) && throw(ArgumentError("Unsupported MTRecord surface type: $surface_type"))
+        return α
+    end
     haskey(_record_alpha_surface, cos) || throw(ArgumentError("Unsupported cosolvent for MTRecord: $cosolvent"))
     α_1e4 = get(_record_alpha_surface[cos], surface_type, nothing)
     isnothing(α_1e4) && throw(ArgumentError("Unsupported MTRecord surface type: $surface_type"))
@@ -260,8 +303,8 @@ end
 
 function MTRecordDenaturedModel(p::AbstractVector{<:Atom})
     p_ext = extended_chain(p)
-    sasa_native = sasa_particles(CreamerUnitedAtomRadii, p)
-    sasa_ext = sasa_particles(CreamerUnitedAtomRadii, p_ext)
+    sasa_native = sasa_particles(RichardsUnitedAtomRadii, p)
+    sasa_ext = sasa_particles(RichardsUnitedAtomRadii, p_ext)
     return MTRecordDenaturedModel(p, p_ext, sasa_native, sasa_ext)
 end
 
@@ -313,7 +356,7 @@ function transfer_free_energy(
     parallel::Bool=true,
     unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
-    sasa_ats = sasa_particles(CreamerUnitedAtomRadii, atoms; unitcell)
+    sasa_ats = sasa_particles(RichardsUnitedAtomRadii, atoms; unitcell)
     return transfer_free_energy(
         MTRecord,
         sasa_ats,
@@ -326,7 +369,7 @@ function transfer_free_energy(
 end
 
 """
-    transfer_free_energy(::Type{MTRecord}, sasa_ats::SASA{CreamerUnitedAtomRadii}, cosolvent::AbstractString; kargs...)
+    transfer_free_energy(::Type{MTRecord}, sasa_ats::SASA{RichardsUnitedAtomRadii}, cosolvent::AbstractString; kargs...)
 
 Compute fixed-state transfer free energies using Record interaction potentials
 and atom-resolved coarse-grained surface classes.
@@ -334,7 +377,7 @@ and atom-resolved coarse-grained surface classes.
 """
 function transfer_free_energy(
     ::Type{MTRecord},
-    sasa_ats::SASA{CreamerUnitedAtomRadii},
+    sasa_ats::SASA{RichardsUnitedAtomRadii},
     cosolvent::AbstractString;
     backbone::F1=isbackbone,
     sel::Union{String,Function}=all,
@@ -380,5 +423,30 @@ function transfer_free_energy(
     sc = sum(residue_contributions_sc)
     tot = bb + sc
     return TransferFreeEnergy{MTRecord}(length(residues), tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cos)
+end
+
+"""
+    transfer_free_energy(sasa_ats::SASA{RichardsUnitedAtomRadii}, cosolvent::AbstractString; model=MTRecord, kargs...)
+
+Compute transfer free energies from a precomputed SASA using Richards united atom radii.
+This is the `RichardsUnitedAtomRadii` counterpart of
+`transfer_free_energy(sasa_ats::SASA{CreamerUnitedAtomRadii}, ...)`: since Richards radii are
+only meaningful for the `MTRecord` model, `model` must be `MTRecord` (its default).
+
+"""
+function transfer_free_energy(
+    sasa_ats::SASA{RichardsUnitedAtomRadii},
+    cosolvent::AbstractString;
+    model::Type{<:MValueModel}=MTRecord,
+    kargs...
+)
+    if model != MTRecord
+        throw(ArgumentError("""\n
+            SASA computed with RichardsUnitedAtomRadii can only be used with the MTRecord model.
+            Got model: $(modelname(model))
+
+        """))
+    end
+    return transfer_free_energy(MTRecord, sasa_ats, cosolvent; kargs...)
 end
 

@@ -602,7 +602,7 @@ end
 
     # Test path of TFE from SASA
     tfe = transfer_free_energy(MJC, "urea"; model=MTRecord)
-    tfe_sasa = transfer_free_energy(sasa_particles(CreamerUnitedAtomRadii, MJC), "urea"; model=MTRecord)
+    tfe_sasa = transfer_free_energy(sasa_particles(RichardsUnitedAtomRadii, MJC), "urea"; model=MTRecord)
     @test tfe.tot ≈ tfe_sasa.tot
 
     # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
@@ -610,10 +610,10 @@ end
     # literature-validated targets.
     rec_m = MTRecordDenaturedModel(RN2)
     c_rec = mvalue(rec_m, "betaine").tot
-    @test c_rec ≈ 1.20 rtol = 0.05
+    @test c_rec ≈ 0.9574 rtol = 0.05
     rec_m = MTRecordDenaturedModel(MJC)
     c_rec = mvalue(rec_m, "betaine").tot
-    @test c_rec ≈ 0.54 rtol = 0.05
+    @test c_rec ≈ 0.4556 rtol = 0.05
 
     # Tests for arithmetic operations on TFEs
     tfe_n = transfer_free_energy(MJC, "urea"; model=MTRecord)
@@ -723,9 +723,27 @@ end
     @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.5273f0; atol=1f-4)
     @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.6590f0; atol=1f-4)
 
+    # Test error message of atomic radii used
+    s = sasa_particles(RichardsUnitedAtomRadii, pep)
+    @test_throws "Got model: Accessibility" transfer_free_energy(s, "tmao"; model=Accessibility)
+
+    # TetraEG and glycerol group interaction potentials are given directly in
+    # cal mol⁻¹ molal⁻¹ Å⁻² in their source table, unlike the Guinn et al. cosolvents
+    # above, so model_combination_rule must return them unscaled.
+    @test isapprox(model_combination_rule(MTRecord, "glycerol", :hydroxyl_oxygen), 0.0305f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "glycerol", :cationic_nitrogen), -0.245f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "tetraeg", :carboxylate_oxygen), 3.59f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "tetraeg", :aliphatic_carbon), -0.349f0; atol=1f-4)
+
     tfe = transfer_free_energy(MTRecord, ats, "urea")
     @test tfe isa TransferFreeEnergy{MTRecord}
     @test tfe.nresidues == 7
+
+    # Sanity check that the full pipeline runs for the new cosolvents.
+    tfe_glycerol = transfer_free_energy(MTRecord, pep, "glycerol")
+    @test tfe_glycerol isa TransferFreeEnergy{MTRecord}
+    tfe_tetraeg = transfer_free_energy(MTRecord, pep, "tetraeg")
+    @test tfe_tetraeg isa TransferFreeEnergy{MTRecord}
 end
 
 @testitem "tfe_dimer_tests" begin

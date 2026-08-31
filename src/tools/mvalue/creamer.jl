@@ -1,6 +1,6 @@
 struct CreamerUnitedAtomRadii <: AtomicRadiiType end
 
-_not_hydrogen(at) = startswith(element(at)) != 'H'
+_not_hydrogen(at) = element(at) != "H"
 _get_creamer_radius(at) = PDBTools.creamer_atomic_radii[at]
 
 """
