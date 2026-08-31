@@ -205,4 +205,18 @@ const SurfaceRacerResults = Dict{String,Float32}(
 
     @test_throws "radii_set parameter must be" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:wrong)
 
+    # Test invalid atom type error
+    prot[1].name = "AB"
+    @test_throws "united atom type" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot)
+
+    # Test with the presence of hydrogens (which must be ignored)
+    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot))
+    @test s1 ≈ s2
+
+    # Test with a double-conformer amino acid name
+    prot[1].resname = "BALA"
+    s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot))
+    @test s1 ≈ s2
+
 end
