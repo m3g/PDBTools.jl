@@ -723,6 +723,10 @@ end
     @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.5273f0; atol=1f-4)
     @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.6590f0; atol=1f-4)
 
+    # Test error message of atomic radii used
+    s = sasa_particles(RichardsUnitedAtomRadii, pep)
+    @test_throws "Got model: Accessibility" transfer_free_energy(s, "tmao"; model=Accessibility)
+
     # TetraEG and glycerol group interaction potentials are given directly in
     # cal mol⁻¹ molal⁻¹ Å⁻² in their source table, unlike the Guinn et al. cosolvents
     # above, so model_combination_rule must return them unscaled.
