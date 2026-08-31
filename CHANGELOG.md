@@ -12,6 +12,9 @@ PDBTools.jl Changelog
 
 Version 3.36.1-DEV
 --------------
+- ![FEATURE][badge-feature] Add `tetraeg` and `glycerol` parameters for `MTRecord` model.
+- ![FEATURE][badge-feature] Implement Richard's radii.
+- ![FIX][badge-fix] Use Richard's radii in the computations of TFEs using MTRecord models.
 
 Version 3.36.0
 --------------

@@ -723,9 +723,23 @@ end
     @test isapprox(model_combination_rule(MTRecord, "urea", :aromatic_carbon), -0.5273f0; atol=1f-4)
     @test isapprox(model_combination_rule(MTRecord, "betaine", :amide_oxygen), 1.6590f0; atol=1f-4)
 
+    # TetraEG and glycerol group interaction potentials are given directly in
+    # cal mol⁻¹ molal⁻¹ Å⁻² in their source table, unlike the Guinn et al. cosolvents
+    # above, so model_combination_rule must return them unscaled.
+    @test isapprox(model_combination_rule(MTRecord, "glycerol", :hydroxyl_oxygen), 0.0305f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "glycerol", :cationic_nitrogen), -0.245f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "tetraeg", :carboxylate_oxygen), 3.59f0; atol=1f-4)
+    @test isapprox(model_combination_rule(MTRecord, "tetraeg", :aliphatic_carbon), -0.349f0; atol=1f-4)
+
     tfe = transfer_free_energy(MTRecord, ats, "urea")
     @test tfe isa TransferFreeEnergy{MTRecord}
     @test tfe.nresidues == 7
+
+    # Sanity check that the full pipeline runs for the new cosolvents.
+    tfe_glycerol = transfer_free_energy(MTRecord, pep, "glycerol")
+    @test tfe_glycerol isa TransferFreeEnergy{MTRecord}
+    tfe_tetraeg = transfer_free_energy(MTRecord, pep, "tetraeg")
+    @test tfe_tetraeg isa TransferFreeEnergy{MTRecord}
 end
 
 @testitem "tfe_dimer_tests" begin
