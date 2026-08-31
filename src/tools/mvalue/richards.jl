@@ -64,6 +64,9 @@ function richards_atom_type(at::Atom)
         atname == "SG" && return "SH"
         atname == "SD" && return "ST"
     end
+    # Unreachable with the current PDB_ATOM_HYBRIDIZATION table (every "Ssp3" entry is
+    # ("CYS","SG") or ("MET","SD")); kept as a guard against a silent `nothing` return
+    # if that table is ever extended with another Ssp3-mapped atom name.
     throw(ArgumentError("""\n
         Could not determine Richards united atom type for $atname of residue $(resname(at))
 
@@ -209,6 +212,8 @@ const SurfaceRacerResults = Dict{String,Float32}(
 
     # Test invalid atom type error
     prot[1].name = "AB"
+    @test_throws "united atom type" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot)
+    prot[1].name = "SF"
     @test_throws "united atom type" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot)
 
     # Test with the presence of hydrogens (which must be ignored)
