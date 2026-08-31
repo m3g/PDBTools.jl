@@ -47,10 +47,12 @@ function richards_atom_type(at::Atom)
     else
         nothing
     end
-    isnothing(hybrid) && throw(ArgumentError("""\n
-        Could not determine Richards united atom type for $atname of residue $(resname(at))
-
-    """))
+    if isnothing(hybrid) 
+        throw(ArgumentError("""\n
+            Could not determine Richards united atom type for $atname of residue $(resname(at))
+    
+        """))
+    end
     hybrid == "Csp3" && return "CH4"
     hybrid == "Csp2" && return "CH3"
     hybrid == "Nsp3" && return "NH4"
@@ -213,6 +215,7 @@ const SurfaceRacerResults = Dict{String,Float32}(
     prot = read_pdb(PDBTools.TESTPDB, "protein")
     s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot))
     @test s1 ≈ s2
+    @test PDBTools.richards_atom_type(prot[2]) == "H"
 
     # Test with a double-conformer amino acid name
     prot[1].resname = "BALA"
