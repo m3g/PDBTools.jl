@@ -602,7 +602,7 @@ end
 
     # Test path of TFE from SASA
     tfe = transfer_free_energy(MJC, "urea"; model=MTRecord)
-    tfe_sasa = transfer_free_energy(sasa_particles(CreamerUnitedAtomRadii, MJC), "urea"; model=MTRecord)
+    tfe_sasa = transfer_free_energy(sasa_particles(RichardsUnitedAtomRadii, MJC), "urea"; model=MTRecord)
     @test tfe.tot ≈ tfe_sasa.tot
 
     # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
@@ -610,10 +610,10 @@ end
     # literature-validated targets.
     rec_m = MTRecordDenaturedModel(RN2)
     c_rec = mvalue(rec_m, "betaine").tot
-    @test c_rec ≈ 1.20 rtol = 0.05
+    @test c_rec ≈ 0.9574 rtol = 0.05
     rec_m = MTRecordDenaturedModel(MJC)
     c_rec = mvalue(rec_m, "betaine").tot
-    @test c_rec ≈ 0.54 rtol = 0.05
+    @test c_rec ≈ 0.4556 rtol = 0.05
 
     # Tests for arithmetic operations on TFEs
     tfe_n = transfer_free_energy(MJC, "urea"; model=MTRecord)

@@ -260,8 +260,8 @@ end
 
 function MTRecordDenaturedModel(p::AbstractVector{<:Atom})
     p_ext = extended_chain(p)
-    sasa_native = sasa_particles(CreamerUnitedAtomRadii, p)
-    sasa_ext = sasa_particles(CreamerUnitedAtomRadii, p_ext)
+    sasa_native = sasa_particles(RichardsUnitedAtomRadii, p)
+    sasa_ext = sasa_particles(RichardsUnitedAtomRadii, p_ext)
     return MTRecordDenaturedModel(p, p_ext, sasa_native, sasa_ext)
 end
 
@@ -313,7 +313,7 @@ function transfer_free_energy(
     parallel::Bool=true,
     unitcell=nothing,
 ) where {F1<:Function,F2<:Function}
-    sasa_ats = sasa_particles(CreamerUnitedAtomRadii, atoms; unitcell)
+    sasa_ats = sasa_particles(RichardsUnitedAtomRadii, atoms; unitcell)
     return transfer_free_energy(
         MTRecord,
         sasa_ats,
@@ -326,7 +326,7 @@ function transfer_free_energy(
 end
 
 """
-    transfer_free_energy(::Type{MTRecord}, sasa_ats::SASA{CreamerUnitedAtomRadii}, cosolvent::AbstractString; kargs...)
+    transfer_free_energy(::Type{MTRecord}, sasa_ats::SASA{RichardsUnitedAtomRadii}, cosolvent::AbstractString; kargs...)
 
 Compute fixed-state transfer free energies using Record interaction potentials
 and atom-resolved coarse-grained surface classes.
@@ -334,7 +334,7 @@ and atom-resolved coarse-grained surface classes.
 """
 function transfer_free_energy(
     ::Type{MTRecord},
-    sasa_ats::SASA{CreamerUnitedAtomRadii},
+    sasa_ats::SASA{RichardsUnitedAtomRadii},
     cosolvent::AbstractString;
     backbone::F1=isbackbone,
     sel::Union{String,Function}=all,
@@ -380,5 +380,30 @@ function transfer_free_energy(
     sc = sum(residue_contributions_sc)
     tot = bb + sc
     return TransferFreeEnergy{MTRecord}(length(residues), tot, bb, sc, residue_contributions_bb, residue_contributions_sc, cos)
+end
+
+"""
+    transfer_free_energy(sasa_ats::SASA{RichardsUnitedAtomRadii}, cosolvent::AbstractString; model=MTRecord, kargs...)
+
+Compute transfer free energies from a precomputed SASA using Richards united atom radii.
+This is the `RichardsUnitedAtomRadii` counterpart of
+`transfer_free_energy(sasa_ats::SASA{CreamerUnitedAtomRadii}, ...)`: since Richards radii are
+only meaningful for the `MTRecord` model, `model` must be `MTRecord` (its default).
+
+"""
+function transfer_free_energy(
+    sasa_ats::SASA{RichardsUnitedAtomRadii},
+    cosolvent::AbstractString;
+    model::Type{<:MValueModel}=MTRecord,
+    kargs...
+)
+    if model != MTRecord
+        throw(ArgumentError("""\n
+            SASA computed with RichardsUnitedAtomRadii can only be used with the MTRecord model.
+            Got model: $(modelname(model))
+
+        """))
+    end
+    return transfer_free_energy(MTRecord, sasa_ats, cosolvent; kargs...)
 end
 
