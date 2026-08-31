@@ -17,6 +17,7 @@ function _model_type(s::String)
 end
 
 include("./creamer.jl")
+include("./richards.jl")
 include("./models/data.jl")
 include("./models/MoeserHorinek.jl")
 include("./models/AutonBolen.jl")

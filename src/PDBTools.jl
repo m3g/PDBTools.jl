@@ -45,7 +45,7 @@ export select_with_vmd
 export center_of_mass
 export moveto!
 export sasa_particles, sasa, SASA
-export StandardAtomicRadii, CreamerUnitedAtomRadii, CustomAtomicRadii
+export StandardAtomicRadii, CreamerUnitedAtomRadii, RichardsUnitedAtomRadii, CustomAtomicRadii
 export read_unitcell, lattice_to_matrix, matrix_to_lattice
 export hydrogen_bonds
 export mvalue, CreamerDenaturedModel, save, load
