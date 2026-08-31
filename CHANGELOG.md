@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.36.1-DEV
+Version 3.37.0
 --------------
 - ![FEATURE][badge-feature] Add `tetraeg` and `glycerol` parameters for `MTRecord` model.
 - ![FEATURE][badge-feature] Implement Richard's radii.
