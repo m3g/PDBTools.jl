@@ -73,7 +73,7 @@ const _record_cationic_nitrogens = Set{Tuple{String,String}}([
 ])
 
 #=
-    record_surface_type(atom::Atom)
+    record_surface_type(atom::Atom; nterminal::Bool=false, cterminal::Bool=false)
 
 Map a protein atom to one of the seven coarse-grained surface types from the
 Record transfer model:
@@ -87,8 +87,18 @@ Record transfer model:
 - `:cationic_nitrogen`
 
 Returns `nothing` for sulfur and hydrogen atoms, which are ignored by this model.
+
+Since this classification is otherwise a pure function of the atom itself, terminal
+groups need residue-position context passed in explicitly: set `nterminal=true` for
+the backbone "N" of a chain's first residue (free α-amino group, protonated and
+cationic rather than an amide nitrogen), and `cterminal=true` for the backbone "O" of
+a residue whose terminal carboxylate is present (i.e. it also carries an OXT/OT1/OT2
+atom), so that "O" is classified alongside OXT as `:carboxylate_oxygen` instead of
+`:amide_oxygen`. Both default to `false`, which reproduces the original, purely
+per-atom, classification (used e.g. by the `record_*` macro keywords, which have no
+residue context available).
 =#
-function record_surface_type(at::Atom)
+function record_surface_type(at::Atom; nterminal::Bool=false, cterminal::Bool=false)
     restype = String(uppercase(threeletter(StringType, resname(at))))
     atname = String(uppercase(name(at)))
     elem = element(at)
@@ -105,7 +115,9 @@ function record_surface_type(at::Atom)
             return :carboxylate_oxygen
         elseif key in _record_hydroxyl_oxygens
             return :hydroxyl_oxygen
-        elseif atname == "O" || key in _record_amide_oxygens
+        elseif atname == "O"
+            return cterminal ? :carboxylate_oxygen : :amide_oxygen
+        elseif key in _record_amide_oxygens
             return :amide_oxygen
         end
         return :amide_oxygen
@@ -114,7 +126,9 @@ function record_surface_type(at::Atom)
     if el == "N"
         if key in _record_cationic_nitrogens
             return :cationic_nitrogen
-        elseif atname == "N" || key in _record_amide_nitrogens
+        elseif atname == "N"
+            return nterminal ? :cationic_nitrogen : :amide_nitrogen
+        elseif key in _record_amide_nitrogens
             return :amide_nitrogen
         end
         return :amide_nitrogen
@@ -400,8 +414,15 @@ function transfer_free_energy(
             bb_contrib = 0.0f0
             sc_contrib = 0.0f0
 
+            # Terminal groups need residue-position context: the first residue of each
+            # chain carries a free (cationic) N-terminal amine, and a residue carrying an
+            # OXT/OT1/OT2 atom has a C-terminal carboxylate, so its "O" is chemically
+            # equivalent to OXT rather than an amide oxygen.
+            is_nterminal = iresidue == 1 || chain(res) != chain(residues[iresidue-1]) || model(res) != model(residues[iresidue-1])
+            is_cterminal = any(at -> String(uppercase(name(at))) in ("OXT", "OT1", "OT2"), res)
+
             for at in bb_atoms
-                stype = record_surface_type(at)
+                stype = record_surface_type(at; nterminal=is_nterminal, cterminal=is_cterminal)
                 isnothing(stype) && continue
                 σ = model_combination_rule(MTRecord, cos, stype)
                 bb_contrib += σ * sasa(sasa_ats, x -> x === at)
