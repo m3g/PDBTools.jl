@@ -74,21 +74,31 @@ function richards_atom_type(at::Atom)
 end
 
 #
-# Two alternative sets of Richards united-atom radii, both quoted from the same table:
+# Three alternative sets of Richards united-atom radii, corresponding to the three
+# choices offered by SurfaceRacer itself ("1 - Richards (1977)" and "2 - Chothia
+# (1976)" in its own prompt, plus the Richmond & Richards variant used elsewhere):
 #
-#     Set 1                         Set 2
-# (Richards, 1977)   (Richmond & Richards, 1978)
+#     Set 1                Set 2                    Set 3
+# (Richards, 1977)   (Richmond & Richards, 1978)   (Chothia, 1976)
 #
-# ch4 2.00                1.90
-# ch3 1.70                1.70
-# nh4 2.00                1.70
-# nh3 1.70                1.70
-# oh4 1.60                1.40
-# oh3 1.50                1.40
-# sh  2.00                1.80
-# st  1.80                1.80
-# zn  0.64                0.64
-# fe  0.64                0.64
+# ch4 2.00                1.90                       1.87
+# ch3 1.70                1.70                       1.76
+# nh4 2.00                1.70                       1.50
+# nh3 1.70                1.70                       1.65
+# oh4 1.60                1.40                       1.40
+# oh3 1.50                1.40                       1.40
+# sh  2.00                1.80                       1.85
+# st  1.80                1.80                       1.85
+# zn  0.64                0.64                       0.64
+# fe  0.64                0.64                       0.64
+#
+# Set 3 was validated directly against a local run of SurfaceRacer 5.0 (Tsodikov,
+# Record & Sergeev, 2002) on the biological tetramer assembly of 3CNA (Hardman &
+# Ainsworth, 1972), with its own "2 - Chothia (1976)" option and a 1.4 Å probe: total
+# SASA 35477.35 Å² there vs. ~35480-35575 Å² here depending on `n_dots` (<0.3%
+# difference, consistent with an exact analytical algorithm vs. this module's
+# numerical, dot-based one). See the "RichardsUnitedAtomRadii validated against
+# SurfaceRacer" testitem below.
 #
 const richards_atomic_radii_set1 = OrderedDict{StringType,Float32}(
     "CH4" => 2.00,
@@ -118,11 +128,30 @@ const richards_atomic_radii_set2 = OrderedDict{StringType,Float32}(
     "H" => 0.0,
 )
 
+# From Chothia 1976 (J. Mol. Biol. 105, 1-14)
+const richards_atomic_radii_set3 = OrderedDict{StringType,Float32}(
+    "CH4" => 1.87,
+    "CH3" => 1.76,
+    "NH4" => 1.50,
+    "NH3" => 1.65,
+    "OH4" => 1.40,
+    "OH3" => 1.40,
+    "SH" => 1.85,
+    "ST" => 1.85,
+    "ZN" => 0.64,
+    "FE" => 0.64,
+    "H" => 0.0,
+)
+
 function _richards_radii_set(s::Symbol)
     s == :set1 && return richards_atomic_radii_set1
     s == :set2 && return richards_atomic_radii_set2
+    s == :set3 && return richards_atomic_radii_set3
     throw(ArgumentError("""\n
-        radii_set parameter must be either :set1 (Richards, 1977) or :set2 (Richmond & Richards, 1978)
+        radii_set parameter must be one of
+            :set1 (Richards, 1977) 
+            :set2 (Richmond & Richards, 1978)
+            :set3 (Chothia, 1976)
 
     """))
 end
@@ -134,20 +163,12 @@ Compute the SASA of the structure using the Richards united atom radii, as used 
 SurfaceRacer. This parameterization is available for proteins only, and ignores any
 hydrogen atoms of the structure.
 
-Two alternative radii sets are available, both reproduced from the same source table:
+Three alternative radii sets are available, matching SurfaceRacer's own two built-in
+choices plus a third variant used elsewhere in the transfer-model literature:
 
 - `:set2` (default): Richmond & Richards, 1978.
-- `:set1`: Richards, 1977.
-
-Both sets were validated against the total SASA values reported by SurfaceRacer for the
-30 structures in `SurfaceRacerResults` (downloading each PDB entry and computing the SASA
-of all protein atoms, all chains, no hydrogens): both reproduce the reported values with a
-mean absolute error of ~2% (root-mean-square error ~2.4-2.5%), with `:set2` showing a
-slightly smaller mean bias and `:set1` a slightly smaller worst-case outlier. This confirms
-that the atom -> group classification used by `richards_atom_type` (the same sp3/sp2 split
-used for the Creamer radii, relabeled) matches SurfaceRacer's own assignment closely enough
-that the residual discrepancy is attributable to details of the rolling-ball algorithm
-(number of dots per atom, exact probe radius rounding) rather than to atom (mis)typing.
+- `:set1`: Richards, 1977 (SurfaceRacer's own "1 - Richards (1977)" option).
+- `:set3`: Chothia, J. Mol. Biol., 1976 (SurfaceRacer's own "2 - Chothia (1976)" option).
 
 """
 function sasa_particles(::Type{RichardsUnitedAtomRadii}, atoms; radii_set::Symbol=:set2, kargs...)
@@ -208,6 +229,9 @@ const SurfaceRacerResults = Dict{String,Float32}(
     s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:set1))
     @test s1 ≈ 5260.748 rtol = 1e-4
 
+    s3 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:set3))
+    @test s3 ≈ 5246.431 rtol = 1e-4
+
     @test_throws "radii_set parameter must be" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:wrong)
 
     # Test invalid atom type error
@@ -227,4 +251,66 @@ const SurfaceRacerResults = Dict{String,Float32}(
     s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot))
     @test s1 ≈ s2
 
+end
+
+@testitem "RichardsUnitedAtomRadii validated against SurfaceRacer" begin
+    using PDBTools
+    using Downloads
+
+    # SurfaceRacer 5.0 (Tsodikov, Record & Sergeev, 2002), run locally with its own
+    # "2 - Chothia (1976)" radii option and a 1.4 Å probe, on the biological tetramer
+    # assembly of 3CNA (Hardman & Ainsworth, 1972; 4 chains, 7228 protein atoms):
+    #
+    #     tetramer:                        Total area = 35477.35 Å²
+    #     each dimer (chain A+A-2 or A-3+A-4, related by an exact crystallographic
+    #     2-fold, and therefore geometrically identical): Total area = 19954.90 Å² (both)
+    #
+    # `:set3` (with the corrected NH4 radius) reproduces the tetramer value to <0.3%,
+    # validating the radii table and the dot-based SASA algorithm against the reference
+    # program (residual difference expected: exact analytical vs. numerical dot-based
+    # methods). Note `wget("3CNA")` only returns the asymmetric unit (a single chain);
+    # the biological tetramer requires RCSB's separate assembly file, fetched here
+    # directly (mirroring what `wget` does internally for a plain PDB id).
+    buf = IOBuffer()
+    Downloads.download("https://files.rcsb.org/download/3CNA-assembly1.cif", buf)
+    seekstart(buf)
+    cna = read_mmcif(buf, "protein")
+    @test length(cna) == 7228
+    @test Set(unique(chain.(cna))) == Set(["A", "A-2", "A-3", "A-4"])
+
+    d1 = select(cna, at -> chain(at) in ("A", "A-2"))
+    d2 = select(cna, at -> chain(at) in ("A-3", "A-4"))
+    @test length(d1) == length(d2) == 3614
+
+    s_tet = sasa(sasa_particles(RichardsUnitedAtomRadii, cna; radii_set=:set3))
+    @test s_tet ≈ 35477.35 rtol = 0.005
+
+    # Higher n_dots here only to demonstrate the exact crystallographic symmetry
+    # (SASA(d1) == SASA(d2)) without dot-pattern-orientation noise; the package
+    # default (n_dots=512) already agrees with SurfaceRacer to within ~0.2%.
+    s_d1 = sasa(sasa_particles(RichardsUnitedAtomRadii, d1; radii_set=:set3, n_dots=5000))
+    s_d2 = sasa(sasa_particles(RichardsUnitedAtomRadii, d2; radii_set=:set3, n_dots=5000))
+    @test s_d1 ≈ s_d2 rtol = 0.002
+    @test s_d1 ≈ 19954.90 rtol = 0.02
+    @test s_d2 ≈ 19954.90 rtol = 0.02
+
+    # Regression pin (default radii_set=:set2) for the tetramer -> 2-dimer dissociation
+    # transfer free energies, computed exactly as Table 2 of Knowles et al. 2015
+    # (10.1021/acs.biochem.5b00246) defines the "no conformational changes" ΔASA:
+    # Δtfe = tfe(d1) + tfe(d2) - tfe(tetramer). These do NOT reproduce that paper's own
+    # predicted m-values (traced to structure-preparation details not fully identified);
+    # they are pinned here only to catch future regressions in this codebase.
+    targets = Dict(
+        "tetraeg" => 0.19622135,
+        "urea" => -0.45273495,
+        "glycerol" => 0.13829088,
+        "proline" => 0.5135155,
+        "betaine" => 0.469985,
+    )
+    for (s, target) in targets
+        delta = transfer_free_energy(d1, s; model=MTRecord).tot +
+                transfer_free_energy(d2, s; model=MTRecord).tot -
+                transfer_free_energy(cna, s; model=MTRecord).tot
+        @test delta ≈ target rtol = 1e-4
+    end
 end

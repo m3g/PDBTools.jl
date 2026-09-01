@@ -15,9 +15,11 @@ Version 3.37.1-DEV
 - ![FEATURE][badge-feature] Add `record_type_contributions(::SASA)` to decompose a SASA into per-Record-surface-type area and fraction.
 - ![FEATURE][badge-feature] Support `temperature` parameter in Record model.
 - ![ENHANCEMENT][badge-enhancement] N-terminal and C-terminal nitrogen and oxygen atoms are classified as cationic and carboxylate in Record models. 
-- ![BUGFIX][badge-bugfix] `record_surface_type` now throws instead of silently defaulting an unrecognized O or N atom to an amide type.
-- ![ENHANCEMENT][badge-enhancement] Avoid an O(N²) SASA lookup in the Record model's transfer free energy computation.
+- ![ENHANCEMENT][badge-enhancement] Avoid an O(N^2) SASA lookup in the Record model's transfer free energy computation.
 - ![INFO][badge-info] Clarify in the docs that `MTRecord`'s surface potentials come from model-compound data, not from the extended-chain denatured-state model, and document the relation between the `alpha` keyword and Hong & Xiong's ΔASA correction factor `f`.
+- ![INFO][badge-info] `record_surface_type` now throws instead of silently defaulting an unrecognized O or N atom to an amide type.
+- ![FEATURE][badge-feature] Add `:set3` (Chothia, 1976) Richards united-atom radii, matching SurfaceRacer's own "Chothia" option; validated directly against a local SurfaceRacer run on the 3CNA tetramer.
+- ![INFO][badge-info] Add regression tests pinning `MTRecord`/`record_type_contributions` output for PDB 1OSL (lacDBD) and 3CNA (concanavalin A tetramer/dimers).
 
 Version 3.37.0
 --------------

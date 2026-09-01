@@ -762,6 +762,64 @@ end
     @test tfe_tetraeg isa TransferFreeEnergy{MTRecord}
 end
 
+@testitem "MTRecord regression pins (1OSL)" begin
+    using PDBTools
+    using PDBTools: record_type_contributions
+
+    # Regression pins for a single (chain, model) of the lac repressor DNA-binding
+    # domain (lacDBD) NMR ensemble (PDB 1OSL; the same structure Knowles et al. 2015
+    # used to build Table S5 of their SI). These do NOT reproduce that paper's own
+    # reported ΔASA/m-values: `extended_chain` only idealizes backbone phi/psi,
+    # leaving native side-chain rotamers untouched, so the "denatured" reference
+    # inherits this NMR ensemble's per-model rotamer noise (most visible in the
+    # thinly-sampled carboxylate O category: only 5 Asp/Glu residues in this
+    # 62-residue domain). Values here pin PDBTools's own output, to catch future
+    # regressions, not to validate against the paper.
+    p = wget("1OSL", "protein and chain C and model 1")
+    @test length(p) == 959
+    @test length(collect(eachresidue(p))) == 62
+
+    m = MTRecordDenaturedModel(p)
+    cn = record_type_contributions(m.sasa_native)
+    ce = record_type_contributions(m.sasa_ext)
+
+    native_targets = Dict(
+        :aliphatic_carbon => 2259.0735,
+        :aromatic_carbon => 213.92944,
+        :hydroxyl_oxygen => 246.68571,
+        :amide_oxygen => 667.8986,
+        :carboxylate_oxygen => 316.15024,
+        :amide_nitrogen => 376.91205,
+        :cationic_nitrogen => 477.86224,
+    )
+    ext_targets = Dict(
+        :aliphatic_carbon => 4847.526,
+        :aromatic_carbon => 446.02045,
+        :hydroxyl_oxygen => 326.15622,
+        :amide_oxygen => 1114.7037,
+        :carboxylate_oxygen => 351.94083,
+        :amide_nitrogen => 580.22754,
+        :cationic_nitrogen => 585.4166,
+    )
+    for t in keys(native_targets)
+        @test cn[t].area ≈ native_targets[t] rtol = 1e-4
+        @test ce[t].area ≈ ext_targets[t] rtol = 1e-4
+    end
+
+    mvalue_targets = Dict(
+        "urea" => -0.56872404,
+        "tmao" => 3.554749,
+        "betaine" => 0.63385475,
+        "proline" => 0.87962806,
+        "trehalose" => 2.9595973,
+        "tetraeg" => -0.43776095,
+        "glycerol" => 0.3038363,
+    )
+    for (s, target) in mvalue_targets
+        @test mvalue(m, s).tot ≈ target rtol = 1e-4
+    end
+end
+
 @testitem "tfe_dimer_tests" begin
     using PDBTools
     dir = @__DIR__
