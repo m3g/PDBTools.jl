@@ -255,7 +255,6 @@ end
 
 @testitem "RichardsUnitedAtomRadii validated against SurfaceRacer" begin
     using PDBTools
-    using Downloads
 
     # SurfaceRacer 5.0 (Tsodikov, Record & Sergeev, 2002), run locally with its own
     # "2 - Chothia (1976)" radii option and a 1.4 Å probe, on the biological tetramer
@@ -269,12 +268,8 @@ end
     # validating the radii table and the dot-based SASA algorithm against the reference
     # program (residual difference expected: exact analytical vs. numerical dot-based
     # methods). Note `wget("3CNA")` only returns the asymmetric unit (a single chain);
-    # the biological tetramer requires RCSB's separate assembly file, fetched here
-    # directly (mirroring what `wget` does internally for a plain PDB id).
-    buf = IOBuffer()
-    Downloads.download("https://files.rcsb.org/download/3CNA-assembly1.cif", buf)
-    seekstart(buf)
-    cna = read_mmcif(buf, "protein")
+    # the biological tetramer requires RCSB's separate assembly file, hence `assembly=1`.
+    cna = wget("3CNA", "protein"; assembly=1)
     @test length(cna) == 7228
     @test Set(unique(chain.(cna))) == Set(["A", "A-2", "A-3", "A-4"])
 

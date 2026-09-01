@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.37.1-DEV
 --------------
+- ![FEATURE][badge-feature] Add `assembly` keyword to `wget`, to download a numbered biological assembly (e.g. `wget("3CNA"; assembly=1)` for the crystallographic tetramer) instead of the default asymmetric unit.
 - ![FEATURE][badge-feature] Add `record_type_contributions(::SASA)` to decompose a SASA into per-Record-surface-type area and fraction.
 - ![FEATURE][badge-feature] Support `temperature` parameter in Record model.
 - ![ENHANCEMENT][badge-enhancement] N-terminal and C-terminal nitrogen and oxygen atoms are classified as cationic and carboxylate in Record models. 
