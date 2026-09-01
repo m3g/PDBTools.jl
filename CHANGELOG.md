@@ -12,6 +12,12 @@ PDBTools.jl Changelog
 
 Version 3.37.1-DEV
 --------------
+- ![FEATURE][badge-feature] Add `record_type_contributions(::SASA)` to decompose a SASA into per-Record-surface-type area and fraction.
+- ![FEATURE][badge-feature] Support `temperature` parameter in Record model.
+- ![ENHANCEMENT][badge-enhancement] N-terminal and C-terminal nitrogen and oxygen atoms are classified as cationic and carboxylate in Record models. 
+- ![BUGFIX][badge-bugfix] `record_surface_type` now throws instead of silently defaulting an unrecognized O or N atom to an amide type.
+- ![ENHANCEMENT][badge-enhancement] Avoid an O(N²) SASA lookup in the Record model's transfer free energy computation.
+- ![INFO][badge-info] Clarify in the docs that `MTRecord`'s surface potentials come from model-compound data, not from the extended-chain denatured-state model, and document the relation between the `alpha` keyword and Hong & Xiong's ΔASA correction factor `f`.
 
 Version 3.37.0
 --------------

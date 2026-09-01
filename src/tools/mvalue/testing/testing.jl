@@ -677,9 +677,9 @@ end
     @test isnothing(record_surface_type(Atom(resname="CYS", name="SG")))
     @test_throws "unsupported element" record_surface_type(Atom(resname="ALA", name="P", pdb_element="P"))
 
-    # Fallback for usuported types
-    @test record_surface_type(Atom(resname="ARG", name="OAM")) == :amide_oxygen
-    @test record_surface_type(Atom(resname="ARG", name="NAM")) == :amide_nitrogen
+    # Unclassifiable O/N atoms must throw, not silently default to an amide type.
+    @test_throws "Could not classify oxygen atom" record_surface_type(Atom(resname="ARG", name="OAM"))
+    @test_throws "Could not classify nitrogen atom" record_surface_type(Atom(resname="ARG", name="NAM"))
 
     # Registering the macro keywords a second time (e.g. on reload) must be a no-op.
     PDBTools._register_record_macro_keywords!()
@@ -726,6 +726,22 @@ end
     # Test error message of atomic radii used
     s = sasa_particles(RichardsUnitedAtomRadii, pep)
     @test_throws "Got model: Accessibility" transfer_free_energy(s, "tmao"; model=Accessibility)
+
+    # record_type_contributions: per-surface-type SASA decomposition
+    contrib = record_type_contributions(s)
+    surface_types = (
+        :aliphatic_carbon, :aromatic_carbon, :hydroxyl_oxygen,
+        :amide_oxygen, :carboxylate_oxygen, :amide_nitrogen, :cationic_nitrogen,
+    )
+    @test Set(keys(contrib)) == Set(surface_types)
+    @test all(v.area >= 0 for v in values(contrib))
+    total = sasa(s)
+    @test sum(v.area for v in values(contrib)) < total  # pep has H and a CYS sulfur, excluded from every area
+    @test all(isapprox(v.fraction, v.area / total; atol=1f-6) for v in values(contrib))
+    # pep = "residue 1 to 5" (ALA, CYS, ASP, TYR, THR): no Lys/Arg/His, so the only
+    # cationic nitrogen is the N-terminal backbone N of the first residue (ALA).
+    iN = findfirst(at -> name(at) == "N" && resnum(at) == resnum(first(pep)), pep)
+    @test contrib[:cationic_nitrogen].area ≈ s[iN]
 
     # TetraEG and glycerol group interaction potentials are given directly in
     # cal mol⁻¹ molal⁻¹ Å⁻² in their source table, unlike the Guinn et al. cosolvents
