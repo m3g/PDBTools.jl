@@ -57,13 +57,20 @@ function _wget(pdb_id, selection_function::Function; format, assembly=nothing)
             read_mmcif(buf, selection_function)
         end
     catch
-        @info "Failed downloading from `download` PDB repository, trying `view` repository ..."
-        Downloads.download(_assembly_url("view", pdb_id, format, assembly), buf)
-        seekstart(buf)
-        if format == "pdb"
-            read_pdb(buf, selection_function)
-        else
-            read_mmcif(buf, selection_function)
+        try 
+            @info "Failed downloading from `download` PDB repository, trying `view` repository ..."
+            Downloads.download(_assembly_url("view", pdb_id, format, assembly), buf)
+            seekstart(buf)
+            if format == "pdb"
+                read_pdb(buf, selection_function)
+            else
+                read_mmcif(buf, selection_function)
+            end
+        catch
+            error("""\n
+                Failed downloading $pdb_id - please check the identifier code or internet connection.
+            
+            """)
         end
     end
     return atoms
@@ -103,4 +110,5 @@ end
     @test length(tetramer) == 7228
     tetramer_pdb = wget("3CNA", "protein"; format="PDB", assembly=1)
     @test length(tetramer_pdb) == length(tetramer)
+    @test_throws "identifier code or internet connection" wget("####") 
 end
