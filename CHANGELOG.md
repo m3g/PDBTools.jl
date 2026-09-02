@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.37.1-DEV
+Version 3.38.0
 --------------
 - ![FEATURE][badge-feature] Add `assembly` keyword to `wget`, to download a numbered biological assembly (e.g. `wget("3CNA"; assembly=1)` for the crystallographic tetramer) instead of the default asymmetric unit.
 - ![FEATURE][badge-feature] Add `record_type_contributions(::SASA)` to decompose a SASA into per-Record-surface-type area and fraction.
