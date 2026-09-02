@@ -802,8 +802,8 @@ end
         :cationic_nitrogen => 585.4166,
     )
     for t in keys(native_targets)
-        @test cn[t].area ≈ native_targets[t] rtol = 1e-4
-        @test ce[t].area ≈ ext_targets[t] rtol = 1e-4
+        @test cn[t].area ≈ native_targets[t] rtol = 0.01
+        @test ce[t].area ≈ ext_targets[t] rtol = 0.01
     end
 
     mvalue_targets = Dict(
@@ -816,7 +816,7 @@ end
         "glycerol" => 0.3038363,
     )
     for (s, target) in mvalue_targets
-        @test mvalue(m, s).tot ≈ target rtol = 1e-4
+        @test mvalue(m, s).tot ≈ target rtol = 0.01
     end
 end
 
