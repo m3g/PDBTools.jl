@@ -677,9 +677,9 @@ end
     @test isnothing(record_surface_type(Atom(resname="CYS", name="SG")))
     @test_throws "unsupported element" record_surface_type(Atom(resname="ALA", name="P", pdb_element="P"))
 
-    # Fallback for usuported types
-    @test record_surface_type(Atom(resname="ARG", name="OAM")) == :amide_oxygen
-    @test record_surface_type(Atom(resname="ARG", name="NAM")) == :amide_nitrogen
+    # Unclassifiable O/N atoms must throw, not silently default to an amide type.
+    @test_throws "Could not classify oxygen atom" record_surface_type(Atom(resname="ARG", name="OAM"))
+    @test_throws "Could not classify nitrogen atom" record_surface_type(Atom(resname="ARG", name="NAM"))
 
     # Registering the macro keywords a second time (e.g. on reload) must be a no-op.
     PDBTools._register_record_macro_keywords!()
@@ -727,6 +727,22 @@ end
     s = sasa_particles(RichardsUnitedAtomRadii, pep)
     @test_throws "Got model: Accessibility" transfer_free_energy(s, "tmao"; model=Accessibility)
 
+    # record_type_contributions: per-surface-type SASA decomposition
+    contrib = record_type_contributions(s)
+    surface_types = (
+        :aliphatic_carbon, :aromatic_carbon, :hydroxyl_oxygen,
+        :amide_oxygen, :carboxylate_oxygen, :amide_nitrogen, :cationic_nitrogen,
+    )
+    @test Set(keys(contrib)) == Set(surface_types)
+    @test all(v.area >= 0 for v in values(contrib))
+    total = sasa(s)
+    @test sum(v.area for v in values(contrib)) < total  # pep has H and a CYS sulfur, excluded from every area
+    @test all(isapprox(v.fraction, v.area / total; atol=1f-6) for v in values(contrib))
+    # pep = "residue 1 to 5" (ALA, CYS, ASP, TYR, THR): no Lys/Arg/His, so the only
+    # cationic nitrogen is the N-terminal backbone N of the first residue (ALA).
+    iN = findfirst(at -> name(at) == "N" && resnum(at) == resnum(first(pep)), pep)
+    @test contrib[:cationic_nitrogen].area ≈ s[iN]
+
     # TetraEG and glycerol group interaction potentials are given directly in
     # cal mol⁻¹ molal⁻¹ Å⁻² in their source table, unlike the Guinn et al. cosolvents
     # above, so model_combination_rule must return them unscaled.
@@ -744,6 +760,64 @@ end
     @test tfe_glycerol isa TransferFreeEnergy{MTRecord}
     tfe_tetraeg = transfer_free_energy(MTRecord, pep, "tetraeg")
     @test tfe_tetraeg isa TransferFreeEnergy{MTRecord}
+end
+
+@testitem "MTRecord regression pins (1OSL)" begin
+    using PDBTools
+    using PDBTools: record_type_contributions
+
+    # Regression pins for a single (chain, model) of the lac repressor DNA-binding
+    # domain (lacDBD) NMR ensemble (PDB 1OSL; the same structure Knowles et al. 2015
+    # used to build Table S5 of their SI). These do NOT reproduce that paper's own
+    # reported ΔASA/m-values: `extended_chain` only idealizes backbone phi/psi,
+    # leaving native side-chain rotamers untouched, so the "denatured" reference
+    # inherits this NMR ensemble's per-model rotamer noise (most visible in the
+    # thinly-sampled carboxylate O category: only 5 Asp/Glu residues in this
+    # 62-residue domain). Values here pin PDBTools's own output, to catch future
+    # regressions, not to validate against the paper.
+    p = wget("1OSL", "protein and chain C and model 1")
+    @test length(p) == 959
+    @test length(collect(eachresidue(p))) == 62
+
+    m = MTRecordDenaturedModel(p)
+    cn = record_type_contributions(m.sasa_native)
+    ce = record_type_contributions(m.sasa_ext)
+
+    native_targets = Dict(
+        :aliphatic_carbon => 2259.0735,
+        :aromatic_carbon => 213.92944,
+        :hydroxyl_oxygen => 246.68571,
+        :amide_oxygen => 667.8986,
+        :carboxylate_oxygen => 316.15024,
+        :amide_nitrogen => 376.91205,
+        :cationic_nitrogen => 477.86224,
+    )
+    ext_targets = Dict(
+        :aliphatic_carbon => 4847.526,
+        :aromatic_carbon => 446.02045,
+        :hydroxyl_oxygen => 326.15622,
+        :amide_oxygen => 1114.7037,
+        :carboxylate_oxygen => 351.94083,
+        :amide_nitrogen => 580.22754,
+        :cationic_nitrogen => 585.4166,
+    )
+    for t in keys(native_targets)
+        @test cn[t].area ≈ native_targets[t] rtol = 0.01
+        @test ce[t].area ≈ ext_targets[t] rtol = 0.01
+    end
+
+    mvalue_targets = Dict(
+        "urea" => -0.56872404,
+        "tmao" => 3.554749,
+        "betaine" => 0.63385475,
+        "proline" => 0.87962806,
+        "trehalose" => 2.9595973,
+        "tetraeg" => -0.43776095,
+        "glycerol" => 0.3038363,
+    )
+    for (s, target) in mvalue_targets
+        @test mvalue(m, s).tot ≈ target rtol = 0.01
+    end
 end
 
 @testitem "tfe_dimer_tests" begin

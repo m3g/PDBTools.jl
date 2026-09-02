@@ -73,7 +73,7 @@ const _record_cationic_nitrogens = Set{Tuple{String,String}}([
 ])
 
 #=
-    record_surface_type(atom::Atom)
+    record_surface_type(atom::Atom; nterminal::Bool=false, cterminal::Bool=false)
 
 Map a protein atom to one of the seven coarse-grained surface types from the
 Record transfer model:
@@ -87,8 +87,23 @@ Record transfer model:
 - `:cationic_nitrogen`
 
 Returns `nothing` for sulfur and hydrogen atoms, which are ignored by this model.
+
+Since this classification is otherwise a pure function of the atom itself, terminal
+groups need residue-position context passed in explicitly: set `nterminal=true` for
+the backbone "N" of a chain's first residue (free α-amino group, protonated and
+cationic rather than an amide nitrogen), and `cterminal=true` for the backbone "O" of
+a residue whose terminal carboxylate is present (i.e. it also carries an OXT/OT1/OT2
+atom), so that "O" is classified alongside OXT as `:carboxylate_oxygen` instead of
+`:amide_oxygen`. Both default to `false`, which reproduces the original, purely
+per-atom, classification (used e.g. by the `record_*` macro keywords, which have no
+residue context available).
+
+Throws an `ArgumentError` for an O or N atom that matches none of the known surface
+types (e.g. a modified residue or a ligand atom slipping past the caller's selection),
+rather than silently defaulting to `:amide_oxygen`/`:amide_nitrogen` — a wrong m-value
+from a misclassified atom is worse than a loud failure.
 =#
-function record_surface_type(at::Atom)
+function record_surface_type(at::Atom; nterminal::Bool=false, cterminal::Bool=false)
     restype = String(uppercase(threeletter(StringType, resname(at))))
     atname = String(uppercase(name(at)))
     elem = element(at)
@@ -105,19 +120,23 @@ function record_surface_type(at::Atom)
             return :carboxylate_oxygen
         elseif key in _record_hydroxyl_oxygens
             return :hydroxyl_oxygen
-        elseif atname == "O" || key in _record_amide_oxygens
+        elseif atname == "O"
+            return cterminal ? :carboxylate_oxygen : :amide_oxygen
+        elseif key in _record_amide_oxygens
             return :amide_oxygen
         end
-        return :amide_oxygen
+        throw(ArgumentError("Could not classify oxygen atom $(name(at)) of residue $(resname(at)) for Record model."))
     end
 
     if el == "N"
         if key in _record_cationic_nitrogens
             return :cationic_nitrogen
-        elseif atname == "N" || key in _record_amide_nitrogens
+        elseif atname == "N"
+            return nterminal ? :cationic_nitrogen : :amide_nitrogen
+        elseif key in _record_amide_nitrogens
             return :amide_nitrogen
         end
-        return :amide_nitrogen
+        throw(ArgumentError("Could not classify nitrogen atom $(name(at)) of residue $(resname(at)) for Record model."))
     end
 
     if el == "S" || el == "H"
@@ -239,14 +258,21 @@ const _record_R_cal = 1.9872041f0
 const _record_default_T = 298.15f0
 
 #=
-    model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol)
+    model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol; temperature::Real=_record_default_T)
 
 Return the Record surface interaction potential contribution in `cal mol⁻¹ A⁻²` for
 a coarse-grained surface type, computed from Guinn et al. Table 1 and Eq. 4 (for
 `_record_alpha_surface` cosolvents), or read directly from `_record_alpha_surface_cal`
 (TetraEG and glycerol, already in cal mol⁻¹ molal⁻¹ Å⁻²).
+
+`temperature` (in K) only affects the `_record_alpha_surface` cosolvents, whose
+potential is explicitly `R * T * alpha_i` in Eq. 4 of Guinn et al., with the
+dimensionless `alpha_i` assumed temperature-independent. TetraEG and glycerol
+coefficients are raw empirical values reported directly in cal mol⁻¹ molal⁻¹ Å⁻²
+at their own reference temperature, with no such R*T decomposition in the source
+paper, so `temperature` has no effect on them.
 =#
-function model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol)
+function model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbol; temperature::Real=_record_default_T)
     cos = lowercase(cosolvent)
     if haskey(_record_alpha_surface_cal, cos)
         α = get(_record_alpha_surface_cal[cos], surface_type, nothing)
@@ -257,17 +283,20 @@ function model_combination_rule(::Type{MTRecord}, cosolvent, surface_type::Symbo
     α_1e4 = get(_record_alpha_surface[cos], surface_type, nothing)
     isnothing(α_1e4) && throw(ArgumentError("Unsupported MTRecord surface type: $surface_type"))
     α = α_1e4 * 1f-4
-    return _record_R_cal * _record_default_T * α
+    return _record_R_cal * Float32(temperature) * α
 end
 
 """
     MTRecordDenaturedModel
 
 Type that specifies that a m-value calculation will consider the `MTRecord` transfer
-model (Guinn et al., PNAS 2011). Unlike the other transfer models, `MTRecord` was
-parameterized against, and is meant to be used with, an explicit atomistic model of the
-unfolded state: this type wraps a protein's native (folded) structure together with its
-fully-extended (all-trans, phi = psi = 180°, see `extended_chain`) chain, and the
+model (Guinn et al., PNAS 2011). Like the other transfer models, the `alpha_i` surface
+interaction potentials of `MTRecord` come from model-compound (small-molecule) transfer
+free energies, not from the unfolded-state model itself. What is specific to `MTRecord`
+is that Guinn et al. validate it (their Table S3, urea) against an explicit atomistic
+denatured-state model — the fully-extended (all-trans, phi = psi = 180°, see
+`extended_chain`) chain — rather than a residue-type-average ASA table. This type wraps
+a protein's native (folded) structure together with that extended chain, and the
 atom-resolved SASAs of both, precomputed once at construction. This type is used as the
 first input variable of the `mvalue` function.
 
@@ -313,19 +342,30 @@ function Base.show(io::IO, m::MTRecordDenaturedModel)
 end
 
 """
-    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0)
+    mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0, temperature=298.15)
 
 Compute Record-model m-values from coarse-grained surface interaction potentials, using
 Eq. 4 (Guinn et al. 2011) and the atom-resolved ΔASA between the native and fully-extended
 chains wrapped in `m` (that is, ASA of the extended chain minus ASA of the native chain, for
 each atom), following the original Record model.
 
-The optional `alpha` keyword scales the extended-chain (denatured-state) ASA of each atom
-before taking the difference with the native-state ASA. The default, `alpha=1.0`, uses the
-extended-chain ASA as computed, with no adjustment; this reproduces the urea benchmarks of
-Guinn et al. (Table S3) well. There is no equivalent extended-chain validation set for
-betaine in the paper, so `alpha` is exposed to allow empirically fitting the denatured-state
-ASA scale to experimental betaine data, if needed.
+The optional `alpha` keyword scales the extended-chain (denatured-state) transfer free
+energy `tfe_d` before subtracting the native-state `tfe_n`: `mval = alpha * tfe_d - tfe_n`.
+The default, `alpha=1.0`, uses the extended-chain ASA as computed, with no adjustment; this
+reproduces the urea benchmarks of Guinn et al. (Table S3) well. There is no equivalent
+extended-chain validation set for betaine in the paper, so `alpha` is exposed to allow
+empirically fitting the denatured-state ASA scale to experimental betaine data, if needed.
+
+Because it rescales only the denatured-state term, `alpha` is *not* the same quantity as
+the ΔASA correction factor `f` of Hong & Xiong, which rescales the whole ΔASA
+(`tfe_d - tfe_n`) instead: the two are related by `alpha = f + (1 - f) * tfe_n / tfe_d`.
+
+The optional `temperature` keyword (in K, default `298.15`) rescales the `R * T * alpha_i`
+surface interaction potentials (Eq. 4) to a different temperature, assuming the
+dimensionless `alpha_i` themselves are temperature-independent. It only affects cosolvents
+parameterized in the Guinn et al. convention (betaine, urea, tmao, proline, trehalose); the
+TetraEG and glycerol coefficients are raw empirical values with no such decomposition in
+their source paper, and are unaffected by this keyword.
 
 """
 function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0, kargs...)
@@ -340,10 +380,13 @@ function mvalue(m::MTRecordDenaturedModel, cosolvent::AbstractString; alpha=1.0,
 end
 
 """
-    transfer_free_energy(::Type{MTRecord}, atoms::AbstractVector{<:Atom}, cosolvent::AbstractString; kargs...)
+    transfer_free_energy(::Type{MTRecord}, atoms::AbstractVector{<:Atom}, cosolvent::AbstractString; temperature=298.15, kargs...)
 
 Compute transfer free energies from a fixed (native) structure using the Record
 surface-type model and atom-resolved SASAs.
+
+The optional `temperature` keyword (in K, default `298.15`) is forwarded to
+`model_combination_rule`; see its docstring for which cosolvents it affects.
 
 """
 function transfer_free_energy(
@@ -355,6 +398,7 @@ function transfer_free_energy(
     sidechain::F2=issidechain,
     parallel::Bool=true,
     unitcell=nothing,
+    temperature::Real=_record_default_T,
 ) where {F1<:Function,F2<:Function}
     sasa_ats = sasa_particles(RichardsUnitedAtomRadii, atoms; unitcell)
     return transfer_free_energy(
@@ -365,14 +409,18 @@ function transfer_free_energy(
         sel,
         sidechain,
         parallel,
+        temperature,
     )
 end
 
 """
-    transfer_free_energy(::Type{MTRecord}, sasa_ats::SASA{RichardsUnitedAtomRadii}, cosolvent::AbstractString; kargs...)
+    transfer_free_energy(::Type{MTRecord}, sasa_ats::SASA{RichardsUnitedAtomRadii}, cosolvent::AbstractString; temperature=298.15, kargs...)
 
 Compute fixed-state transfer free energies using Record interaction potentials
 and atom-resolved coarse-grained surface classes.
+
+The optional `temperature` keyword (in K, default `298.15`) is forwarded to
+`model_combination_rule`; see its docstring for which cosolvents it affects.
 
 """
 function transfer_free_energy(
@@ -383,11 +431,22 @@ function transfer_free_energy(
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
     parallel::Bool=true,
+    temperature::Real=_record_default_T,
 ) where {F1<:Function,F2<:Function}
     selector = Select(sel)
     residues = collect(eachresidue(select(sasa_ats.particles, selector)))
     cos = lowercase(cosolvent)
     haskey(cosolvent_column_MTRecord, cos) || throw(ArgumentError("Unsupported cosolvent for MTRecord: $cosolvent"))
+
+    # `select` (called above) filters `sasa_ats.particles` without copying the atoms
+    # themselves, so every atom reachable from `residues` is one of these same objects:
+    # this index, built once in O(N), lets each atom's precomputed SASA be fetched in
+    # O(1) below instead of `sasa(sasa_ats, x -> x === at)` linear-scanning all of
+    # `sasa_ats.particles` per atom (O(N) per atom, O(N^2) overall).
+    atom_index = IdDict{eltype(sasa_ats.particles),Int}()
+    for (i, p) in enumerate(sasa_ats.particles)
+        atom_index[p] = i
+    end
 
     residue_contributions_bb = zeros(Float32, length(residues))
     residue_contributions_sc = zeros(Float32, length(residues))
@@ -400,18 +459,25 @@ function transfer_free_energy(
             bb_contrib = 0.0f0
             sc_contrib = 0.0f0
 
+            # Terminal groups need residue-position context: the first residue of each
+            # chain carries a free (cationic) N-terminal amine, and a residue carrying an
+            # OXT/OT1/OT2 atom has a C-terminal carboxylate, so its "O" is chemically
+            # equivalent to OXT rather than an amide oxygen.
+            is_nterminal = iresidue == 1 || chain(res) != chain(residues[iresidue-1]) || model(res) != model(residues[iresidue-1])
+            is_cterminal = any(at -> String(uppercase(name(at))) in ("OXT", "OT1", "OT2"), res)
+
             for at in bb_atoms
-                stype = record_surface_type(at)
+                stype = record_surface_type(at; nterminal=is_nterminal, cterminal=is_cterminal)
                 isnothing(stype) && continue
-                σ = model_combination_rule(MTRecord, cos, stype)
-                bb_contrib += σ * sasa(sasa_ats, x -> x === at)
+                σ = model_combination_rule(MTRecord, cos, stype; temperature)
+                bb_contrib += σ * sasa_ats[atom_index[at]]
             end
 
             for at in sc_atoms
                 stype = record_surface_type(at)
                 isnothing(stype) && continue
-                σ = model_combination_rule(MTRecord, cos, stype)
-                sc_contrib += σ * sasa(sasa_ats, x -> x === at)
+                σ = model_combination_rule(MTRecord, cos, stype; temperature)
+                sc_contrib += σ * sasa_ats[atom_index[at]]
             end
 
             residue_contributions_bb[iresidue] = bb_contrib / 1000f0
@@ -448,5 +514,75 @@ function transfer_free_energy(
         """))
     end
     return transfer_free_energy(MTRecord, sasa_ats, cosolvent; kargs...)
+end
+
+export record_type_contributions
+
+"""
+    record_type_contributions(sasa_ats::SASA{RichardsUnitedAtomRadii})
+
+Decompose the total SASA in `sasa_ats` into the contribution of each Record surface type
+(see `record_surface_type`), returning a `Dict{Symbol,@NamedTuple{area::Float32,fraction::Float32}}`
+with one entry per surface type:
+
+- `:aliphatic_carbon`
+- `:aromatic_carbon`
+- `:hydroxyl_oxygen`
+- `:amide_oxygen`
+- `:carboxylate_oxygen`
+- `:amide_nitrogen`
+- `:cationic_nitrogen`
+
+`area` is the summed SASA (in Å²) of the atoms classified into that type; `fraction` is
+`area` divided by the total SASA of `sasa_ats` (all atoms, including the sulfur and
+hydrogen atoms that `record_surface_type` does not classify and that are therefore absent
+from every `area`) — so the seven fractions need not add up to 1.
+
+Terminal-group classification follows the same residue-position rules used internally by
+`transfer_free_energy(::Type{MTRecord}, ...)` (see `record_surface_type`): the first
+residue of each chain/model is treated as N-terminal, and a residue carrying an
+OXT/OT1/OT2 atom is treated as C-terminal. As with the rest of the Record model,
+`sasa_ats` is assumed to contain only protein atoms.
+
+# Example
+
+```jldoctest
+julia> using PDBTools
+
+julia> pep = read_pdb(PDBTools.TESTPDB, "protein and residue 1 to 5");
+
+julia> sasa_ats = sasa_particles(RichardsUnitedAtomRadii, pep);
+
+julia> contrib = record_type_contributions(sasa_ats);
+
+julia> contrib[:aliphatic_carbon].area > 0
+true
+
+```
+
+"""
+function record_type_contributions(sasa_ats::SASA{RichardsUnitedAtomRadii})
+    surface_types = (
+        :aliphatic_carbon, :aromatic_carbon, :hydroxyl_oxygen,
+        :amide_oxygen, :carboxylate_oxygen, :amide_nitrogen, :cationic_nitrogen,
+    )
+    areas = Dict{Symbol,Float32}(t => 0.0f0 for t in surface_types)
+
+    residues = collect(eachresidue(sasa_ats.particles))
+    for (iresidue, res) in enumerate(residues)
+        is_nterminal = iresidue == 1 || chain(res) != chain(residues[iresidue-1]) || model(res) != model(residues[iresidue-1])
+        is_cterminal = any(at -> String(uppercase(name(at))) in ("OXT", "OT1", "OT2"), res)
+        for i in res.range
+            stype = record_surface_type(sasa_ats.particles[i]; nterminal=is_nterminal, cterminal=is_cterminal)
+            isnothing(stype) && continue
+            areas[stype] += sasa_ats[i]
+        end
+    end
+
+    total = sasa(sasa_ats)
+    return Dict{Symbol,@NamedTuple{area::Float32,fraction::Float32}}(
+        t => (area=areas[t], fraction=total > 0 ? areas[t] / total : 0.0f0)
+        for t in surface_types
+    )
 end
 

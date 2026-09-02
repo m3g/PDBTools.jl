@@ -153,3 +153,11 @@ deprotonated `:carboxylate_oxygen` class is used), and is therefore not included
 
 These are currently the seven cosolvents for which a full set of surface-type potentials is
 available.
+
+The contribution of each type of atom to the transfer free energies can be obtained
+by decomposing the solvent accessible surface areas into the contribution of the types above,
+using the `record_type_contributions` function.
+
+```@docs
+record_type_contributions
+```
