@@ -108,10 +108,12 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
     ),
 
     # --- Proline (PRO) Side Chain (Cyclic with backbone N) ---
-    # The backbone N in Proline is an sp3 tertiary amine.
-    # N is often considered Nsp3 in Proline, unlike other residues.
+    # Despite being a tertiary amine, Proline's backbone N is still part of the
+    # peptide bond (amide) and is treated as Nsp2, like every other backbone N;
+    # this matches the atom-type assignment used by SurfaceRacer (Tsodikov et al.,
+    # 2002), the reference program for the Richards united-atom radii.
     "PRO" => OrderedDict(
-        "N" => "Nsp3", # Specific for Proline's N
+        "N" => "Nsp2", # Peptide-bond (amide) nitrogen, as for other backbone N atoms
         "CB" => "Csp3",
         "CG" => "Csp3",
         "CD" => "Csp3", # Delta Carbon
@@ -167,7 +169,8 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
         "CB" => "Csp3",
         "CG" => "Csp2", # Amide Carbon
         "OD1" => "Osp2", # Amide Oxygen
-        "ND2" => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+        "ND2" => "Nsp2", # Amide Nitrogen (planar, resonance-delocalized with the carbonyl;
+                          # matches SurfaceRacer's atom-type assignment)
     ),
 
     # --- Glutamic Acid (GLU) Side Chain ---
@@ -185,7 +188,8 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
         "CG" => "Csp3",
         "CD" => "Csp2", # Amide Carbon
         "OE1" => "Osp2", # Amide Oxygen
-        "NE2" => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+        "NE2" => "Nsp2", # Amide Nitrogen (planar, resonance-delocalized with the carbonyl;
+                          # matches SurfaceRacer's atom-type assignment)
     ),
 
     # --- Lysine (LYS) Side Chain (Like your example) ---
@@ -202,7 +206,10 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
         "CB" => "Csp3",
         "CG" => "Csp3",
         "CD" => "Csp3",
-        "NE" => "Nsp2", # Epsilon Nitrogen (Part of the delocalized system)
+        "NE" => "Nsp3", # Epsilon Nitrogen: despite being part of the delocalized
+                        # guanidinium system, SurfaceRacer's atom-type assignment
+                        # (the reference program for the Richards united-atom radii)
+                        # groups it with the larger Nsp3 radius, unlike NH1/NH2.
         "CZ" => "Csp2", # Guanidinium Carbon
         "NH1" => "Nsp2", # Guanidinium Nitrogen
         "NH2" => "Nsp2", # Guanidinium Nitrogen

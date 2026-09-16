@@ -227,10 +227,10 @@ const SurfaceRacerResults = Dict{String,Float32}(
     @test s2 ≈ 5234.202 rtol = 1e-4
 
     s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:set1))
-    @test s1 ≈ 5260.748 rtol = 1e-4
+    @test s1 ≈ 5268.6494 rtol = 1e-4
 
     s3 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:set3))
-    @test s3 ≈ 5246.431 rtol = 1e-4
+    @test s3 ≈ 5241.985 rtol = 1e-4
 
     @test_throws "radii_set parameter must be" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot; radii_set=:wrong)
 
@@ -293,8 +293,31 @@ end
     # transfer free energies, computed exactly as Table 2 of Knowles et al. 2015
     # (10.1021/acs.biochem.5b00246) defines the "no conformational changes" ΔASA:
     # Δtfe = tfe(d1) + tfe(d2) - tfe(tetramer). These do NOT reproduce that paper's own
-    # predicted m-values (traced to structure-preparation details not fully identified);
-    # they are pinned here only to catch future regressions in this codebase.
+    # predicted m-values; they are pinned here only to catch future regressions in this
+    # codebase.
+    #
+    # The residual gap was tracked down (2026-09) by running SurfaceRacer 5.0 itself,
+    # locally, on this exact tetramer/dimer split with the "1 - Richards (1977)" radii
+    # option (ASA-only mode, 1.4 Å probe): tetramer = 34052.06 Å², each dimer = 19469.37
+    # Å², giving ΔASA = 2*19469.37 - 34052.06 = 4886.7 Å² -- matching the paper's own
+    # Table S5 value (4885 Å²) essentially exactly. So neither the dimer/tetramer split
+    # used here nor the source structure is at fault. Two distinct causes were found for
+    # why this package's own (dot-based) SASA doesn't reproduce that number:
+    #   1. Four atom types (ARG NE, ASN ND2, GLN NE2, PRO N) were assigned the wrong
+    #      Richards hybridization class relative to SurfaceRacer's own per-atom radius
+    #      table (extracted from its *.txt output); fixed in creamer.jl. This has no
+    #      effect on radii_set=:set2 (its NH4/NH3 radii are equal, 1.70 Å) or on
+    #      CreamerUnitedAtomRadii (Nsp2/Nsp3 share the same 1.64 Å radius there), but
+    #      does change results for radii_set=:set1/:set3.
+    #   2. The larger, still-open cause: SurfaceRacer explicitly computes "outside"
+    #      (solvent-connected) ASA as topologically distinct from interior-cavity ASA,
+    #      and reports dozens of cavities for this tetramer (76, in the run above).
+    #      `sasa_particles` here has no notion of bulk-solvent connectivity -- it is a
+    #      purely pairwise per-atom-per-dot occlusion test -- so it will count any
+    #      exposed-but-sealed-cavity dot as accessible. Consistent with this: the gap
+    #      shrinks for tighter radii sets (:set3, less atomic overlap => less interior
+    #      cavity volume, matches SurfaceRacer to <0.3%) and is insensitive to n_dots
+    #      (confirmed up to n_dots=60000), ruling out dot-density as the cause.
     targets = Dict(
         "tetraeg" => 0.19622135,
         "urea" => -0.45273495,
