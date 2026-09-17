@@ -10,7 +10,7 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 3.38.1-DEV
+Version 3.39.0
 --------------
 - ![FEATURE][badge-feature] Add `exclude_cavities` (and `cavity_dot_cutoff`) keyword to `sasa_particles`: optionally excludes surface dots that sit in a solvent-sealed interior cavity (not reachable from bulk solvent), reproducing the ASA convention used by SurfaceRacer (as opposed to the plain Shrake-Rupley default, shared with GROMACS's `gmx sasa` and VMD's `measure sasa`, which does not make this distinction). Implemented in the new `tools/sasa/cavity_exclusion.jl`, by reconstructing connectivity directly on the already-computed exposed-dot cloud (union-find + spatial hashing), not on a resampled voxel grid. Off by default for `sasa_particles` in general.
 - ![FIX][badge-fix] `MTRecord`'s `transfer_free_energy`/`mvalue`/`MTRecordDenaturedModel` now default to `radii_set=:set1` (Richards, 1977) and `exclude_cavities=true`, instead of `sasa_particles`'s own defaults (`:set2`, no cavity exclusion). This combination was found to much better reproduce Knowles et al. 2015's own Table 2 predictions (validated on the 3CNA tetramer/dimer benchmark for glycerol, tetraEG, urea, proline, and betaine); the previous default underpredicted these same *m*-values by 17-66%. Pass `radii_set=:set2, exclude_cavities=false` explicitly to recover the previous behavior.
