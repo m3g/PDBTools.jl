@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.39.1-DEV
+--------------
+
 Version 3.39.0
 --------------
 - ![FEATURE][badge-feature] Add `exclude_cavities` (and `cavity_dot_cutoff`) keyword to `sasa_particles`: optionally excludes surface dots that sit in a solvent-sealed interior cavity (not reachable from bulk solvent), reproducing the ASA convention used by SurfaceRacer (as opposed to the plain Shrake-Rupley default, shared with GROMACS's `gmx sasa` and VMD's `measure sasa`, which does not make this distinction). Implemented in the new `tools/sasa/cavity_exclusion.jl`, by reconstructing connectivity directly on the already-computed exposed-dot cloud (union-find + spatial hashing), not on a resampled voxel grid. Off by default for `sasa_particles` in general.
