@@ -2,7 +2,7 @@
 CollapsedDocStrings = true
 ```
 
-# Solvent Accessible Surface Area (SASA)
+# [Solvent Accessible Surface Area (SASA)](@id sasa)
 
 These functions are used to compute the solvent accessible surface area (SASA) of structures or parts of a structure. They provide a very fast implementation of the [Shake-Rupley](https://doi.org/10.1016/0022-2836(73)90011-9) method, using a Fibonacci lattice to construct the grid points.
 
@@ -157,5 +157,92 @@ This parameterization reproduces the SASA calculations of
 [SurfaceRacer](https://doi.org/10.1002/prot.10250) (Tsodikov,
 Record & Sergeev) with a mean absolute error of about 2%.
 
+## Excluding solvent-sealed cavities
+
+### The problem
+
+`sasa_particles` implements the [Shrake-Rupley](https://doi.org/10.1016/0022-2836(73)90011-9)
+algorithm: for each atom, a set of points ("dots") is placed on a sphere of radius `atom_radius +
+probe_radius`, and a dot counts toward that atom's SASA if it is not covered by any *other single
+atom's* inflated sphere. This is a purely local, pairwise test -- the same category of algorithm
+used by, e.g., GROMACS's `gmx sasa` (an Eisenhaber et al. 1995 "double cubic lattice" variant of
+Shrake-Rupley) and VMD's `measure sasa` -- and it has no notion of whether a dot that survives it
+is actually connected to bulk solvent by some continuous path, or whether it instead sits on the
+wall of a fully sealed interior cavity. For most protein structures the resulting error is small
+(a fraction of a percent to a couple of percent of the total SASA), because most proteins don't
+have much topologically sealed interior void space, but it is not zero, and it is exactly the
+distinction that some reference programs -- notably
+[SurfaceRacer](https://doi.org/10.1002/prot.10250) -- do make (they compute "outside", i.e.
+solvent-connected, ASA as topologically distinct from interior-cavity ASA, and exclude the
+latter).
+
+### The algorithm
+
+`sasa_particles(...; exclude_cavities=true)` adds exactly that distinction, as a post-processing
+step on top of the ordinary Shrake-Rupley result. It works directly on the dots the pairwise test
+already found exposed -- not on a separate, discretized voxel/grid representation of the
+structure (an earlier version of this feature did use a voxel grid; it was abandoned because it
+was both less accurate and far more sensitive to its own tuning parameters, for reasons described
+in `cavity_exclusion.jl`'s module docstring):
+
+1. **Collect** every exposed dot of every atom into a single point cloud, in absolute (not
+   atom-relative) coordinates.
+2. **Connect** two dots, via a [union-find](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
+   structure, whenever they are within `cavity_dot_cutoff` of each other in 3D space. This
+   reconstructs the adjacency of the real, continuous molecular surface directly from the already-
+   computed dot cloud, rather than from a resampled grid.
+3. **Seed** an "exterior" component with the (up to six) dots that individually maximize or
+   minimize each Cartesian coordinate (x, y, z) of the whole structure. Each of these is, by
+   construction, on the true convex, solvent-exposed exterior of the structure; using six
+   independent seeds (rather than a single one) protects against any one of them landing, by
+   coincidence, in a small disconnected sliver.
+4. **Exclude** any exposed dot whose connected component does not contain one of these seeds --
+   i.e., any dot that is only reachable from other exposed dots that are themselves sealed off
+   from the true exterior.
+
+The figure below sketches the mechanism on a cross-section of a ring of atoms sealing a small
+central cavity. Both the outer surface and the cavity wall carry exposed dots after step 1
+("Collect"), indistinguishable from each other; step 2 ("Connect") reconstructs two disconnected
+rings, since the gap across the cavity is wider than `cavity_dot_cutoff`; step 3/4 ("Seed" /
+"Exclude") keep only the ring reachable from a seed and clear the other:
+
+![Cavity dot exclusion algorithm](./assets/cavity_exclusion.svg)
+
+This only ever *removes* area that the plain pairwise test already counted; it never adds any,
+and it has no notion of periodic boundary conditions (`exclude_cavities=true` together with a
+non-`nothing` `unitcell` raises an error).
+
+`cavity_dot_cutoff` defaults to twice the estimated nearest-neighbor spacing between dots on the
+largest inflated atom sphere present (which depends on `n_dots` and the atom radii/probe radius in
+use), but the result is essentially insensitive to the exact multiple over a wide range: on the
+3CNA tetramer/dimer benchmark used in this package's tests, cutoffs from 0.6 to 1.3 Å (for the
+default `n_dots=512`) all agree to better than 0.01%. This robustness is the main advantage over
+the abandoned voxel-grid approach, whose result changed non-monotonically -- and sometimes
+drastically -- with its own tuning parameters (see `cavity_exclusion.jl` for the full comparison).
+
+```@example sasa
+dimer = read_pdb(PDBTools.DIMERPDB)
+sasa(sasa_particles(dimer))                            # default: no cavity exclusion
+```
+```@example sasa
+sasa(sasa_particles(dimer; exclude_cavities=true))     # with cavity exclusion
+```
+
+### Scope and limitations
+
+This is a compatibility feature for reproducing SurfaceRacer's specific ASA convention -- not a
+general correctness fix, and not a claim that the plain Shrake-Rupley default is "wrong" (it
+isn't; it's the same convention used by GROMACS and VMD). It matters here because it is the
+convention some transfer-model parameterizations (see the [Record model](@ref record_model)) were
+calibrated against. Two caveats worth keeping in mind:
+
+- It is an approximation, not a bit-for-bit reproduction of SurfaceRacer's own exact analytical
+  algorithm. On the 3CNA benchmark, it recovers the *difference* between two structures' SASA
+  (the quantity that enters an *m*-value) to within about 1% of SurfaceRacer's own number, but
+  individual absolute SASA totals can still be off by a percent or two.
+- Genuinely small compounds (individual amino acids, short peptides, sugars, and similar) have
+  essentially no topologically sealed interior void space to begin with, so `exclude_cavities`
+  has little to no effect on them; the correction only becomes appreciable for folded domains and,
+  especially, for buried protein-protein or subunit-subunit interfaces.
 
 

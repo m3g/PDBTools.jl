@@ -600,20 +600,45 @@ end
     m_tfe = tfe_d.tot - tfe_n.tot
     @test c_rec_mjc ≈ m_tfe
 
-    # Test path of TFE from SASA
+    # Test path of TFE from SASA (must match MTRecord's own defaults: :set1, cavities excluded)
     tfe = transfer_free_energy(MJC, "urea"; model=MTRecord)
-    tfe_sasa = transfer_free_energy(sasa_particles(RichardsUnitedAtomRadii, MJC), "urea"; model=MTRecord)
+    tfe_sasa = transfer_free_energy(
+        sasa_particles(RichardsUnitedAtomRadii, MJC; radii_set=:set1, exclude_cavities=true), "urea"; model=MTRecord,
+    )
     @test tfe.tot ≈ tfe_sasa.tot
+
+    # exclude_cavities must actually take effect for non-MTRecord models too, through the
+    # generic transfer_free_energy(atoms, cosolvent; model=...) dispatcher -- this used to
+    # be silently ignored for every model except MTRecord. MJC/RN2 are too small to have
+    # much cavity content (see cavity_exclusion.jl's tests for why size/packing, not just
+    # atom count, is what matters), so this needs a structure where the correction is
+    # known to be non-negligible: the 3CNA tetramer.
+    cna = wget("3CNA", "protein"; assembly=1)
+    t_default = transfer_free_energy(cna, "tmao") # model=AutonBolen (CreamerUnitedAtomRadii)
+    t_excl = transfer_free_energy(cna, "tmao"; exclude_cavities=true)
+    @test t_default.tot != t_excl.tot
+    @test t_excl.tot ≈ transfer_free_energy(
+        sasa_particles(CreamerUnitedAtomRadii, select(cna, isprotein); exclude_cavities=true), "tmao",
+    ).tot
+
+    # radii_set is meaningless outside model=MTRecord and must error, not silently do nothing.
+    @test_throws "only meaningful for model=MTRecord" transfer_free_energy(cna, "tmao"; radii_set=:set1)
+
+    # CreamerDenaturedModel must also accept exclude_cavities/cavity_dot_cutoff, and they
+    # must actually change its output (default is false, unlike MTRecordDenaturedModel).
+    cm_default = CreamerDenaturedModel(cna)
+    cm_excl = CreamerDenaturedModel(cna; exclude_cavities=true)
+    @test mvalue(cm_default, "tmao").tot != mvalue(cm_excl, "tmao").tot
 
     # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
     # urea-only), so these are regression checks against the model's own output, not
     # literature-validated targets.
     rec_m = MTRecordDenaturedModel(RN2)
     c_rec = mvalue(rec_m, "betaine").tot
-    @test c_rec ≈ 0.9574 rtol = 0.05
+    @test c_rec ≈ 1.8838 rtol = 0.05
     rec_m = MTRecordDenaturedModel(MJC)
     c_rec = mvalue(rec_m, "betaine").tot
-    @test c_rec ≈ 0.4556 rtol = 0.05
+    @test c_rec ≈ 0.7359 rtol = 0.05
 
     # Tests for arithmetic operations on TFEs
     tfe_n = transfer_free_energy(MJC, "urea"; model=MTRecord)
@@ -784,22 +809,22 @@ end
     ce = record_type_contributions(m.sasa_ext)
 
     native_targets = Dict(
-        :aliphatic_carbon => 2259.0735,
-        :aromatic_carbon => 213.92944,
-        :hydroxyl_oxygen => 246.68571,
-        :amide_oxygen => 667.8986,
-        :carboxylate_oxygen => 316.15024,
-        :amide_nitrogen => 376.91205,
-        :cationic_nitrogen => 477.86224,
+        :aliphatic_carbon => 2226.8647,
+        :aromatic_carbon => 194.8244,
+        :hydroxyl_oxygen => 288.92834,
+        :amide_oxygen => 694.578,
+        :carboxylate_oxygen => 338.9293,
+        :amide_nitrogen => 333.7488,
+        :cationic_nitrogen => 509.8633,
     )
     ext_targets = Dict(
-        :aliphatic_carbon => 4847.526,
-        :aromatic_carbon => 446.02045,
-        :hydroxyl_oxygen => 326.15622,
-        :amide_oxygen => 1114.7037,
-        :carboxylate_oxygen => 351.94083,
-        :amide_nitrogen => 580.22754,
-        :cationic_nitrogen => 585.4166,
+        :aliphatic_carbon => 4934.8916,
+        :aromatic_carbon => 413.707,
+        :hydroxyl_oxygen => 400.70032,
+        :amide_oxygen => 1185.8397,
+        :carboxylate_oxygen => 381.24387,
+        :amide_nitrogen => 475.50357,
+        :cationic_nitrogen => 639.1356,
     )
     for t in keys(native_targets)
         @test cn[t].area ≈ native_targets[t] rtol = 0.01
@@ -807,13 +832,13 @@ end
     end
 
     mvalue_targets = Dict(
-        "urea" => -0.56872404,
-        "tmao" => 3.554749,
-        "betaine" => 0.63385475,
-        "proline" => 0.87962806,
-        "trehalose" => 2.9595973,
-        "tetraeg" => -0.43776095,
-        "glycerol" => 0.3038363,
+        "urea" => -0.58481085,
+        "tmao" => 3.6786027,
+        "betaine" => 0.8174896,
+        "proline" => 0.9944722,
+        "trehalose" => 3.0833623,
+        "tetraeg" => -0.1776824,
+        "glycerol" => 0.38174033,
     )
     for (s, target) in mvalue_targets
         @test mvalue(m, s).tot ≈ target rtol = 0.01

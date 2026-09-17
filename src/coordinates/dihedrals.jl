@@ -7,7 +7,7 @@ Computes the dihedral angle given four atoms of type PDBTools.Atom.
 
 # Example
 
-```jldoctest
+```jldoctest; filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
 julia> using PDBTools
 
 julia> pdb = read_pdb(PDBTools.TESTPDB);

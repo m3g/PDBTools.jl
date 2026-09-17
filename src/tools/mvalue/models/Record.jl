@@ -303,10 +303,17 @@ first input variable of the `mvalue` function.
 Construction:
 
 ```
-MTRecordDenaturedModel(atoms::AbstractVector{<:Atom})
+MTRecordDenaturedModel(atoms::AbstractVector{<:Atom}; radii_set=:set1, exclude_cavities=true, cavity_dot_cutoff=nothing)
 ```
 
 builds the extended chain internally (via `extended_chain`) and computes both SASAs.
+
+`radii_set` and `exclude_cavities` (passed on to `sasa_particles(RichardsUnitedAtomRadii, ...)`
+for both the native and extended-chain SASA) default to `:set1` (Richards, 1977) and `true`:
+this is the combination found to best reproduce the ASA convention (SurfaceRacer, Tsodikov,
+Record & Sergeev, 2002) that the underlying `alpha_i` values were calibrated against — see
+richards.jl's tests for the validation. `cavity_dot_cutoff` is forwarded to
+`exclude_cavity_dots!` and only has an effect when `exclude_cavities=true`.
 
 Use the `MTRecordDenaturedModel` model as the first input argument of `mvalue`, for example:
 
@@ -330,10 +337,15 @@ struct MTRecordDenaturedModel{T1,T2,S1,S2}
     sasa_ext::S2
 end
 
-function MTRecordDenaturedModel(p::AbstractVector{<:Atom})
+function MTRecordDenaturedModel(
+    p::AbstractVector{<:Atom};
+    radii_set::Symbol=:set1,
+    exclude_cavities::Bool=true,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
+)
     p_ext = extended_chain(p)
-    sasa_native = sasa_particles(RichardsUnitedAtomRadii, p)
-    sasa_ext = sasa_particles(RichardsUnitedAtomRadii, p_ext)
+    sasa_native = sasa_particles(RichardsUnitedAtomRadii, p; radii_set, exclude_cavities, cavity_dot_cutoff)
+    sasa_ext = sasa_particles(RichardsUnitedAtomRadii, p_ext; radii_set, exclude_cavities, cavity_dot_cutoff)
     return MTRecordDenaturedModel(p, p_ext, sasa_native, sasa_ext)
 end
 
@@ -388,6 +400,21 @@ surface-type model and atom-resolved SASAs.
 The optional `temperature` keyword (in K, default `298.15`) is forwarded to
 `model_combination_rule`; see its docstring for which cosolvents it affects.
 
+`radii_set` (default `:set1`, Richards 1977) and `exclude_cavities` (default `true`) are
+forwarded to `sasa_particles(RichardsUnitedAtomRadii, ...)`; this combination was found
+to best reproduce the ASA convention (SurfaceRacer, Tsodikov, Record & Sergeev, 2002)
+that the underlying `alpha_i` values were calibrated against -- see richards.jl's tests
+for the validation. `cavity_dot_cutoff` is forwarded to `exclude_cavity_dots!` and only
+has an effect when `exclude_cavities=true`.
+
+`exclude_cavities=true` is not supported together with periodic boundary conditions
+(`unitcell`); if `unitcell` is given and `exclude_cavities` is left at its default, it is
+silently set to `false` instead (with a one-time warning) rather than erroring, since the
+combination of "periodic structure" and "default keywords" is a common, legitimate case
+(e.g. transfer free energies along an MD trajectory). Pass `exclude_cavities=true`
+explicitly together with a `unitcell` to get the (currently unsupported) error instead of
+this silent fallback.
+
 """
 function transfer_free_energy(
     ::Type{MTRecord},
@@ -399,8 +426,23 @@ function transfer_free_energy(
     parallel::Bool=true,
     unitcell=nothing,
     temperature::Real=_record_default_T,
+    radii_set::Symbol=:set1,
+    exclude_cavities::Union{Nothing,Bool}=nothing,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 ) where {F1<:Function,F2<:Function}
-    sasa_ats = sasa_particles(RichardsUnitedAtomRadii, atoms; unitcell)
+    if isnothing(exclude_cavities)
+        exclude_cavities = isnothing(unitcell)
+        if !exclude_cavities
+            @warn """\n
+                exclude_cavities defaults to true for MTRecord, but is not supported
+                together with periodic boundary conditions (unitcell); disabling it for
+                this call. Pass exclude_cavities=false explicitly to silence this
+                warning.
+
+            """ maxlog = 1
+        end
+    end
+    sasa_ats = sasa_particles(RichardsUnitedAtomRadii, atoms; unitcell, radii_set, exclude_cavities, cavity_dot_cutoff)
     return transfer_free_energy(
         MTRecord,
         sasa_ats,

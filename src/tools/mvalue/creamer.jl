@@ -455,6 +455,14 @@ The optional `sasa_parameterization` keyword defines which denatured SASA parame
 be used, with the published Creamer SASAs (`:original` - default) or
 the recomputed parameters based on the CATH S20 classification (`:cath_s20`).
 
+The optional `exclude_cavities` (default `false`) and `cavity_dot_cutoff` keywords are forwarded
+to the `sasa_particles(CreamerUnitedAtomRadii, ...)` call used to compute the native structure's
+SASA; see [Excluding solvent-sealed cavities](@ref). Unlike `MTRecordDenaturedModel`,
+`exclude_cavities` defaults to `false` here: this model's denatured-state reference is Creamer's
+own parametric per-residue table, not a second computed SASA, so there is no equivalent
+SurfaceRacer-reproduction validation for this combination -- it is exposed for the user to control
+and experiment with, not defaulted to `true`.
+
 """
 struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
     atoms::T
@@ -462,7 +470,12 @@ struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
     n_protein_atoms::Int
     sasa_atoms::S
     sasa_parameterization::Symbol
-    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int; sasa_parameterization=:original)
+    function CreamerDenaturedModel(
+        atoms::AbstractVector{<:Atom}, type::Int;
+        sasa_parameterization=:original,
+        exclude_cavities::Bool=false,
+        cavity_dot_cutoff::Union{Nothing,Real}=nothing,
+    )
         if !(type in (1,2,3))
             throw(ArgumentError("""\n
                 Type of Creamer denaturation model must be either:
@@ -474,15 +487,17 @@ struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
         end
         _sasa_parameterization(sasa_parameterization) # validates; throws if invalid
         protein_atoms = select(atoms, isprotein)
-        sasa_at = sasa_particles(CreamerUnitedAtomRadii, protein_atoms)
+        sasa_at = sasa_particles(CreamerUnitedAtomRadii, protein_atoms; exclude_cavities, cavity_dot_cutoff)
         return new{typeof(atoms), typeof(sasa_at)}(atoms, type, length(protein_atoms), sasa_at, sasa_parameterization)
     end
 end
 function CreamerDenaturedModel(
     atoms::AbstractVector{<:Atom};
-    sasa_parameterization=:original
+    sasa_parameterization=:original,
+    exclude_cavities::Bool=false,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 )
-    return CreamerDenaturedModel(atoms, 2; sasa_parameterization)
+    return CreamerDenaturedModel(atoms, 2; sasa_parameterization, exclude_cavities, cavity_dot_cutoff)
 end
 function Base.show(io::IO, m::CreamerDenaturedModel)
     t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal"
