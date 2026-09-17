@@ -40,6 +40,39 @@ As with the other models, the result is split into backbone and side-chain contr
 obtained by summing the atom-resolved surface-type contributions of backbone and side-chain atoms,
 respectively.
 
+### ASA convention: `radii_set` and `exclude_cavities`
+
+Under the hood, `MTRecord` computes ASA with `sasa_particles(RichardsUnitedAtomRadii, ...)` (see
+[SASA](@ref sasa) and, for the cavity-exclusion algorithm specifically, [Excluding solvent-sealed
+cavities](@ref)). Both `transfer_free_energy(..., model=MTRecord)` and `MTRecordDenaturedModel`
+expose the underlying `radii_set` and `exclude_cavities` (and `cavity_dot_cutoff`) keywords, and
+default them to `radii_set=:set1` (Richards, 1977) and `exclude_cavities=true`:
+
+```@example mvalue
+tfe_default = transfer_free_energy(native_state, "urea"; model=MTRecord)
+tfe_legacy  = transfer_free_energy(native_state, "urea"; model=MTRecord, radii_set=:set2, exclude_cavities=false)
+(tfe_default.tot, tfe_legacy.tot)
+```
+
+This default combination was chosen empirically, not on general SASA-correctness grounds: the
+`alpha_i` values of this model were calibrated using
+[SurfaceRacer](https://doi.org/10.1002/prot.10250) with its "Richards (1977)" radii option (this
+package's `:set1`; the SurfaceRacer SI of Guinn et al. 2011, the source of the urea/betaine
+`alpha_i` values, states this explicitly), and SurfaceRacer's own ASA excludes solvent-sealed
+cavities. On a validation benchmark (the concanavalin A tetramer dissociating into two dimers, PDB
+3CNA, compared against Knowles et al. 2015's own reported predictions for glycerol and tetraEG,
+and against Guinn-convention `alpha_i` predictions for urea/proline/betaine), the
+`radii_set=:set2, exclude_cavities=false` combination that used to be the implicit default
+underpredicted every one of these five solutes' *m*-values by 17-66%; `radii_set=:set1,
+exclude_cavities=true` gets four of the five within about 1-2% of target, and the fifth (tetraEG,
+whose *m*-value is an unusually sensitive small residual of large offsetting surface-type
+contributions) within about 6%. Neither change alone accounts for this: `:set1` alone and
+`exclude_cavities=true` alone each close only part of the gap; the combination is what matters.
+
+If you need the previous behavior for reproducibility (e.g., to compare against results computed
+before this default changed), pass `radii_set=:set2, exclude_cavities=false` explicitly, as shown
+above.
+
 ## Denaturation *m*-values
 
 Unlike the other transfer models, which pair a native structure with a *parametric* estimate of the

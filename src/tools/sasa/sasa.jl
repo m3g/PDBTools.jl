@@ -161,8 +161,22 @@ in the structure.
   Higher values lead to more accurate but slower calculations.
 - `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
   the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
-- `parallel::Bool=true`: Control if the computation runs in parallel (requires 
+- `parallel::Bool=true`: Control if the computation runs in parallel (requires
   running Julia with multiple threads).
+- `exclude_cavities::Bool=false`: If `true`, additionally exclude from the SASA any
+  surface dot that, although not covered by any single neighboring atom (the default,
+  purely pairwise test), is not connected -- via a chain of other exposed dots -- to
+  the structure's exterior, i.e., sits inside a solvent-sealed interior cavity. This
+  reproduces the convention used by SurfaceRacer (Tsodikov, Record & Sergeev, 2002), as
+  opposed to the plain Shrake-Rupley-family default (shared with, e.g., GROMACS's
+  `gmx sasa` and VMD's `measure sasa`), which does not attempt this distinction. See
+  `PDBTools.exclude_cavity_dots!` for the algorithm. Not compatible with `unitcell`
+  (periodic boundary conditions).
+- `cavity_dot_cutoff::Union{Nothing,Real}=nothing`: Distance (Å) below which two exposed
+  dots are considered connected when detecting solvent-sealed cavities, if
+  `exclude_cavities=true`; defaults to twice the estimated nearest-neighbor spacing
+  between dots (see `PDBTools.exclude_cavity_dots!`). Only meaningful when
+  `exclude_cavities=true`.
 
 # Example
 
@@ -213,24 +227,28 @@ function sasa_particles(
     unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tuned for maximum performance.
+    exclude_cavities::Bool=false,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 ) where {N}
     # Without defining atom type functions, return default StandardAtomicRadii calculation
     if isnothing(atom_type) & isnothing(atom_radius_from_type)
         return sasa_particles(StandardAtomicRadii, atoms;
-            probe_radius, n_dots, output_dots, unitcell, parallel, N_SIMD
+            probe_radius, n_dots, output_dots, unitcell, parallel, N_SIMD,
+            exclude_cavities, cavity_dot_cutoff,
         )
     else
         # Return a CustomAtomicRadii structure
         atom_type = isnothing(atom_type) ? element : atom_type
-        atom_radius_from_type = isnothing(atom_radius_from_type) ? 
+        atom_radius_from_type = isnothing(atom_radius_from_type) ?
             type -> getproperty(elements[type], :vdw_radius) : atom_radius_from_type
         return _sasa_particles(CustomAtomicRadii, atoms;
             atom_type=atom_type,
             atom_radius_from_type=atom_radius_from_type,
-            probe_radius, n_dots, output_dots, unitcell, parallel, N_SIMD
+            probe_radius, n_dots, output_dots, unitcell, parallel, N_SIMD,
+            exclude_cavities, cavity_dot_cutoff,
         )
     end
-end 
+end
 
 #
 # Internal main sasa calculation interface 
@@ -246,8 +264,17 @@ function _sasa_particles(
     unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tuned for maximum performance.
+    exclude_cavities::Bool=false,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 ) where {N}
     probe_radius = Float32(probe_radius)
+    if exclude_cavities && !isnothing(unitcell)
+        throw(ArgumentError("""\n
+            exclude_cavities=true is not currently supported together with periodic
+            boundary conditions (unitcell).
+
+        """))
+    end
 
     # Unique list of atom types
     atom_types = atom_type.(unique(atom_type, atoms))
@@ -290,6 +317,8 @@ function _sasa_particles(
         atom_radius_from_type,
         probe_radius,
         N_SIMD,
+        exclude_cavities,
+        cavity_dot_cutoff,
     )
 end
 
@@ -304,6 +333,8 @@ function _compute_sasa_particles(
     atom_radius_from_type,
     probe_radius,
     N_SIMD,
+    exclude_cavities::Bool=false,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 )
 
     pairwise!(
@@ -313,6 +344,13 @@ function _compute_sasa_particles(
             ),
         system,
     )
+
+    if exclude_cavities
+        exclude_cavity_dots!(
+            system.surface_dots, atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius;
+            n_dots, cavity_dot_cutoff,
+        )
+    end
 
     s = zeros(Float32, length(atoms))
     dots = Vector{SVector{3,Float32}}[]

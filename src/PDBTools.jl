@@ -122,6 +122,7 @@ include("./coordinates/dihedrals.jl")
 # Miscellaneous tools
 include("./tools/tools.jl")
 include("./tools/sasa/sasa.jl")
+include("./tools/sasa/cavity_exclusion.jl")
 include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
 include("./tools/mvalue/mvalue.jl")

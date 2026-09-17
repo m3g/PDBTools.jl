@@ -16,7 +16,7 @@ scatter(::Ramachandran)
 
 The `dihedral` function computes the dihedral angle given four atoms:
 
-```jldoctest
+```jldoctest; filter = r"(\d*)\.(\d{4})\d+" => s"\1.\2***"
 julia> using PDBTools, Plots
 
 julia> prot = read_pdb(PDBTools.TESTPDB, "protein");

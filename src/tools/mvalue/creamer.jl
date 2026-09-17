@@ -108,10 +108,12 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
     ),
 
     # --- Proline (PRO) Side Chain (Cyclic with backbone N) ---
-    # The backbone N in Proline is an sp3 tertiary amine.
-    # N is often considered Nsp3 in Proline, unlike other residues.
+    # Despite being a tertiary amine, Proline's backbone N is still part of the
+    # peptide bond (amide) and is treated as Nsp2, like every other backbone N;
+    # this matches the atom-type assignment used by SurfaceRacer (Tsodikov et al.,
+    # 2002), the reference program for the Richards united-atom radii.
     "PRO" => OrderedDict(
-        "N" => "Nsp3", # Specific for Proline's N
+        "N" => "Nsp2", # Peptide-bond (amide) nitrogen, as for other backbone N atoms
         "CB" => "Csp3",
         "CG" => "Csp3",
         "CD" => "Csp3", # Delta Carbon
@@ -167,7 +169,8 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
         "CB" => "Csp3",
         "CG" => "Csp2", # Amide Carbon
         "OD1" => "Osp2", # Amide Oxygen
-        "ND2" => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+        "ND2" => "Nsp2", # Amide Nitrogen (planar, resonance-delocalized with the carbonyl;
+                          # matches SurfaceRacer's atom-type assignment)
     ),
 
     # --- Glutamic Acid (GLU) Side Chain ---
@@ -185,7 +188,8 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
         "CG" => "Csp3",
         "CD" => "Csp2", # Amide Carbon
         "OE1" => "Osp2", # Amide Oxygen
-        "NE2" => "Nsp3", # Amide Nitrogen (can be Nsp2 in some contexts, but Nsp3 is better for simple type)
+        "NE2" => "Nsp2", # Amide Nitrogen (planar, resonance-delocalized with the carbonyl;
+                          # matches SurfaceRacer's atom-type assignment)
     ),
 
     # --- Lysine (LYS) Side Chain (Like your example) ---
@@ -202,7 +206,10 @@ const PDB_ATOM_HYBRIDIZATION = OrderedDict{StringType,OrderedDict{StringType,Str
         "CB" => "Csp3",
         "CG" => "Csp3",
         "CD" => "Csp3",
-        "NE" => "Nsp2", # Epsilon Nitrogen (Part of the delocalized system)
+        "NE" => "Nsp3", # Epsilon Nitrogen: despite being part of the delocalized
+                        # guanidinium system, SurfaceRacer's atom-type assignment
+                        # (the reference program for the Richards united-atom radii)
+                        # groups it with the larger Nsp3 radius, unlike NH1/NH2.
         "CZ" => "Csp2", # Guanidinium Carbon
         "NH1" => "Nsp2", # Guanidinium Nitrogen
         "NH2" => "Nsp2", # Guanidinium Nitrogen
@@ -448,6 +455,14 @@ The optional `sasa_parameterization` keyword defines which denatured SASA parame
 be used, with the published Creamer SASAs (`:original` - default) or
 the recomputed parameters based on the CATH S20 classification (`:cath_s20`).
 
+The optional `exclude_cavities` (default `false`) and `cavity_dot_cutoff` keywords are forwarded
+to the `sasa_particles(CreamerUnitedAtomRadii, ...)` call used to compute the native structure's
+SASA; see [Excluding solvent-sealed cavities](@ref). Unlike `MTRecordDenaturedModel`,
+`exclude_cavities` defaults to `false` here: this model's denatured-state reference is Creamer's
+own parametric per-residue table, not a second computed SASA, so there is no equivalent
+SurfaceRacer-reproduction validation for this combination -- it is exposed for the user to control
+and experiment with, not defaulted to `true`.
+
 """
 struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
     atoms::T
@@ -455,7 +470,12 @@ struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
     n_protein_atoms::Int
     sasa_atoms::S
     sasa_parameterization::Symbol
-    function CreamerDenaturedModel(atoms::AbstractVector{<:Atom}, type::Int; sasa_parameterization=:original)
+    function CreamerDenaturedModel(
+        atoms::AbstractVector{<:Atom}, type::Int;
+        sasa_parameterization=:original,
+        exclude_cavities::Bool=false,
+        cavity_dot_cutoff::Union{Nothing,Real}=nothing,
+    )
         if !(type in (1,2,3))
             throw(ArgumentError("""\n
                 Type of Creamer denaturation model must be either:
@@ -467,15 +487,17 @@ struct CreamerDenaturedModel{T<:AbstractVector{<:Atom}, S}
         end
         _sasa_parameterization(sasa_parameterization) # validates; throws if invalid
         protein_atoms = select(atoms, isprotein)
-        sasa_at = sasa_particles(CreamerUnitedAtomRadii, protein_atoms)
+        sasa_at = sasa_particles(CreamerUnitedAtomRadii, protein_atoms; exclude_cavities, cavity_dot_cutoff)
         return new{typeof(atoms), typeof(sasa_at)}(atoms, type, length(protein_atoms), sasa_at, sasa_parameterization)
     end
 end
 function CreamerDenaturedModel(
     atoms::AbstractVector{<:Atom};
-    sasa_parameterization=:original
+    sasa_parameterization=:original,
+    exclude_cavities::Bool=false,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 )
-    return CreamerDenaturedModel(atoms, 2; sasa_parameterization)
+    return CreamerDenaturedModel(atoms, 2; sasa_parameterization, exclude_cavities, cavity_dot_cutoff)
 end
 function Base.show(io::IO, m::CreamerDenaturedModel)
     t = m.type == 1 ? "minimal" : m.type == 2 ? "mean" : "maximal"

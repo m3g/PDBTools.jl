@@ -112,6 +112,14 @@ $(_available_cosolvents())
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
 - `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
   the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
+- `exclude_cavities::Union{Nothing,Bool}=nothing`: forwarded to `sasa_particles`; excludes
+  surface dots that sit in a solvent-sealed interior cavity (see [Excluding solvent-sealed
+  cavities](@ref)). Defaults to `true` for `model=MTRecord` and to `false` for every other
+  model (not validated for those).
+- `cavity_dot_cutoff::Union{Nothing,Real}=nothing`: forwarded to `sasa_particles`; only has
+  an effect when `exclude_cavities=true`.
+- `radii_set::Union{Nothing,Symbol}=nothing`: only meaningful for `model=MTRecord` (defaults
+  to `:set1` there); passing it for any other model throws an `ArgumentError`.
 
 # Returns
 
@@ -148,19 +156,29 @@ function transfer_free_energy(
     sidechain::F2=issidechain,
     parallel::Bool=true,
     unitcell=nothing,
+    radii_set::Union{Nothing,Symbol}=nothing,
+    exclude_cavities::Union{Nothing,Bool}=nothing,
+    cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 ) where {F1<:Function,F2<:Function}
-    sasa_ats = sasa_particles(_radii_of_model(model), atoms; unitcell)
     if model == MTRecord
+        # Delegate entirely to the MTRecord-specific method: it is the one that knows
+        # the model's own defaults (radii_set=:set1, exclude_cavities=true) and how to
+        # handle exclude_cavities together with unitcell; duplicating that logic here
+        # would risk the two entry points silently drifting apart.
         return transfer_free_energy(
-            MTRecord,
-            sasa_ats,
-            cosolvent;
-            backbone,
-            sel,
-            sidechain,
-            parallel,
+            MTRecord, atoms, cosolvent;
+            backbone, sel, sidechain, parallel, unitcell,
+            radii_set=something(radii_set, :set1),
+            exclude_cavities, cavity_dot_cutoff,
         )
     else
+        if !isnothing(radii_set)
+            throw(ArgumentError("radii_set is only meaningful for model=MTRecord (got model=$model)."))
+        end
+        sasa_ats = sasa_particles(
+            _radii_of_model(model), atoms;
+            unitcell, exclude_cavities=something(exclude_cavities, false), cavity_dot_cutoff,
+        )
         return transfer_free_energy(
             sasa_ats, cosolvent;
             model, backbone, sel, sidechain, parallel
