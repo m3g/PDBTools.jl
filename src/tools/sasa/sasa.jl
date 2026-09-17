@@ -319,6 +319,7 @@ function _sasa_particles(
         N_SIMD,
         exclude_cavities,
         cavity_dot_cutoff,
+        parallel,
     )
 end
 
@@ -335,6 +336,7 @@ function _compute_sasa_particles(
     N_SIMD,
     exclude_cavities::Bool=false,
     cavity_dot_cutoff::Union{Nothing,Real}=nothing,
+    parallel::Bool=true,
 )
 
     pairwise!(
@@ -348,7 +350,7 @@ function _compute_sasa_particles(
     if exclude_cavities
         exclude_cavity_dots!(
             system.surface_dots, atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius;
-            n_dots, cavity_dot_cutoff,
+            n_dots, cavity_dot_cutoff, parallel,
         )
     end
 

@@ -99,6 +99,150 @@ function _cavity_dot_spacing(atoms, atom_type::Function, atom_radius_from_type::
 end
 
 #=
+    _collect_exposed_dot_positions(surface_dots, atoms, dot_cache, atom_type)
+
+Collects the (already atom-atom-pairwise-tested) exposed dots of every atom into one
+point cloud, in absolute coordinates, together with back-references to the owning
+(atom, dot) index. Split out of `exclude_cavity_dots!` as its own function -- rather
+than inlined as its first phase -- purely as a compiler-performance function barrier:
+kept together with the (much larger, closure-heavy) connectivity phase below in a
+single function, this collection loop measured ~15x slower and allocated ~100x more
+than it does on its own, apparently because the combined function was too large for
+Julia/LLVM's escape analysis to prove any of the closures in the connectivity phase
+non-escaping. Splitting the two phases at a function boundary restores that.
+=#
+function _collect_exposed_dot_positions(surface_dots, atoms, dot_cache, atom_type::Function)
+    positions = SVector{3,Float32}[]
+    owner_atom = Int[]
+    owner_dot = Int[]
+    for i in eachindex(atoms)
+        at = atoms[i]
+        atom_pos = SVector{3,Float32}(at.x, at.y, at.z)
+        dc = dot_cache[atom_type(at)]
+        exposed_i = surface_dots[i].exposed
+        for idot in eachindex(exposed_i)
+            exposed_i[idot] || continue
+            push!(positions, atom_pos + SVector{3,Float32}(dc.x[idot], dc.y[idot], dc.z[idot]))
+            push!(owner_atom, i)
+            push!(owner_dot, idot)
+        end
+    end
+    return positions, owner_atom, owner_dot
+end
+
+#=
+    _CavityPairs
+
+Per-thread output accumulator for the `pairwise!` neighbor search in
+`_exclude_disconnected_dots!`: just the pairs of exposed-dot indices found within
+`cutoff` of each other. Implements the `CellListMap` output protocol
+(`copy_output`/`reset_output!`/`reducer`, the same one `AtomDotMatrix` in sasa.jl uses)
+so the search itself can run multi-threaded; the union-find merge of the collected
+pairs is then done serially in `_exclude_disconnected_dots!`, since union-find over a
+shared `parent` array is not safely parallelizable across threads the way independent
+per-pair accumulation is.
+=#
+struct _CavityPairs
+    pairs::Vector{Tuple{Int,Int}}
+end
+CellListMap.copy_output(p::_CavityPairs) = _CavityPairs(copy(p.pairs))
+function CellListMap.reset_output!(p::_CavityPairs)
+    empty!(p.pairs)
+    return p
+end
+function CellListMap.reducer(x::_CavityPairs, y::_CavityPairs)
+    append!(x.pairs, y.pairs)
+    return x
+end
+_collect_cavity_pair!(pair, pairs::_CavityPairs) = (push!(pairs.pairs, (pair.i, pair.j)); pairs)
+
+#=
+    _find_cavity_pairs(positions, cutoff; parallel=true)
+
+Returns every pair of indices into `positions` that are within `cutoff` of each other,
+via `CellListMap.pairwise!` -- the same infrastructure `sasa_particles` uses for the
+atom-atom dot-occlusion test -- rather than a hand-rolled `Dict`-based spatial hash: on
+the 3CNA benchmark this cut the search from ~11.5 ms to ~1.7-4 ms (parallel/serial) for
+~23k exposed dots, since CellListMap's cell list avoids per-lookup tuple hashing and
+(when `parallel=true`) threads the search -- worthwhile here since this runs once per
+frame of an MD trajectory. Kept as its own function (rather than inlined into
+`_exclude_disconnected_dots!` alongside the union-find below) for the same
+compiler-performance reason documented on `_collect_exposed_dot_positions`: combined
+into one function, the two allocated ~65x more and ran ~1.4x slower, apparently for the
+same reason -- too large a function for escape analysis to prove the union-find
+closures non-escaping.
+=#
+function _find_cavity_pairs(positions::Vector{SVector{3,Float32}}, cutoff::Float32; parallel::Bool=true)
+    system = ParticleSystem(
+        xpositions=positions,
+        unitcell=nothing,
+        cutoff=cutoff,
+        output=_CavityPairs(Tuple{Int,Int}[]),
+        output_name=:pairs,
+        parallel=parallel,
+    )
+    pairwise!((pair, pairs) -> _collect_cavity_pair!(pair, pairs), system)
+    return system.pairs.pairs
+end
+
+#=
+    _connected_components(n, pairs)
+
+Plain union-find over `1:n`, unioning each `(i, j)` in `pairs`: returns a `Vector{Int}`
+mapping each index to its (fully path-compressed) component root. Kept as its own
+function for the same compiler-performance reason documented on `_find_cavity_pairs`.
+=#
+function _connected_components(n::Integer, pairs::Vector{Tuple{Int,Int}})
+    parent = collect(1:n)
+    function _find(x)
+        while parent[x] != x
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        end
+        return x
+    end
+    function _unite!(x, y)
+        rx, ry = _find(x), _find(y)
+        rx != ry && (parent[rx] = ry)
+        return nothing
+    end
+    for (i, j) in pairs
+        _unite!(i, j)
+    end
+    for i in 1:n
+        parent[i] = _find(i)
+    end
+    return parent
+end
+
+#=
+    _exclude_disconnected_dots!(surface_dots, positions, owner_atom, owner_dot, cutoff; parallel=true)
+
+Given the exposed-dot point cloud collected by `_collect_exposed_dot_positions`, clears
+every dot (via `surface_dots[owner_atom[i]].exposed[owner_dot[i]] = false`) that is not
+connected -- via a chain of other exposed dots no farther than `cutoff` apart -- to one
+of the structure's extreme (guaranteed-exterior) dots. Mutates `surface_dots` in place
+and also returns it. Kept as its own function for the same compiler-performance reason
+documented on `_collect_exposed_dot_positions`.
+=#
+function _exclude_disconnected_dots!(surface_dots, positions, owner_atom, owner_dot, cutoff::Float32; parallel::Bool=true)
+    n = length(positions)
+    n == 0 && return surface_dots
+
+    pairs = _find_cavity_pairs(positions, cutoff; parallel)
+    component = _connected_components(n, pairs)
+
+    exterior_roots = Set(component[i] for i in _cavity_seed_indices(positions))
+
+    for i in 1:n
+        if component[i] ∉ exterior_roots
+            surface_dots[owner_atom[i]].exposed[owner_dot[i]] = false
+        end
+    end
+    return surface_dots
+end
+
+#=
     exclude_cavity_dots!(surface_dots, atoms, dot_cache, atom_type, atom_radius_from_type, probe_radius; n_dots, cavity_dot_cutoff=nothing)
 
 Given the `surface_dots` output of the pairwise dot-occlusion test already run by
@@ -123,6 +267,7 @@ function exclude_cavity_dots!(
     probe_radius::Real;
     n_dots::Integer,
     cavity_dot_cutoff::Union{Nothing,Real}=nothing,
+    parallel::Bool=true,
 )
     cutoff = Float32(isnothing(cavity_dot_cutoff) ?
         2 * _cavity_dot_spacing(atoms, atom_type, atom_radius_from_type, probe_radius, n_dots) :
@@ -130,77 +275,8 @@ function exclude_cavity_dots!(
     )
     cutoff > 0 || throw(ArgumentError("cavity_dot_cutoff must be positive, got $cutoff."))
 
-    # Collect exposed dots (absolute positions) with back-references to (atom, dot) index.
-    positions = SVector{3,Float32}[]
-    owner_atom = Int[]
-    owner_dot = Int[]
-    for i in eachindex(atoms)
-        at = atoms[i]
-        atom_pos = SVector{3,Float32}(at.x, at.y, at.z)
-        dc = dot_cache[atom_type(at)]
-        exposed_i = surface_dots[i].exposed
-        for idot in eachindex(exposed_i)
-            exposed_i[idot] || continue
-            push!(positions, atom_pos + SVector{3,Float32}(dc.x[idot], dc.y[idot], dc.z[idot]))
-            push!(owner_atom, i)
-            push!(owner_dot, idot)
-        end
-    end
-    n = length(positions)
-    n == 0 && return surface_dots
-
-    # Spatial hash (bucket size = cutoff) for O(1)-amortized neighbor candidates.
-    xmin = minimum(p[1] for p in positions)
-    ymin = minimum(p[2] for p in positions)
-    zmin = minimum(p[3] for p in positions)
-    cellof(p) = (
-        floor(Int, (p[1] - xmin) / cutoff),
-        floor(Int, (p[2] - ymin) / cutoff),
-        floor(Int, (p[3] - zmin) / cutoff),
-    )
-    buckets = Dict{NTuple{3,Int},Vector{Int}}()
-    for i in 1:n
-        push!(get!(buckets, cellof(positions[i]), Int[]), i)
-    end
-
-    # Union-find over dot indices.
-    parent = collect(1:n)
-    function _find(x)
-        while parent[x] != x
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        end
-        return x
-    end
-    function _unite!(x, y)
-        rx, ry = _find(x), _find(y)
-        rx != ry && (parent[rx] = ry)
-        return nothing
-    end
-
-    cutoff2 = cutoff^2
-    for i in 1:n
-        ci, cj, ck = cellof(positions[i])
-        for dk in -1:1, dj in -1:1, di in -1:1
-            key = (ci + di, cj + dj, ck + dk)
-            haskey(buckets, key) || continue
-            for j in buckets[key]
-                j <= i && continue
-                if sum(abs2, positions[i] - positions[j]) <= cutoff2
-                    _unite!(i, j)
-                end
-            end
-        end
-    end
-
-    exterior_roots = Set(_find(i) for i in _cavity_seed_indices(positions))
-
-    for i in 1:n
-        if _find(i) ∉ exterior_roots
-            surface_dots[owner_atom[i]].exposed[owner_dot[i]] = false
-        end
-    end
-    return surface_dots
+    positions, owner_atom, owner_dot = _collect_exposed_dot_positions(surface_dots, atoms, dot_cache, atom_type)
+    return _exclude_disconnected_dots!(surface_dots, positions, owner_atom, owner_dot, cutoff; parallel)
 end
 
 @testitem "exclude_cavities: opt-in, off by default" begin
