@@ -1282,7 +1282,7 @@ $(document).ready(function () {
   // causing the header to be hidden under the fixed top menu.
   if (location.hash) {
     var target = document.getElementById(
-      decodeURIComponent(location.hash.substring(1))
+      decodeURIComponent(location.hash.substring(1)),
     );
     if (target) target.scrollIntoView();
   }
