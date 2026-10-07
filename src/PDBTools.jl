@@ -40,6 +40,7 @@ export element, mass, element_name, element_symbol, element_symbol_string, eleme
 export formula, stoichiometry
 export Sequence
 export select_with_vmd
+export visualize
 
 # Tools
 export center_of_mass
@@ -127,6 +128,7 @@ include("./tools/hydrogen_bonds.jl")
 include("./tools/read_unitcell.jl")
 include("./tools/mvalue/mvalue.jl")
 include("./tools/secondary_structure.jl")
+include("./tools/visualize.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
