@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 3.39.2-DEV
 --------------
+- ![FEATURE][badge-feature] Visualization of structures with 3DMol.js.
 
 Version 3.39.1
 --------------
