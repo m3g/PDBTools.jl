@@ -324,6 +324,72 @@ function save(filename::AbstractString, v::StructureView)
     return filename
 end
 
+"""
+    open_browser(view::StructureView; file=tempname() * ".html")
+
+Save the interactive structure view to an HTML `file` and open it in the default web browser.
+Returns the name of the file. The browser command can be set with the `BROWSER` environment variable.
+
+In the Julia REPL, the views are opened in the browser automatically when displayed.
+
+"""
+function open_browser(v::StructureView; file::AbstractString=tempname() * ".html")
+    save(file, v)
+    cmd = _browser_command(file)
+    if isnothing(cmd)
+        @warn "No graphical display found to open the browser. Open the view file manually: $file"
+        return file
+    end
+    try
+        run(pipeline(cmd; stdin=devnull, stdout=devnull, stderr=devnull); wait=false)
+    catch err
+        err isa Base.IOError || rethrow()
+        @warn "Could not open the browser with `$cmd`. Open the view file manually: $file"
+    end
+    return file
+end
+
+function _browser_command(file)
+    browser = get(ENV, "BROWSER", "")
+    !isempty(browser) && return `$(Base.shell_split(browser)) $file`
+    Sys.isapple() && return `open $file`
+    Sys.iswindows() && return `cmd /c start "" $file`
+    # Linux and other Unix systems: no browser without a graphical session (e.g. SSH)
+    if isempty(get(ENV, "DISPLAY", "")) && isempty(get(ENV, "WAYLAND_DISPLAY", ""))
+        return nothing
+    end
+    return `xdg-open $file`
+end
+
+@testitem "open_browser" begin
+    using PDBTools
+    v = visualize(read_pdb(PDBTools.SMALLPDB))
+    if !Sys.iswindows()
+        file = withenv("BROWSER" => "true") do
+            open_browser(v)
+        end
+        @test read(file, String) == v.html
+        file = tempname() * ".html"
+        @test withenv(() -> open_browser(v; file), "BROWSER" => "true") == file
+        # browser command not found
+        @test_logs (:warn, r"Could not open the browser") withenv("BROWSER" => "not_a_browser_command_xyz") do
+            open_browser(v)
+        end
+    end
+    @test PDBTools._browser_command("a.html") isa Union{Nothing,Cmd}
+    # REPL display opens the browser
+    import REPL
+    @test !isnothing(Base.get_extension(PDBTools, :REPLDisplay))
+    if !Sys.iswindows()
+        out = IOBuffer()
+        d = REPL.REPLDisplay(REPL.BasicREPL(REPL.Terminals.TTYTerminal("dumb", stdin, out, stderr)))
+        withenv(() -> display(d, v), "BROWSER" => "true")
+        @test occursin("Opened in the browser", String(take!(out)))
+    end
+    @test withenv(() -> PDBTools._browser_command("a.html"), "BROWSER" => "firefox --new-window") == 
+        `firefox --new-window a.html`
+end
+
 @testitem "visualize" begin
     using PDBTools
     atoms = read_pdb(PDBTools.TESTPDB)

@@ -6,8 +6,8 @@ CollapsedDocStrings = true
 
 The `visualize` function returns an interactive 3D view of a structure, rendered with 
 [3Dmol.js](https://3dmol.csb.pitt.edu). The view is displayed in environments that render HTML: the 
-VS Code plot pane, Pluto and Jupyter notebooks, and Documenter pages (like this one). In the REPL, 
-save the view to an HTML file with `save("view.html", view)` and open it in a web browser.
+VS Code plot pane, Pluto and Jupyter notebooks, and Documenter pages (like this one). In the Julia REPL, the view is opened in the default web browser. 
+From scripts, use `open_browser(view)`, or save the view to an HTML file with `save("view.html", view)`.
 
 The secondary structure shown in the cartoon representation is computed by 3Dmol.js. The 3Dmol.js 
 library is loaded from a CDN, so an internet connection is required to display the views.
@@ -16,6 +16,7 @@ library is loaded from a CDN, so an internet connection is required to display t
 visualize
 PDBTools.StructureView
 save(::AbstractString, ::PDBTools.StructureView)
+open_browser
 ```
 
 ## Examples

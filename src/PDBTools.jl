@@ -40,7 +40,7 @@ export element, mass, element_name, element_symbol, element_symbol_string, eleme
 export formula, stoichiometry
 export Sequence
 export select_with_vmd
-export visualize
+export visualize, open_browser
 
 # Tools
 export center_of_mass
