@@ -15,7 +15,9 @@ Volumetric data can be read from and written to OpenDX (`.dx`) files with
 julia> using PDBTools
 
 julia> v = VolumetricData(zeros(10, 20, 30); origin=[0.0, 0.0, 0.0], step=0.5)
-PDBTools.VolumetricData: 10×20×30 grid, origin = [0.0, 0.0, 0.0], step = [0.5, 0.5, 0.5]
+PDBTools.VolumetricData: 10×20×30 grid 
+    origin = [0.0, 0.0, 0.0]
+    step = [0.5, 0.5, 0.5]
     values from 0.0 to 0.0
 ```
 
@@ -35,7 +37,9 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", v::VolumetricData)
     print(io, chomp("""
-    PDBTools.VolumetricData: $(join(size(v.data), "×")) grid, origin = $(Vector(v.origin)), step = $(Vector(v.step))
+    PDBTools.VolumetricData: $(join(size(v.data), "×")) 
+        grid, origin = $(Vector(v.origin)) 
+        step = $(Vector(v.step))
         values from $(minimum(v.data)) to $(maximum(v.data))
     """))
 end
