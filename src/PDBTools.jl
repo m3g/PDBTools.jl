@@ -41,6 +41,7 @@ export formula, stoichiometry
 export Sequence
 export select_with_vmd
 export visualize, open_browser
+export VolumetricData, read_dx, write_dx
 
 # Tools
 export center_of_mass
@@ -109,6 +110,7 @@ include("./read_write/read_mmcif.jl")
 include("./read_write/write_mmcif.jl")
 include("./read_write/edit.jl")
 include("./read_write/wget.jl")
+include("./read_write/dx.jl")
 
 include("./properties/formula.jl")
 include("./properties/getseq.jl")
