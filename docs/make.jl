@@ -10,7 +10,8 @@ makedocs(
         PDBTools, 
         isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :Plotting) : PDBTools.Plotting
     ],
-    format = Documenter.HTML(top_menu = true),
+    # The visualization page embeds the structures in the HTML
+    format = Documenter.HTML(top_menu = true, size_threshold_ignore = ["visualization.md"]),
     sitename = "PDBTools.jl",
     pages = [
         "Home" => "index.md",
@@ -26,7 +27,8 @@ makedocs(
             "Secondary structures" => "secondary_structure.md",
             "Hydrogen bonds" => "hydrogen_bonds.md",
             "Solvent Accessible Area" => "sasa.md",
-            "Coordinate manipulations" => "coordinates.md"
+            "Coordinate manipulations" => "coordinates.md",
+            "Visualization" => "visualization.md",
         ],
         "Transfer Free Energy" => Any[
             "Transfer Free Energy" => "mvalues/mvalue.md",
