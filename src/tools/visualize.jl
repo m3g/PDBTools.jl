@@ -54,6 +54,27 @@ groups. The same atoms can be part of more than one group (for example, to show 
 side chains of some residues). `color_by` must have one value per atom of the group (before selection).
 The other keyword arguments (`hover` to `height`) apply to the whole view.
 
+# Isosurfaces of volumetric data
+
+Volumetric data (a [`VolumetricData`](@ref) object, as read from a `.dx` file with [`read_dx`](@ref)) can be shown 
+as isosurfaces, together with the groups of atoms. Each isosurface is given by a `Pair` of the volumetric 
+data and a `NamedTuple` with the options:
+
+- `isovalue::Real`: the value of the isosurface (required).
+- `color="orange"`: color of the isosurface.
+- `opacity::Real=1.0`: opacity of the isosurface, from `0` to `1`.
+
+For example, two isosurfaces of the same data, with different values:
+
+```julia
+density = read_dx("density.dx")
+visualize(
+    protein => (style=:cartoon,), 
+    density => (isovalue=0.1, color="orange", opacity=0.5), 
+    density => (isovalue=0.3, color="red"),
+)
+```
+
 # Keyword arguments
 
 Representation (per group):
@@ -109,6 +130,8 @@ end
 
 # Options that define the representation of each group of atoms
 const _GROUP_OPTIONS = (:selection, :style, :color, :color_by, :colormap, :color_range, :ligands, :water, :surface, :opacity)
+# Options of the isosurfaces of volumetric data
+const _ISOSURFACE_OPTIONS = (:isovalue, :color, :opacity)
 
 function visualize(
     atoms::AbstractVector{<:Atom},
@@ -131,17 +154,20 @@ end
 function visualize(
     atoms::AbstractVector{<:Atom},
     group::Pair{<:Union{AbstractString,Function},<:NamedTuple},
-    other_groups::Pair{<:Union{AbstractString,Function},<:NamedTuple}...;
+    other_groups::Pair{<:Union{AbstractString,Function,VolumetricData},<:NamedTuple}...;
     kargs...
 )
     groups = (group, other_groups...)
-    any(g -> haskey(last(g), :selection), groups) &&
+    any(g -> !(first(g) isa VolumetricData) && haskey(last(g), :selection), groups) &&
         throw(ArgumentError("groups defined by selections cannot have a `selection` option."))
-    return visualize((atoms => (; selection=first(g), last(g)...) for g in groups)...; kargs...)
+    return visualize(
+        (first(g) isa VolumetricData ? g : atoms => (; selection=first(g), last(g)...) for g in groups)...; 
+        kargs...
+    )
 end
 
 function visualize(
-    groups::Pair{<:AbstractVector{<:Atom},<:NamedTuple}...;
+    groups::Pair{<:Union{AbstractVector{<:Atom},VolumetricData},<:NamedTuple}...;
     hover::Bool=true,
     unitcell::Union{Nothing,AbstractVector{<:Real},AbstractMatrix{<:Real}}=nothing,
     unitcell_origin::Union{Symbol,AbstractVector{<:Real},Tuple{Vararg{Real,3}}}=(0, 0, 0),
@@ -151,12 +177,15 @@ function visualize(
     height::Union{Integer,AbstractString}=400,
 )
     isempty(groups) && throw(ArgumentError("No atoms to visualize."))
-    for (_, options) in groups
-        invalid = setdiff(keys(options), _GROUP_OPTIONS)
+    for (data, options) in groups
+        valid = data isa VolumetricData ? _ISOSURFACE_OPTIONS : _GROUP_OPTIONS
+        invalid = setdiff(keys(options), valid)
         isempty(invalid) || throw(ArgumentError("""\n
-            Invalid group options: $(join(invalid, ", ")).
-            Valid options are: $(join(_GROUP_OPTIONS, ", ")).
+            Invalid $(data isa VolumetricData ? "isosurface" : "group") options: $(join(invalid, ", ")).
+            Valid options are: $(join(valid, ", ")).
         """))
+        data isa VolumetricData && !haskey(options, :isovalue) &&
+            throw(ArgumentError("The `isovalue` option is required for isosurfaces of volumetric data."))
     end
     if !isnothing(unitcell) && !(size(unitcell) in ((3,), (3, 3)))
         throw(ArgumentError("unitcell must be a 3x3 matrix or a vector of length 3. Got size: $(size(unitcell))"))
@@ -175,12 +204,25 @@ function visualize(
     any(g -> get(last(g), :surface, false), groups) && println(js, "\$3Dmol.SurfaceWorker = undefined;")
     natoms = 0
     geometric_center = zeros(3)
-    for (imodel, (atoms, options)) in enumerate(groups)
+    imodel = 0
+    for (atoms, options) in groups
+        atoms isa VolumetricData && continue
+        imodel += 1
         n, center = _add_model!(js, imodel, atoms; options...)
         geometric_center .+= n .* center
         natoms += n
     end
-    geometric_center ./= natoms
+    geometric_center ./= max(natoms, 1)
+    # Each volumetric data is written once, even if it is used for more than one isosurface
+    volumes = IdDict{VolumetricData,String}()
+    for (volume, options) in groups
+        volume isa VolumetricData || continue
+        if !haskey(volumes, volume)
+            volumes[volume] = "volume$(length(volumes) + 1)"
+            println(js, "const $(volumes[volume]) = new \$3Dmol.VolumeData(", _js_str(sprint(_write_dx, volume)), ", 'dx');")
+        end
+        _add_isosurface!(js, volumes[volume]; options...)
+    end
     if !isnothing(unitcell)
         m = unitcell isa AbstractVector ? [unitcell[1] 0 0; 0 unitcell[2] 0; 0 0 unitcell[3]] : unitcell
         a, b, c = m[:, 1], m[:, 2], m[:, 3]
@@ -234,6 +276,12 @@ function visualize(
 end
 
 _js_str(x) = replace(JSON.json(x), "</" => "<\\/")
+
+function _add_isosurface!(js::IOBuffer, volume::AbstractString; isovalue::Real, color::AbstractString="orange", opacity::Real=1.0)
+    0 <= opacity <= 1 || throw(ArgumentError("opacity must be between 0 and 1. Got: $opacity"))
+    spec = Dict("isoval" => isovalue, "color" => color, "opacity" => opacity)
+    println(js, "viewer.addIsosurface($volume, ", _js_str(spec), ");")
+end
 
 # Writes the javascript code that adds the selected atoms as a new model to the view, with the
 # representation defined by the options. Returns the number of atoms and their geometric center.
@@ -602,6 +650,32 @@ end
     @test count("\"opacity\":0.3", v.html) == 5 # stick and sphere of polymer and other, and water lines
     @test_throws ArgumentError visualize(atoms; opacity=1.5)
     @test_throws ArgumentError visualize(protein => (opacity=-0.1,))
+    # isosurfaces of volumetric data
+    volume = VolumetricData(rand(5, 6, 7); origin=[0.0, 0.0, 0.0], step=1.0)
+    other_volume = VolumetricData(rand(2, 2, 2); origin=[1.0, 1.0, 1.0], step=0.5)
+    v = visualize(
+        protein => (;), 
+        volume => (isovalue=0.5,), 
+        volume => (isovalue=0.8, color="red", opacity=0.5),
+        other_volume => (isovalue=0.1,),
+    )
+    @test v.natoms == length(protein)
+    @test count("new \$3Dmol.VolumeData(", v.html) == 2 # each volume is written once
+    @test count("viewer.addIsosurface(volume1", v.html) == 2
+    @test count("viewer.addIsosurface(volume2", v.html) == 1
+    @test occursin("\"isoval\":0.8", v.html) && occursin("\"color\":\"red\"", v.html)
+    @test occursin("\"color\":\"orange\"", v.html)
+    @test occursin("gridpositions counts 5 6 7", v.html)
+    # volumes with groups defined by selections
+    v = visualize(atoms, "protein" => (;), volume => (isovalue=0.5,))
+    @test v.natoms == length(protein)
+    @test occursin("addIsosurface", v.html)
+    # only volumes
+    v = visualize(volume => (isovalue=0.5,))
+    @test v.natoms == 0
+    @test_throws ArgumentError visualize(protein => (;), volume => (color="red",))
+    @test_throws ArgumentError visualize(protein => (;), volume => (isovalue=0.5, style=:dots))
+    @test_throws ArgumentError visualize(protein => (;), volume => (isovalue=0.5, opacity=2.0))
     # display
     html = sprint(show, MIME"text/html"(), visualize(atoms, "protein"))
     @test startswith(html, "<iframe srcdoc=")

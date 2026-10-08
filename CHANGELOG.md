@@ -15,6 +15,8 @@ Version 3.41.0-DEV
 - ![FEATURE][badge-feature] `visualize` accepts groups of atoms with different representations, as `atoms => (style=..., color_by=..., ...)` pairs, or as `selection => (...)` pairs of a single vector of atoms. Each group is a separate model in the view.
 - ![FEATURE][badge-feature] `style=:dots` representation in `visualize` (small spheres, without bonds).
 - ![FEATURE][badge-feature] `opacity` option in `visualize`, to set the opacity of the atoms (of each group).
+- ![FEATURE][badge-feature] `VolumetricData` type, and `read_dx` and `write_dx` functions, to read and write volumetric data in the OpenDX (`.dx`) format.
+- ![FEATURE][badge-feature] `visualize` displays isosurfaces of volumetric data, given as `VolumetricData => (isovalue=..., color=..., opacity=...)` pairs.
 
 Version 3.40.0
 --------------
