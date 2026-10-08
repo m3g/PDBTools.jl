@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 3.41.1-DEV
+--------------
+
 Version 3.41.0
 --------------
 - ![FEATURE][badge-feature] `visualize` accepts groups of atoms with different representations, as `atoms => (style=..., color_by=..., ...)` pairs, or as `selection => (...)` pairs of a single vector of atoms. Each group is a separate model in the view.
