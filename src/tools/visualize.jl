@@ -20,6 +20,8 @@ end
 
 """
     visualize(atoms::AbstractVector{<:Atom}, [selection]; kargs...)
+    visualize(atoms::AbstractVector{<:Atom}, groups::Pair...; kargs...)
+    visualize(groups::Pair...; kargs...)
 
 Returns an interactive 3D view of the structure, rendered with [3Dmol.js](https://3dmol.csb.pitt.edu).
 The view is displayed in environments that render HTML (VS Code plot pane, Pluto, Jupyter notebooks,
@@ -31,9 +33,32 @@ The optional `selection` (a string or function) restricts the atoms shown.
 The atoms are classified as polymer (protein or nucleic acid), water, or other (ligands, ions, etc.).
 The main `style` applies to polymer atoms, and to ligands if `style` is not `:cartoon`.
 
+# Groups of atoms with different representations
+
+Several groups of atoms can be shown in the same view, each one with its own representation. Each
+group is given by a `Pair` of the atoms and a `NamedTuple` of the representation options (the
+keyword arguments `style` to `opacity` below, and `selection`):
+
+```julia
+visualize(protein => (style=:cartoon,), points => (style=:dots, color="red"))
+```
+
+Alternatively, the groups can be defined by selections of a single vector of atoms:
+
+```julia
+visualize(atoms, "protein" => (style=:cartoon,), "resname HEM" => (style=:sticks, color="green"))
+```
+
+Each group is a separate model in the view, thus bonds are not computed between atoms of different
+groups. The same atoms can be part of more than one group (for example, to show a cartoon and the
+side chains of some residues). `color_by` must have one value per atom of the group (before selection).
+The other keyword arguments (`hover` to `height`) apply to the whole view.
+
 # Keyword arguments
 
-- `style::Symbol=:cartoon`: `:cartoon`, `:sticks`, `:ballandstick`, `:spheres`, or `:lines`.
+Representation (per group):
+
+- `style::Symbol=:cartoon`: `:cartoon`, `:sticks`, `:ballandstick`, `:spheres`, `:dots` (small spheres), or `:lines`.
 - `color=:auto`: one of `:chain`, `:ss` (secondary structure), `:spectrum` (cartoon only), `:element`,
   `:residue`, or a color string (e.g. `"red"` or `"#ff0000"`). With `:auto`, cartoons are colored by
   chain (or by spectrum if there is a single chain), and other styles by element.
@@ -41,14 +66,19 @@ The main `style` applies to polymer atoms, and to ligands if `style` is not `:ca
   used to color the atoms with a gradient. Overrides `color`.
 - `colormap::Symbol=:rwb`: gradient used with `color_by`: `:rwb` (red-white-blue), `:roygb`, or `:sinebow`.
 - `color_range=nothing`: `(min, max)` limits of the gradient. Defaults to the range of `color_by`.
+  A reversed range, `(max, min)`, reverses the gradient.
 - `ligands::Bool=true`: show non-polymer, non-water atoms (as sticks if `style == :cartoon`).
 - `water=:auto`: show water molecules (`true` or `false`). With `:auto`, water is shown only if there
   is nothing else to show (no polymer or other molecules).
 - `surface::Bool=false`: add a transparent molecular surface for the polymer atoms.
+- `opacity::Real=1.0`: opacity of the atoms, from `0` (invisible) to `1` (opaque).
+
+View:
+
 - `hover::Bool=true`: show atom labels when the mouse is over the atoms.
-- `unitcell=nothing`: draw the edges of the periodic box. A 3x3 matrix with the lattice vectors 
+- `unitcell=nothing`: draw the edges of the periodic box. A 3x3 matrix with the lattice vectors
   as columns (as returned by [`read_unitcell`](@ref)), or a vector with the box sides, for orthorhombic boxes.
-- `unitcell_origin=(0, 0, 0)`: position of the origin (corner) of the box, or `:center` to center the box 
+- `unitcell_origin=(0, 0, 0)`: position of the origin (corner) of the box, or `:center` to center the box
   on the geometric center of the atoms.
 - `unitcell_color="gray"`: color of the box edges.
 - `background="white"`: background color.
@@ -63,6 +93,7 @@ visualize(atoms)
 visualize(atoms; style=:sticks, color=:residue)
 visualize(atoms; color_by=beta.(atoms), colormap=:roygb)
 v = visualize(atoms, "chain A"; surface=true)
+visualize(atoms, "all" => (style=:cartoon,), "resname ARG" => (style=:sticks,))
 visualize(read_pdb(PDBTools.TESTPBC); unitcell=read_unitcell(PDBTools.TESTPBC))
 save("view.html", v)
 ```
@@ -76,6 +107,9 @@ function visualize(
     visualize(atoms, parse_query(selection); kargs...)
 end
 
+# Options that define the representation of each group of atoms
+const _GROUP_OPTIONS = (:selection, :style, :color, :color_by, :colormap, :color_range, :ligands, :water, :surface, :opacity)
+
 function visualize(
     atoms::AbstractVector{<:Atom},
     selection_function::Function=all;
@@ -87,6 +121,27 @@ function visualize(
     ligands::Bool=true,
     water::Union{Bool,Symbol}=:auto,
     surface::Bool=false,
+    opacity::Real=1.0,
+    kargs...
+)
+    group = (; selection=selection_function, style, color, color_by, colormap, color_range, ligands, water, surface, opacity)
+    return visualize(atoms => group; kargs...)
+end
+
+function visualize(
+    atoms::AbstractVector{<:Atom},
+    group::Pair{<:Union{AbstractString,Function},<:NamedTuple},
+    other_groups::Pair{<:Union{AbstractString,Function},<:NamedTuple}...;
+    kargs...
+)
+    groups = (group, other_groups...)
+    any(g -> haskey(last(g), :selection), groups) &&
+        throw(ArgumentError("groups defined by selections cannot have a `selection` option."))
+    return visualize((atoms => (; selection=first(g), last(g)...) for g in groups)...; kargs...)
+end
+
+function visualize(
+    groups::Pair{<:AbstractVector{<:Atom},<:NamedTuple}...;
     hover::Bool=true,
     unitcell::Union{Nothing,AbstractVector{<:Real},AbstractMatrix{<:Real}}=nothing,
     unitcell_origin::Union{Symbol,AbstractVector{<:Real},Tuple{Vararg{Real,3}}}=(0, 0, 0),
@@ -95,10 +150,14 @@ function visualize(
     width::Union{Integer,AbstractString}="100%",
     height::Union{Integer,AbstractString}=400,
 )
-    style in (:cartoon, :sticks, :ballandstick, :spheres, :lines) ||
-        throw(ArgumentError("style must be one of :cartoon, :sticks, :ballandstick, :spheres, or :lines. Got: :$style"))
-    water isa Bool || water == :auto ||
-        throw(ArgumentError("water must be true, false, or :auto. Got: :$water"))
+    isempty(groups) && throw(ArgumentError("No atoms to visualize."))
+    for (_, options) in groups
+        invalid = setdiff(keys(options), _GROUP_OPTIONS)
+        isempty(invalid) || throw(ArgumentError("""\n
+            Invalid group options: $(join(invalid, ", ")).
+            Valid options are: $(join(_GROUP_OPTIONS, ", ")).
+        """))
+    end
     if !isnothing(unitcell) && !(size(unitcell) in ((3,), (3, 3)))
         throw(ArgumentError("unitcell must be a 3x3 matrix or a vector of length 3. Got size: $(size(unitcell))"))
     end
@@ -106,13 +165,105 @@ function visualize(
         throw(ArgumentError("unitcell_origin must be a vector of length 3 or :center. Got: :$unitcell_origin"))
     unitcell_origin isa AbstractVector && length(unitcell_origin) != 3 &&
         throw(ArgumentError("unitcell_origin must be a vector of length 3 or :center. Got length: $(length(unitcell_origin))"))
+    js = IOBuffer()
+    println(js, "const viewer = \$3Dmol.createViewer(document.getElementById('viewer'), {backgroundColor: ", _js_str(background), "});")
+    # group of each atom of a model (0: polymer, 1: other, 2: water), which is used in the 3Dmol.js
+    # selections through the atom index (atoms are kept in the same order)
+    println(js, "const inGroup = (model, groups, g) => ({model: model, predicate: (a) => groups.charCodeAt(a.index) === 48 + g});")
+    # Surfaces are computed synchronously, because the 3Dmol.js web workers may not run from
+    # file:// pages or from iframes embedded in notebooks or editors
+    any(g -> get(last(g), :surface, false), groups) && println(js, "\$3Dmol.SurfaceWorker = undefined;")
+    natoms = 0
+    geometric_center = zeros(3)
+    for (imodel, (atoms, options)) in enumerate(groups)
+        n, center = _add_model!(js, imodel, atoms; options...)
+        geometric_center .+= n .* center
+        natoms += n
+    end
+    geometric_center ./= natoms
+    if !isnothing(unitcell)
+        m = unitcell isa AbstractVector ? [unitcell[1] 0 0; 0 unitcell[2] 0; 0 0 unitcell[3]] : unitcell
+        a, b, c = m[:, 1], m[:, 2], m[:, 3]
+        origin = unitcell_origin == :center ? geometric_center - (a + b + c) / 2 : collect(unitcell_origin)
+        corner(i, j, k) = origin + i * a + j * b + k * c
+        xyz(v) = Dict("x" => v[1], "y" => v[2], "z" => v[3])
+        radius = max(0.05, 0.002 * maximum(norm, (a, b, c)))
+        # The 12 edges connect corners that differ in one lattice vector
+        for (i, j, k) in Iterators.product(0:1, 0:1, 0:1), (di, dj, dk) in ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+            (i + di > 1 || j + dj > 1 || k + dk > 1) && continue
+            edge = Dict(
+                "start" => xyz(corner(i, j, k)), "end" => xyz(corner(i + di, j + dj, k + dk)),
+                "radius" => radius, "color" => unitcell_color, "fromCap" => 1, "toCap" => 1,
+            )
+            println(js, "viewer.addCylinder(", _js_str(edge), ");")
+        end
+    end
+    if hover
+        println(js, """
+        viewer.setHoverable({}, true,
+            function (atom, viewer) {
+                if (!atom.label) {
+                    atom.label = viewer.addLabel(atom.resn + atom.resi + ":" + atom.chain + " " + atom.atom,
+                        {position: atom, backgroundColor: "black", backgroundOpacity: 0.7, fontColor: "white", fontSize: 12});
+                }
+            },
+            function (atom, viewer) {
+                if (atom.label) { viewer.removeLabel(atom.label); delete atom.label; }
+            });""")
+    end
+    println(js, "viewer.zoomTo();")
+    println(js, "viewer.render();")
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <title>PDBTools.jl - $natoms atoms</title>
+    <script src="$_3DMOL_URL"></script>
+    <style>html, body { margin: 0; height: 100%; overflow: hidden; } #viewer { position: relative; width: 100%; height: 100%; }</style>
+    </head>
+    <body>
+    <div id="viewer"></div>
+    <script>
+    $(String(take!(js)))</script>
+    </body>
+    </html>
+    """
+    _css_size(x) = x isa Integer ? "$(x)px" : String(x)
+    return StructureView(html, natoms, _css_size(width), _css_size(height))
+end
+
+_js_str(x) = replace(JSON.json(x), "</" => "<\\/")
+
+# Writes the javascript code that adds the selected atoms as a new model to the view, with the
+# representation defined by the options. Returns the number of atoms and their geometric center.
+function _add_model!(
+    js::IOBuffer,
+    imodel::Integer,
+    atoms::AbstractVector{<:Atom};
+    selection::Union{AbstractString,Function}=all,
+    style::Symbol=:cartoon,
+    color::Union{Symbol,AbstractString}=:auto,
+    color_by::Union{Nothing,AbstractVector{<:Real}}=nothing,
+    colormap::Symbol=:rwb,
+    color_range::Union{Nothing,Tuple{<:Real,<:Real}}=nothing,
+    ligands::Bool=true,
+    water::Union{Bool,Symbol}=:auto,
+    surface::Bool=false,
+    opacity::Real=1.0,
+)
+    selection_function = selection isa AbstractString ? parse_query(selection) : selection
+    0 <= opacity <= 1 || throw(ArgumentError("opacity must be between 0 and 1. Got: $opacity"))
+    style in (:cartoon, :sticks, :ballandstick, :spheres, :dots, :lines) ||
+        throw(ArgumentError("style must be one of :cartoon, :sticks, :ballandstick, :spheres, :dots, or :lines. Got: :$style"))
+    water isa Bool || water == :auto ||
+        throw(ArgumentError("water must be true, false, or :auto. Got: :$water"))
     colormap in (:rwb, :roygb, :sinebow) ||
         throw(ArgumentError("colormap must be one of :rwb, :roygb, or :sinebow. Got: :$colormap"))
     if !isnothing(color_by) && length(color_by) != length(atoms)
         throw(ArgumentError("color_by must have the same length as atoms ($(length(atoms))). Got: $(length(color_by))"))
     end
-    # mmCIF text of the selected atoms, and group of each atom (0: polymer, 1: other, 2: water), which is
-    # used in the 3Dmol.js selections through the atom index (atoms are kept in the same order)
+    # mmCIF text of the selected atoms, and group of each atom
     cif = IOBuffer()
     println(cif, "data_PDBTools")
     println(cif, "loop_")
@@ -187,6 +338,10 @@ function visualize(
             throw(ArgumentError("color must be :auto, :chain, :ss, :spectrum, :element, :residue, or a color string. Got: :$color"))
         end
     end
+    if opacity < 1
+        polymer_color = merge(polymer_color, Dict("opacity" => opacity))
+        other_color = merge(other_color, Dict("opacity" => opacity))
+    end
     _style(s, color) = if s == :cartoon
         Dict("cartoon" => color)
     elseif s == :sticks
@@ -195,6 +350,8 @@ function visualize(
         Dict("stick" => merge(Dict("radius" => 0.15), color), "sphere" => merge(Dict("scale" => 0.25), color))
     elseif s == :spheres
         Dict("sphere" => color)
+    elseif s == :dots
+        Dict("sphere" => merge(Dict("radius" => 0.2), color))
     elseif s == :lines
         Dict("line" => color)
     end
@@ -204,73 +361,18 @@ function visualize(
     # Water is shown as lines in the presence of other molecules, otherwise with the style of other molecules
     only_water = npolymer == 0 && (nother == 0 || !ligands)
     show_water = water == :auto ? only_water : water
-    water_style = only_water ? other_style : Dict("line" => Dict("colorscheme" => "default"))
-    js_str(x) = replace(JSON.json(x), "</" => "<\\/")
-    js = IOBuffer()
-    println(js, "const cif = ", js_str(String(take!(cif))), ";")
-    println(js, "const groups = ", js_str(String(take!(groups))), ";")
-    println(js, "const inGroup = (g) => ({predicate: (a) => groups.charCodeAt(a.index) === 48 + g});")
-    println(js, "const viewer = \$3Dmol.createViewer(document.getElementById('viewer'), {backgroundColor: ", js_str(background), "});")
-    println(js, "viewer.addModel(cif, 'cif');")
-    println(js, "viewer.setStyle({}, {});")
-    println(js, "viewer.setStyle(inGroup(0), ", js_str(polymer_style), ");")
-    ligands && println(js, "viewer.setStyle(inGroup(1), ", js_str(other_style), ");")
-    show_water && println(js, "viewer.setStyle(inGroup(2), ", js_str(water_style), ");")
-    # Surfaces are computed synchronously, because the 3Dmol.js web workers may not run from
-    # file:// pages or from iframes embedded in notebooks or editors
-    surface && println(js, "\$3Dmol.SurfaceWorker = undefined;")
-    surface && println(js, "viewer.addSurface(\$3Dmol.SurfaceType.SES, {opacity: 0.6, color: 'white'}, inGroup(0));")
-    if !isnothing(unitcell)
-        m = unitcell isa AbstractVector ? [unitcell[1] 0 0; 0 unitcell[2] 0; 0 0 unitcell[3]] : unitcell
-        a, b, c = m[:, 1], m[:, 2], m[:, 3]
-        origin = unitcell_origin == :center ? geometric_center - (a + b + c) / 2 : collect(unitcell_origin)
-        corner(i, j, k) = origin + i * a + j * b + k * c
-        xyz(v) = Dict("x" => v[1], "y" => v[2], "z" => v[3])
-        radius = max(0.05, 0.002 * maximum(norm, (a, b, c)))
-        # The 12 edges connect corners that differ in one lattice vector
-        for (i, j, k) in Iterators.product(0:1, 0:1, 0:1), (di, dj, dk) in ((1, 0, 0), (0, 1, 0), (0, 0, 1))
-            (i + di > 1 || j + dj > 1 || k + dk > 1) && continue
-            edge = Dict(
-                "start" => xyz(corner(i, j, k)), "end" => xyz(corner(i + di, j + dj, k + dk)),
-                "radius" => radius, "color" => unitcell_color, "fromCap" => 1, "toCap" => 1,
-            )
-            println(js, "viewer.addCylinder(", js_str(edge), ");")
-        end
-    end
-    if hover
-        println(js, """
-        viewer.setHoverable({}, true,
-            function (atom, viewer) {
-                if (!atom.label) {
-                    atom.label = viewer.addLabel(atom.resn + atom.resi + ":" + atom.chain + " " + atom.atom,
-                        {position: atom, backgroundColor: "black", backgroundOpacity: 0.7, fontColor: "white", fontSize: 12});
-                }
-            },
-            function (atom, viewer) {
-                if (atom.label) { viewer.removeLabel(atom.label); delete atom.label; }
-            });""")
-    end
-    println(js, "viewer.zoomTo();")
-    println(js, "viewer.render();")
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <meta charset="utf-8">
-    <title>PDBTools.jl - $natoms atoms</title>
-    <script src="$_3DMOL_URL"></script>
-    <style>html, body { margin: 0; height: 100%; overflow: hidden; } #viewer { position: relative; width: 100%; height: 100%; }</style>
-    </head>
-    <body>
-    <div id="viewer"></div>
-    <script>
-    $(String(take!(js)))</script>
-    </body>
-    </html>
-    """
-    _css_size(x) = x isa Integer ? "$(x)px" : String(x)
-    return StructureView(html, natoms, _css_size(width), _css_size(height))
+    water_style = only_water ? other_style : Dict("line" => merge(Dict("colorscheme" => "default"), opacity < 1 ? Dict("opacity" => opacity) : Dict()))
+    m, g = "m$imodel", "groups$imodel"
+    println(js, "const $g = ", _js_str(String(take!(groups))), ";")
+    println(js, "const $m = viewer.addModel(", _js_str(String(take!(cif))), ", 'cif');")
+    println(js, "viewer.setStyle({model: $m}, {});")
+    println(js, "viewer.setStyle(inGroup($m, $g, 0), ", _js_str(polymer_style), ");")
+    ligands && println(js, "viewer.setStyle(inGroup($m, $g, 1), ", _js_str(other_style), ");")
+    show_water && println(js, "viewer.setStyle(inGroup($m, $g, 2), ", _js_str(water_style), ");")
+    surface && println(js, "viewer.addSurface(\$3Dmol.SurfaceType.SES, {opacity: 0.6, color: 'white'}, inGroup($m, $g, 0));")
+    return natoms, geometric_center
 end
+
 
 # Values of the mmCIF atom_site loop: empty values are written as ".", and values
 # with spaces or quotes (e.g. primed nucleotide atom names) are quoted
@@ -399,7 +501,7 @@ end
     @test occursin("3Dmol", v.html)
     @test occursin("cartoon", v.html)
     # one group character per atom
-    m = match(r"const groups = \"([012]*)\"", v.html)
+    m = match(r"const groups1 = \"([012]*)\"", v.html)
     @test length(m[1]) == length(atoms)
     @test count(==('0'), m[1]) == count(isprotein, atoms)
     @test count(==('2'), m[1]) == count(iswater, atoms)
@@ -433,10 +535,10 @@ end
     @test_throws ArgumentError visualize(atoms; color_by=[1.0])
     @test_throws ArgumentError visualize(atoms, "name XXXX")
     # water is shown by default only if there is nothing else to show
-    @test !occursin("inGroup(2)", visualize(atoms).html)
-    @test occursin("inGroup(2), {\"stick\"", visualize(atoms, "water").html)
-    @test occursin("inGroup(2), {\"line\"", visualize(atoms; water=true).html)
-    @test !occursin("inGroup(2)", visualize(atoms, "water"; water=false).html)
+    @test !occursin("inGroup(m1, groups1, 2)", visualize(atoms).html)
+    @test occursin("inGroup(m1, groups1, 2), {\"stick\"", visualize(atoms, "water").html)
+    @test occursin("inGroup(m1, groups1, 2), {\"line\"", visualize(atoms; water=true).html)
+    @test !occursin("inGroup(m1, groups1, 2)", visualize(atoms, "water"; water=false).html)
     # unit cell
     v = visualize(atoms; unitcell=[10, 20, 30])
     @test count("addCylinder", v.html) == 12
@@ -454,8 +556,8 @@ end
     atoms_long_chain = read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)
     v = visualize(atoms_long_chain)
     @test v.natoms == length(atoms_long_chain)
-    @test occursin("inGroup(0), {\"stick\"", v.html) # single residue: no cartoon
-    @test occursin("inGroup(0), {\"cartoon\"", visualize(atoms, "protein").html)
+    @test occursin("inGroup(m1, groups1, 0), {\"stick\"", v.html) # single residue: no cartoon
+    @test occursin("inGroup(m1, groups1, 0), {\"cartoon\"", visualize(atoms, "protein").html)
     long_chain = first(filter(c -> length(c) > 1, chain.(atoms_long_chain)))
     @test occursin(" $long_chain ", v.html)
     @test PDBTools._cif_value("O5'") == "\"O5'\""
@@ -464,6 +566,42 @@ end
     @test PDBTools._cif_value("CA") == "CA"
     @test PDBTools._cif_element(Atom(name="CA", pdb_element="C")) == "C"
     @test PDBTools._cif_element(Atom(name="1XX", pdb_element="")) == "X"
+    # groups of atoms with different representations
+    protein = select(atoms, "protein")
+    ca = select(atoms, "name CA")
+    v = visualize(protein => (;), ca => (style=:dots, color_by=beta.(ca), color_range=(1, 0)))
+    @test v.natoms == length(protein) + length(ca)
+    @test occursin("const m2 = viewer.addModel", v.html)
+    @test !occursin("const m3", v.html)
+    @test occursin("inGroup(m1, groups1, 0), {\"cartoon\"", v.html)
+    @test occursin("inGroup(m2, groups2, 0), {\"sphere\":{\"colorscheme\"", v.html)
+    @test occursin("\"radius\":0.2", v.html)
+    m = match(r"const groups2 = \"([012]*)\"", v.html)
+    @test length(m[1]) == length(ca)
+    # groups defined by selections of the same atoms
+    v = visualize(atoms, "protein" => (;), "resname ARG" => (style=:sticks, surface=true); background="black")
+    @test v.natoms == length(protein) + count(sel"resname ARG", atoms)
+    @test occursin("inGroup(m2, groups2, 0), {\"stick\"", v.html)
+    @test occursin("addSurface(\$3Dmol.SurfaceType.SES, {opacity: 0.6, color: 'white'}, inGroup(m2, groups2, 0))", v.html)
+    @test count("SurfaceWorker = undefined", v.html) == 1
+    @test occursin("\"black\"", v.html)
+    v = visualize(atoms, (at -> name(at) == "CA") => (style=:spheres,))
+    @test v.natoms == length(ca)
+    @test visualize(protein => (selection="residue < 10",)).natoms == count(sel"residue < 10", protein)
+    @test_throws ArgumentError visualize(atoms, "protein" => (selection="water",))
+    @test_throws ArgumentError visualize(protein => (style=:dots, colour="red"))
+    @test_throws ArgumentError visualize(protein => (style=:ribbon,))
+    @test_throws ArgumentError visualize(protein => (;), ca => (color_by=[1.0],))
+    @test_throws ArgumentError visualize(protein => (selection="water",))
+    @test_throws ArgumentError visualize()
+    # opacity
+    @test !occursin("opacity\":", visualize(atoms).html)
+    v = visualize(protein => (;), ca => (style=:dots, opacity=0.5))
+    @test count("\"opacity\":0.5", v.html) == 2 # polymer and other styles of the second group
+    v = visualize(atoms; style=:ballandstick, opacity=0.3, water=true)
+    @test count("\"opacity\":0.3", v.html) == 5 # stick and sphere of polymer and other, and water lines
+    @test_throws ArgumentError visualize(atoms; opacity=1.5)
+    @test_throws ArgumentError visualize(protein => (opacity=-0.1,))
     # display
     html = sprint(show, MIME"text/html"(), visualize(atoms, "protein"))
     @test startswith(html, "<iframe srcdoc=")
