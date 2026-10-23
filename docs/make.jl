@@ -1,6 +1,9 @@
 using Documenter
 using Plots
 using PDBTools
+# Download the test files before the doctests, so that the download messages are not part of their output
+PDBTools.test_file("structure.pdb") # files of PDBToolsBase
+PDBTools.test_file("hbonds.pdb") # files of PDBTools
 ENV["GKSwstype"] = "100"
 ENV["LINES"] = 10
 ENV["COLUMNS"] = 120
