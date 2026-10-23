@@ -109,6 +109,18 @@ The `Structure` type was experimental in PDBTools 3.x, and was redesigned:
   the type of the underlying vector (thus, `Structure{Atom{Nothing}}` matches structures of 
   atoms without custom fields).
 
+## Removed legacy names
+
+The aliases kept for compatibility with older versions were removed:
+
+| Removed                            | Use instead                         |
+|:-----------------------------------|:------------------------------------|
+| `readPDB(file, ...)`               | [`read_pdb`](@ref)`(file, ...)`     |
+| `writePDB(atoms, file, ...)`       | [`write_pdb`](@ref)`(file, atoms, ...)` (note the order of the arguments) |
+| `coor(atoms)`                      | [`positions`](@ref)`(atoms)`        |
+| `coor(atom)`                       | [`position`](@ref)`(atom)`          |
+| `atomic_sasa(atoms, ...)`          | [`sasa_particles`](@ref)`(atoms, ...)` |
+
 ## Other changes
 
 - The constants with the paths of test files (`PDBTools.TESTPDB`, `PDBTools.SMALLPDB`, 

@@ -17,6 +17,8 @@ makedocs(
     # The core functions are defined in PDBToolsBase: the docstrings of the public names of 
     # both modules must be included in the manual.
     checkdocs = :public,
+    # Source links of the docstrings of PDBToolsBase
+    remotes = Dict(pkgdir(PDBTools.PDBToolsBase) => (Documenter.Remotes.GitHub("m3g", "PDBToolsBase.jl"), "main")),
     # The visualization page embeds the structures in the HTML
     format = Documenter.HTML(top_menu = true, size_threshold_ignore = ["visualization.md"]),
     sitename = "PDBTools.jl",

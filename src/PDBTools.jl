@@ -158,7 +158,6 @@ include("./tools/visualize.jl")
 include("./tools/custom_types.jl")
 
 # Legacy compatibility
-include("./package_internals/legacy.jl")
 
 # Precompilation
 include("./package_internals/precompile.jl")
