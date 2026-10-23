@@ -31,9 +31,3 @@ end
         ],),
     )
 end
-
-#@testitem "Doctests" begin
-#    using Documenter: doctest
-#    using PDBTools
-#    doctest(PDBTools)
-#end
