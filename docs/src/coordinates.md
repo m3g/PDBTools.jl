@@ -22,9 +22,9 @@ positions(::AbstractVector{<:Atom})
 ```
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> positions(atoms[1:2])
 2-element Vector{StaticArraysCore.SVector{3, Float32}}:
@@ -37,9 +37,9 @@ The `positions` function accepts selections:
 C``\alpha`` coordinates:
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> positions(atoms, "name CA")
 3-element Vector{StaticArraysCore.SVector{3, Float64}}:
@@ -67,7 +67,7 @@ The distance between atoms, or sets of atoms, can be computed with the `distance
 function returns the *minimum distance* between the atoms of the sets involved. For example:
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> model = wget("1BSX");
 
@@ -95,7 +95,7 @@ A function similar to the one above is `closest`, which returns the shortest dis
 but also the identity of the atom or pair of atoms that satisfy that shortest distance:
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> model = wget("1BSX");
 
@@ -125,9 +125,9 @@ closest
 Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> maxmin(atoms, "residue > 1")
  Minimum atom coordinates: xmin = [-6.974, -16.785, -10.863]
@@ -148,6 +148,23 @@ maxmin
 read_unitcell
 lattice_to_matrix
 matrix_to_lattice
+```
+
+## Periodic images
+
+```@docs
+PDBTools.wrap
+PDBTools.wrap_to_first
+```
+
+## Structural alignment
+
+```@docs
+PDBTools.align
+PDBTools.align!
+PDBTools.rmsd
+PDBTools.alignment_movements
+PDBTools.apply_alignment_transformation!
 ```
 
 

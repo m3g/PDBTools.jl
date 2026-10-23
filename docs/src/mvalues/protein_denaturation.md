@@ -14,8 +14,8 @@ The estimate of the m-value associated to protein denaturation (the change in tr
 Here, we compute the m-value estimates using the Creamer model, but first wrapping the atom array in the `CreamerDenaturedModel` type, which defines also the denaturation extent to be considered, by default, "mean":
 
 ```@example mvalue
-using PDBTools
-prot = read_pdb(PDBTools.TESTPDB, "protein")
+using PDBTools, LazyArtifacts
+prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 model = CreamerDenaturedModel(prot)
 ```
 A second argument of the constructor defines the extent to the "minimal", "mean", "maximal", as described in the docstring below. 

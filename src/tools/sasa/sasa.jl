@@ -17,9 +17,9 @@ struct SASA{RadiiType<:AtomicRadiiType,N,V}
 end
 Base.getindex(x::SASA, i::Integer) = x.sasa[i]
 Base.eachindex(x::SASA) = eachindex(x.sasa)
-function Base.show(io::IO, ::MIME"text/plain", s::SASA)
+function Base.show(io::IO, ::MIME"text/plain", s::SASA{RadiiType}) where {RadiiType}
     print(io, chomp("""
-    $(typeof(s))
+    SASA{$RadiiType}
         Number of particles: $(length(s.particles))
         Total SASA: $(sasa(s))
         Output of dots: $(isempty(s.dots) ? false : true) 
@@ -159,8 +159,8 @@ in the structure.
 - `probe_radius::Real=1.4f0`: The radius of the solvent probe in Angstroms.
 - `n_dots::Int=512`: The number of grid points along one axis for dot generation. 
   Higher values lead to more accurate but slower calculations.
-- `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
-  the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
+- `unitcell=false`: `false`: no periodic boundary conditions; `true`: use the unit cell of the [`Structure`](@ref);
+  or a [`UnitCell`](@ref).
 - `parallel::Bool=true`: Control if the computation runs in parallel (requires
   running Julia with multiple threads).
 - `exclude_cavities::Bool=false`: If `true`, additionally exclude from the SASA any
@@ -181,9 +181,9 @@ in the structure.
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
+julia> prot = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
 
 julia> at_sasa = sasa_particles(prot);
 
@@ -224,7 +224,7 @@ function sasa_particles(
     atom_type::Union{Nothing,Function}=nothing,
     atom_radius_from_type::Union{Nothing,Function}=nothing,
     output_dots::Bool=false,
-    unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tuned for maximum performance.
     exclude_cavities::Bool=false,
@@ -261,13 +261,14 @@ function _sasa_particles(
     atom_type::Function=element,
     atom_radius_from_type::Function=type -> getproperty(elements[type], :vdw_radius),
     output_dots::Bool=false,
-    unitcell::Union{AbstractVector,AbstractMatrix,Nothing}=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     parallel=true,
     N_SIMD::Val{N}=Val(16), # Size of SIMD blocks. Can be tuned for maximum performance.
     exclude_cavities::Bool=false,
     cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 ) where {N}
     probe_radius = Float32(probe_radius)
+    unitcell = _resolve_unitcell(atoms, unitcell)
     if exclude_cavities && !isnothing(unitcell)
         throw(ArgumentError("""\n
             exclude_cavities=true is not currently supported together with periodic
@@ -406,9 +407,9 @@ or with the object and a selection, given by a function or selection string.
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> prot = select(read_pdb(PDBTools.TESTPDB), "protein");
+julia> prot = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
 
 julia> at_sasa = sasa_particles(prot);
 
@@ -428,8 +429,8 @@ julia> sasa(at_sasa[1]) # single atom SASA
 """
 function sasa end
 sasa(p::SASA) = sum(i -> p[i], eachindex(p); init=0.f0)
-sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::Function) where {T,N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]); init=0.f0)
-sasa(p::SASA{T,N,<:AbstractVector{<:PDBTools.Atom}}, sel::AbstractString) where {T,N} = sasa(p, Select(sel))
+sasa(p::SASA{T,N,<:AbstractVector{<:Atom}}, sel::Function) where {T,N} = sum(p[i] for i in eachindex(p) if sel(p.particles[i]); init=0.f0)
+sasa(p::SASA{T,N,<:AbstractVector{<:Atom}}, sel::AbstractString) where {T,N} = sasa(p, Select(sel))
 
 #
 # Save and load SASA objects
@@ -550,9 +551,10 @@ function load(::Type{SASA}, filename::AbstractString)
 end
 
 @testitem "sasa" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     N = 10_030 # number of dot samples: not multiple of 16 to have a SIMD remaining
 
     # Compare with the output of VMD: the difference is that VMD uses a vdW radius for H 
@@ -575,10 +577,11 @@ end
     @test sasa(at_sasa, "residue 104") ≈ 122.50507354736328 rtol = 0.05
 
     # Test periodic boundary conditions
-    at_sasa_no_pbc = sasa_particles(read_pdb(PDBTools.TESTNOPBC, "protein"); n_dots=N)
-    uc = [107.845, 107.845, 107.845]
-    at_sasa_pbc = sasa_particles(read_pdb(PDBTools.TESTPBC, "protein"); unitcell=uc, n_dots=N)
+    at_sasa_no_pbc = sasa_particles(read_pdb(PDBTools.test_file("no_pbc.pdb"), "protein"); n_dots=N)
+    uc = UnitCell([107.845, 107.845, 107.845])
+    at_sasa_pbc = sasa_particles(read_pdb(PDBTools.test_file("pbc.pdb"), "protein"); unitcell=uc, n_dots=N)
     @test sasa(at_sasa_pbc) ≈ sasa(at_sasa_no_pbc)
+    @test sasa(sasa_particles(read_pdb(PDBTools.test_file("pbc.pdb"), "protein"); unitcell=true, n_dots=N)) ≈ sasa(at_sasa_pbc)
 
     # Compare with Gromacs - 2023.3 output
     # gmx sasa -s prot.pdb -o sasa_output.xvg -ndots 100000
@@ -646,7 +649,7 @@ end
 
     # Test show method
     @test parse_show(at_sasa; repl=Dict(r"PDBTools." => "")) ≈ """
-            SASA{StandardAtomicRadii, 3, Vector{Atom{Nothing}}}
+            SASA{StandardAtomicRadii}
                 Number of particles: 104
                 Total SASA: 5856.9966
                 Output of dots: true 

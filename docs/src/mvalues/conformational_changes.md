@@ -6,9 +6,9 @@ CollapsedDocStrings = true
 
 Consider these two states of a model protein, a native and a denatured (straight chain) state, obtained from  a simulation. Here the conformational change could be of any kind. We load the structures of the two states:
 ```@example mvalue
-using PDBTools
-native_state = read_pdb(PDBTools.MJC_NATIVE, "protein")
-desnat_state = read_pdb(PDBTools.MJC_DESNAT, "protein")
+using PDBTools, LazyArtifacts
+native_state = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
+desnat_state = read_pdb(PDBTools.test_file("1MJC_straight.pdb"), "protein")
 ```
 
 The denatured state has a greater surface area than the native state. Thus, cosolvents 

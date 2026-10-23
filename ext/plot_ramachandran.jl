@@ -15,9 +15,9 @@ All other arguments are default keywords of `Plots.scatter` and can be adjusted 
 # Example 
 
 ```jldoctest
-julia> using PDBTools, Plots
+julia> using PDBTools, Plots, LazyArtifacts
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> ram = Ramachandran(prot)
 Ramachandran data: phi, psi vectors with 102 angles.
@@ -57,11 +57,12 @@ function scatter(ram::Ramachandran;
 end
 
 @testitem "ramachandran plots" begin
+    using LazyArtifacts
     using PDBTools
     using Plots
     ENV["GKSwstype"] = "nul"
     tmpplot = tempname()*".png"
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     ram = Ramachandran(prot)
     plt = scatter(ram)
     savefig(plt, tmpplot)

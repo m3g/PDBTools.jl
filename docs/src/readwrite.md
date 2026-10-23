@@ -13,8 +13,8 @@ read_pdb
 To read a PDB or mmCIF file and return a vector of atoms of
 type `Atom`, do:
 ```@example read_write
-using PDBTools
-atoms = read_pdb(PDBTools.test_dir*"/structure.pdb")
+using PDBTools, LazyArtifacts
+atoms = read_pdb(PDBTools.test_file("structure.pdb"))
 ```
 
 The format is detected automatically, so the same function can be used for mmCIF files:
@@ -116,14 +116,14 @@ In the following example, we illustrate reading the `_atom_site.type_symbol` fie
 atom data structure:
 
 ```@example read_write
-atoms = read_pdb(PDBTools.test_dir*"/small.cif", "index <= 5");
+atoms = read_pdb(PDBTools.test_file("small.cif"), "index <= 5");
 name.(atoms)
 ```
 
 If, however, we attribute the `name` field to the `type_symbol` mmCIF field, which contains the element symbols, we get:
 
 ```@example read_write
-atoms = read_pdb(PDBTools.TESTCIF, "index <= 5"; 
+atoms = read_pdb(PDBTools.test_file("small.cif"), "index <= 5"; 
    field_assignment=Dict("type_symbol" => :name)
 )
 name.(atoms)
@@ -141,7 +141,7 @@ the string in an `IOBuffer`.
 
 The following `read` call returns the raw PDB file contents as a string:
 ```@example read_write
-pdbdata = read(PDBTools.test_dir*"/small.pdb", String);
+pdbdata = read(PDBTools.test_file("small.pdb"), String);
 ```
 This string can be passed to the `read_pdb` function wrapped in a `IOBuffer`:
 ```@example read_write
@@ -153,10 +153,10 @@ atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
 The `Atom` structure is mutable, meaning that the fields can be edited. For example:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.TESTPDB)
-   Vector{Atom{Nothing}} with 62026 atoms with fields:
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"))
+   Structure{Atom{Nothing}} with 62026 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        1    N     ALA     A        1        1   -9.229  -14.861   -5.481  0.00  0.00     1    PROT         1
        2  HT1     ALA     A        1        1  -10.048  -15.427   -5.569  0.00  0.00     1    PROT         2

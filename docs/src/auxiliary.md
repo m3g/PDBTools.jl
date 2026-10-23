@@ -8,9 +8,9 @@ CollapsedDocStrings = true
 
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> pdb = read_pdb(PDBTools.SMALLPDB);
+julia> pdb = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> getseq(pdb)
 3-element Vector{String}:
@@ -23,9 +23,9 @@ Use `getseq(atoms,code=2)` to get the sequence as three-letter residue codes, or
 full natural-aminoacid names, like "Alanine", "Proline", etc:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> pdb = read_pdb(PDBTools.SMALLPDB);
+julia> pdb = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> getseq(pdb; code=2)
 3-element Vector{String}:
@@ -51,7 +51,7 @@ Sequence
     ```jldoctest
     julia> using PDBTools
 
-    julia> atoms = read_pdb(PDBTools.SMALLPDB);
+    julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
     julia> for at in atoms
               if resname(at) == "ALA"
@@ -71,9 +71,9 @@ The `getseq` function can of course be used on an `Atom` list, accepts selection
 last argument, as well as the reading and writing functions:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> getseq(atoms, "residue > 1")
 2-element Vector{String}:
@@ -117,7 +117,7 @@ threeletter
 Here we illustrate how to plot the average temperature factor of each residue of a crystallographic model as function of the residues.
 
 ```julia-repl
-julia> using PDBTools, Plots
+julia> using PDBTools, Plots, LazyArtifacts
 
 julia> atoms = wget("1UBQ", "protein");
 
@@ -153,4 +153,24 @@ julia> residue_ticks(collect(eachresidue(atoms)); stride=10)
 
 ```@docs
 add_hydrogens!
+```
+
+## Shared function names
+
+PDBTools.jl is built on PDBToolsBase.jl, which defines the core data structures and the 
+function names shared by the packages of the ecosystem (MolSimToolkit.jl, ComplexMixtures.jl, 
+and others), which add methods to them.
+
+```@docs
+PDBTools.PDBToolsBase
+PDBTools.distances
+PDBTools.coordination_number
+```
+
+## Test files
+
+The examples of this documentation use test files, which are downloaded on the first use:
+
+```@docs
+PDBTools.test_file
 ```

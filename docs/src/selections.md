@@ -99,9 +99,9 @@ function can be used, by passing a `Select` object, or a regular
 function, to select the atoms:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue <= 3");
 
 julia> findall(Select("name CA"), atoms)
 3-element Vector{Int64}:
@@ -123,12 +123,12 @@ The `Select` constructor can be used to feed simple selection syntax entries to
 other Julia functions, such as `findfirst`, `findlast`, or `filter`:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue <= 3");
 
 julia> filter(Select("name CA"), atoms)
-   Vector{Atom{Nothing}} with 3 atoms with fields:
+   Structure{Atom{Nothing}} with 3 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
       15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
@@ -143,7 +143,7 @@ julia> findfirst(Select("beta = 0.00"), atoms)
     ```jldoctest
     julia> using PDBTools
 
-    julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
+    julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue <= 3");
 
     julia> name.(filter(sel"name CA", atoms))
     3-element Vector{InlineStrings.String15}:
@@ -189,6 +189,25 @@ input, and returns `true` or `false` depending on the conditions required for th
     `ishydrophobic`,
     `isnucleoside`,  `ispurine`,      `ispyrimidine`.
 
+```@docs
+isprotein
+isnucleoside
+isbackbone
+issidechain
+iswater
+isacidic
+isaliphatic
+isaromatic
+isbasic
+ischarged
+isneutral
+ishydrophobic
+ispolar
+isnonpolar
+ispurine
+ispyrimidine
+```
+
 ## Adding custom keywords and macro-keywords
 
 The selection syntax can be extended with user-defined keywords and macro-keywords.
@@ -222,7 +241,7 @@ a one-argument function that receives an `Atom` and returns the value.
 To register the new keyword, push it into `PDBTools.keywords`:
 
 ```julia
-using PDBTools
+using PDBTools, LazyArtifacts
 
 # Build a vector of atoms that carry a custom "charge" field
 atoms = read_pdb("file.pdb")
@@ -255,7 +274,7 @@ and returns a `Bool`.
 To register the new macro-keyword, push it into `PDBTools.macro_keywords`:
 
 ```julia
-using PDBTools
+using PDBTools, LazyArtifacts
 atoms = read_pdb("file.pdb")
 
 # Register a macro keyword that selects glycerol molecules
@@ -272,7 +291,7 @@ A common pattern is to attach per-atom numerical data as a custom field and then
 filter with a custom `Keyword`:
 
 ```julia
-using PDBTools
+using PDBTools, LazyArtifacts
 
 atoms = read_pdb("file.pdb")
 scores = rand(length(atoms)) # one score per atom
@@ -318,9 +337,9 @@ information.
 For example, here some atoms are selected from a previously loaded vector of atoms:
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> pdbfile = PDBTools.SMALLPDB
+julia> pdbfile = PDBTools.test_file("small.pdb")
 
 julia> atoms = read_pdb(pdbfile);
 

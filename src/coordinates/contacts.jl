@@ -38,8 +38,8 @@ struct ContactMap{T}
     matrix::SparseMatrixCSC{T}
     d::Float64
     gap::Int
-    residues1::Vector{PDBTools.Residue}
-    residues2::Vector{PDBTools.Residue}
+    residues1::Vector{Residue}
+    residues2::Vector{Residue}
 end
 Base.setindex!(map::ContactMap, value, i, j) = map.matrix[i, j] = value
 # Single element fetching
@@ -155,7 +155,7 @@ _err_same_type() = throw(ArgumentError("""\n
         atoms2::AbstractVector{<:PDBTools.Atom}; # optional for contacts between two structures
         dmax::Real=4.0,
         gap::Int=0, # only available if atoms2 is not provided
-        unitcell=nothing,
+        unitcell=false,
         discrete::Bool=true,
         positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
         parallel::Bool=false,
@@ -183,7 +183,8 @@ Returns the contact map as a `ContactMap` object.
 
 - `dmax::Real=4.0`: Threshold distance for a contact.
 - `gap::Int=0`: Gap between residues to calculate contacts.
-- `unitcell=nothing`: Unit cell dimensions for periodic boundary conditions.
+- `unitcell=false`: `false`: no periodic boundary conditions; `true`: use the unit cell of the [`Structure`](@ref);
+  or a [`UnitCell`](@ref).
 - `discrete::Bool=true`: If `true`, the matrix contains `Bool` values, where `true` 
   indicates a contact and `false` indicates no contact. 
   If `false`, the matrix contains distances between residues.
@@ -197,9 +198,9 @@ Returns the contact map as a `ContactMap` object.
 ## Contact map between residues in the same structure
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> ats = read_pdb(PDBTools.DIMERPDB);
+julia> ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 
 julia> cA = select(ats, "chain A");
 
@@ -215,9 +216,9 @@ julia> # using Plots; heatmap(map); # uncomment to plot the contact map
 ## Contact map between residues in two different structures
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> ats = read_pdb(PDBTools.DIMERPDB);
+julia> ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 
 julia> cA = select(ats, "chain A");
 
@@ -328,22 +329,22 @@ _combine(::Type{Bool}, x, y) = x | y
 _combine(::Type{<:Real}, x, y) = max(x, y)
 
 function contact_map(
-    atoms1::AbstractVector{<:PDBTools.Atom};
+    atoms1::AbstractVector{<:Atom};
     dmax::Real=4.0,
     gap::Int=0,
     discrete::Bool=true,
-    unitcell=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     positions::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
     parallel::Bool=false,
 )
     T = discrete ? Bool : typeof(atoms1[1].x)
-    residues = collect(PDBTools.eachresidue(atoms1))
+    residues = collect(eachresidue(atoms1))
     index_residue = assign_index_residue(atoms1, residues)
     map_matrix = MapMatrix(Int[], Int[], T[])
     sys = CellListMap.ParticleSystem(
-        positions=isnothing(positions) ? PDBTools.positions(atoms1) : positions,
+        positions=isnothing(positions) ? PDBToolsBase.positions(atoms1) : positions,
         cutoff=dmax,
-        unitcell=unitcell,
+        unitcell=_resolve_unitcell(atoms1, unitcell),
         output=map_matrix,
         output_name=:map_matrix,
         parallel=parallel,
@@ -411,22 +412,22 @@ function contact_map(
     atoms2::AbstractVector{<:Atom};
     dmax::Real=4.0,
     discrete::Bool=true,
-    unitcell=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     positions1::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
     positions2::Union{Nothing,AbstractVector{<:AbstractVector{<:Real}}}=nothing,
     parallel::Bool=false,
 )
     T = discrete ? Bool : promote_type(typeof(atoms1[1].x), typeof(atoms2[1].x))
-    residues1 = collect(PDBTools.eachresidue(atoms1))
+    residues1 = collect(eachresidue(atoms1))
     index_residue1 = assign_index_residue(atoms1, residues1)
-    residues2 = collect(PDBTools.eachresidue(atoms2))
+    residues2 = collect(eachresidue(atoms2))
     index_residue2 = assign_index_residue(atoms2, residues2)
     map_matrix = MapMatrix(Int[], Int[], T[])
     sys = CellListMap.ParticleSystem(
-        xpositions=isnothing(positions1) ? PDBTools.positions(atoms1) : positions1,
-        ypositions=isnothing(positions2) ? PDBTools.positions(atoms2) : positions2,
+        xpositions=isnothing(positions1) ? PDBToolsBase.positions(atoms1) : positions1,
+        ypositions=isnothing(positions2) ? PDBToolsBase.positions(atoms2) : positions2,
         cutoff=dmax,
-        unitcell=unitcell,
+        unitcell=_resolve_unitcell(atoms1, unitcell),
         output=map_matrix,
         output_name=:map_matrix,
         parallel=parallel,
@@ -475,12 +476,13 @@ function _compute_contact_map2(
 end
 
 @testitem "contact_map" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
     using SparseArrays
 
     # monomer
-    ats = read_pdb(PDBTools.TESTPDB, "protein")
+    ats = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     for parallel in (false, true)
         map = contact_map(ats)
         @test size(map.matrix) == (104, 104)
@@ -492,7 +494,7 @@ end
     end
 
     # dimer
-    ats = read_pdb(PDBTools.DIMERPDB)
+    ats = read_pdb(PDBTools.test_file("dimer.pdb"))
     cA = select(ats, "chain A")
     cB = select(ats, "chain B")
     for parallel in (false, true)
@@ -506,9 +508,9 @@ end
     end
 
     # Test with and without periodic boundary conditions
-    pdb_pbc = read_pdb(PDBTools.TESTPBC, "protein")
-    uc = read_unitcell(PDBTools.TESTPBC)
-    pdb_nopbc = read_pdb(PDBTools.TESTNOPBC, "protein")
+    pdb_pbc = read_pdb(PDBTools.test_file("pbc.pdb"), "protein")
+    uc = UnitCell(read_unitcell(PDBTools.test_file("pbc.pdb")))
+    pdb_nopbc = read_pdb(PDBTools.test_file("no_pbc.pdb"), "protein")
     for parallel in (false, true)
         pbc = contact_map(pdb_pbc; discrete=true, unitcell=uc, parallel=parallel)
         no_pbc = contact_map(pdb_nopbc; discrete=true, parallel=parallel)
@@ -516,7 +518,11 @@ end
         pbc = contact_map(pdb_pbc; discrete=false, unitcell=uc, parallel=parallel)
         no_pbc = contact_map(pdb_nopbc; discrete=false, parallel=parallel)
         @test all(isapprox(pbc.matrix[i], no_pbc.matrix[i]; rtol=1e-2) for i in eachindex(pbc.matrix))
+        # unit cell of the Structure
+        @test contact_map(pdb_pbc; unitcell=true, parallel=parallel).matrix == contact_map(pdb_pbc; unitcell=uc, parallel=parallel).matrix
+        @test contact_map(pdb_pbc; unitcell=false, parallel=parallel).matrix == contact_map(pdb_pbc; parallel=parallel).matrix
     end
+    @test_throws ArgumentError contact_map(pdb_pbc.atoms; unitcell=true)
 
     pdb = wget("2cpb", "model 1 2")
     m = collect(eachmodel(pdb))

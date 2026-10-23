@@ -21,11 +21,13 @@ end
 
 @testitem "Aqua.test_all" begin
     import Aqua
-    Aqua.test_all(PDBTools)
+    using PDBTools: PDBToolsBase
+    # PDBTools adds methods to the functions and types of PDBToolsBase (e.g. for selection
+    # strings, and for the secondary structure functions with vectors of atoms)
+    Aqua.test_all(PDBTools;
+        piracies=(treat_as_own=[
+            PDBToolsBase.Atom, PDBToolsBase.read_pdb, PDBToolsBase.read_mmcif, PDBToolsBase.write_pdb,
+            PDBToolsBase.write_mmcif, PDBToolsBase.positions, PDBToolsBase.maxmin,
+        ],),
+    )
 end
-
-#@testitem "Doctests" begin
-#    using Documenter: doctest
-#    using PDBTools
-#    doctest(PDBTools)
-#end
