@@ -221,7 +221,7 @@ const SurfaceRacerResults = Dict{String,Float32}(
 
 @testitem "RichardsUnitedAtomRadii" begin
     using PDBTools
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 
     s2 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot))
     @test s2 ≈ 5234.202 rtol = 1e-4
@@ -241,7 +241,7 @@ const SurfaceRacerResults = Dict{String,Float32}(
     @test_throws "united atom type" sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot)
 
     # Test with the presence of hydrogens (which must be ignored)
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     s1 = sasa(sasa_particles(PDBTools.RichardsUnitedAtomRadii, prot))
     @test s1 ≈ s2
     @test PDBTools.richards_atom_type(prot[2]) == "H"

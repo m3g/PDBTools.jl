@@ -1,24 +1,50 @@
 module PDBTools
 
-import Dates
 import Downloads
+import LazyArtifacts # must be loaded for lazy artifacts
+using LazyArtifacts: @artifact_str
 import JSON
 import PrecompileTools
 using Compat: @compat
-using Format: format, generate_formatter
+using Format: format
 using LinearAlgebra: norm, cross, dot
 using Printf: @printf, @sprintf
 using StaticArrays: SVector, SMatrix
 using TestItems: @testitem, @testmodule
 using OrderedCollections: OrderedDict
 using InlineStrings: InlineString, String1, String15
-import MolSimToolkitShared: center_of_mass, wrap, dihedral, get_atoms, save, load
+
+#
+# Core data structures and functions, defined in PDBToolsBase: the public names are
+# re-exported (or declared public) below. Imported with `import`, such that PDBTools 
+# can add methods to them (e.g. for selection strings).
+#
+import PDBToolsBase
+import PDBToolsBase:
+    # public names
+    Atom, Chain, Element, MetaData, Model, NucleosideResidue, ProteinResidue, Residue, Segment, 
+    Sequence, Structure, UnitCell,
+    add_custom_field, add_element!, add_nucleoside_residue!, add_protein_residue!, 
+    align, align!, alignment_movements, apply_alignment_transformation!,
+    atomic_mass, atomic_number, atomic_symbol, beta, center_of_mass, chain, charge, closest,
+    coordination_number, dihedral, dihedrals, distance, distances, 
+    eachchain, eachmodel, eachresidue, eachsegment, 
+    element, element_name, element_symbol, element_symbol_string, element_vdw_radius, elements,
+    get_atoms, index, index_pdb, 
+    isacidic, isaliphatic, isaromatic, isbackbone, isbasic, ischarged, ishydrophobic, isneutral,
+    isnonpolar, isnucleoside, ispolar, isprotein, ispurine, ispyrimidine, issidechain, iswater,
+    lattice_to_matrix, load, mass, matrix_to_lattice, maxmin, model, moveto!, name, 
+    nucleoside_residues, occup, oneletter, pdb_element, position, positions, printatom, 
+    protein_residues, read_mmcif, read_pdb, read_unitcell, remove_custom_elements!, 
+    remove_custom_nucleoside_residues!, remove_custom_protein_residues!, residue, 
+    residue_residue_distance, residuename, resname, resnum, rmsd, save, segname, set_position!, 
+    threeletter, wrap, wrap_to_first, write_mmcif, write_pdb,
+    # internal names
+    AbstractStructuralElement, EachStructuralElement, StringType, backbone_atoms, not_side_chain_atoms,
+    _resolve_unitcell
 
 # Version
 const VERSION = pkgversion(@__MODULE__)
-
-# Default fixed String size for names, chains, segments, etc.
-const StringType = String15
 
 # AtomsBase interface compatibility: deprecated until AtomsBase becomes stable
 #import AtomsBase: atomic_number, atomic_symbol, atomic_mass, position
@@ -27,7 +53,12 @@ export atomic_number, atomic_symbol, atomic_mass, position, set_position!
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
 export read_mmcif, write_mmcif
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
-export Structure
+export Structure, UnitCell
+@compat public MetaData
+@compat public test_file
+@compat public Element, elements, ProteinResidue, protein_residues, NucleosideResidue, nucleoside_residues
+@compat public align, align!, rmsd, alignment_movements, apply_alignment_transformation!
+@compat public wrap, wrap_to_first, dihedrals, distances, coordination_number
 export add_custom_field
 export Residue, eachresidue, resname, residue, resnum, model, segname, zeta, zeta_check
 export get_atoms
@@ -39,6 +70,10 @@ export positions, maxmin, distance, closest, dihedral, Ramachandran, set_phi!, s
 export element, mass, element_name, element_symbol, element_symbol_string, element_vdw_radius
 export formula, stoichiometry
 export Sequence
+export isprotein, isnucleoside, isbackbone, issidechain, iswater
+export isacidic, isaliphatic, isaromatic, isbasic, ischarged
+export ishydrophobic, isneutral, isnonpolar, ispolar
+export ispurine, ispyrimidine
 export select_with_vmd
 export visualize, open_browser
 export VolumetricData, read_dx, write_dx
@@ -61,53 +96,44 @@ export custom_elements!, add_element!, remove_custom_elements!
 export SIRAH
 
 # Test files
-const src_dir = @__DIR__
-const test_dir = joinpath(src_dir, "../test")
-const TESTPDB = joinpath(src_dir, "../test/structure.pdb")
-const SMALLPDB = joinpath(src_dir, "../test/small.pdb")
-const SIRAHPDB = joinpath(src_dir, "../test/sirah.pdb")
-const TESTCIF = joinpath(src_dir, "../test/small.cif")
-const CHAINSPDB = joinpath(src_dir, "../test/chains.pdb")
-const BROKENCIF = joinpath(src_dir, "../test/broken.cif")
-const LONG_CHAIN_STRING_CIF = joinpath(src_dir, "../test/long_chain_string.cif")
-const LONG_NAME_STRING_CIF = joinpath(src_dir, "../test/long_name_string.cif")
-const DIMERPDB = joinpath(src_dir, "../test/dimer.pdb")
-const HETATMPDB = joinpath(src_dir, "../test/hetatm.pdb")
-const TESTPBC = joinpath(src_dir, "../test/pbc.pdb")
-const TESTNOPBC = joinpath(src_dir, "../test/no_pbc.pdb")
-const CIF_2C_CHAIN = joinpath(src_dir, "../test/6CO8.cif")
-const MJC_NATIVE = joinpath(src_dir, "./tools/mvalue/testing/1MJC_native.pdb")
-const MJC_DESNAT = joinpath(src_dir, "./tools/mvalue/testing/1MJC_straight.pdb")
+const _extra_test_files = (
+    "hbonds.pdb", "pbc.pdb", "no_pbc.pdb", "sirah.pdb",
+    "1MJC_clean.pdb", "1MJC_native.pdb", "1MJC_straight.pdb",
+    "2RN2_clean.pdb", "2RN2_native.pdb", "2RN2_straight.pdb", "2rmm_dimer.pdb",
+)
+"""
+    PDBTools.test_file(name::AbstractString)
 
-# Basic chemistry
-include("./properties/elements.jl")
-include("./properties/protein_residues.jl")
-include("./properties/nucleoside_residues.jl")
-include("./properties/residue_properties.jl")
+Returns the path of the test file `name`, used in the examples of the documentation 
+(e.g. `read_pdb(PDBTools.test_file("structure.pdb"))`). The test files are downloaded 
+on the first call (they are lazy artifacts, from https://github.com/m3g/MolSimTestFiles).
 
-#
-# Data structures and their iterators
-#
-include("./struct_and_iterators/Atom.jl")
-include("./struct_and_iterators/Structure.jl")
-include("./struct_and_iterators/iterators_base.jl")
+"""
+function test_file(name::AbstractString)
+    name in _extra_test_files && return joinpath(artifact"pdbtools_extra_test_files", name)
+    return PDBToolsBase.test_file(name)
+end
+
+@testitem "test_file" begin
+    using PDBTools
+    # files of PDBToolsBase and of PDBTools (lazy artifacts)
+    for name in ("structure.pdb", "small.cif", "hbonds.pdb", "sirah.pdb", "1MJC_native.pdb")
+        @test isfile(PDBTools.test_file(name))
+    end
+    @test all(isfile(PDBTools.test_file(name)) for name in PDBTools._extra_test_files)
+end
+
+# Analysis functions of residues
 include("./struct_and_iterators/Residue.jl")
-include("./struct_and_iterators/Chain.jl")
-include("./struct_and_iterators/Segment.jl")
-include("./struct_and_iterators/Model.jl")
 
 # Selection functions
 include("./select/select.jl")
 include("./select/select_with_vmd.jl")
+include("./select/string_selections.jl")
 
 #
 # Input and output functions
 #
-include("./read_write/parsers.jl")
-include("./read_write/read_pdb.jl")
-include("./read_write/write_pdb.jl")
-include("./read_write/read_mmcif.jl")
-include("./read_write/write_mmcif.jl")
 include("./read_write/edit.jl")
 include("./read_write/wget.jl")
 include("./read_write/dx.jl")
@@ -116,9 +142,6 @@ include("./properties/formula.jl")
 include("./properties/getseq.jl")
 
 # Coordinates-dependent functions
-include("./coordinates/positions.jl")
-include("./coordinates/distance.jl")
-include("./coordinates/maxmin.jl")
 include("./coordinates/contacts.jl")
 include("./coordinates/dihedrals.jl")
 
@@ -127,15 +150,12 @@ include("./tools/tools.jl")
 include("./tools/sasa/sasa.jl")
 include("./tools/sasa/cavity_exclusion.jl")
 include("./tools/hydrogen_bonds.jl")
-include("./tools/read_unitcell.jl")
 include("./tools/mvalue/mvalue.jl")
 include("./tools/secondary_structure.jl")
 include("./tools/visualize.jl")
 
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
-
-# Contact maps
 
 # Legacy compatibility
 include("./package_internals/legacy.jl")

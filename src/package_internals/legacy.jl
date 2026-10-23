@@ -10,5 +10,5 @@ export atomic_sasa
 const atomic_sasa = sasa_particles
 
 export coor
-const coor = positions
+coor(args...) = positions(args...)
 coor(at::Atom) = position(at)

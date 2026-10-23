@@ -101,7 +101,7 @@ function, to select the atoms:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue <= 3");
 
 julia> findall(Select("name CA"), atoms)
 3-element Vector{Int64}:
@@ -125,10 +125,10 @@ other Julia functions, such as `findfirst`, `findlast`, or `filter`:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue <= 3");
 
 julia> filter(Select("name CA"), atoms)
-   Vector{Atom{Nothing}} with 3 atoms with fields:
+   Structure{Atom{Nothing}} with 3 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
       15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
@@ -143,7 +143,7 @@ julia> findfirst(Select("beta = 0.00"), atoms)
     ```jldoctest
     julia> using PDBTools
 
-    julia> atoms = read_pdb(PDBTools.TESTPDB, "protein and residue <= 3");
+    julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue <= 3");
 
     julia> name.(filter(sel"name CA", atoms))
     3-element Vector{InlineStrings.String15}:
@@ -188,6 +188,25 @@ input, and returns `true` or `false` depending on the conditions required for th
     `ispolar`,       `isnonpolar`,
     `ishydrophobic`,
     `isnucleoside`,  `ispurine`,      `ispyrimidine`.
+
+```@docs
+isprotein
+isnucleoside
+isbackbone
+issidechain
+iswater
+isacidic
+isaliphatic
+isaromatic
+isbasic
+ischarged
+isneutral
+ishydrophobic
+ispolar
+isnonpolar
+ispurine
+ispyrimidine
+```
 
 ## Adding custom keywords and macro-keywords
 
@@ -320,7 +339,7 @@ For example, here some atoms are selected from a previously loaded vector of ato
 ```julia-repl
 julia> using PDBTools
 
-julia> pdbfile = PDBTools.SMALLPDB
+julia> pdbfile = PDBTools.test_file("small.pdb")
 
 julia> atoms = read_pdb(pdbfile);
 

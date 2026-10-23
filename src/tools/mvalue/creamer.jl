@@ -344,7 +344,7 @@ julia> using PDBTools
 
 julia> using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> creamer_sasas = creamer_delta_sasa(prot)
 OrderedCollections.OrderedDict{String, OrderedCollections.OrderedDict} with 19 entries:
@@ -514,7 +514,7 @@ Computes an estimate of the effect of a cosolvent on the m-value of denaturation
 ```jldoctest; filter = r"(\\d*)\\.(\\d{2})\\d+" => s"\\1.\\2***"
 julia> using PDBTools
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> m = mvalue(CreamerDenaturedModel(prot), "urea")
 MValue{AutonBolen} - 104 residues - cosolvent: "urea"
@@ -556,7 +556,7 @@ end
 @testitem "CreamerDenaturedModel" begin
     using PDBTools
     using ShowMethodTesting
-    prot = read_pdb(PDBTools.TESTPDB)
+    prot = read_pdb(PDBTools.test_file("structure.pdb"))
     @test parse_show(CreamerDenaturedModel(prot, 1)) ≈ """
         CreamerDenaturedModel of a 1463-atom protein and minimal denaturation.
     """

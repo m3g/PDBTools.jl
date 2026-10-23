@@ -12,7 +12,7 @@ The `eachresidue` iterator enables iteration over the residues of a structure. I
 
 ```@example iterators
 using PDBTools
-protein = read_pdb(PDBTools.SMALLPDB);
+protein = read_pdb(PDBTools.test_file("small.pdb"));
 count(res -> resname(res) == "ALA", eachresidue(protein))
 ```
 
@@ -94,7 +94,7 @@ residuename
 The `eachchain` iterator in PDBTools enables users to iterate over the chains in a PDB structure. A PDB file may contain multiple protein chains. This iterator simplifies operations involving individual chains.
 
 ```@example iterators
-ats = read_pdb(PDBTools.CHAINSPDB);
+ats = read_pdb(PDBTools.test_file("chains.pdb"));
 chain.(eachchain(ats)) # Retrieve the names of all chains in the structure
 ```
 
@@ -173,7 +173,7 @@ get_atoms(::Chain)
 The `eachsegment` iterator enables iteration over the segments of a structure. For example:
 
 ```@example iterators
-read_pdb(PDBTools.DIMERPDB)
+read_pdb(PDBTools.test_file("dimer.pdb"))
 eachsegment(ats)
 ```
 

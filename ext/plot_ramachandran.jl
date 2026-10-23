@@ -17,7 +17,7 @@ All other arguments are default keywords of `Plots.scatter` and can be adjusted 
 ```jldoctest
 julia> using PDBTools, Plots
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> ram = Ramachandran(prot)
 Ramachandran data: phi, psi vectors with 102 angles.
@@ -61,7 +61,7 @@ end
     using Plots
     ENV["GKSwstype"] = "nul"
     tmpplot = tempname()*".png"
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     ram = Ramachandran(prot)
     plt = scatter(ram)
     savefig(plt, tmpplot)

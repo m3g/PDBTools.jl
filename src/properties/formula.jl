@@ -30,7 +30,7 @@ Returns the molecular formula of the current selection. The output is an indexab
 ```jldoctest
 julia> using PDBTools
 
-julia> pdb  = read_pdb(PDBTools.TESTPDB, "residue 1"); # testing PDB file
+julia> pdb  = read_pdb(PDBTools.test_file("structure.pdb"), "residue 1"); # testing PDB file
 
 julia> resname(pdb[1])
 "ALA"
@@ -79,7 +79,7 @@ Returns the stoichiometry of atom selection in a `Formula` structure.
 ```jldoctest
 julia> using PDBTools
 
-julia> pdb  = read_pdb(PDBTools.TESTPDB, "water"); # testing PDB file
+julia> pdb  = read_pdb(PDBTools.test_file("structure.pdb"), "water"); # testing PDB file
 
 julia> stoichiometry(pdb)
 H₂O₁
@@ -97,7 +97,7 @@ end
 
 @testitem "Formula" begin
     using PDBTools
-    pdb = read_pdb(PDBTools.TESTPDB, "resname GLY")
+    pdb = read_pdb(PDBTools.test_file("structure.pdb"), "resname GLY")
     f = formula(pdb)
     buff = IOBuffer()
     show(buff, f)

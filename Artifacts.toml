@@ -1,0 +1,9 @@
+# PDBTools.jl-only test files, from https://github.com/m3g/MolSimTestFiles (downloaded only when
+# needed). The test files shared with PDBToolsBase.jl are provided by PDBToolsBase.test_file.
+[pdbtools_extra_test_files]
+git-tree-sha1 = "ca652874a9d3d488c4451b472cd9fccdc26fa53d"
+lazy = true
+
+    [[pdbtools_extra_test_files.download]]
+    url = "https://github.com/m3g/MolSimTestFiles/releases/download/pdbtools_extra-v1/pdbtools_extra.tar.gz"
+    sha256 = "5deb3c35d721c8fb6afcd83ddab4364f6a919dc13bb235e60379f49d99fa663f"

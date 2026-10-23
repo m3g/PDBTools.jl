@@ -424,14 +424,14 @@ function transfer_free_energy(
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
     parallel::Bool=true,
-    unitcell=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     temperature::Real=_record_default_T,
     radii_set::Symbol=:set1,
     exclude_cavities::Union{Nothing,Bool}=nothing,
     cavity_dot_cutoff::Union{Nothing,Real}=nothing,
 ) where {F1<:Function,F2<:Function}
     if isnothing(exclude_cavities)
-        exclude_cavities = isnothing(unitcell)
+        exclude_cavities = isnothing(_resolve_unitcell(atoms, unitcell))
         if !exclude_cavities
             @warn """\n
                 exclude_cavities defaults to true for MTRecord, but is not supported
@@ -591,7 +591,7 @@ OXT/OT1/OT2 atom is treated as C-terminal. As with the rest of the Record model,
 ```jldoctest
 julia> using PDBTools
 
-julia> pep = read_pdb(PDBTools.TESTPDB, "protein and residue 1 to 5");
+julia> pep = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue 1 to 5");
 
 julia> sasa_ats = sasa_particles(RichardsUnitedAtomRadii, pep);
 

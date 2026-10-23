@@ -32,7 +32,7 @@ with the `transfer_free_energy` function:
 
 ```@example mvalue
 using PDBTools
-native_state = read_pdb(PDBTools.MJC_NATIVE, "protein")
+native_state = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
 tfe = transfer_free_energy(native_state, "urea")
 ```
 
@@ -105,7 +105,7 @@ load(::Type{MValue}, ::AbstractString)
 ```
 
 ```@example mvalue
-desnat_state = read_pdb(PDBTools.MJC_DESNAT, "protein")
+desnat_state = read_pdb(PDBTools.test_file("1MJC_straight.pdb"), "protein")
 m = mvalue(native_state, desnat_state, "urea")
 save(outfile, m)
 m_loaded = load(MValue, outfile)

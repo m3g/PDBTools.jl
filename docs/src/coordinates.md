@@ -24,7 +24,7 @@ positions(::AbstractVector{<:Atom})
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> positions(atoms[1:2])
 2-element Vector{StaticArraysCore.SVector{3, Float32}}:
@@ -39,7 +39,7 @@ C``\alpha`` coordinates:
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> positions(atoms, "name CA")
 3-element Vector{StaticArraysCore.SVector{3, Float64}}:
@@ -127,7 +127,7 @@ Use `maxmin(atoms)`, or `maxmin(atoms,"resname CA")`, for example:
 ```julia-repl
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.SMALLPDB);
+julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
 julia> maxmin(atoms, "residue > 1")
  Minimum atom coordinates: xmin = [-6.974, -16.785, -10.863]
@@ -148,6 +148,23 @@ maxmin
 read_unitcell
 lattice_to_matrix
 matrix_to_lattice
+```
+
+## Periodic images
+
+```@docs
+PDBTools.wrap
+PDBTools.wrap_to_first
+```
+
+## Structural alignment
+
+```@docs
+PDBTools.align
+PDBTools.align!
+PDBTools.rmsd
+PDBTools.alignment_movements
+PDBTools.apply_alignment_transformation!
 ```
 
 

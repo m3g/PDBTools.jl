@@ -15,7 +15,7 @@ function sasa_particles(::Type{SIRAH}, args...; kargs...)
     )
 end
 
-function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.protein_residues)
+function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBToolsBase.protein_residues)
     #! format: off
     for s in ("s", "n", "c")
         add_protein_residue!("$(s)A",protein_residues["ALA"])
@@ -39,7 +39,7 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
         add_protein_residue!("$(s)Y",protein_residues["TYR"])
         add_protein_residue!("$(s)V",protein_residues["VAL"])
         add_protein_residue!("$(s)X",
-            PDBTools.ProteinResidue(
+            ProteinResidue(
                 name = "Cysteine - bridged",     
                 three_letter_code = "CYS", 
                 one_letter_code = "C", 
@@ -57,7 +57,7 @@ function custom_protein_residues!(::Type{SIRAH}; protein_residues=PDBTools.prote
     return nothing
 end
 
-function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
+function custom_elements!(::Type{SIRAH}; elements=PDBToolsBase.elements)
     add_element!("GN", elements["N"]; symbol_string="GN", mass=14.0067f0, vdw_radius=4.2) # 4.0 for N-terminal, 5.5 for charged N-terminal
     add_element!("GC", elements["C"]; symbol_string="GC", mass=12.011f0, vdw_radius=4.2)
     add_element!("BCG", elements["C"]; symbol_string="BCG", mass=12.011f0, vdw_radius=4.2)
@@ -106,7 +106,7 @@ function custom_elements!(::Type{SIRAH}; elements=PDBTools.elements)
     nothing
 end
 
-function custom_nucleoside_residues!(::Type{SIRAH}; nucleoside_residues=PDBTools.nucleoside_residues)
+function custom_nucleoside_residues!(::Type{SIRAH}; nucleoside_residues=PDBToolsBase.nucleoside_residues)
     #! format: off
     add_nucleoside_residue!("DAX", nucleoside_residues["ADO"])
     add_nucleoside_residue!("DGX", nucleoside_residues["GUO"])
@@ -121,7 +121,7 @@ end
     remove_custom_protein_residues!()
     remove_custom_elements!()
 
-    pdb_file = PDBTools.SIRAHPDB
+    pdb_file = PDBTools.test_file("sirah.pdb")
     pdb = read_pdb(pdb_file)
 
     s0 = sasa_particles(pdb)

@@ -25,7 +25,7 @@ in the [ProteinSecondaryStructures.jl documentation](https://biojulia.dev/Protei
 The `stride_run` function runs the STRIDE algorithm on the provided array of atoms.
 ```@example secondary-structure
 using PDBTools
-atoms = read_pdb(PDBTools.TESTPDB, "protein")
+atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 ss = stride_run(atoms)
 ```
 

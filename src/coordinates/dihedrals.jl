@@ -1,36 +1,3 @@
-import MolSimToolkitShared: dihedral
-
-"""
-    dihedral(at1::Atom, at2::Atom, at3::Atom, at4::Atom)
-
-Computes the dihedral angle given four atoms of type PDBTools.Atom.
-
-# Example
-
-```jldoctest; filter = r"(\\d*)\\.(\\d{4})\\d+" => s"\\1.\\2***"
-julia> using PDBTools
-
-julia> pdb = read_pdb(PDBTools.TESTPDB);
-
-julia> C1 = pdb[11]; N2 = pdb[13]; CA2 = pdb[15]; C2 = pdb[22];
-
-julia> phi = dihedral(C1, N2, CA2, C2) 
--36.70359f0
-```
-
-"""
-dihedral(at1::Atom, at2::Atom, at3::Atom, at4::Atom) =
-    dihedral(position(at1), position(at2), position(at3), position(at4))
-
-@testitem "dihedral" begin
-    using PDBTools
-    pdb = read_pdb(PDBTools.TESTPDB);
-    N1 = pdb[1]; CA1 = pdb[5]; C1 = pdb[11]; N2 = pdb[13];
-    @test dihedral(N1, CA1, C1, N2) ≈ 64.07296f0
-    C1 = pdb[11]; N2 = pdb[13]; CA2 = pdb[15]; C2 = pdb[22];
-    @test dihedral(C1, N2, CA2, C2) ≈ -36.70359f0
-end
-
 """
     Ramachandran(prot::AbstractVector{<:PDBTools.Atom})
     Ramachandran # type
@@ -52,7 +19,7 @@ The resulting `Ramachandran` object can be plotted with the `Plots.scatter` func
 ```jldoctest
 julia> using PDBTools
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> ram = Ramachandran(prot)
 Ramachandran data: phi, psi vectors with 102 angles.
@@ -111,7 +78,7 @@ end
 @testitem "Ramachandran" begin
     using PDBTools
     using ShowMethodTesting
-    pdb = read_pdb(PDBTools.TESTPDB)
+    pdb = read_pdb(PDBTools.test_file("structure.pdb"))
     @test_throws ArgumentError Ramachandran(pdb)
     prot = filter(isprotein, pdb)
     pp = copy.(prot)
@@ -189,7 +156,7 @@ needed to define every phi angle to be set, or the function throws an `ArgumentE
 ```jldoctest
 julia> using PDBTools
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> nres = length(collect(eachresidue(prot)));
 
@@ -254,7 +221,7 @@ atoms needed to define every psi angle to be set, or the function throws an `Arg
 ```jldoctest
 julia> using PDBTools
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> nres = length(collect(eachresidue(prot)));
 
@@ -332,11 +299,11 @@ end
 @testitem "extended_chain and extended_chain!" begin
     using PDBTools
 
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     ext = extended_chain(prot)
 
     # Non-mutating: the original is untouched
-    orig = read_pdb(PDBTools.TESTPDB, "protein")
+    orig = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     for (at1, at2) in zip(prot, orig)
         @test position(at1) ≈ position(at2)
     end
@@ -346,7 +313,7 @@ end
     @test all(x -> isapprox(x, 180.0; atol=1e-2) || isapprox(abs(x), 180.0; atol=1e-2), ram.psi)
 
     # Mutating version changes the input in place
-    prot2 = read_pdb(PDBTools.TESTPDB, "protein")
+    prot2 = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     extended_chain!(prot2)
     ram2 = Ramachandran(prot2)
     @test all(x -> isapprox(x, 180.0; atol=1e-2) || isapprox(abs(x), 180.0; atol=1e-2), ram2.phi)
@@ -356,7 +323,7 @@ end
 @testitem "set_phi! and set_psi!" begin
     using PDBTools
 
-    prot = read_pdb(PDBTools.TESTPDB, "protein")
+    prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     nres = length(collect(eachresidue(prot)))
 
     # Setting all phi angles to a fixed value reproduces that value everywhere
@@ -392,7 +359,7 @@ end
             PDBTools._fetch_atom("C", res), PDBTools._fetch_atom("N", rnext),
         ))
     end
-    prot_copy = read_pdb(PDBTools.TESTPDB, "protein")
+    prot_copy = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     set_phi!(prot_copy, fill(-60.0, nres - 1); unit="deg")
     set_psi!(prot_copy, fill(140.0, nres - 1); unit="deg")
     set_phi!(prot_copy, phi_native; unit="deg")
@@ -402,7 +369,7 @@ end
     end
 
     # radians is the default unit
-    prot3 = read_pdb(PDBTools.TESTPDB, "protein")
+    prot3 = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     set_phi!(prot3, fill(-1.0, nres - 1))
     ram3 = Ramachandran(prot3)
     @test all(x -> isapprox(x, rad2deg(-1.0); atol=1e-2), ram3.phi)
@@ -412,7 +379,7 @@ end
     @test_throws ArgumentError set_psi!(prot, fill(0.0, nres)) # wrong length
     @test_throws ArgumentError set_phi!(prot, fill(0.0, nres - 1); unit="degrees") # invalid unit
 
-    pdb = read_pdb(PDBTools.TESTPDB) # not a protein-only selection
+    pdb = read_pdb(PDBTools.test_file("structure.pdb")) # not a protein-only selection
     @test_throws ArgumentError set_phi!(pdb, fill(0.0, length(collect(eachresidue(pdb))) - 1))
 
     pp = copy.(prot)
@@ -420,7 +387,7 @@ end
     @test_throws ArgumentError set_phi!(pp, fill(0.0, nres - 1))
 
     # multiple chains
-    dimer = read_pdb(PDBTools.TESTPDB, "protein")
+    dimer = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     for at in @view(dimer[(length(dimer) ÷ 2 + 1):end])
         at.chain = "Z"
     end

@@ -97,8 +97,8 @@ Representation (per group):
 View:
 
 - `hover::Bool=true`: show atom labels when the mouse is over the atoms.
-- `unitcell=nothing`: draw the edges of the periodic box. A 3x3 matrix with the lattice vectors
-  as columns (as returned by [`read_unitcell`](@ref)), or a vector with the box sides, for orthorhombic boxes.
+- `unitcell=false`: draw the edges of the periodic box. `true` draws the unit cell of the [`Structure`](@ref)
+  (of the first group of atoms). Alternatively, a [`UnitCell`](@ref).
 - `unitcell_origin=(0, 0, 0)`: position of the origin (corner) of the box, or `:center` to center the box
   on the geometric center of the atoms.
 - `unitcell_color="gray"`: color of the box edges.
@@ -109,13 +109,13 @@ View:
 
 ```julia
 using PDBTools
-atoms = read_pdb(PDBTools.TESTPDB, "protein")
+atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 visualize(atoms)
 visualize(atoms; style=:sticks, color=:residue)
 visualize(atoms; color_by=beta.(atoms), colormap=:roygb)
 v = visualize(atoms, "chain A"; surface=true)
 visualize(atoms, "all" => (style=:cartoon,), "resname ARG" => (style=:sticks,))
-visualize(read_pdb(PDBTools.TESTPBC); unitcell=read_unitcell(PDBTools.TESTPBC))
+visualize(read_pdb(PDBTools.test_file("pbc.pdb")); unitcell=true)
 save("view.html", v)
 ```
 
@@ -169,7 +169,7 @@ end
 function visualize(
     groups::Pair{<:Union{AbstractVector{<:Atom},VolumetricData},<:NamedTuple}...;
     hover::Bool=true,
-    unitcell::Union{Nothing,AbstractVector{<:Real},AbstractMatrix{<:Real}}=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     unitcell_origin::Union{Symbol,AbstractVector{<:Real},Tuple{Vararg{Real,3}}}=(0, 0, 0),
     unitcell_color::AbstractString="gray",
     background::AbstractString="white",
@@ -187,9 +187,9 @@ function visualize(
         data isa VolumetricData && !haskey(options, :isovalue) &&
             throw(ArgumentError("The `isovalue` option is required for isosurfaces of volumetric data."))
     end
-    if !isnothing(unitcell) && !(size(unitcell) in ((3,), (3, 3)))
-        throw(ArgumentError("unitcell must be a 3x3 matrix or a vector of length 3. Got size: $(size(unitcell))"))
-    end
+    # Unit cell matrix (or nothing): unitcell=true uses the unit cell of the first group of atoms
+    iatoms = findfirst(g -> first(g) isa AbstractVector{<:Atom}, groups)
+    unitcell = _resolve_unitcell(isnothing(iatoms) ? Atom{Nothing}[] : first(groups[iatoms]), unitcell)
     unitcell_origin isa Symbol && unitcell_origin != :center &&
         throw(ArgumentError("unitcell_origin must be a vector of length 3 or :center. Got: :$unitcell_origin"))
     unitcell_origin isa AbstractVector && length(unitcell_origin) != 3 &&
@@ -224,8 +224,7 @@ function visualize(
         _add_isosurface!(js, volumes[volume]; options...)
     end
     if !isnothing(unitcell)
-        m = unitcell isa AbstractVector ? [unitcell[1] 0 0; 0 unitcell[2] 0; 0 0 unitcell[3]] : unitcell
-        a, b, c = m[:, 1], m[:, 2], m[:, 3]
+        a, b, c = unitcell[:, 1], unitcell[:, 2], unitcell[:, 3]
         origin = unitcell_origin == :center ? geometric_center - (a + b + c) / 2 : collect(unitcell_origin)
         corner(i, j, k) = origin + i * a + j * b + k * c
         xyz(v) = Dict("x" => v[1], "y" => v[2], "z" => v[3])
@@ -513,7 +512,7 @@ end
 
 @testitem "open_browser" begin
     using PDBTools
-    v = visualize(read_pdb(PDBTools.SMALLPDB))
+    v = visualize(read_pdb(PDBTools.test_file("small.pdb")))
     if !Sys.iswindows()
         file = withenv("BROWSER" => "true") do
             open_browser(v)
@@ -542,7 +541,7 @@ end
 
 @testitem "visualize" begin
     using PDBTools
-    atoms = read_pdb(PDBTools.TESTPDB)
+    atoms = read_pdb(PDBTools.test_file("structure.pdb"))
     v = visualize(atoms)
     @test v isa PDBTools.StructureView
     @test v.natoms == length(atoms)
@@ -588,20 +587,24 @@ end
     @test occursin("inGroup(m1, groups1, 2), {\"line\"", visualize(atoms; water=true).html)
     @test !occursin("inGroup(m1, groups1, 2)", visualize(atoms, "water"; water=false).html)
     # unit cell
-    v = visualize(atoms; unitcell=[10, 20, 30])
+    v = visualize(atoms; unitcell=UnitCell([10, 20, 30]))
     @test count("addCylinder", v.html) == 12
     @test occursin("\"z\":30", v.html) && !occursin("\"z\":-15", v.html)
-    v = visualize(atoms; unitcell=[10, 20, 30], unitcell_origin=[0, 0, -15], unitcell_color="red")
+    v = visualize(atoms; unitcell=UnitCell([10, 20, 30]), unitcell_origin=[0, 0, -15], unitcell_color="red")
     @test occursin("\"z\":-15", v.html) && occursin("\"red\"", v.html)
-    uc = read_unitcell(PDBTools.TESTPBC)
-    v = visualize(read_pdb(PDBTools.TESTPBC); unitcell=uc, unitcell_origin=:center)
+    uc = UnitCell(read_unitcell(PDBTools.test_file("pbc.pdb")))
+    pbc = read_pdb(PDBTools.test_file("pbc.pdb"), "protein")
+    @test visualize(pbc; unitcell=true).html == visualize(pbc; unitcell=uc).html
+    @test count("addCylinder", visualize(pbc).html) == 0
+    @test_throws ArgumentError visualize(pbc.atoms; unitcell=true)
+    v = visualize(read_pdb(PDBTools.test_file("pbc.pdb")); unitcell=uc, unitcell_origin=:center)
     @test count("addCylinder", v.html) == 12
     @test !occursin("addCylinder", visualize(atoms).html)
-    @test_throws ArgumentError visualize(atoms; unitcell=[1, 2])
-    @test_throws ArgumentError visualize(atoms; unitcell=[1, 2, 3], unitcell_origin=:middle)
-    @test_throws ArgumentError visualize(atoms; unitcell=[1, 2, 3], unitcell_origin=[0, 0])
+    @test_throws ArgumentError visualize(atoms; unitcell=UnitCell([1, 2]))
+    @test_throws ArgumentError visualize(atoms; unitcell=UnitCell([1, 2, 3]), unitcell_origin=:middle)
+    @test_throws ArgumentError visualize(atoms; unitcell=UnitCell([1, 2, 3]), unitcell_origin=[0, 0])
     # mmCIF fields: long chain names, and quoted atom names
-    atoms_long_chain = read_mmcif(PDBTools.LONG_CHAIN_STRING_CIF)
+    atoms_long_chain = read_mmcif(PDBTools.test_file("long_chain_string.cif"))
     v = visualize(atoms_long_chain)
     @test v.natoms == length(atoms_long_chain)
     @test occursin("inGroup(m1, groups1, 0), {\"stick\"", v.html) # single residue: no cartoon

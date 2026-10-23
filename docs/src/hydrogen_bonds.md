@@ -26,8 +26,8 @@ Each `HBonds` object is an iterable container where each element is a named tupl
 
 ```@example hbonds
 using PDBTools
-pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb", "model 1")
-uc = read_unitcell(PDBTools.test_dir*"/hbonds.pdb")
+pdb = read_pdb(PDBTools.test_file("hbonds.pdb"), "model 1")
+uc = UnitCell(read_unitcell(PDBTools.test_file("hbonds.pdb")))
 hbs = hydrogen_bonds(pdb, 
     "protein", # alias for "protein" => "protein"
     "protein" => "water",

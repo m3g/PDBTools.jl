@@ -33,7 +33,7 @@ A typical usage consists in computing the contact map and plotting it:
 ```@example contacts
 using PDBTools
 using Plots
-ats = read_pdb(PDBTools.DIMERPDB);
+ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 cA = select(ats, "chain A");
 cB = select(ats, "chain B");
 map = contact_map(cA, cB) # contact map between chains A and B
@@ -129,7 +129,7 @@ residue. For example:
 
 ```@example getindex_map
 using PDBTools
-ats = read_pdb(PDBTools.DIMERPDB);
+ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 cA = select(ats, "chain A");
 cB = select(ats, "chain B");
 map = contact_map(cA, cB; discrete=false, dmax=12.0)

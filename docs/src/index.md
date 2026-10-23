@@ -14,7 +14,7 @@ julia> import Pkg; Pkg.add("PDBTools")
 
 ```@example index
 using PDBTools
-atoms = read_pdb(PDBTools.test_dir*"/small.pdb")
+atoms = read_pdb(PDBTools.test_file("small.pdb"))
 ```
 
 ## What Makes it Special?

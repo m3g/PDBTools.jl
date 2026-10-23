@@ -19,13 +19,13 @@ Using a string to select the CA atoms of the first residue:
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> findfirst(Select("name CA"), atoms)
 5
 
 julia> filter(Select("name CA and residue 1"), atoms)
-   Vector{Atom{Nothing}} with 1 atoms with fields:
+   Structure{Atom{Nothing}} with 1 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
        5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
 
@@ -75,7 +75,7 @@ all(atoms) = true
 
 @testitem "Select and sel_str show" begin
     using PDBTools
-    atoms = read_pdb(PDBTools.TESTPDB, "protein")
+    atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     sel = Select("name CA and residue 1")
     buff = IOBuffer()
     show(buff, MIME"text/plain"(), sel)
@@ -101,15 +101,15 @@ The function can be any function that takes an atom and returns a boolean value.
 ```jldoctest
 julia> using PDBTools
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> select(atoms, "name CA and (residue > 1 and residue < 3)")
-   Vector{Atom{Nothing}} with 1 atoms with fields:
+   Structure{Atom{Nothing}} with 1 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
       15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
 
 julia> select(atoms, at -> name(at) == "CA" && 1 < residue(at) < 3)
-   Vector{Atom{Nothing}} with 1 atoms with fields:
+   Structure{Atom{Nothing}} with 1 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
       15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15  
 
@@ -576,7 +576,7 @@ end
 
 @testitem "Selections" begin
     using PDBTools
-    atoms = read_pdb(PDBTools.TESTPDB)
+    atoms = read_pdb(PDBTools.test_file("structure.pdb"))
 
     @test length(select(atoms, "name CA")) == 104
     sel = select(atoms, "index = 13")

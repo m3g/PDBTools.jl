@@ -210,8 +210,8 @@ function process_selections(selections)
     return [sel isa String ? sel => sel : first(sel) => last(sel) for sel in selections]
 end
 
-struct SelectionData{A<:PDBTools.Atom,}
-    ats::Vector{A}
+struct SelectionData{V<:AbstractVector{<:Atom}}
+    ats::V
     inds::Vector{Int32}
     polar_bonds::HPolarBonds
 end
@@ -226,7 +226,7 @@ Initialize the results dictionary and process selection data for each unique sel
 
 =#
 function initialize_hbonds_data(
-    atoms::AbstractVector{<:PDBTools.Atom},
+    atoms::AbstractVector{<:Atom},
     selection_pairs::Vector{Pair{String,String}};
     unitcell=nothing,
     parallel::Bool=true,
@@ -242,7 +242,7 @@ function initialize_hbonds_data(
                 inds_sel = index.(ats_sel)
                 polar_bonds = find_hbond_donors(
                     ats_sel,
-                    positions=PDBTools.positions(ats_sel),
+                    positions=positions(ats_sel),
                     unitcell=unitcell,
                     cutoff=donor_acceptor_distance,
                     parallel=parallel,
@@ -275,7 +275,7 @@ function setup_particle_systems(
         if sel1 == sel2
             s1 = selection_data[sel1]
             systems[key] = ParticleSystem(
-                xpositions=PDBTools.positions(s1.ats),
+                xpositions=positions(s1.ats),
                 unitcell=unitcell,
                 cutoff=donor_acceptor_distance,
                 output=HBonds(),
@@ -286,8 +286,8 @@ function setup_particle_systems(
             s1 = selection_data[sel1]
             s2 = selection_data[sel2]
             systems[key] = ParticleSystem(
-                xpositions=PDBTools.positions(s1.ats),
-                ypositions=PDBTools.positions(s2.ats),
+                xpositions=positions(s1.ats),
+                ypositions=positions(s2.ats),
                 unitcell=unitcell,
                 cutoff=donor_acceptor_distance,
                 output=HBonds(),
@@ -364,7 +364,8 @@ If no selection is provided, the hydrogen bonds of the complete structure will b
 
 ### Optional keyword arguments
 
-- `unitcell::Union{Nothing,AbstractVecOrMat}=nothing`: Unit cell for periodic boundary conditions.
+- `unitcell=false`: `false`: no periodic boundary conditions; `true`: use the unit cell of the [`Structure`](@ref);
+  or a [`UnitCell`](@ref).
 - `donor_acceptor_distance::Real=3.5f0`: Maximum distance between donor and acceptor to consider a hydrogen bond.
 - `angle_cutoff::Real=30`: Maximum angle (in degrees) between donor-hydrogen-acceptor to consider a hydrogen bond.
 - `electronegative_elements=("N", "O", "F", "S")`: Elements considered electronegative for hydrogen bonding.
@@ -382,9 +383,9 @@ If no selection is provided, the hydrogen bonds of the complete structure will b
 ```jldoctest; filter = r"\\d+" => s"***"
 julia> using PDBTools
 
-julia> pdb = read_pdb(PDBTools.test_dir*"/hbonds.pdb", "model 1");
+julia> pdb = read_pdb(PDBTools.test_file("hbonds.pdb"), "model 1");
 
-julia> uc = read_unitcell(PDBTools.test_dir*"/hbonds.pdb");
+julia> uc = UnitCell(read_unitcell(PDBTools.test_file("hbonds.pdb")));
 
 julia> hbs = hydrogen_bonds(pdb, "protein"; unitcell=uc) # Single set of atoms: selection is optional
 OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
@@ -431,11 +432,12 @@ function hydrogen_bonds(
     donor_acceptor_distance::Real=3.5f0,
     angle_cutoff::Real=30,
     electronegative_elements=("N", "O", "F", "S"),
-    unitcell::Union{Nothing,AbstractVecOrMat}=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     d_covalent_bond::Real=1.2f0,
     parallel::Bool=false,
 )
     ats = get_atoms(structure)
+    unitcell = _resolve_unitcell(ats, unitcell)
     selection_pairs = process_selections(selections)
 
     # Initialize results and process selections
@@ -475,7 +477,7 @@ end
 @testitem "Hydrogen Bonds" begin
     using PDBTools
     using ShowMethodTesting
-    pdb = read_pdb(PDBTools.test_dir * "/hbonds.pdb")
+    pdb = read_pdb(PDBTools.test_file("hbonds.pdb"))
     models = collect(eachmodel(pdb))
 
     #
@@ -489,9 +491,10 @@ end
         hbs = hydrogen_bonds(m, "protein"; parallel=true)
         @test length(hbs["protein => protein"]) == nhb[i]
     end
-    uc = read_unitcell(PDBTools.test_dir * "/hbonds.pdb")
+    uc = UnitCell(read_unitcell(PDBTools.test_file("hbonds.pdb")))
     hbs = hydrogen_bonds(models[1], "protein"; unitcell=uc)
     @test length(hbs["protein => protein"]) == 63
+    @test length(hydrogen_bonds(models[1], "protein"; unitcell=true)["protein => protein"]) == 63
 
     prot = select(models[1], "protein")
     hbs = hydrogen_bonds(prot)
@@ -510,7 +513,7 @@ end
     nhb = [17964, 17915, 17945, 17977, 17852] # checked with gmx hbond
     for (i, m) in enumerate(models)
         local hbs
-        local uc = pbcs[i]
+        local uc = UnitCell(pbcs[i])
         hbs = hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc)
         @test length(hbs["resname HOH SOL => resname HOH SOL"]) ≈ nhb[i] atol = 10
         hbs = hydrogen_bonds(m, "resname HOH SOL"; unitcell=uc, parallel=true)
@@ -523,7 +526,7 @@ end
     nhb = [140, 130, 142, 135, 143] # checked with gmx hbond
     for (i, m) in enumerate(models)
         local hbs
-        local uc = pbcs[i]
+        local uc = UnitCell(pbcs[i])
         hbs = hydrogen_bonds(m, "protein" => "resname HOH SOL")
         @test length(hbs["protein => resname HOH SOL"]) == nhb[i]
         hbs = hydrogen_bonds(m, "protein" => "resname HOH SOL"; unitcell=uc)
@@ -534,20 +537,20 @@ end
     nhb = [156, 143, 150, 141, 156] # checked with gmx hbond
     for (i, m) in enumerate(models)
         local hbs
-        local uc = pbcs[i]
+        local uc = UnitCell(pbcs[i])
         hbs = hydrogen_bonds(m, "resname HOH" => "resname SOL"; unitcell=uc)
         @test length(hbs["resname HOH => resname SOL"]) == nhb[i]
     end
 
-    hbs = hydrogen_bonds(models[1], "protein"; unitcell=pbcs[1])
+    hbs = hydrogen_bonds(models[1], "protein"; unitcell=UnitCell(pbcs[1]))
     @test parse_show(hbs; repl=Dict("PDBTools." => "")) ≈ """
         OrderedCollections.OrderedDict{String, PDBTools.HBonds} with 1 entry:
         "protein => protein" => 63 hydrogen-bonds
     """
     @test parse_show(hbs["protein => protein"]) ≈ """
         HBonds data structure with 63 hydrogen-bonds.
-            First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.6454127f0, ang = 4.0603805f0)
-            Last hbond: (D-H---A) = (D = 1212, H = 1214, A = 618, r = 2.6903327f0, ang = 9.57599f0)
+            First hbond: (D-H---A) = (D = 1, H = 4, A = 267, r = 2.645413f0, ang = 4.0603766f0)
+            Last hbond: (D-H---A) = (D = 1212, H = 1214, A = 618, r = 2.6903327f0, ang = 9.576041f0)
             - r is the distance between Donor and Acceptor atoms (D-A)
             - ang is the angle (degrees) between H-D and A-D.
         """
@@ -559,7 +562,7 @@ end
         """
 
     # Test set overlap error
-    @test_throws ArgumentError hydrogen_bonds(models[1], "resname ARG" => "protein"; unitcell=pbcs[1])
+    @test_throws ArgumentError hydrogen_bonds(models[1], "resname ARG" => "protein"; unitcell=UnitCell(pbcs[1]))
 
     # Test iteration interface
     hbs = hydrogen_bonds(models[1], "protein")

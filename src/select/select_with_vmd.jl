@@ -127,7 +127,7 @@ function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::AbstractStrin
 end
 
 @testitem "select_with_vmd" begin
-    pdbfile = PDBTools.TESTPDB
+    pdbfile = PDBTools.test_file("structure.pdb")
     if !isnothing(Sys.which("vmd"))
         inds, names = select_with_vmd(pdbfile, "protein and residue 1")
         @test inds == [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]

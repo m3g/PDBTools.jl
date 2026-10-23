@@ -15,7 +15,7 @@ Here, we compute the m-value estimates using the Creamer model, but first wrappi
 
 ```@example mvalue
 using PDBTools
-prot = read_pdb(PDBTools.TESTPDB, "protein")
+prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 model = CreamerDenaturedModel(prot)
 ```
 A second argument of the constructor defines the extent to the "minimal", "mean", "maximal", as described in the docstring below. 
