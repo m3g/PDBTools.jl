@@ -15,7 +15,7 @@ The unit cell is read from the `CRYST1` field of PDB files, or from the `_cell` 
 files:
 
 ```@example structure
-using PDBTools
+using PDBTools, LazyArtifacts
 str = read_pdb(PDBTools.test_file("pbc.pdb"))
 ```
 

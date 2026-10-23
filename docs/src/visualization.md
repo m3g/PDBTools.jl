@@ -29,7 +29,7 @@ and water molecules are hidden (unless there is nothing else to show, or `water=
 atoms shows their residue, chain, and name:
 
 ```@example visualization
-using PDBTools
+using PDBTools, LazyArtifacts
 atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 visualize(atoms)
 ```

@@ -125,9 +125,9 @@ The aliases kept for compatibility with older versions were removed:
 
 - The constants with the paths of test files (`PDBTools.TESTPDB`, `PDBTools.SMALLPDB`, 
   `PDBTools.TESTPBC`, `PDBTools.test_dir`, ...) were removed. The test files are now downloaded
-  on demand, with [`PDBTools.test_file`](@ref): for example, `PDBTools.TESTPDB` is now 
-  `PDBTools.test_file("structure.pdb")`, and `PDBTools.SMALLPDB` is 
-  `PDBTools.test_file("small.pdb")`.
+  on demand, with [`PDBTools.test_file`](@ref), which is available after `using LazyArtifacts`: 
+  for example, `PDBTools.TESTPDB` is now `PDBTools.test_file("structure.pdb")`, and 
+  `PDBTools.SMALLPDB` is `PDBTools.test_file("small.pdb")`.
 - PDBTools requires Julia 1.11 or greater.
 - The printed output of `SASA` objects (returned by [`sasa_particles`](@ref)) shows only the type of the atomic radii, as in 
   `SASA{StandardAtomicRadii}`.

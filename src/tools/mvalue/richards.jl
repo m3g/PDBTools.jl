@@ -220,6 +220,7 @@ const SurfaceRacerResults = Dict{String,Float32}(
 )
 
 @testitem "RichardsUnitedAtomRadii" begin
+    using LazyArtifacts
     using PDBTools
     prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 

@@ -17,7 +17,7 @@ by converting a string selection into a call to query call.
 Using a string to select the CA atoms of the first residue:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -74,6 +74,7 @@ end
 all(atoms) = true
 
 @testitem "Select and sel_str show" begin
+    using LazyArtifacts
     using PDBTools
     atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     sel = Select("name CA and residue 1")
@@ -99,7 +100,7 @@ The function can be any function that takes an atom and returns a boolean value.
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -575,6 +576,7 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
 end
 
 @testitem "Selections" begin
+    using LazyArtifacts
     using PDBTools
     atoms = read_pdb(PDBTools.test_file("structure.pdb"))
 

@@ -11,7 +11,7 @@ PDBTools.jl provides lazy iterators over Residues, Chains, Segments, and Models 
 The `eachresidue` iterator enables iteration over the residues of a structure. In PDB files, distinct molecules are often treated as separate residues, so this iterator can be used to iterate over the molecules within a structure. For example:
 
 ```@example iterators
-using PDBTools
+using PDBTools, LazyArtifacts
 protein = read_pdb(PDBTools.test_file("small.pdb"));
 count(res -> resname(res) == "ALA", eachresidue(protein))
 ```

@@ -17,7 +17,7 @@ The resulting `Ramachandran` object can be plotted with the `Plots.scatter` func
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -76,6 +76,7 @@ function Ramachandran(prot::AbstractVector{<:Atom})
 end
 
 @testitem "Ramachandran" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
     pdb = read_pdb(PDBTools.test_file("structure.pdb"))
@@ -154,7 +155,7 @@ needed to define every phi angle to be set, or the function throws an `ArgumentE
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -219,7 +220,7 @@ atoms needed to define every psi angle to be set, or the function throws an `Arg
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -297,6 +298,7 @@ function extended_chain(atoms::AbstractVector{<:Atom})
 end
 
 @testitem "extended_chain and extended_chain!" begin
+    using LazyArtifacts
     using PDBTools
 
     prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
@@ -321,6 +323,7 @@ end
 end
 
 @testitem "set_phi! and set_psi!" begin
+    using LazyArtifacts
     using PDBTools
 
     prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")

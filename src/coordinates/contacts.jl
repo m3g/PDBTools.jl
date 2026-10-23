@@ -198,7 +198,7 @@ Returns the contact map as a `ContactMap` object.
 ## Contact map between residues in the same structure
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 
@@ -216,7 +216,7 @@ julia> # using Plots; heatmap(map); # uncomment to plot the contact map
 ## Contact map between residues in two different structures
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 
@@ -476,6 +476,7 @@ function _compute_contact_map2(
 end
 
 @testitem "contact_map" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
     using SparseArrays

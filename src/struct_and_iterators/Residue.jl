@@ -9,7 +9,7 @@ Expected values are 33.9 ± 3.5 degrees (for one standard deviation). Also see t
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> protein = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
 
@@ -46,7 +46,7 @@ See: https://www.ebi.ac.uk/thornton-srv/software/PROCHECK/manual/manappa.html
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> protein = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
 
@@ -69,6 +69,7 @@ function zeta_check(r::Residue; nsigma=2)
 end
 
 @testitem "zeta" begin
+    using LazyArtifacts
     using PDBTools
     protein = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
     residues = collect(eachresidue(protein));
@@ -173,6 +174,7 @@ function residue_ticks(atoms::AbstractVector{<:Atom}; kargs...)
 end
 
 @testitem "residue_ticks" begin
+    using LazyArtifacts
     # residue indices start with 1
     atoms = wget("1UBQ")
     @test residue_ticks(eachresidue(atoms), stride=20, serial=false) == ([1, 21, 41, 61, 81, 101, 121], ["M1", "D21", "Q41", "I61", "X81", "X101", "X121"])

@@ -117,6 +117,7 @@ function custom_nucleoside_residues!(::Type{SIRAH}; nucleoside_residues=PDBTools
 end
 
 @testitem "SIRAH" begin
+    using LazyArtifacts
     using PDBTools
     remove_custom_protein_residues!()
     remove_custom_elements!()

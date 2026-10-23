@@ -1,4 +1,5 @@
 @testitem "mvalue" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
 
@@ -139,6 +140,7 @@
 end
 
 @testitem "mvalue_delta_sasa" begin
+    using LazyArtifacts
     using PDBTools: mvalue_delta_sasa
     using PDBTools: delta_sasa_per_restype
     using PDBTools: parse_mvalue_server_sasa
@@ -395,6 +397,7 @@ end
 end
 
 @testitem "creamer_delta_sasa" begin
+    using LazyArtifacts
     using PDBTools
     using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
 
@@ -462,6 +465,7 @@ end
 end
 
 @testitem "transfer free energy" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
 
@@ -682,6 +686,7 @@ end
 end
 
 @testitem "Record transfer model atom type mapping" begin
+    using LazyArtifacts
     using PDBTools
     using PDBTools: record_surface_type, model_combination_rule
     using ShowMethodTesting
@@ -842,6 +847,7 @@ end
 end
 
 @testitem "tfe_dimer_tests" begin
+    using LazyArtifacts
     using PDBTools
     dimer = read_pdb(PDBTools.test_file("2rmm_dimer.pdb"))
     tfe = transfer_free_energy(dimer, "tmao"; model=Accessibility)

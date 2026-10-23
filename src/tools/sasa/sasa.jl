@@ -181,7 +181,7 @@ in the structure.
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> prot = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
 
@@ -407,7 +407,7 @@ or with the object and a selection, given by a function or selection string.
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> prot = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein");
 
@@ -551,6 +551,7 @@ function load(::Type{SASA}, filename::AbstractString)
 end
 
 @testitem "sasa" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
     prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")

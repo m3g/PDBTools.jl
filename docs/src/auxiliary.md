@@ -8,7 +8,7 @@ CollapsedDocStrings = true
 
 To obtain a list of the residue names of the protein with three- and one-letter codes, use
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> pdb = read_pdb(PDBTools.test_file("small.pdb"));
 
@@ -23,7 +23,7 @@ Use `getseq(atoms,code=2)` to get the sequence as three-letter residue codes, or
 full natural-aminoacid names, like "Alanine", "Proline", etc:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> pdb = read_pdb(PDBTools.test_file("small.pdb"));
 
@@ -71,7 +71,7 @@ The `getseq` function can of course be used on an `Atom` list, accepts selection
 last argument, as well as the reading and writing functions:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("small.pdb"));
 
@@ -117,7 +117,7 @@ threeletter
 Here we illustrate how to plot the average temperature factor of each residue of a crystallographic model as function of the residues.
 
 ```julia-repl
-julia> using PDBTools, Plots
+julia> using PDBTools, Plots, LazyArtifacts
 
 julia> atoms = wget("1UBQ", "protein");
 

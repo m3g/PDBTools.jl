@@ -42,7 +42,7 @@ Most typical options to adjust are:
 # Example 
 
 ```jldoctest
-julia> using PDBTools, Plots
+julia> using PDBTools, Plots, LazyArtifacts
 
 julia> ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 
@@ -110,6 +110,7 @@ function heatmap(
 end
 
 @testitem "contact plots" begin
+    using LazyArtifacts
     ENV["GKSwstype"] = "nul"
     using PDBTools
     using Plots

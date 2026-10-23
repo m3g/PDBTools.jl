@@ -13,7 +13,7 @@ read_pdb
 To read a PDB or mmCIF file and return a vector of atoms of
 type `Atom`, do:
 ```@example read_write
-using PDBTools
+using PDBTools, LazyArtifacts
 atoms = read_pdb(PDBTools.test_file("structure.pdb"))
 ```
 
@@ -153,7 +153,7 @@ atoms = read_pdb(IOBuffer(pdbdata), "protein and name CA")
 The `Atom` structure is mutable, meaning that the fields can be edited. For example:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"))
    Structure{Atom{Nothing}} with 62026 atoms

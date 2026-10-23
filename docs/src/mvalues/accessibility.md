@@ -136,7 +136,7 @@ The model is available for all cosolvents in the Auton & Bolen parameterization 
 Proline, Sorbitol, Sucrose, Urea, Glycerol, and Trehalose):
 
 ```@example mvalue
-using PDBTools
+using PDBTools, LazyArtifacts
 creamer_model = CreamerDenaturedModel(read_pdb(PDBTools.test_file("structure.pdb"), "protein"))
 m = mvalue(creamer_model, "urea"; model=Accessibility)
 ```

@@ -31,7 +31,7 @@ heatmap(::ContactMap{<:Real})
 A typical usage consists in computing the contact map and plotting it:
 
 ```@example contacts
-using PDBTools
+using PDBTools, LazyArtifacts
 using Plots
 ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 cA = select(ats, "chain A");
@@ -128,7 +128,7 @@ The `ContactMap` data structure can be indexed to extract the contacts of a spec
 residue. For example:
 
 ```@example getindex_map
-using PDBTools
+using PDBTools, LazyArtifacts
 ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 cA = select(ats, "chain A");
 cB = select(ats, "chain B");

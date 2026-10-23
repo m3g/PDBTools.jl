@@ -13,7 +13,7 @@ julia> import Pkg; Pkg.add("PDBTools")
 ## Quick Start
 
 ```@example index
-using PDBTools
+using PDBTools, LazyArtifacts
 atoms = read_pdb(PDBTools.test_file("small.pdb"))
 ```
 

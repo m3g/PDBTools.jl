@@ -511,6 +511,7 @@ function _browser_command(file)
 end
 
 @testitem "open_browser" begin
+    using LazyArtifacts
     using PDBTools
     v = visualize(read_pdb(PDBTools.test_file("small.pdb")))
     if !Sys.iswindows()
@@ -540,6 +541,7 @@ end
 end
 
 @testitem "visualize" begin
+    using LazyArtifacts
     using PDBTools
     atoms = read_pdb(PDBTools.test_file("structure.pdb"))
     v = visualize(atoms)

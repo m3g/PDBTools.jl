@@ -19,7 +19,7 @@ Add hydrogens to a PDB file using Open Babel.
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and not element H");
 
@@ -76,6 +76,7 @@ function add_hydrogens!(
 end
 
 @testitem "add_hydrogens!" begin
+    using LazyArtifacts
     using PDBTools
     atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and not element H")
     @test length(atoms) == 781

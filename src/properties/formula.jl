@@ -28,7 +28,7 @@ Returns the molecular formula of the current selection. The output is an indexab
 ## Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> pdb  = read_pdb(PDBTools.test_file("structure.pdb"), "residue 1"); # testing PDB file
 
@@ -77,7 +77,7 @@ Returns the stoichiometry of atom selection in a `Formula` structure.
 ### Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> pdb  = read_pdb(PDBTools.test_file("structure.pdb"), "water"); # testing PDB file
 
@@ -96,6 +96,7 @@ function stoichiometry(atoms::AbstractVector{<:Atom})
 end
 
 @testitem "Formula" begin
+    using LazyArtifacts
     using PDBTools
     pdb = read_pdb(PDBTools.test_file("structure.pdb"), "resname GLY")
     f = formula(pdb)

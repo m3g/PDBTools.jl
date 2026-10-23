@@ -1,8 +1,6 @@
 module PDBTools
 
 import Downloads
-import LazyArtifacts # must be loaded for lazy artifacts
-using LazyArtifacts: @artifact_str
 import JSON
 import PrecompileTools
 using Compat: @compat
@@ -108,13 +106,13 @@ Returns the path of the test file `name`, used in the examples of the documentat
 (e.g. `read_pdb(PDBTools.test_file("structure.pdb"))`). The test files are downloaded 
 on the first call (they are lazy artifacts, from https://github.com/m3g/MolSimTestFiles).
 
+`test_file` is available after `using LazyArtifacts` (it is defined in a package extension).
+
 """
-function test_file(name::AbstractString)
-    name in _extra_test_files && return joinpath(artifact"pdbtools_extra_test_files", name)
-    return PDBToolsBase.test_file(name)
-end
+function test_file end
 
 @testitem "test_file" begin
+    using LazyArtifacts
     using PDBTools
     # files of PDBToolsBase and of PDBTools (lazy artifacts)
     for name in ("structure.pdb", "small.cif", "hbonds.pdb", "sirah.pdb", "1MJC_native.pdb")

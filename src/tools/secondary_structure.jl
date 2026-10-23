@@ -63,7 +63,7 @@ Run STRIDE secondary structure assignment on the provided array of atoms.
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -125,7 +125,7 @@ Run DSSP secondary structure assignment on the provided array of atoms.
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -152,6 +152,7 @@ function ProteinSecondaryStructures.dssp_run(atoms::AbstractVector{<:Atom})
 end
 
 @testitem "secondary structure assignment" begin
+    using LazyArtifacts
     using PDBTools
     ats = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     ss_stride = stride_run(ats)

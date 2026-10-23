@@ -31,7 +31,7 @@ The transfer free energy of a protein from water to a 1M solution of a cosolvent
 with the `transfer_free_energy` function:
 
 ```@example mvalue
-using PDBTools
+using PDBTools, LazyArtifacts
 native_state = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
 tfe = transfer_free_energy(native_state, "urea")
 ```

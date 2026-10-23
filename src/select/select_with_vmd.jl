@@ -127,6 +127,7 @@ function select_with_vmd(atoms::AbstractVector{<:Atom}, selection::AbstractStrin
 end
 
 @testitem "select_with_vmd" begin
+    using LazyArtifacts
     pdbfile = PDBTools.test_file("structure.pdb")
     if !isnothing(Sys.which("vmd"))
         inds, names = select_with_vmd(pdbfile, "protein and residue 1")

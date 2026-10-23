@@ -381,7 +381,7 @@ If no selection is provided, the hydrogen bonds of the complete structure will b
 # Example
 
 ```jldoctest; filter = r"\\d+" => s"***"
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> pdb = read_pdb(PDBTools.test_file("hbonds.pdb"), "model 1");
 
@@ -475,6 +475,7 @@ function hydrogen_bonds(
 end
 
 @testitem "Hydrogen Bonds" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
     pdb = read_pdb(PDBTools.test_file("hbonds.pdb"))

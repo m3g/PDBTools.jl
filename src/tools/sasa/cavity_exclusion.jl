@@ -280,6 +280,7 @@ function exclude_cavity_dots!(
 end
 
 @testitem "exclude_cavities: opt-in, off by default" begin
+    using LazyArtifacts
     using PDBTools
     prot = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein")
     s_default = sasa_particles(prot)

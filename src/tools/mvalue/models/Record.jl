@@ -589,7 +589,7 @@ OXT/OT1/OT2 atom is treated as C-terminal. As with the rest of the Record model,
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> pep = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue 1 to 5");
 

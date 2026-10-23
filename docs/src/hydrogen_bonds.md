@@ -25,7 +25,7 @@ Each `HBonds` object is an iterable container where each element is a named tupl
 ## Basic Usage
 
 ```@example hbonds
-using PDBTools
+using PDBTools, LazyArtifacts
 pdb = read_pdb(PDBTools.test_file("hbonds.pdb"), "model 1")
 uc = UnitCell(read_unitcell(PDBTools.test_file("hbonds.pdb")))
 hbs = hydrogen_bonds(pdb, 

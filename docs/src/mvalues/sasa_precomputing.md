@@ -21,7 +21,7 @@ Pass `CreamerUnitedAtomRadii` as the first argument to `sasa_particles` to obtai
 `transfer_free_energy`:
 
 ```@example mvalue
-using PDBTools
+using PDBTools, LazyArtifacts
 native_state = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
 desnat_state = read_pdb(PDBTools.test_file("1MJC_straight.pdb"), "protein")
 sasa_native  = sasa_particles(CreamerUnitedAtomRadii, native_state)

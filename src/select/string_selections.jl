@@ -18,6 +18,7 @@ positions(residue::Residue, selection::AbstractString) = positions(residue, pars
 maxmin(atoms::AbstractVector{<:Atom}, selection::AbstractString) = maxmin(atoms, parse_query(selection))
 
 @testitem "string selections" begin
+    using LazyArtifacts
     using PDBTools
     ca(at) = isprotein(at) && name(at) == "CA"
     # reading
