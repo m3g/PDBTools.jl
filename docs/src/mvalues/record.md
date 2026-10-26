@@ -31,8 +31,8 @@ The transfer free energy of a single (fixed) structure can be computed directly 
 atom-resolved SASA with `transfer_free_energy`, by requesting the `MTRecord` model:
 
 ```@example mvalue
-using PDBTools
-native_state = read_pdb(PDBTools.MJC_NATIVE, "protein")
+using PDBTools, LazyArtifacts
+native_state = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
 tfe = transfer_free_energy(native_state, "urea"; model=MTRecord)
 ```
 

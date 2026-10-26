@@ -29,8 +29,8 @@ and water molecules are hidden (unless there is nothing else to show, or `water=
 atoms shows their residue, chain, and name:
 
 ```@example visualization
-using PDBTools
-atoms = read_pdb(PDBTools.TESTPDB, "protein")
+using PDBTools, LazyArtifacts
+atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 visualize(atoms)
 ```
 
@@ -128,12 +128,12 @@ The options that apply to the whole view (`hover`, `unitcell`, `unitcell_origin`
 
 ## Periodic boxes
 
-The edges of the periodic box can be drawn by providing the unit cell, as a 3x3 matrix with the lattice
-vectors as columns (as returned by `read_unitcell`) or as a vector of box sides. By default the box
-origin is at `(0, 0, 0)`; use `unitcell_origin=:center` for boxes centered on the system:
+The edges of the periodic box are drawn with `unitcell=true`, which uses the unit cell of the structure
+(read from the file), or by providing a `UnitCell`. By default the box origin is at `(0, 0, 0)`; use 
+`unitcell_origin=:center` for boxes centered on the system:
 
 ```julia
-atoms = read_pdb(PDBTools.TESTPBC)
-visualize(atoms; unitcell=read_unitcell(PDBTools.TESTPBC))
-visualize(atoms; unitcell=[85.0, 85.0, 85.0], unitcell_origin=:center)
+atoms = read_pdb(PDBTools.test_file("pbc.pdb"))
+visualize(atoms; unitcell=true)
+visualize(atoms; unitcell=UnitCell(85.0, 85.0, 85.0), unitcell_origin=:center)
 ```

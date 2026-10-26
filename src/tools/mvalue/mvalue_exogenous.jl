@@ -80,7 +80,7 @@ mvalue_delta_sasa(; model=AutonBolen, cosolvent="TMAO", atoms=protein, sasas=sas
 function mvalue_delta_sasa(;
     model::Type{<:MValueModel}=MoeserHorinek,
     cosolvent::AbstractString="urea",
-    atoms::AbstractVector{<:PDBTools.Atom}, sasas, type=1
+    atoms::AbstractVector{<:Atom}, sasas, type=1
 )
     protein = select(atoms, "protein")
     residue_names = unique(resname.(protein))
@@ -125,18 +125,18 @@ Each of these keys maps to a tuple containing a single Float64 value representin
 - `backbone::Function = at -> name(at) in ("N", "CA", "C", "O")`: Define what is a backbone atom.
 - `sidechain::Function = at -> !(name(at) in ("N", "CA", "C", "O"))`: Define what is a sidechain atom.
 - `ignore_hydrogen::Bool = true`: By default, ignore all Hydrogen atoms of the structure.
-- `unitcell=nothing`: By default, do not use periodic boundary conditions. To use PBCs, define A
-  unitcell by providing either a 3x3 matrix or, for orthorhombic cells, a vector of length 3 of cell sides.
+- `unitcell=false`: `false`: no periodic boundary conditions; `true`: use the unit cell of the [`Structure`](@ref);
+  or a [`UnitCell`](@ref).
 
 """
 function delta_sasa_per_restype(;
-    native::AbstractVector{<:PDBTools.Atom},
-    desnat::AbstractVector{<:PDBTools.Atom},
+    native::AbstractVector{<:Atom},
+    desnat::AbstractVector{<:Atom},
     n_dots::Int=500,
     backbone::Function=at -> name(at) in ("N", "CA", "C", "O"),
     sidechain::Function=at -> !(name(at) in ("N", "CA", "C", "O")),
     ignore_hydrogen::Bool=true,
-    unitcell=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
 )
     keepH(at) = ignore_hydrogen ? !(element(at) == "H") : true
     native_atoms = select(native, at -> isprotein(at) & keepH(at))

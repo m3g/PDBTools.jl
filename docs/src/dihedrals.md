@@ -8,6 +8,7 @@ of this function is the computation of Ramachandran plots.
 
 ```@docs
 dihedral
+PDBTools.dihedrals
 Ramachandran
 scatter(::Ramachandran)
 ```
@@ -17,9 +18,9 @@ scatter(::Ramachandran)
 The `dihedral` function computes the dihedral angle given four atoms:
 
 ```jldoctest; filter = r"(\d*)\.(\d{4})\d+" => s"\1.\2***"
-julia> using PDBTools, Plots
+julia> using PDBTools, Plots, LazyArtifacts
 
-julia> prot = read_pdb(PDBTools.TESTPDB, "protein");
+julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> dihedral(prot[1], prot[5], prot[11], prot[13])
 64.07296f0
@@ -30,8 +31,8 @@ julia> dihedral(prot[1], prot[5], prot[11], prot[13])
 The `Ramachandran` function and object are used to compute and plot Ramachandran plots for a protein structure. The call to `Ramachandran(vec)` where `vec` is a vector of `Atom`s returns a `Ramachandran` object, with fields `phi` and `psi`, containing the list of dihedral angles:
 
 ```@example ramachandran
-using PDBTools
-prot = read_pdb(PDBTools.TESTPDB, "protein");
+using PDBTools, LazyArtifacts
+prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 ram = Ramachandran(prot)
 ```
 
@@ -62,8 +63,8 @@ Both functions require `atoms` to belong to a single protein chain, with the bac
 needed to define every dihedral to be set. Angles are given in radians by default:
 
 ```@example ramachandran
-using PDBTools
-prot = read_pdb(PDBTools.TESTPDB, "protein");
+using PDBTools, LazyArtifacts
+prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 nres = length(collect(eachresidue(prot)));
 set_phi!(prot, fill(-60.0, nres - 1); unit="deg")
 set_psi!(prot, fill(-45.0, nres - 1); unit="deg")

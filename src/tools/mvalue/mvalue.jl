@@ -92,7 +92,7 @@ _AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
         parallel:Bool = true,
-        unitcell=nothing,
+        unitcell=false,
         sasa_particles::Function = sasa_particles with Creamer united atom radii and no hydrogens.
     )
 
@@ -114,8 +114,8 @@ $(_available_cosolvents())
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
-- `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
-  the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
+- `unitcell=false`: `false`: no periodic boundary conditions; `true`: use the unit cell of the [`Structure`](@ref);
+  or a [`UnitCell`](@ref).
 
 # Returns
 
@@ -156,7 +156,7 @@ function mvalue(
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
     parallel::Bool=true,
-    unitcell=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
 ) where {F1<:Function,F2<:Function}
     sasa_initial = sasa_particles(CreamerUnitedAtomRadii, initial_state; unitcell)
     sasa_final = sasa_particles(CreamerUnitedAtomRadii, final_state; unitcell)

@@ -20,7 +20,7 @@ missing backbone atoms, secondary structure assignment tools like STRIDE and DSS
 may not function correctly.
 
 =# 
-function _set_pdb(ats::AbstractVector{<:PDBTools.Atom})
+function _set_pdb(ats::AbstractVector{<:Atom})
     ats_new = copy.(select(ats, at -> isprotein(at) && element(at) != "H"))
     for r in eachresidue(ats_new)
         N = false
@@ -63,9 +63,9 @@ Run STRIDE secondary structure assignment on the provided array of atoms.
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> atoms[1458].name = "O"; # Terminal residue has non-standard atom name
 
@@ -80,7 +80,7 @@ julia> ss = stride_run(atoms)
 ```
 
 """
-function ProteinSecondaryStructures.stride_run(atoms::AbstractVector{<:PDBTools.Atom})
+function ProteinSecondaryStructures.stride_run(atoms::AbstractVector{<:Atom})
     ats_new = _set_pdb(atoms)
     # Possibly remove non-standard chain names coming from CIF data
     non_standard_chain = findfirst(c -> length(c) > 1, chain(at) for at in ats_new)
@@ -125,9 +125,9 @@ Run DSSP secondary structure assignment on the provided array of atoms.
 # Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> atoms = read_pdb(PDBTools.TESTPDB, "protein");
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> atoms[1458].name = "O"; # Terminal residue has non-standard atom name
 
@@ -142,7 +142,7 @@ julia> ss = dssp_run(atoms)
 ```
 
 """
-function ProteinSecondaryStructures.dssp_run(atoms::AbstractVector{<:PDBTools.Atom})
+function ProteinSecondaryStructures.dssp_run(atoms::AbstractVector{<:Atom})
     ats_new = _set_pdb(atoms)
     tmpcif = tempname() * ".cif"
     write_mmcif(tmpcif, ats_new)
@@ -152,15 +152,16 @@ function ProteinSecondaryStructures.dssp_run(atoms::AbstractVector{<:PDBTools.At
 end
 
 @testitem "secondary structure assignment" begin
+    using LazyArtifacts
     using PDBTools
-    ats = read_pdb(PDBTools.TESTPDB, "protein")
+    ats = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     ss_stride = stride_run(ats)
     ss_dssp = dssp_run(ats)
     @test length(ss_stride) == 104
     @test length(ss_dssp) == 103
     @test ss_composition(ss_stride) == Dict("310 helix" => 0, "bend" => 0, "turn" => 36, "beta bridge" => 4, "kappa helix" => 0, "pi helix" => 0, "beta strand" => 21, "alpha helix" => 17, "loop" => 0, "coil" => 26)
     @test ss_composition(ss_dssp) == Dict("310 helix" => 0, "bend" => 18, "turn" => 9, "beta bridge" => 3, "kappa helix" => 2, "pi helix" => 0, "beta strand" => 15, "alpha helix" => 17, "loop" => 39, "coil" => 0) 
-    p = read_mmcif(PDBTools.CIF_2C_CHAIN)
+    p = read_mmcif(PDBTools.test_file("6CO8.cif"))
     ss_dssp = dssp_run(p)
     @test length(ss_dssp) == 501
     @test ss_dssp[1].chain == "A_1"

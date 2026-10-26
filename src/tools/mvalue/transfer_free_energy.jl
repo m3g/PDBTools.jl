@@ -110,8 +110,8 @@ $(_available_cosolvents())
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
-- `unitcell=nothing`: if periodic boundary conditions are used, provide a 3x3 matrix with
-  the unitcell, or alternatively a vector of length 3 with the sides, for orthorhombic cells.
+- `unitcell=false`: `false`: no periodic boundary conditions; `true`: use the unit cell of the [`Structure`](@ref);
+  or a [`UnitCell`](@ref).
 - `exclude_cavities::Union{Nothing,Bool}=nothing`: forwarded to `sasa_particles`; excludes
   surface dots that sit in a solvent-sealed interior cavity (see [Excluding solvent-sealed
   cavities](@ref)). Defaults to `true` for `model=MTRecord` and to `false` for every other
@@ -155,7 +155,7 @@ function transfer_free_energy(
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
     parallel::Bool=true,
-    unitcell=nothing,
+    unitcell::Union{Bool,UnitCell}=false,
     radii_set::Union{Nothing,Symbol}=nothing,
     exclude_cavities::Union{Nothing,Bool}=nothing,
     cavity_dot_cutoff::Union{Nothing,Real}=nothing,

@@ -6,9 +6,9 @@ Returns the sequence of amino acids from the vector of atoms or file name. Selec
 ### Example
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
-julia> protein = read_pdb(PDBTools.TESTPDB);
+julia> protein = read_pdb(PDBTools.test_file("structure.pdb"));
 
 julia> getseq(protein, "residue < 3")
 2-element Vector{String}:
@@ -59,8 +59,9 @@ function getseq(atoms::AbstractVector{<:Atom}, selection_function::Function=ispr
 end
 
 @testitem "getseq" begin
+    using LazyArtifacts
     using PDBTools
-    ats = read_pdb(PDBTools.TESTPDB)
+    ats = read_pdb(PDBTools.test_file("structure.pdb"))
     s = getseq(ats, "residue < 3")
     @test s == ["A", "C"]
     s = getseq(ats, "residue < 3"; code=2)

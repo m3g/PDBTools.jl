@@ -280,8 +280,9 @@ function exclude_cavity_dots!(
 end
 
 @testitem "exclude_cavities: opt-in, off by default" begin
+    using LazyArtifacts
     using PDBTools
-    prot = select(read_pdb(PDBTools.TESTPDB), "protein")
+    prot = select(read_pdb(PDBTools.test_file("structure.pdb")), "protein")
     s_default = sasa_particles(prot)
     s_explicit_off = sasa_particles(prot; exclude_cavities=false)
     @test sasa(s_default) == sasa(s_explicit_off)
@@ -303,7 +304,7 @@ end
     # unitcell (periodic boundary conditions) is not supported together with cavity
     # exclusion; must fail loudly rather than silently ignore one or the other.
     @test_throws "not currently supported together with" sasa_particles(
-        prot; exclude_cavities=true, unitcell=[100.0, 100.0, 100.0],
+        prot; exclude_cavities=true, unitcell=UnitCell([100.0, 100.0, 100.0]),
     )
 end
 

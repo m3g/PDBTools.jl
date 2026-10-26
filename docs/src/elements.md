@@ -69,7 +69,7 @@ with the added value in the custom field:
 For example:
 
 ```jldoctest
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atom = Atom(custom="TEST");
 
@@ -104,6 +104,8 @@ other functions work for the new types. The function to be used is `add_element!
 ```@docs
 add_element!
 remove_custom_elements!
+PDBTools.elements
+PDBTools.Element
 ```
 
 ## Additional property-retrieving and set functions
@@ -135,6 +137,10 @@ add_protein_residue!
 add_nucleoside_residue!
 remove_custom_protein_residues!
 remove_custom_nucleoside_residues!
+PDBTools.protein_residues
+PDBTools.ProteinResidue
+PDBTools.nucleoside_residues
+PDBTools.NucleosideResidue
 ```
 
 For example, here we create
@@ -142,7 +148,7 @@ a new resiude type `NEW` with the same properties of an `ALA` residue. To
 remove all custom protein residues, use `remove_custom_protein_residues!()`.
 
 ```@example custom_types
-using PDBTools
+using PDBTools, LazyArtifacts
 add_protein_residue!("NEW", PDBTools.protein_residues["ALA"])
 ```
 
@@ -177,7 +183,7 @@ Here we repeteadly call `remove_custom_residues!()` and `remove_custom_elements!
 
 With those definitions, adding all SIRAH protein residue types and element names can be done with:
 ```@example sirah
-using PDBTools 
+using PDBTools, LazyArtifacts
 custom_protein_residues!(SIRAH)
 custom_nucleoside_residues!(SIRAH)
 custom_elements!(SIRAH)
@@ -186,7 +192,7 @@ custom_elements!(SIRAH)
 With that, SIRAH structures have a special support. Let us start reading a CG model:
 
 ```@example sirah
-sirah_pdb = read_pdb(PDBTools.SIRAHPDB)
+sirah_pdb = read_pdb(PDBTools.test_file("sirah.pdb"))
 resname.(eachresidue(sirah_pdb))
 ```
 

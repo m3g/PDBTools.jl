@@ -20,8 +20,8 @@ sasa
 A typical run of these functions consists in providing the structure of a protein to the first function, `sasa_particles`, to obtain a `SASA` object, which contains the accessible area per atom:
 
 ```@example sasa
-using PDBTools
-prot = read_pdb(PDBTools.TESTPDB, "protein")
+using PDBTools, LazyArtifacts
+prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 atom_sasa = sasa_particles(prot)
 ```
 
@@ -70,10 +70,10 @@ scatter!(Tuple.(dots); # surface dots
 To compute the solvent accessible surface area of SIRAH models, call the `sasa_particles(SIRAH, ...)` method, after [loading the custom protein residues](@ref sirah) and elements of the SIRAH force field:
 
 ```@example sirah_sasa
-using PDBTools
+using PDBTools, LazyArtifacts
 custom_protein_residues!(SIRAH)
 custom_elements!(SIRAH)
-sirah_pdb = read_pdb(PDBTools.SIRAHPDB)
+sirah_pdb = read_pdb(PDBTools.test_file("sirah.pdb"))
 ```
 
 Now we compute the SASA of the full structure:
@@ -221,7 +221,7 @@ the abandoned voxel-grid approach, whose result changed non-monotonically -- and
 drastically -- with its own tuning parameters (see `cavity_exclusion.jl` for the full comparison).
 
 ```@example sasa
-dimer = read_pdb(PDBTools.DIMERPDB)
+dimer = read_pdb(PDBTools.test_file("dimer.pdb"))
 sasa(sasa_particles(dimer))                            # default: no cavity exclusion
 ```
 ```@example sasa

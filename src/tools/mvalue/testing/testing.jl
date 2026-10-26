@@ -1,10 +1,10 @@
 @testitem "mvalue" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
 
-    dir = @__DIR__
-    MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
-    MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
+    MJC_native = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
+    MJC_desnat = read_pdb(PDBTools.test_file("1MJC_straight.pdb"), "protein")
 
     r_1MJC = mvalue(MJC_native, MJC_desnat, "urea")
     @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
@@ -113,8 +113,8 @@
     @test r0.tot ≈ r1.tot + r2.tot
 
     # Some errors
-    p1 = read_pdb(PDBTools.TESTPDB, "protein and residue < 10")
-    p2 = read_pdb(PDBTools.TESTPDB, "protein and residue < 11")
+    p1 = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue < 10")
+    p2 = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue < 11")
     @test_throws "same number of residues" mvalue(p1, p2, "urea") # different number of residues
 
     p1 = select(p1, "protein")
@@ -126,9 +126,9 @@
     @test_throws "same type" mvalue(p1, p2, "urea") # different number of residues
 
     # Support for periodic boundary conditions
-    no_pbc = read_pdb(PDBTools.TESTNOPBC, "protein")
-    pbc = read_pdb(PDBTools.TESTPBC, "protein")
-    uc = [107.845, 107.845, 107.845]
+    no_pbc = read_pdb(PDBTools.test_file("no_pbc.pdb"), "protein")
+    pbc = read_pdb(PDBTools.test_file("pbc.pdb"), "protein")
+    uc = UnitCell([107.845, 107.845, 107.845])
     @test transfer_free_energy(no_pbc, "urea").tot ≈ 
           transfer_free_energy(pbc, "urea"; unitcell=uc).tot
     @test mvalue(pbc, pbc, "urea"; unitcell=uc).tot ≈ 0.0 atol=1e-5
@@ -140,6 +140,7 @@
 end
 
 @testitem "mvalue_delta_sasa" begin
+    using LazyArtifacts
     using PDBTools: mvalue_delta_sasa
     using PDBTools: delta_sasa_per_restype
     using PDBTools: parse_mvalue_server_sasa
@@ -207,13 +208,12 @@ end
         @warn "gmx executable not available: some tests won't be run"
     end
 
-    dir = @__DIR__
 
     #
     # 1MJC
     #
-    MJC_native = read_pdb(joinpath(dir, "1MJC_native.pdb"), "protein")
-    MJC_desnat = read_pdb(joinpath(dir, "1MJC_straight.pdb"), "protein")
+    MJC_native = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
+    MJC_desnat = read_pdb(PDBTools.test_file("1MJC_straight.pdb"), "protein")
 
     r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC_clean, type=2)
     @test isapprox(r_1MJC.tot, references["1MJC"][1]; rtol=1e-1)
@@ -234,16 +234,16 @@ end
 
     if !isnothing(gmx)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
-            native_pdb=joinpath(dir, "1MJC_native.pdb"),
-            desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
+            native_pdb=PDBTools.test_file("1MJC_native.pdb"),
+            desnat_pdb=PDBTools.test_file("1MJC_straight.pdb"),
         )
         r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
         @test isapprox(r_1MJC.tot, -1.2335; rtol=1e-1)
         @test isapprox(r_1MJC.bb, -0.7333; rtol=1e-1)
         @test isapprox(r_1MJC.sc, -0.50025; rtol=1e-1)
         sasa_1MJC = gmx_delta_sasa_per_restype(;
-            native_pdb=joinpath(dir, "1MJC_native.pdb"),
-            desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
+            native_pdb=PDBTools.test_file("1MJC_native.pdb"),
+            desnat_pdb=PDBTools.test_file("1MJC_straight.pdb"),
             ignore_hydrogen=false,
         )
         r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
@@ -255,8 +255,8 @@ end
     #
     # 2RN2
     #
-    RN2_native = read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
-    RN2_desnat = read_pdb(joinpath(dir, "2RN2_straight.pdb"), "protein")
+    RN2_native = read_pdb(PDBTools.test_file("2RN2_native.pdb"), "protein")
+    RN2_desnat = read_pdb(PDBTools.test_file("2RN2_straight.pdb"), "protein")
 
     r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2_clean, type=2)
     @test isapprox(r_2RN2.tot, references["2RN2"][1]; rtol=1e-1)
@@ -277,16 +277,16 @@ end
 
     if !isnothing(gmx)
         sasa_2RN2 = gmx_delta_sasa_per_restype(;
-            native_pdb=joinpath(dir, "2RN2_native.pdb"),
-            desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
+            native_pdb=PDBTools.test_file("2RN2_native.pdb"),
+            desnat_pdb=PDBTools.test_file("2RN2_straight.pdb"),
         )
         r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2)
         @test isapprox(r_2RN2.tot, -3.17; rtol=1e-1)
         @test isapprox(r_2RN2.bb, -1.94; rtol=1e-1)
         @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
         sasa_2RN2 = gmx_delta_sasa_per_restype(;
-            native_pdb=joinpath(dir, "2RN2_native.pdb"),
-            desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
+            native_pdb=PDBTools.test_file("2RN2_native.pdb"),
+            desnat_pdb=PDBTools.test_file("2RN2_straight.pdb"),
             ignore_hydrogen=false,
         )
         r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2)
@@ -307,7 +307,7 @@ end
         "urea" => (-293, -711, -1132),
     )
 
-    MJC_clean = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
+    MJC_clean = read_pdb(PDBTools.test_file("1MJC_clean.pdb"))
     for (cos, dg) in data_mvalue_server_auton_and_bolen_1MJC
         for ig in 1:3
             m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=MJC_clean, sasas=sasa_1MJC_clean, type=ig)
@@ -329,7 +329,7 @@ end
         "urea" => (-1217, -2226, -3236)
     )
 
-    RN2_clean = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
+    RN2_clean = read_pdb(PDBTools.test_file("2RN2_clean.pdb"))
     for (cos, dg) in data_mvalue_server_auton_and_bolen_2RN2
         for ig in 1:3
             m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=RN2_clean, sasas=sasa_2RN2_clean, type=ig)
@@ -342,22 +342,22 @@ end
 
     # gmx keyword argument tests
     @test_throws ArgumentError gmx_delta_sasa_per_restype(;
-        native_pdb=joinpath(dir, "1MJC_native.pdb"),
-        desnat_pdb=joinpath(dir, "1MJC_straight.pdb"),
+        native_pdb=PDBTools.test_file("1MJC_native.pdb"),
+        desnat_pdb=PDBTools.test_file("1MJC_straight.pdb"),
         gmx="/tmp/gmx_fake",
     )
     if !isnothing(gmx)
         @test length(gmx_delta_sasa_per_restype(;
-            native_pdb=joinpath(dir, "2RN2_native.pdb"),
-            desnat_pdb=joinpath(dir, "2RN2_straight.pdb"),
+            native_pdb=PDBTools.test_file("2RN2_native.pdb"),
+            desnat_pdb=PDBTools.test_file("2RN2_straight.pdb"),
             gmx=gmx,
         )) == 20
     end
 
     # Test m-value calculation using PBCs
-    pbc = read_pdb(joinpath(dir, "pbc.pdb"))
-    no_pbc = read_pdb(joinpath(dir, "no_pbc.pdb"))
-    uc = lattice_to_matrix(107.845413, 107.845413, 107.845413, 90., 90., 90.)
+    pbc = read_pdb(PDBTools.test_file("pbc.pdb"))
+    no_pbc = read_pdb(PDBTools.test_file("no_pbc.pdb"))
+    uc = UnitCell(107.845413, 107.845413, 107.845413)
     ss = delta_sasa_per_restype(; native=pbc, desnat=no_pbc, unitcell=uc)
     m = mvalue_delta_sasa(model=AutonBolen, cosolvent="urea", atoms=pbc, sasas=ss)
     @test m.tot ≈ 0.0 atol = 1e-3
@@ -397,10 +397,10 @@ end
 end
 
 @testitem "creamer_delta_sasa" begin
+    using LazyArtifacts
     using PDBTools
     using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
 
-    dir = @__DIR__
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
     data_mvalue_server_auton_and_bolen_1MJC = Dict(
@@ -413,7 +413,7 @@ end
         "urea" => (-293, -711, -1132),
     )
 
-    MJC_clean = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
+    MJC_clean = read_pdb(PDBTools.test_file("1MJC_clean.pdb"))
     for (cos, dg) in data_mvalue_server_auton_and_bolen_1MJC
         for ig in 1:3
             m = mvalue_delta_sasa(
@@ -437,7 +437,7 @@ end
         "urea" => (-1217, -2226, -3236)
     )
 
-    RN2_clean = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
+    RN2_clean = read_pdb(PDBTools.test_file("2RN2_clean.pdb"))
     for (cos, dg) in data_mvalue_server_auton_and_bolen_2RN2
         for ig in 1:3
             m = mvalue_delta_sasa(
@@ -452,7 +452,7 @@ end
     end
 
     # test that hydrogens are properly handled (0 vdw radius)
-    pdb = read_pdb(PDBTools.TESTPDB, "protein or name CLA")
+    pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein or name CLA")
     prot = select(pdb, "protein")
     mH = mvalue_delta_sasa(; atoms=prot, sasas=PDBTools.creamer_delta_sasa(prot))
     prot = select(pdb, "protein and not element H")
@@ -465,9 +465,9 @@ end
 end
 
 @testitem "transfer free energy" begin
+    using LazyArtifacts
     using PDBTools
     using ShowMethodTesting
-    dir = @__DIR__
 
     #
     # Server results for 2RN2_clean.pdb
@@ -484,7 +484,7 @@ end
         "Trehalose" => (bb=2462, sc=-1341, tot=1121),
         "urea" => (bb=-1548, sc=445, tot=-1104),
     )
-    p = read_pdb(joinpath(dir, "2RN2_clean.pdb"))
+    p = read_pdb(PDBTools.test_file("2RN2_clean.pdb"))
     for (cosolvent, vals)  in pairs(server_result)
         t = transfer_free_energy(p, cosolvent)
         @test t.bb ≈ 1e-3*vals.bb atol=0.1
@@ -558,7 +558,7 @@ end
     rm(tmp; force=true)
 
     # Tests for MoeserHorinekApp model
-    cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
+    cm = CreamerDenaturedModel(read_pdb(PDBTools.test_file("structure.pdb"), "protein"))
     for c in filter(!=("urea"), keys(PDBTools.cosolvent_column_MoeserHorinekApp))
         c_ab = mvalue(cm, c; model=AutonBolen)
         c_mhapp = mvalue(cm, c; model=MoeserHorinekApp)
@@ -566,7 +566,7 @@ end
     end
 
     # Tests for Accessibility model
-    cm = CreamerDenaturedModel(read_pdb(PDBTools.TESTPDB, "protein"))
+    cm = CreamerDenaturedModel(read_pdb(PDBTools.test_file("structure.pdb"), "protein"))
     for c in keys(PDBTools.cosolvent_column_Accessibility)
         c_ab = mvalue(cm, c; model=AutonBolen).tot
         c_acc = mvalue(cm, c; model=Accessibility).tot
@@ -577,8 +577,8 @@ end
     # Tests for MTRecord model (native structure vs. its own fully-extended chain).
     # For urea, Guinn et al. (Table S3) themselves use this exact "extended beta (all-trans)"
     # reference state, so these reproduce the paper's own predicted m-values well.
-    RN2 = read_pdb(joinpath(dir, "2RN2_native.pdb"), "protein")
-    MJC = read_pdb(joinpath(dir, "1MJC_clean.pdb"))
+    RN2 = read_pdb(PDBTools.test_file("2RN2_native.pdb"), "protein")
+    MJC = read_pdb(PDBTools.test_file("1MJC_clean.pdb"))
     rec_m = MTRecordDenaturedModel(RN2)
     c_rec = mvalue(rec_m, "urea").tot
     @test c_rec ≈ -2.2 rtol = 0.15
@@ -655,7 +655,7 @@ end
     @test_throws "cosolvents" tfe_n2 + tfe_n
 
     # Test error path
-    pdb = read_pdb(PDBTools.TESTPDB, "protein or resname TMAO")
+    pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein or resname TMAO")
     @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
     @test_throws "residue TMAO" transfer_free_energy(pdb, "urea")
 
@@ -686,6 +686,7 @@ end
 end
 
 @testitem "Record transfer model atom type mapping" begin
+    using LazyArtifacts
     using PDBTools
     using PDBTools: record_surface_type, model_combination_rule
     using ShowMethodTesting
@@ -736,7 +737,7 @@ end
 
     # MTRecordDenaturedModel needs a real backbone (to build the extended chain from),
     # unlike the synthetic, disconnected `ats` used above.
-    pep = read_pdb(PDBTools.TESTPDB, "protein and residue 1 to 5")
+    pep = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue 1 to 5")
     m = MTRecordDenaturedModel(pep)
     @test parse_show(m) ≈ "MTRecordDenaturedModel wrapping a $(length(pep))-atom native/extended chain pair"
     @test length(m.native_chain) == length(pep)
@@ -846,9 +847,9 @@ end
 end
 
 @testitem "tfe_dimer_tests" begin
+    using LazyArtifacts
     using PDBTools
-    dir = @__DIR__
-    dimer = read_pdb(joinpath(dir, "2rmm_dimer.pdb"))
+    dimer = read_pdb(PDBTools.test_file("2rmm_dimer.pdb"))
     tfe = transfer_free_energy(dimer, "tmao"; model=Accessibility)
     @test tfe.tot ≈ 1.4553362
 
