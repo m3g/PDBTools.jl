@@ -21,7 +21,8 @@ Where the `tot`, `bb` and `sc` fields contain, respectively, the total, backbone
 The `MValue` object contains, additionally, the contribution of the side chain and backbone of 
 each amino acid residue type for the *m*-value, in the `residue_contributions_bb` and `residue_contributions_sc` fields.
 
-We can set the `beta` fields (for example) of the atoms as the residue contributions:
+We can set the `beta` fields (for example) of the atoms as the residue contributions, and observe 
+the contributions drawn on top of the structure:
 ```@example mvalue
 for (ir, r) in enumerate(eachresidue(native_state)) # iterate over residues
     # total contribution of residue ir
@@ -30,12 +31,11 @@ for (ir, r) in enumerate(eachresidue(native_state)) # iterate over residues
         at.beta = c_residue
     end
 end
-write_pdb("contrib.pdb", native_state)
+phe_and_trp = select(native_state, "resname PHE TRP")
+visualize(
+    native_state => (color_by=beta.(native_state),),
+    phe_and_trp => (style=:ballandstick, color_by=beta.(phe_and_trp))
+)
 ```
-
-And with that get an image (here produced with VMD) of the contributions of the residues
-to the transfer free energies:
-
-```@raw html
-<img src="../../assets/mvalue.png" width=30%>
-```
+Where we can see that Phe53 is a buried hydrophobic residue with the most important contribution to the 
+denaturation m-value. 
