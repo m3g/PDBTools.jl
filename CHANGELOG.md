@@ -10,8 +10,11 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 4.0.1-DEV
+------------- 
+
 Version 4.0.0
---------------
+------------- 
 - ![BREAKING][badge-breaking] `read_pdb`, `read_mmcif` and `wget` return a `Structure`, which behaves as a vector of atoms and carries the unit cell read from the file (`CRYST1` or `_cell` fields). Selections, indexing with ranges, `filter` and `copy` of structures return structures, preserving the unit cell. Code that requires a concrete `Vector{<:Atom}` (instead of `AbstractVector{<:Atom}`) must be adapted, and the printed output of structures changed.
 - ![BREAKING][badge-breaking] The `unitcell` keyword argument of `contact_map`, `hydrogen_bonds`, `sasa_particles`, `visualize` and of the transfer free energy functions accepts `false` (default, no periodic boundary conditions), `true` (use the unit cell of the `Structure`), or a `UnitCell`. Matrices and vectors of box sides must be converted with `UnitCell(...)`.
 - ![BREAKING][badge-breaking] Requires Julia 1.11.
