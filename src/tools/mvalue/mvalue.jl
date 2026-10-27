@@ -88,7 +88,7 @@ _AtomSelector(f::Function) = _AtomSelector(f, Ref{Residue}())
         final_state::AbstractVector{<:Atom},
         cosolvent::AbstractString;
         sel::Union{String,Function}=all,
-        model::Type{<:MValueModel}=AutonBolen,
+        model::Type{<:MValueModel}=Accessibility,
         backbone::Function = isbackbone,
         sidechain::Function = issidechain,
         parallel:Bool = true,
@@ -110,7 +110,7 @@ $(_available_cosolvents())
 # Keyword Arguments
 
 - `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
-- `model::Type{<:MValueModel}=AutonBolen`. 
+- `model::Type{<:MValueModel}=Accessibility`. 
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
 - `parallel:Bool = true`: Set parallelization, requires starting Julia multithreaded.
@@ -152,7 +152,7 @@ function mvalue(
     final_state::AbstractVector{<:Atom},
     cosolvent::AbstractString;
     sel::Union{String,Function}=all,
-    model::Type{<:MValueModel}=AutonBolen,
+    model::Type{<:MValueModel}=Accessibility,
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
     parallel::Bool=true,
@@ -194,7 +194,7 @@ end
         sasa_final::SASA{CreamerUnitedAtomRadii},
         cosolvent::AbstractString;
         sel::Union{String,Function}=all,
-        model::Type{<:MValueModel}=AutonBolen,
+        model::Type{<:MValueModel}=Accessibility,
         backbone::F1=isbackbone,
         sidechain::F2=issidechain,
         parallel::Bool=true,
@@ -209,7 +209,7 @@ function mvalue(
     sasa_final::SASA{CreamerUnitedAtomRadii},
     cosolvent::AbstractString;
     sel::Union{String,Function}=all,
-    model::Type{<:MValueModel}=AutonBolen,
+    model::Type{<:MValueModel}=Accessibility,
     backbone::F1=isbackbone,
     sidechain::F2=issidechain,
     parallel::Bool=true,

@@ -6,18 +6,18 @@
     MJC_native = read_pdb(PDBTools.test_file("1MJC_native.pdb"), "protein")
     MJC_desnat = read_pdb(PDBTools.test_file("1MJC_straight.pdb"), "protein")
 
-    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea")
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; model=AutonBolen)
     @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
     @test isapprox(r_1MJC.bb, -1.405; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.071; atol=1e-2)
 
     # Confirm that now cosolvent selection is not case-sensitive
-    r_1MJC = mvalue(MJC_native, MJC_desnat, "Urea")
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "Urea"; model=AutonBolen)
     @test isapprox(r_1MJC.tot, -1.334; atol=1e-2)
 
     # test non-parallel vs. parallel calculations
-    ms = mvalue(MJC_native, MJC_desnat, "urea"; parallel=false)
-    mp = mvalue(MJC_native, MJC_desnat, "urea"; parallel=true)
+    ms = mvalue(MJC_native, MJC_desnat, "urea"; parallel=false, model=AutonBolen)
+    mp = mvalue(MJC_native, MJC_desnat, "urea"; parallel=true, model=AutonBolen)
     @test ms.tot ≈ mp.tot
 
     # Test show method
@@ -42,7 +42,7 @@
     @test m_load.cosolvent == r_1MJC.cosolvent
     rm(tmp; force=true)
 
-    r_1MJC = mvalue(MJC_native, MJC_desnat, "tmao")
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "tmao"; model=AutonBolen)
     @test isapprox(r_1MJC.tot, 2.5198; atol=1e-2)
     @test isapprox(r_1MJC.bb, 3.2425; atol=1e-2)
     @test isapprox(r_1MJC.sc, -0.7227; atol=1e-2)
@@ -80,42 +80,42 @@
     @test isapprox(r_1MJC.sc, -0.52656; atol=1e-2)
 
     # Provide a selection
-    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
+    r_1MJC = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic", model=AutonBolen)
     @test isapprox(r_1MJC.tot, -0.01512; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.10998993; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.09485909; atol=1e-2)
 
     # Test selection additivity
-    r0 = mvalue(MJC_native, MJC_desnat, "urea")
-    r1 = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic")
-    r2 = mvalue(MJC_native, MJC_desnat, "urea"; sel="not acidic")
+    r0 = mvalue(MJC_native, MJC_desnat, "urea"; model=AutonBolen)
+    r1 = mvalue(MJC_native, MJC_desnat, "urea"; sel="acidic", model=AutonBolen)
+    r2 = mvalue(MJC_native, MJC_desnat, "urea"; sel="not acidic", model=AutonBolen)
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
-    rbb = mvalue(MJC_native, MJC_desnat, "urea"; sel="backbone")
+    rbb = mvalue(MJC_native, MJC_desnat, "urea"; sel="backbone", model=AutonBolen)
     @test r0.bb ≈ rbb.tot
     @test r0.bb ≈ rbb.bb
     @test rbb.sc ≈ 0.0 atol=1e-10
-    rsc = mvalue(MJC_native, MJC_desnat, "urea"; sel="sidechain")
+    rsc = mvalue(MJC_native, MJC_desnat, "urea"; sel="sidechain", model=AutonBolen)
     @test r0.sc ≈ rsc.tot
     @test r0.sc ≈ rsc.sc
     @test rsc.bb ≈ 0.0 atol=1e-10
 
     # Provide a selection using SASAs
-    r_1MJC = mvalue(sn, sd, "urea"; sel="acidic")
+    r_1MJC = mvalue(sn, sd, "urea"; sel="acidic", model=AutonBolen)
     @test isapprox(r_1MJC.tot, -0.01512; atol=1e-2)
     @test isapprox(r_1MJC.bb, -0.10998993; atol=1e-2)
     @test isapprox(r_1MJC.sc, 0.09486909; atol=1e-2)
 
     # Test selection additivity
-    r1 = mvalue(sn, sd, "urea"; sel="acidic")
-    r2 = mvalue(sn, sd, "urea"; sel="not acidic")
+    r1 = mvalue(sn, sd, "urea"; sel="acidic", model=AutonBolen)
+    r2 = mvalue(sn, sd, "urea"; sel="not acidic", model=AutonBolen)
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
 
     # Some errors
     p1 = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue < 10")
     p2 = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residue < 11")
-    @test_throws "same number of residues" mvalue(p1, p2, "urea") # different number of residues
+    @test_throws "same number of residues" mvalue(p1, p2, "urea"; model=AutonBolen) # different number of residues
 
     p1 = select(p1, "protein")
     p2 = copy.(p1)
@@ -123,19 +123,19 @@
     for at in rs[7]
         at.resname = "ASP"
     end
-    @test_throws "same type" mvalue(p1, p2, "urea") # different number of residues
+    @test_throws "same type" mvalue(p1, p2, "urea"; model=AutonBolen) # different number of residues
 
     # Support for periodic boundary conditions
     no_pbc = read_pdb(PDBTools.test_file("no_pbc.pdb"), "protein")
     pbc = read_pdb(PDBTools.test_file("pbc.pdb"), "protein")
     uc = UnitCell([107.845, 107.845, 107.845])
-    @test transfer_free_energy(no_pbc, "urea").tot ≈ 
-          transfer_free_energy(pbc, "urea"; unitcell=uc).tot
-    @test mvalue(pbc, pbc, "urea"; unitcell=uc).tot ≈ 0.0 atol=1e-5
+    @test transfer_free_energy(no_pbc, "urea"; model=AutonBolen).tot ≈ 
+          transfer_free_energy(pbc, "urea"; unitcell=uc, model=AutonBolen).tot
+    @test mvalue(pbc, pbc, "urea"; unitcell=uc, model=AutonBolen).tot ≈ 0.0 atol=1e-5
 
     # Error if wrong atomic radii was provided
     s = sasa_particles(no_pbc)
-    @test_throws "must use CreamerUnitedAtomRadii" mvalue(s, s, "urea")
+    @test_throws "must use CreamerUnitedAtomRadii" mvalue(s, s, "urea"; model=AutonBolen)
 
 end
 
@@ -313,7 +313,7 @@ end
             m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=MJC_clean, sasas=sasa_1MJC_clean, type=ig)
             @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
             cm = CreamerDenaturedModel(MJC_clean, ig)
-            m = mvalue(cm, cos)
+            m = mvalue(cm, cos; model=AutonBolen)
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
             @test sum(m.residue_contributions_bb) + sum(m.residue_contributions_sc) ≈ 1e-3 * dg[ig] atol = 0.1
         end
@@ -335,7 +335,7 @@ end
             m = mvalue_delta_sasa(model=AutonBolen, cosolvent=cos, atoms=RN2_clean, sasas=sasa_2RN2_clean, type=ig)
             @test m.tot ≈ 1e-3 * dg[ig] rtol = 0.1
             cm = CreamerDenaturedModel(RN2_clean, ig)
-            m = mvalue(cm, cos)
+            m = mvalue(cm, cos; model=AutonBolen)
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
     end
@@ -486,49 +486,49 @@ end
     )
     p = read_pdb(PDBTools.test_file("2RN2_clean.pdb"))
     for (cosolvent, vals)  in pairs(server_result)
-        t = transfer_free_energy(p, cosolvent)
+        t = transfer_free_energy(p, cosolvent; model=AutonBolen)
         @test t.bb ≈ 1e-3*vals.bb atol=0.1
         @test t.sc ≈ 1e-3*vals.sc atol=0.1
         @test t.tot ≈ 1e-3*vals.tot atol=0.1
         # from SASAs
         s = sasa_particles(CreamerUnitedAtomRadii, p)
-        t = transfer_free_energy(s, cosolvent)
+        t = transfer_free_energy(s, cosolvent; model=AutonBolen)
         @test t.bb ≈ 1e-3*vals.bb atol=0.1
         @test t.sc ≈ 1e-3*vals.sc atol=0.1
         @test t.tot ≈ 1e-3*vals.tot atol=0.1
     end
 
     # Test selection additivity
-    r0 = transfer_free_energy(p, "urea")
-    r1 = transfer_free_energy(p, "urea"; sel="polar")
-    r2 = transfer_free_energy(p, "urea"; sel="not polar")
+    r0 = transfer_free_energy(p, "urea"; model=AutonBolen)
+    r1 = transfer_free_energy(p, "urea"; sel="polar", model=AutonBolen)
+    r2 = transfer_free_energy(p, "urea"; sel="not polar", model=AutonBolen)
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
 
     # Provide a selection using SASAs
     s = sasa_particles(CreamerUnitedAtomRadii, p)
-    r0 = transfer_free_energy(s, "urea")
-    r1 = transfer_free_energy(s, "urea"; sel="polar")
-    r2 = transfer_free_energy(s, "urea"; sel="not polar")
+    r0 = transfer_free_energy(s, "urea"; model=AutonBolen)
+    r1 = transfer_free_energy(s, "urea"; sel="polar", model=AutonBolen)
+    r2 = transfer_free_energy(s, "urea"; sel="not polar", model=AutonBolen)
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
 
     # Test selection additivity
-    r1 = transfer_free_energy(s, "urea"; sel="polar")
-    r2 = transfer_free_energy(s, "urea"; sel="not polar")
+    r1 = transfer_free_energy(s, "urea"; sel="polar", model=AutonBolen)
+    r2 = transfer_free_energy(s, "urea"; sel="not polar", model=AutonBolen)
     @test r0.nresidues == r1.nresidues + r2.nresidues
     @test r0.tot ≈ r1.tot + r2.tot
-    rbb = transfer_free_energy(s, "urea"; sel="backbone")
+    rbb = transfer_free_energy(s, "urea"; sel="backbone", model=AutonBolen)
     @test r0.bb ≈ rbb.tot
     @test r0.bb ≈ rbb.bb
     @test rbb.sc ≈ 0.0 atol=1e-10
-    rsc = transfer_free_energy(s, "urea"; sel="sidechain")
+    rsc = transfer_free_energy(s, "urea"; sel="sidechain", model=AutonBolen)
     @test r0.sc ≈ rsc.tot
     @test r0.sc ≈ rsc.sc
     @test rsc.bb ≈ 0.0 atol=1e-10
 
     # Test show method
-    t = transfer_free_energy(p, "urea")
+    t = transfer_free_energy(p, "urea"; model=AutonBolen)
     @test parse_show(t; repl=Dict(r"PDBTools." => "")) ≈ """
         PDBTools.TransferFreeEnergy{AutonBolen} - 155 residues to 1M "urea".
         Total transfer free energy: -1.125963 kcal mol⁻¹
@@ -614,21 +614,20 @@ end
     # atom count, is what matters), so this needs a structure where the correction is
     # known to be non-negligible: the 3CNA tetramer.
     cna = wget("3CNA", "protein"; assembly=1)
-    t_default = transfer_free_energy(cna, "tmao") # model=AutonBolen (CreamerUnitedAtomRadii)
-    t_excl = transfer_free_energy(cna, "tmao"; exclude_cavities=true)
+    t_default = transfer_free_energy(cna, "tmao"; model=AutonBolen) # model=AutonBolen (CreamerUnitedAtomRadii)
+    t_excl = transfer_free_energy(cna, "tmao"; exclude_cavities=true, model=AutonBolen)
     @test t_default.tot != t_excl.tot
     @test t_excl.tot ≈ transfer_free_energy(
-        sasa_particles(CreamerUnitedAtomRadii, select(cna, isprotein); exclude_cavities=true), "tmao",
-    ).tot
+        sasa_particles(CreamerUnitedAtomRadii, select(cna, isprotein); exclude_cavities=true), "tmao",; model=AutonBolen).tot
 
     # radii_set is meaningless outside model=MTRecord and must error, not silently do nothing.
-    @test_throws "only meaningful for model=MTRecord" transfer_free_energy(cna, "tmao"; radii_set=:set1)
+    @test_throws "only meaningful for model=MTRecord" transfer_free_energy(cna, "tmao"; radii_set=:set1, model=AutonBolen)
 
     # CreamerDenaturedModel must also accept exclude_cavities/cavity_dot_cutoff, and they
     # must actually change its output (default is false, unlike MTRecordDenaturedModel).
     cm_default = CreamerDenaturedModel(cna)
     cm_excl = CreamerDenaturedModel(cna; exclude_cavities=true)
-    @test mvalue(cm_default, "tmao").tot != mvalue(cm_excl, "tmao").tot
+    @test mvalue(cm_default, "tmao"; model=AutonBolen).tot != mvalue(cm_excl, "tmao"; model=AutonBolen).tot
 
     # The paper has no equivalent extended-chain validation set for betaine (Table S3 is
     # urea-only), so these are regression checks against the model's own output, not
@@ -656,8 +655,8 @@ end
 
     # Test error path
     pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein or resname TMAO")
-    @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea")
-    @test_throws "residue TMAO" transfer_free_energy(pdb, "urea")
+    @test_throws "Creamer united atom" transfer_free_energy(pdb, "urea"; model=AutonBolen)
+    @test_throws "residue TMAO" transfer_free_energy(pdb, "urea"; model=AutonBolen)
 
     # Test available cossolvents string
     using InteractiveUtils: subtypes
@@ -681,7 +680,7 @@ end
 
     # Error if wrong atomic radii was provided
     s = sasa_particles(pdb)
-    @test_throws "must use CreamerUnitedAtomRadii" transfer_free_energy(s, "urea")
+    @test_throws "must use CreamerUnitedAtomRadii" transfer_free_energy(s, "urea"; model=AutonBolen)
 
 end
 

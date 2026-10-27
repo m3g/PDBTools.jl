@@ -505,7 +505,7 @@ function Base.show(io::IO, m::CreamerDenaturedModel)
 end
 
 """
-    mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=AutonBolen)
+    mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=Accessibility)
 
 Computes an estimate of the effect of a cosolvent on the m-value of denaturation of a protein.
 
@@ -517,15 +517,15 @@ julia> using PDBTools, LazyArtifacts
 julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> m = mvalue(CreamerDenaturedModel(prot), "urea")
-MValue{AutonBolen} - 104 residues - cosolvent: "urea"
-    Total m-value: -1.290518 kcal mol⁻¹
-    Backbone contributions: -1.3936301 kcal mol⁻¹
-    Side-chain contributions: 0.10311211 kcal mol⁻¹
+MValue{Accessibility} - 104 residues - cosolvent: "urea"
+    Total m-value: -1.3231322 kcal mol⁻¹
+    Backbone contributions: -0.6949058 kcal mol⁻¹
+    Side-chain contributions: -0.62822634 kcal mol⁻¹
 
 ```
 
 """
-function mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=AutonBolen)
+function mvalue(m::CreamerDenaturedModel, cosolvent::AbstractString; model=Accessibility)
     cosolvent = lowercase(cosolvent)
     creamer_sasas = _sasa_parameterization(m.sasa_parameterization)
     residues = collect(eachresidue(m.sasa_atoms.particles))
@@ -569,30 +569,30 @@ end
     """
 
     # With original Creamer SASA parameterization (default)
-    m = mvalue(CreamerDenaturedModel(prot, 1; sasa_parameterization=:original), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 1; sasa_parameterization=:original), "urea"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [-0.6819081277036511, -0.7149675621180843, 0.0330594344144333]
-    m = mvalue(CreamerDenaturedModel(prot, 2; sasa_parameterization=:original), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 2; sasa_parameterization=:original), "urea"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [-1.290518033485419, -1.3936301188484532, 0.10311208536303434]
-    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:original), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:original), "urea"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [-1.899127986615752, -2.0722927071163655, 0.17316472050061354]
     m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:original), "urea"; model=MoeserHorinek)
     @test [m.tot, m.bb, m.sc] ≈ [-1.8015362919415367, -1.0270235184537553, -0.7745127734877815]
-    m = mvalue(CreamerDenaturedModel(prot; sasa_parameterization=:original), "tmao")
+    m = mvalue(CreamerDenaturedModel(prot; sasa_parameterization=:original), "tmao"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [2.0265626662789282, 3.216069534867667, -1.1895068685887387]
 
     @test_throws "Type of Creamer" CreamerDenaturedModel(prot, 4)
     @test_throws "either :cath_s20 or :original" CreamerDenaturedModel(prot; sasa_parameterization=:wrong)
 
     # With :cath_s20 ASA parameterization
-    m = mvalue(CreamerDenaturedModel(prot, 1; sasa_parameterization=:cath_s20), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 1; sasa_parameterization=:cath_s20), "urea"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [-0.7723286405787043, -0.75794495873702,-0.014383681841684322]
-    m = mvalue(CreamerDenaturedModel(prot, 2; sasa_parameterization=:cath_s20), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 2; sasa_parameterization=:cath_s20), "urea"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [-1.4574226968785555, -1.49763370887446, 0.04021101199590444]
-    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:cath_s20), "urea")
+    m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:cath_s20), "urea"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [-2.1425168076484304, -2.2373225098073335, 0.09480570215890308]
     m = mvalue(CreamerDenaturedModel(prot, 3; sasa_parameterization=:cath_s20), "urea"; model=MoeserHorinek)
     @test [m.tot, m.bb, m.sc] ≈ [-1.833589330598673, -1.0959043204679502, -0.7376850101307229]
-    m = mvalue(CreamerDenaturedModel(prot; sasa_parameterization=:cath_s20), "tmao")
+    m = mvalue(CreamerDenaturedModel(prot; sasa_parameterization=:cath_s20), "tmao"; model=AutonBolen)
     @test [m.tot, m.bb, m.sc] ≈ [2.4056443218395076, 3.45607782276105, -1.0504335009215424]
 
 end
