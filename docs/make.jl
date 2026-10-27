@@ -24,8 +24,10 @@ makedocs(
     format = Documenter.HTML(top_menu = true, size_threshold_ignore = ["visualization.md"]),
     sitename = "PDBTools.jl",
     pages = [
-        "Home" => "index.md",
-        "Migrating to 4.0" => "migration.md",
+        "Home" => Any[
+            "Overview" => "index.md",
+            "Migrating to 4.0" => "migration.md",
+        ],
         "Getting started" => Any[
             "Read and Write" => "readwrite.md",
             "Structures and unit cells" => "structure.md",

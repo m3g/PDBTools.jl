@@ -105,7 +105,7 @@ $(_available_cosolvents())
 
 # Keyword Arguments (optional)
 
-- `model::Type{<:MValueModel}=AutonBolen`: The model to use for the calculation. 
+- `model::Type{<:MValueModel}=Accessibility`: The model to use for the calculation. 
 - `sel::Union{String,Function}=all`: Selection of atoms to consider in the calculation. Can be a selection string or a function that takes an `Atom` and returns a `Bool`.
 - `backbone::Function = PDBTools.isbackbone`: Function to identify backbone atoms.
 - `sidechain::Function = PDBTools.issidechain`: Function to identify side chain atoms.
@@ -150,7 +150,7 @@ transfer_free_energy(prot, "urea")
 function transfer_free_energy(
     atoms::AbstractVector{<:Atom},
     cosolvent::AbstractString;
-    model::Type{<:MValueModel}=AutonBolen,
+    model::Type{<:MValueModel}=Accessibility,
     backbone::F1=isbackbone,
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,
@@ -187,7 +187,7 @@ function transfer_free_energy(
 end
 
 function transfer_free_energy(sasa_ats::SASA{T1}, cosolvent; kargs...) where {T1}
-    model = get(kargs, :model, AutonBolen)
+    model = get(kargs, :model, Accessibility)
     expected = nameof(_radii_of_model(model))
     throw(ArgumentError("""\n
         To compute transfer free energies with the $(modelname(model)) model, the SASA computation
@@ -207,7 +207,7 @@ end
     transfer_free_energy(
         sasa_ats::SASA{CreamerUnitedAtomRadii},
         cosolvent::AbstractString;
-        model::Type{<:MValueModel}=AutonBolen,
+        model::Type{<:MValueModel}=Accessibility,
         backbone::F1=isbackbone,
         sel::Union{String,Function}=all,
         sidechain::F2=issidechain,
@@ -222,7 +222,7 @@ have been computed with `CreamerUnitedAtomRadii` radii.
 function transfer_free_energy(
     sasa_ats::SASA{CreamerUnitedAtomRadii},
     cosolvent::AbstractString;
-    model::Type{<:MValueModel}=AutonBolen,
+    model::Type{<:MValueModel}=Accessibility,
     backbone::F1=isbackbone,
     sel::Union{String,Function}=all,
     sidechain::F2=issidechain,

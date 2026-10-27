@@ -27,6 +27,13 @@ Typically, these models are used to obtain the effect of cosolvent on the struct
 but the current implementation allows the practical use of these functions to compute *m*-values of 
 more general transformations, as described in the examples.
 
+!!! note "Default model"
+    The default model of `transfer_free_energy` and `mvalue` is `Accessibility`, which we 
+    currently consider to provide the best estimates. The default model may change in future 
+    versions, as the models are improved. To obtain results that do not depend on the version
+    of the package, set the model explicitly, with the `model` keyword argument (e.g. 
+    `model=AutonBolen`).
+
 The transfer free energy of a protein from water to a 1M solution of a cosolvent can be estimated
 with the `transfer_free_energy` function:
 
