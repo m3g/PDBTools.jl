@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 4.0.2-DEV
+------------- 
+
 Version 4.0.1
 ------------- 
 - ![INFO][badge-info] The default model of `transfer_free_energy` and `mvalue` is now `Accessibility` (it was `AutonBolen`), which we currently consider to provide the best estimates. The default model may change in future versions: set `model` explicitly for results that do not depend on the version of the package. The `"urea-app"` and `"urea-mh"` cosolvents are available only with `model=AutonBolen`.
