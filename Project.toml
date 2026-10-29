@@ -1,6 +1,6 @@
 name = "PDBTools"
 uuid = "e29189f1-7114-4dbd-93d0-c5673a921a58"
-version = "4.0.2-DEV"
+version = "4.1.0-DEV"
 authors = ["Leandro Martinez <lmartine@unicamp.br>"]
 
 [deps]
@@ -47,7 +47,7 @@ JSON = "1.6.1"
 LazyArtifacts = "1.11"
 LinearAlgebra = "1.11"
 OrderedCollections = "1.6.3, 2"
-PDBToolsBase = "1"
+PDBToolsBase = "1.1"
 Plots = "1.39"
 PrecompileTools = "1.2.1"
 Printf = "1.11"

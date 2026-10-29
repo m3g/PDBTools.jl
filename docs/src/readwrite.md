@@ -72,6 +72,44 @@ write_mmcif
 The `field_assignment` keyword, as explained in the [field assignment](@ref field_assignment) section,
 can also be used with `write_mmcif`.
 
+The atoms are numbered sequentially in the written files (1, 2, ...). If `atoms` is a 
+[`Structure`](@ref), its metadata (unit cell, title and connectivity) is also written: see 
+[Structures and unit cells](@ref structure-metadata). The connectivity can be skipped with 
+`connectivity=false`.
+
+## Read and write xyz files
+
+Files in the xyz format are read with `read_xyz` and written with `write_xyz`:
+
+```@example read_write
+ethanol = read_xyz(PDBTools.test_file("ethanol.xyz"))
+```
+
+The first column of the file is stored in the `name` field of the atoms (and the element, if 
+recognized, in the `pdb_element` field), and the comment line is the title of the structure:
+
+```@example read_write
+ethanol.title
+```
+
+Structures read from other formats can be written as xyz files, optionally with a selection. The
+`name` of each atom is written in the first column, such that reading and writing xyz files 
+preserves their content:
+
+```@example read_write
+tmpfile = tempname() * ".xyz"
+write_xyz(tmpfile, read_pdb(PDBTools.test_file("ethanol.pdb")), "not element H")
+print(read(tmpfile, String))
+```
+
+Files with multiple frames are read as multiple models (see [`eachmodel`](@ref)), and the models
+of a structure are written as different frames.
+
+```@docs
+read_xyz
+write_xyz
+```
+
 ## Get structure from the Protein Data Bank
 
 ```@docs

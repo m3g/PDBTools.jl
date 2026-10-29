@@ -10,8 +10,13 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
-Version 4.0.2-DEV
+Version 4.1.0-DEV
 ------------- 
+- ![FEATURE][badge-feature] `read_xyz` and `write_xyz` read and write files in the xyz format (from PDBToolsBase 1.1), with support for selection strings. The first column is read into, and written from, the `name` field of the atoms. Multiple frames are read as, and written from, different models.
+- ![FEATURE][badge-feature] `connectivity` property of `Structure`s: the bonds read from the `CONECT` records of PDB files or the `_geom_bond` fields of mmCIF files (`connectivity[i]` contains the indices of the atoms bonded to the atom with index `i`). `write_pdb` and `write_mmcif` write the connectivity of structures, unless `connectivity=false`.
+- ![FEATURE][badge-feature] `title` property of `Structure`s: the title read from the `TITLE` records of PDB files, the `_struct.title` field of mmCIF files, or the comment line of xyz files, and written by `write_pdb`, `write_mmcif` and `write_xyz`.
+- ![ENHANCEMENT][badge-enhancement] `write_pdb` numbers the atoms sequentially in the file (serial numbers 1, 2, ...), as `write_mmcif` does, instead of writing their indices.
+- ![INFO][badge-info] Requires PDBToolsBase 1.1.
 
 Version 4.0.1
 ------------- 

@@ -33,10 +33,10 @@ import PDBToolsBase:
     isnonpolar, isnucleoside, ispolar, isprotein, ispurine, ispyrimidine, issidechain, iswater,
     lattice_to_matrix, load, mass, matrix_to_lattice, maxmin, model, moveto!, name, 
     nucleoside_residues, occup, oneletter, pdb_element, position, positions, printatom, 
-    protein_residues, read_mmcif, read_pdb, read_unitcell, remove_custom_elements!, 
+    protein_residues, read_mmcif, read_pdb, read_unitcell, read_xyz, remove_custom_elements!, 
     remove_custom_nucleoside_residues!, remove_custom_protein_residues!, residue, 
     residue_residue_distance, residuename, resname, resnum, rmsd, save, segname, set_position!, 
-    threeletter, wrap, wrap_to_first, write_mmcif, write_pdb,
+    threeletter, wrap, wrap_to_first, write_mmcif, write_pdb, write_xyz,
     # internal names
     AbstractStructuralElement, EachStructuralElement, StringType, backbone_atoms, not_side_chain_atoms,
     _resolve_unitcell
@@ -50,6 +50,7 @@ export atomic_number, atomic_symbol, atomic_mass, position, set_position!
 
 export read_pdb, write_pdb, getseq, wget, edit!, oneletter, threeletter, residuename
 export read_mmcif, write_mmcif
+export read_xyz, write_xyz
 export Atom, printatom, index, index_pdb, name, beta, occup, charge, pdb_element
 export Structure, UnitCell
 @compat public MetaData
