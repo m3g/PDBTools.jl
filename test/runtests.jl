@@ -27,7 +27,8 @@ end
     Aqua.test_all(PDBTools;
         piracies=(treat_as_own=[
             PDBToolsBase.Atom, PDBToolsBase.read_pdb, PDBToolsBase.read_mmcif, PDBToolsBase.write_pdb,
-            PDBToolsBase.write_mmcif, PDBToolsBase.positions, PDBToolsBase.maxmin,
+            PDBToolsBase.write_mmcif, PDBToolsBase.read_xyz, PDBToolsBase.write_xyz,
+            PDBToolsBase.positions, PDBToolsBase.maxmin,
         ],),
     )
 end
