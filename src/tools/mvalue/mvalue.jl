@@ -341,4 +341,5 @@ end
 
 include("./transfer_free_energy.jl")
 include("./mvalue_exogenous.jl")
+include("./gmx_deprecated.jl")
 include("./testing/testing.jl")
