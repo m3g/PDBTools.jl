@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 4.1.1-DEV
 ------------- 
+- ![INFO][badge-info] The plotting extension requires Plots 1.40.8 or later (was 1.39): earlier versions use GR 0.72, which does not load on recent Linux systems (Ubuntu 26) that no longer provide `libxml2.so.2`.
 
 Version 4.1.0
 ------------- 
