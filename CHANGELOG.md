@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 4.1.1-DEV
 ------------- 
+- ![DEPRECATION][badge-deprecation] `gmx_delta_sasa_per_restype`, which computes the SASA with GROMACS, is deprecated and will be removed in a future breaking release. Use `delta_sasa_per_restype`, which uses the internal SASA implementation. Its tests run only if GROMACS is available, and GROMACS is no longer installed in CI.
 
 Version 4.1.0
 ------------- 

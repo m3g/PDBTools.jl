@@ -7,7 +7,7 @@ CollapsedDocStrings = true
 The following functions can be used to compute *m*-values from the variation of the SASA per residue 
 type, which allow the use of external tools to compute the SASA. This is used mostly for testing 
 purposes. The functions allow the use of SASAs obtained directly from the [Auton & Bolen server](http://best.bio.jhu.edu/mvalue/), or 
-from Gromacs SASA calculations. The `creamer_delta_sasa` function uses the same random coil models of the 
+from Gromacs SASA calculations (`gmx_delta_sasa_per_restype`, deprecated: use `delta_sasa_per_restype`). The `creamer_delta_sasa` function uses the same random coil models of the 
 server and same atom radii, providing the same results for unfolding m-values.
 
 ```@docs
