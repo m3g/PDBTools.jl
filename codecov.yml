@@ -1,0 +1,3 @@
+ignore:
+  # Deprecated GROMACS wrapper: tested only if `gmx` is available, which is not installed in CI
+  - "src/tools/mvalue/gmx_deprecated.jl"

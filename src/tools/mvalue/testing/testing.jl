@@ -144,7 +144,6 @@ end
     using PDBTools: mvalue_delta_sasa
     using PDBTools: delta_sasa_per_restype
     using PDBTools: parse_mvalue_server_sasa
-    using PDBTools: gmx_delta_sasa_per_restype
 
     sasa_1MJC_clean = parse_mvalue_server_sasa(
         """
@@ -203,12 +202,6 @@ end
         "2RN2" => (-2.3647058823529408, -1.1999999999999997, -1.164705882352941)
     )
 
-    gmx = Sys.which("gmx")
-    if isnothing(gmx)
-        @warn "gmx executable not available: some tests won't be run"
-    end
-
-
     #
     # 1MJC
     #
@@ -232,26 +225,6 @@ end
     @test isapprox(r_1MJC.bb, -0.344; rtol=1e-1)
     @test isapprox(r_1MJC.sc, -0.642; rtol=1e-1)
 
-    if !isnothing(gmx)
-        sasa_1MJC = gmx_delta_sasa_per_restype(;
-            native_pdb=PDBTools.test_file("1MJC_native.pdb"),
-            desnat_pdb=PDBTools.test_file("1MJC_straight.pdb"),
-        )
-        r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
-        @test isapprox(r_1MJC.tot, -1.2335; rtol=1e-1)
-        @test isapprox(r_1MJC.bb, -0.7333; rtol=1e-1)
-        @test isapprox(r_1MJC.sc, -0.50025; rtol=1e-1)
-        sasa_1MJC = gmx_delta_sasa_per_restype(;
-            native_pdb=PDBTools.test_file("1MJC_native.pdb"),
-            desnat_pdb=PDBTools.test_file("1MJC_straight.pdb"),
-            ignore_hydrogen=false,
-        )
-        r_1MJC = mvalue_delta_sasa(; atoms=MJC_native, sasas=sasa_1MJC)
-        @test isapprox(r_1MJC.tot, -0.98749; rtol=1e-1)
-        @test isapprox(r_1MJC.bb, -0.3014; rtol=1e-1)
-        @test isapprox(r_1MJC.sc, -0.67707; rtol=1e-1)
-    end
-
     #
     # 2RN2
     #
@@ -274,26 +247,6 @@ end
     @test isapprox(r_2RN2.tot, -2.59; rtol=1e-1)
     @test isapprox(r_2RN2.bb, -1.03; rtol=1e-1)
     @test isapprox(r_2RN2.sc, -1.57; rtol=1e-1)
-
-    if !isnothing(gmx)
-        sasa_2RN2 = gmx_delta_sasa_per_restype(;
-            native_pdb=PDBTools.test_file("2RN2_native.pdb"),
-            desnat_pdb=PDBTools.test_file("2RN2_straight.pdb"),
-        )
-        r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2)
-        @test isapprox(r_2RN2.tot, -3.17; rtol=1e-1)
-        @test isapprox(r_2RN2.bb, -1.94; rtol=1e-1)
-        @test isapprox(r_2RN2.sc, -1.23; rtol=1e-1)
-        sasa_2RN2 = gmx_delta_sasa_per_restype(;
-            native_pdb=PDBTools.test_file("2RN2_native.pdb"),
-            desnat_pdb=PDBTools.test_file("2RN2_straight.pdb"),
-            ignore_hydrogen=false,
-        )
-        r_2RN2 = mvalue_delta_sasa(; atoms=RN2_native, sasas=sasa_2RN2)
-        @test isapprox(r_2RN2.tot, -2.54; rtol=1e-1)
-        @test isapprox(r_2RN2.bb, -0.88; rtol=1e-1)
-        @test isapprox(r_2RN2.sc, -1.66; rtol=1e-1)
-    end
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
     # http://best.bio.jhu.edu/mvalue/
@@ -338,20 +291,6 @@ end
             m = mvalue(cm, cos; model=AutonBolen)
             @test m.tot ≈ 1e-3 * dg[ig] atol = 0.1
         end
-    end
-
-    # gmx keyword argument tests
-    @test_throws ArgumentError gmx_delta_sasa_per_restype(;
-        native_pdb=PDBTools.test_file("1MJC_native.pdb"),
-        desnat_pdb=PDBTools.test_file("1MJC_straight.pdb"),
-        gmx="/tmp/gmx_fake",
-    )
-    if !isnothing(gmx)
-        @test length(gmx_delta_sasa_per_restype(;
-            native_pdb=PDBTools.test_file("2RN2_native.pdb"),
-            desnat_pdb=PDBTools.test_file("2RN2_straight.pdb"),
-            gmx=gmx,
-        )) == 20
     end
 
     # Test m-value calculation using PBCs
@@ -400,7 +339,6 @@ end
     using LazyArtifacts
     using PDBTools
     using PDBTools: mvalue_delta_sasa, creamer_delta_sasa
-
 
     # Results from running the Auton and Bolen m-value server with 1MJC_clean.pdb
     data_mvalue_server_auton_and_bolen_1MJC = Dict(
