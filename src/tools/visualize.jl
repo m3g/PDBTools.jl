@@ -103,6 +103,10 @@ View:
   on the geometric center of the atoms.
 - `unitcell_color="gray"`: color of the box edges.
 - `background="white"`: background color.
+- `rotate=()`: rotations of the initial view, as `(axis, angle)` pairs applied in order, with
+  `axis` one of `:x`, `:y` or `:z` (the axes of the screen) and `angle` in degrees. For example,
+  `rotate=[(:x, -60), (:y, 30)]` shows a slab of the `xy` plane in perspective. The view
+  starts along the `z` axis.
 - `width="100%"`, `height=400`: size of the view, in pixels if given as numbers.
 
 # Example
@@ -175,8 +179,15 @@ function visualize(
     background::AbstractString="white",
     width::Union{Integer,AbstractString}="100%",
     height::Union{Integer,AbstractString}=400,
+    rotate=(),
 )
     isempty(groups) && throw(ArgumentError("No atoms to visualize."))
+    for r in rotate
+        (r isa Tuple{Symbol,Real} && first(r) in (:x, :y, :z)) || throw(ArgumentError("""\n
+            Each rotation must be a tuple (axis, angle), with axis one of :x, :y or :z, and
+            the angle in degrees. Got: $(repr(r))
+        """))
+    end
     for (data, options) in groups
         valid = data isa VolumetricData ? _ISOSURFACE_OPTIONS : _GROUP_OPTIONS
         invalid = setdiff(keys(options), valid)
@@ -251,6 +262,9 @@ function visualize(
             function (atom, viewer) {
                 if (atom.label) { viewer.removeLabel(atom.label); delete atom.label; }
             });""")
+    end
+    for (axis, angle) in rotate
+        println(js, "viewer.rotate(", Float64(angle), ", ", _js_str("v" * string(axis)), ");") # axes of the screen
     end
     println(js, "viewer.zoomTo();")
     println(js, "viewer.render();")
@@ -605,6 +619,12 @@ end
     @test_throws ArgumentError visualize(atoms; unitcell=UnitCell([1, 2]))
     @test_throws ArgumentError visualize(atoms; unitcell=UnitCell([1, 2, 3]), unitcell_origin=:middle)
     @test_throws ArgumentError visualize(atoms; unitcell=UnitCell([1, 2, 3]), unitcell_origin=[0, 0])
+    # rotations of the initial view, before zooming
+    v = visualize(atoms; rotate=[(:x, -60), (:y, 30)])
+    @test occursin("viewer.rotate(-60.0, \"vx\");\nviewer.rotate(30.0, \"vy\");\nviewer.zoomTo();", v.html)
+    @test !occursin("viewer.rotate", visualize(atoms).html)
+    @test_throws ArgumentError visualize(atoms; rotate=[(:w, 30)])
+    @test_throws ArgumentError visualize(atoms; rotate=[(30, :x)])
     # mmCIF fields: long chain names, and quoted atom names
     atoms_long_chain = read_mmcif(PDBTools.test_file("long_chain_string.cif"))
     v = visualize(atoms_long_chain)
