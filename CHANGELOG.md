@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 4.1.1-DEV
 ------------- 
+- ![FEATURE][badge-feature] `visualize` takes a `rotate` keyword: rotations of the initial view, as `(axis, angle)` pairs about the axes of the screen (degrees), e.g. `rotate=[(:x, -60), (:y, 30)]`, to show a system in perspective. The view starts along `z`.
 - ![INFO][badge-info] The plotting extension requires Plots 1.40.8 or later (was 1.39): earlier versions use GR 0.72, which does not load on recent Linux systems (Ubuntu 26) that no longer provide `libxml2.so.2`.
 - ![DEPRECATION][badge-deprecation] `gmx_delta_sasa_per_restype`, which computes the SASA with GROMACS, is deprecated and will be removed in a future breaking release. Use `delta_sasa_per_restype`, which uses the internal SASA implementation. Its tests run only if GROMACS is available, and GROMACS is no longer installed in CI.
 
