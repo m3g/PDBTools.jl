@@ -10,6 +10,9 @@ PDBTools.jl Changelog
 [badge-fix]: https://img.shields.io/badge/Fix-purple.svg
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
+Version 4.2.1-DEV
+------------- 
+
 Version 4.2.0
 ------------- 
 - ![FEATURE][badge-feature] `visualize` takes a `rotate` keyword: rotations of the initial view, as `(axis, angle)` pairs about the axes of the screen (degrees), e.g. `rotate=[(:x, -60), (:y, 30)]`, to show a system in perspective. The view starts along `z`.
