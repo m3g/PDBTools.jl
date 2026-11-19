@@ -11,7 +11,8 @@ PDBTools.jl Changelog
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
 Version 4.2.1-DEV
-`ss`: secondary structure diagrams colored by per-residue properties (requires CairoMakie).
+- `ss`: secondary structure diagrams colored by per-residue properties (requires CairoMakie).
+- `helical_wheel`, `residue_values` and `hydrophobic_moment`: helical wheel diagrams.
 ------------- 
 
 Version 4.2.0
