@@ -156,15 +156,13 @@ include("./tools/visualize.jl")
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
 
+# Hammer-Aitoff projection and helical wheels
+include("./hammer_aitoff.jl")
+include("./helical_wheel.jl")
+
 # Legacy compatibility
 
 # Precompilation
 include("./package_internals/precompile.jl")
-
-# Branch hammer-aitoff
-include("./hammer_aitoff.jl")
-  
-# Branch helical-wheels
-include("./helical_wheel.jl")
 
 end

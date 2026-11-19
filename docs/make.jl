@@ -43,6 +43,8 @@ makedocs(
             "Solvent Accessible Area" => "sasa.md",
             "Coordinate manipulations" => "coordinates.md",
             "Visualization" => "visualization.md",
+            "Helical wheels" => "helical_wheels.md",
+            "Hammer-Aitoff projection" => "hammer_aitoff.md",
         ],
         "Transfer Free Energy" => Any[
             "Transfer Free Energy" => "mvalues/mvalue.md",

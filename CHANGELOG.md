@@ -11,9 +11,9 @@ PDBTools.jl Changelog
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
 Version 4.2.1-DEV
-- `hammer`, `hammeraitoff` and `plot_hammeraitoff`: Hammer-Aitoff projection of structures.
-- `helical_wheel`, `residue_values` and `hydrophobic_moment`: helical wheel diagrams.
 ------------- 
+- ![FEATURE][badge-feature] Helical wheel diagrams: `helical_wheel` computes the helical wheel of a helix (a `HelicalWheel`), with one value per residue of any property, given as values or computed from a structure; `plot(wheel)` draws it, with the residues colored by their values and the hydrophobic moment (requires `using Plots`). `hydrophobic_moment` computes the mean hydrophobicity and the hydrophobic moment of a helix.
+- ![FEATURE][badge-feature] Hammer-Aitoff projection of structures: `hammer_aitoff_projection` projects the atoms onto a plane, preserving areas, as seen from the center of the structure; `hammer_aitoff_map` computes a map of a per-atom property on the projection (a `HammerAitoffMap`), and `heatmap(map)` plots it, optionally with contours around chains or groups of chains (requires `using Plots`).
 
 Version 4.2.0
 ------------- 

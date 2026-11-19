@@ -1,7 +1,7 @@
-export hammer, hand_made_histogram, hammeraitoff, plot_hammeraitoff
+export hammer_aitoff_projection, hammer_aitoff_map, HammerAitoffMap
 
 """
-    hammer(atoms; center = center_of_mass(atoms)) -> (x_hammer, y_hammer)
+    hammer_aitoff_projection(atoms; center = center_of_mass(atoms)) -> (x, y)
 
 Project the atoms onto a plane using the Hammer-Aitoff equal-area projection.
 
@@ -23,14 +23,14 @@ Two vectors with the projected `x` and `y` coordinates of each atom.
 # Example
 
 ```julia-repl
-julia> using PDBTools
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
-julia> x, y = hammer(atoms);
+julia> x, y = hammer_aitoff_projection(atoms);
 ```
 """
-function hammer(atoms::AbstractVector{<:Atom}; center = center_of_mass(atoms))
+function hammer_aitoff_projection(atoms::AbstractVector{<:Atom}; center = center_of_mass(atoms))
     n = length(atoms)
     x_hammer = zeros(n)
     y_hammer = zeros(n)
@@ -50,31 +50,20 @@ function hammer(atoms::AbstractVector{<:Atom}; center = center_of_mass(atoms))
     return x_hammer, y_hammer
 end
 
-"""
-    hand_made_histogram(x, y, values; nbins=100, statistic=:mean) -> (xbin, ybin, cbins)
+#=
+    _binned_statistic_2d(x, y, values; nbins=100, statistic=:mean) -> (xbin, ybin, cbins)
 
 Build a 2D histogram of `values` over the points `(x[k], y[k])`.
 
 The bounding box of the points is divided into `nbins × nbins` equal bins.
-Each point is assigned to its bin, and the value of a bin is a statistic of
-the `values` of the points that fell inside it. Bins with no points get `0.0`.
-Entries of `values` that are `NaN` or `Inf` are ignored.
+Each point is assigned to its bin, and the value of a bin is a statistic
+(`:mean`, `:sum` or `:count`) of the `values` of the points that fell inside it.
+Bins with no points get `0.0`. Entries of `values` that are `NaN` or `Inf` are ignored.
 
-# Arguments
-- `x`, `y`: coordinates of the points.
-- `values`: one value per point.
-- `nbins`: number of bins along each axis.
-- `statistic`: how the values inside a bin are combined, one of
-  - `:mean`: the mean of the values (default);
-  - `:sum`: the sum of the values;
-  - `:count`: the number of points in the bin.
-
-# Returns
-- `xbin`, `ybin`: the bin centers along each axis.
-- `cbins`: a matrix where `cbins[j, i]` is the value of the bin
-  with center `(xbin[i], ybin[j])`.
-"""
-function hand_made_histogram(x, y, values; nbins::Integer=100, statistic::Symbol=:mean)
+Returns the bin centers along each axis, `xbin` and `ybin`, and a matrix where
+`cbins[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`.
+=#
+function _binned_statistic_2d(x, y, values; nbins::Integer=100, statistic::Symbol=:mean)
     if !(statistic in (:mean, :sum, :count))
         throw(ArgumentError("statistic must be :mean, :sum or :count, got $statistic"))
     end
@@ -123,75 +112,88 @@ function hand_made_histogram(x, y, values; nbins::Integer=100, statistic::Symbol
 end
 
 """
-    hammeraitoff(atoms, values; nbins=100, statistic=:mean) -> (xbin, ybin, cbins)
+    HammerAitoffMap
 
-Project `atoms` with [`hammer`](@ref) and build the 2D histogram of `values`
-with [`hand_made_histogram`](@ref). The `statistic` can be `:mean`, `:sum`
-or `:count`.
+Values of a per-atom property on the Hammer-Aitoff projection of a structure, as
+returned by [`hammer_aitoff_map`](@ref). Plot it with `heatmap(map)` (requires
+`using Plots`).
+
+# Fields
+- `x`, `y`: projected coordinates of each atom (see [`hammer_aitoff_projection`](@ref)).
+- `chains`: chain of each atom (used to draw the contours of the chains).
+- `xbin`, `ybin`: centers of the bins along each axis.
+- `values`: matrix where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`.
+- `statistic`: how the values inside a bin were combined (`:mean`, `:sum` or `:count`).
 """
-function hammeraitoff(atoms::AbstractVector{<:Atom}, values; nbins::Integer=100, statistic::Symbol=:mean)
-    length(values) == length(atoms) ||
-        throw(ArgumentError("values has $(length(values)) elements, but there are $(length(atoms)) atoms"))
-    x_hammer, y_hammer = hammer(atoms)
-    return hand_made_histogram(x_hammer, y_hammer, values; nbins, statistic)
+struct HammerAitoffMap
+    x::Vector{Float64}
+    y::Vector{Float64}
+    chains::Vector{String}
+    xbin::Vector{Float64}
+    ybin::Vector{Float64}
+    values::Matrix{Float64}
+    statistic::Symbol
+end
+
+function Base.show(io::IO, ::MIME"text/plain", m::HammerAitoffMap)
+    print(io, chomp("""
+    HammerAitoffMap of $(length(m.x)) atoms ($(length(unique(m.chains))) chains)
+        Bins: $(length(m.xbin)) × $(length(m.ybin)), statistic: :$(m.statistic)
+        Range of values: $(extrema(m.values))
+    """))
 end
 
 """
-    plot_hammeraitoff(atoms, values;
-                      nbins=100,
-                      statistic=:mean,
-                      colormap=:tempo,
-                      clims=nothing,
-                      contours=:none,
-                      groupfun=identity,
-                      contour_color=:grey30,
-                      colorbar_title="",
-                      title="",
-                      outfile=nothing)
+    hammer_aitoff_map(atoms, values; nbins=100, statistic=:mean, center=center_of_mass(atoms))
 
-Plot a heat map of `values` (one value per atom) using the Hammer-Aitoff projection.
+Compute the map of a per-atom property (`values`, one value per atom) on the Hammer-Aitoff
+projection of the structure. The atoms are projected with [`hammer_aitoff_projection`](@ref),
+the map is divided into `nbins × nbins` bins, and the value of each bin is a statistic of the
+values of the atoms that fell inside it. Bins without atoms get `0.0`, and values that are
+`NaN` or `Inf` are ignored.
 
-!!! note
-    This function requires `using Plots`.
+Returns a [`HammerAitoffMap`](@ref), which can be plotted with `heatmap(map)` (requires `using Plots`).
 
 # Keyword arguments
 - `nbins`: number of bins along each axis.
-- `statistic`: how the values inside a bin are combined: `:mean`, `:sum`
-  or `:count` (see [`hand_made_histogram`](@ref)).
-- `colormap`: color map of the heat map.
-- `clims`: color limits as a tuple `(min, max)`. If `nothing`, they are
-  taken from the data.
-- `contours`: contour mode, one of
-  - `:none`: no contours;
-  - `:chain` (or `:chains`): draw one contour line around each chain;
-  - `:group`: draw contours around groups of chains, where the group of a
-    chain is given by `groupfun(chainname)`.
-- `groupfun`: function mapping a chain name to its group (only used when
-  `contours=:group`).
-- `contour_color`: color of the contour lines.
-- `colorbar_title`, `title`: texts of the color bar and of the plot.
-- `outfile`: if given, the figure is saved to this path.
-
-# Returns
-The plot object.
+- `statistic`: how the values inside a bin are combined:
+  - `:mean`: the mean of the values (default), for intensive properties, such as B-factors or distances;
+  - `:sum`: the sum of the values, for additive properties, such as atomic contributions to a coordination number;
+  - `:count`: the number of atoms in the bin (the values are ignored).
+- `center`: the point from which the directions of the atoms are measured.
 
 # Example
 
 ```julia-repl
-julia> using PDBTools, Plots
+julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
-julia> plot_hammeraitoff(atoms, beta.(atoms); contours = :chain, colorbar_title = "B-factor")
+julia> map = hammer_aitoff_map(atoms, mass.(atoms); nbins = 50)
+HammerAitoffMap of 1463 atoms (1 chains)
+    Bins: 50 × 50, statistic: :mean
+    Range of values: (0.0, 32.060001373291016)
 ```
 """
-function plot_hammeraitoff end
+function hammer_aitoff_map(
+    atoms::AbstractVector{<:Atom},
+    values::AbstractVector{<:Real};
+    nbins::Integer=100,
+    statistic::Symbol=:mean,
+    center = center_of_mass(atoms),
+)
+    length(values) == length(atoms) ||
+        throw(ArgumentError("values has $(length(values)) elements, but there are $(length(atoms)) atoms"))
+    x, y = hammer_aitoff_projection(atoms; center)
+    xbin, ybin, cbins = _binned_statistic_2d(x, y, values; nbins, statistic)
+    return HammerAitoffMap(x, y, string.(chain.(atoms)), xbin, ybin, cbins, statistic)
+end
 
-@testitem "hammer" begin
+@testitem "hammer_aitoff_projection" begin
     using PDBTools, LazyArtifacts
     atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
     coords_before = [(at.x, at.y, at.z) for at in atoms]
-    x, y = hammer(atoms)
+    x, y = hammer_aitoff_projection(atoms)
     @test length(x) == length(y) == length(atoms)
     # the input atoms are not modified
     @test [(at.x, at.y, at.z) for at in atoms] == coords_before
@@ -201,37 +203,49 @@ function plot_hammeraitoff end
     c = [0.0, 0.0, 0.0]
     at = deepcopy(atoms[1])
     at.x, at.y, at.z = 1.0, 0.0, 0.0                # φ = 0, λ = 0
-    xp, yp = hammer([at]; center = c)
+    xp, yp = hammer_aitoff_projection([at]; center = c)
     @test xp[1] ≈ 0.0 atol = 1e-12
     @test yp[1] ≈ 0.0 atol = 1e-12
     at.x, at.y, at.z = 0.0, 0.0, 1.0                # north pole
-    xp, yp = hammer([at]; center = c)
+    xp, yp = hammer_aitoff_projection([at]; center = c)
     @test xp[1] ≈ 0.0 atol = 1e-12
     @test yp[1] ≈ sqrt(2)
 end
 
-@testitem "hand_made_histogram" begin
+@testitem "hammer_aitoff_map" begin
     using PDBTools, LazyArtifacts
+    using PDBTools: _binned_statistic_2d
+    using ShowMethodTesting
     atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
-    x, y = hammer(atoms)
+    x, y = hammer_aitoff_projection(atoms)
     n = length(x)
-    xbin, ybin, c = hand_made_histogram(x, y, ones(n); nbins = 20, statistic = :count)
+    xbin, ybin, c = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :count)
     @test length(xbin) == length(ybin) == 20
     @test size(c) == (20, 20)
     @test sum(c) == n
     # with values = 1, :sum equals :count and every non-empty bin has mean 1
-    _, _, s = hand_made_histogram(x, y, ones(n); nbins = 20, statistic = :sum)
+    _, _, s = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :sum)
     @test s == c
-    _, _, m = hand_made_histogram(x, y, ones(n); nbins = 20, statistic = :mean)
+    _, _, m = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :mean)
     @test all(m[c .> 0] .== 1.0)
     # non-finite values are ignored
     v = ones(n); v[1] = NaN
-    _, _, c2 = hand_made_histogram(x, y, v; nbins = 20, statistic = :count)
+    _, _, c2 = _binned_statistic_2d(x, y, v; nbins = 20, statistic = :count)
     @test sum(c2) == n - 1
-    # hammeraitoff gives the same result as hammer + hand_made_histogram
-    @test hammeraitoff(atoms, ones(n); nbins = 20, statistic = :count)[3] == c
+    # the map contains the projection and the binned values
+    map = hammer_aitoff_map(atoms, ones(n); nbins = 20, statistic = :count)
+    @test map isa HammerAitoffMap
+    @test map.values == c
+    @test (map.x, map.y) == (x, y)
+    @test map.chains == string.(chain.(atoms))
+    @test map.statistic == :count
+    @test parse_show(map) ≈ """
+        HammerAitoffMap of $n atoms ($(length(unique(chain.(atoms)))) chains)
+            Bins: 20 × 20, statistic: :count
+            Range of values: $(extrema(c))
+        """
     # errors
-    @test_throws ArgumentError hand_made_histogram(x, y, ones(n); statistic = :median)
-    @test_throws ArgumentError hand_made_histogram(x, y, ones(n - 1))
-    @test_throws ArgumentError hammeraitoff(atoms, ones(n - 1))
+    @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n); statistic = :median)
+    @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n); nbins = 0)
+    @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n - 1))
 end
