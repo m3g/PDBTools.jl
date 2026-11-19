@@ -27,12 +27,21 @@ Only the direction of each atom is used: atoms along the same line from the cent
 
 ## Projecting the atoms
 
-[`hammer_aitoff_projection`](@ref) projects the atoms, and returns a [`HammerAitoffProjection`](@ref), which contains the atoms, the center of the projection and the projected coordinates of each atom (fields `x` and `y`). The input structure is not modified.
+Here, we use the capsid of the Zika virus, in a coarse-grained (SIRAH) representation.
+The capsid is formed by 60 copies of an asymmetric unit (segments `S1` to `S60`), each
+with three copies of the envelope (E) protein (chains `K`, `M` and `O`) and three copies 
+of the membrane (M) protein (chains `L`, `N` and `P`). We keep only the `GC` beads, which 
+are at the positions of the ``C_\alpha`` atoms, such that there is one bead per residue: 
+103,680 beads.
+
+[`hammer_aitoff_projection`](@ref) projects the atoms, and returns a [`HammerAitoffProjection`](@ref),
+which contains the atoms, the center of the projection and the projected coordinates of each
+atom (fields `x` and `y`). The input structure is not modified.
 
 ```@example hammer
 using PDBTools, LazyArtifacts
-atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
-proj = hammer_aitoff_projection(atoms)
+capsid = read_pdb(PDBTools.test_file("capsid.pdb"), "name GC")
+proj = hammer_aitoff_projection(capsid)
 ```
 
 ```@example hammer
@@ -41,20 +50,29 @@ proj.x[1:3], proj.y[1:3]
 
 ## Heat maps of per-atom properties
 
-[`hammer_aitoff_map`](@ref) projects the atoms, divides the map into `nbins × nbins` bins and computes, for each bin, a statistic of the values of the atoms that fell inside it. Any per-atom property can be used: B-factors, partial charges, contributions to coordination numbers, distances, etc. The resulting [`HammerAitoffMap`](@ref) is plotted with `heatmap` (`Plots` must be loaded).
+[`hammer_aitoff_map`](@ref) projects the atoms, divides the map into `nbins × nbins` bins and
+computes, for each bin, a statistic of the values of the atoms that fell inside it. Any per-atom
+property can be used: B-factors, partial charges, contributions to coordination numbers,
+distances, etc. The resulting [`HammerAitoffMap`](@ref) is plotted with `heatmap` (`Plots` must
+be loaded).
 
-Here, each atom is colored by its distance to the center of mass, which highlights protrusions and cavities of the surface:
+Here, each bead is colored by its distance to the center of the capsid, which shows the
+arrangement of the E proteins on the surface of the virus, repeated by the icosahedral 
+symmetry of the capsid:
 
 ```@example hammer
 using Plots
-c = center_of_mass(atoms)
-dist = [sqrt((at.x - c[1])^2 + (at.y - c[2])^2 + (at.z - c[3])^2) for at in atoms]
-map = hammer_aitoff_map(atoms, dist; nbins = 100)
+c = center_of_mass(capsid)
+dist = [ sqrt((at.x - c[1])^2 + (at.y - c[2])^2 + (at.z - c[3])^2) for at in capsid ]
+map = hammer_aitoff_map(capsid, dist; nbins = 100)
 ```
 
 ```@example hammer
 heatmap(map; colorbar_title = "distance to center (Å)")
 ```
+
+Bins without atoms (for example, outside the ellipse, or at the small openings of the capsid
+at its five-fold symmetry axes) have no value (`NaN`), and are not colored.
 
 The `statistic` keyword of `hammer_aitoff_map` defines how the values inside a bin are combined:
 
@@ -62,36 +80,42 @@ The `statistic` keyword of `hammer_aitoff_map` defines how the values inside a b
 - `:sum`: for additive properties, such as atomic contributions to a coordination number;
 - `:count`: number of atoms in each bin (the values are ignored).
 
-To compare several structures on the same color scale, fix the limits with `clims`:
+To compare several structures on the same color scale, fix the limits with the `clims` 
+keyword of `heatmap`, e.g. `clims = (170, 240)`.
 
-```@example hammer
-heatmap(map; clims = (0, 40), colorbar_title = "distance to center (Å)")
-```
-
-A map can also be computed from a projection, such that maps of several properties of the
-same atoms do not require projecting the atoms again:
-
-```@example hammer
-map_mass = hammer_aitoff_map(proj, mass.(atoms); nbins = 100)
-heatmap(map_mass; colorbar_title = "mass")
-```
-
-The bin centers and the binned values are available in the `xbin`, `ybin` and `values` fields of the map,
-where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`:
+The bin centers and the binned values are available in the `xbin`, `ybin` and `values` fields
+of the map, where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`:
 
 ```@example hammer
 size(map.values)
 ```
 
-## Contours of chains and groups of chains
-
-With `contours = :chain`, a line is drawn around the region occupied by each chain:
+A map can also be computed from a projection, such that maps of several properties of the
+same atoms do not require projecting the atoms again. Here, the number of beads in each
+bin, which depends on how much protein is found along each direction from the center (it is
+larger, on average, where the M proteins lie beneath the E proteins):
 
 ```@example hammer
-heatmap(map; contours = :chain, colorbar_title = "distance to center (Å)")
+map_count = hammer_aitoff_map(proj, ones(length(capsid)); nbins = 100, statistic = :count)
+heatmap(map_count; colorbar_title = "number of beads")
 ```
 
-With `contours = :group`, the atoms are grouped by a function that receives each atom and returns the name of its group. This is useful, for example, when the structure has many copies of a few proteins (as the capsid and envelope proteins of a virus), whose chains are grouped:
+## Contours of chains and groups of atoms
+
+With `contours = :chain`, a line is drawn around the region occupied by each chain. With 
+`contours = :group`, the atoms are grouped by a function that receives each atom and returns
+the name of its group. Here, the atoms are grouped by segment, which shows the 60 asymmetric 
+units of the capsid:
+
+```@example hammer
+heatmap(map; 
+    contours = :group, groupfun = segname, contour_color = :white, 
+    colorbar_title = "distance to center (Å)",
+)
+```
+
+Any property of the atoms can define the groups. For example, the chains of a structure with 
+many copies of a few proteins can be grouped by protein:
 
 ```julia
 groups = Dict("A" => "protein 1", "B" => "protein 1", "C" => "protein 2")

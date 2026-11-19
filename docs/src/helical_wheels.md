@@ -52,21 +52,15 @@ Some details of the drawing:
 The values of the residues are the input of the helical wheel, and can come from any
 source, as long as there is one value per residue, in the order of the sequence.
 
-Residues (and chains, segments, models and structures) are vectors of atoms, such that
-per-residue values of any atomic property can be computed with `sum(f, residue)`, or
-`mean(f, residue)` (with `using Statistics`). Here, we compute the solvent accessible 
-surface area (SASA) of each atom of a protein, store it in the `beta` field of the atoms,
-and sum it for the residues of an α-helix of the protein (residues 13 to 29):
+Here, we compute the solvent accessible surface area (SASA) of the atoms of a protein,
+and the SASA of each residue of an α-helix of the protein (residues 13 to 29):
 
 ```@example wheel
 using LazyArtifacts
 pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 atomic_sasa = sasa_particles(pdb)
-for (i, atom) in enumerate(pdb)
-    atom.beta = atomic_sasa[i] # SASA of atom i
-end
 helix = select(pdb, "resnum >= 13 and resnum <= 29")
-values = [ sum(beta, residue) for residue in eachresidue(helix) ]
+values = [ sasa(atomic_sasa, at -> residue(at) == residue(r)) for r in eachresidue(helix) ]
 ```
 
 ```@example wheel
@@ -76,8 +70,8 @@ plot(helical_wheel(sequence, values); normalize = false, colorbar_title = "SASA 
 
 The buried face of the helix, which packs against the rest of the protein, is at the bottom.
 
-Values computed by other packages can be used as well. For example, with a 
-`ResidueContributions` object `rc` from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl), 
+Values computed by other packages can be used as well. For example, with a
+`ResidueContributions` object `rc` from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl),
 the contribution of each residue to the solvation of the protein at a distance `d` is:
 
 ```julia
@@ -93,14 +87,24 @@ values are taken from the structure itself. The values are computed from a per-a
 property (`property`, by default the `beta` field of the atoms), combined for each
 residue by `aggregate`, as `aggregate(property, residue)`:
 
-- use `aggregate = sum` for additive properties, such as the SASA computed above, or 
-  atomic contributions to a coordination number;
+- use `aggregate = sum` for additive properties, such as the SASA, or atomic contributions
+  to a coordination number;
 - use the mean (default) for intensive properties, such as B-factors or RMSF.
 
-Thus, the helical wheel above is obtained directly from the helix with:
+Residues (and chains, segments, models and structures) are vectors of atoms, such that
+`aggregate(property, residue)` is, for example, `sum(beta, residue)` or `mean(beta, residue)`
+(with `using Statistics`).
+
+Per-atom values computed by other programs are often stored in the `beta` column of PDB files.
+Here, we store the SASA of each atom in the `beta` field of the atoms, and the helical wheel
+above is obtained directly from the helix:
 
 ```@example wheel
-plot(helical_wheel(helix; aggregate = sum); normalize = false, colorbar_title = "SASA (Å\$^2\$)")
+for (i, atom) in enumerate(pdb)
+    atom.beta = atomic_sasa[i] # SASA of atom i (the atoms of helix are those of pdb)
+end
+wheel = helical_wheel(helix; aggregate = sum)
+plot(wheel; normalize = false, colorbar_title = "SASA (Å\$^2\$)")
 ```
 
 The `property` keyword selects another per-atom property, for example

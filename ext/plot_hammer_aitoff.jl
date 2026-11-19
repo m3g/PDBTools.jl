@@ -73,7 +73,7 @@ function heatmap(
         # contour masks from changing it, the masks use only the lowest and
         # highest values of the color scale, and `clims` is passed to every
         # `contour!` call.
-        lo, hi = isnothing(clims) ? extrema(map.values) : clims
+        lo, hi = isnothing(clims) ? PDBTools._finite_extrema(map.values) : clims
 
         # One contour per label: the mask is `hi` for atoms with that label
         # and `lo` for all the others, and the contour is drawn at the border.

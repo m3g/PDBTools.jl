@@ -70,6 +70,12 @@ function hammer_aitoff_projection(atoms::AbstractVector{<:Atom}; center = center
     return HammerAitoffProjection(atoms, SVector{3,Float64}(center[1], center[2], center[3]), x_hammer, y_hammer)
 end
 
+# Minimum and maximum of the values that are not NaN or Inf (e.g. of the non-empty bins)
+function _finite_extrema(x)
+    finite = filter(isfinite, x)
+    return isempty(finite) ? (NaN, NaN) : extrema(finite)
+end
+
 #=
     _binned_statistic_2d(x, y, values; nbins=100, statistic=:mean) -> (xbin, ybin, cbins)
 
@@ -78,7 +84,7 @@ Build a 2D histogram of `values` over the points `(x[k], y[k])`.
 The bounding box of the points is divided into `nbins × nbins` equal bins.
 Each point is assigned to its bin, and the value of a bin is a statistic
 (`:mean`, `:sum` or `:count`) of the `values` of the points that fell inside it.
-Bins with no points get `0.0`. Entries of `values` that are `NaN` or `Inf` are ignored.
+Bins with no points get `NaN`. Entries of `values` that are `NaN` or `Inf` are ignored.
 
 Returns the bin centers along each axis, `xbin` and `ybin`, and a matrix where
 `cbins[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`.
@@ -116,8 +122,8 @@ function _binned_statistic_2d(x, y, values; nbins::Integer=100, statistic::Symbo
         counts[j, i] += 1
     end
 
-    # Final value of each bin (empty bins stay at 0.0)
-    cbins = zeros(nbins, nbins)
+    # Final value of each bin (empty bins have no value: NaN)
+    cbins = fill(NaN, nbins, nbins)
     for i in 1:nbins, j in 1:nbins
         counts[j, i] > 0 || continue
         cbins[j, i] = if statistic == :mean
@@ -141,7 +147,8 @@ returned by [`hammer_aitoff_map`](@ref). Plot it with `heatmap(map)` (requires
 # Fields
 - `projection`: the [`HammerAitoffProjection`](@ref) of the atoms (which contains the atoms).
 - `xbin`, `ybin`: centers of the bins along each axis.
-- `values`: matrix where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`.
+- `values`: matrix where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`
+  (`NaN` for bins without atoms).
 - `statistic`: how the values inside a bin were combined (`:mean`, `:sum` or `:count`).
 """
 struct HammerAitoffMap{P<:HammerAitoffProjection}
@@ -156,7 +163,7 @@ function Base.show(io::IO, ::MIME"text/plain", m::HammerAitoffMap)
     print(io, chomp("""
     HammerAitoffMap of $(length(m.projection.atoms)) atoms
         Bins: $(length(m.xbin)) × $(length(m.ybin)), statistic: :$(m.statistic)
-        Range of values: $(extrema(m.values))
+        Range of values: $(_finite_extrema(m.values))
     """))
 end
 
@@ -168,7 +175,8 @@ Compute the map of a per-atom property (`values`, one value per atom) on the Ham
 projection of the structure. The atoms are projected with [`hammer_aitoff_projection`](@ref)
 (or a projection computed before is used), the map is divided into `nbins × nbins` bins, and
 the value of each bin is a statistic of the values of the atoms that fell inside it. Bins
-without atoms get `0.0`, and values that are `NaN` or `Inf` are ignored.
+without atoms have no value (`NaN`, which is not shown in the heat map), and values that
+are `NaN` or `Inf` are ignored.
 
 Returns a [`HammerAitoffMap`](@ref), which can be plotted with `heatmap(map)` (requires `using Plots`).
 
@@ -191,7 +199,7 @@ julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 julia> map = hammer_aitoff_map(atoms, mass.(atoms); nbins = 50)
 HammerAitoffMap of 1463 atoms
     Bins: 50 × 50, statistic: :mean
-    Range of values: (0.0, 32.060001373291016)
+    Range of values: (1.0079699754714966, 32.060001373291016)
 ```
 """
 function hammer_aitoff_map(
@@ -246,29 +254,32 @@ end
     xbin, ybin, c = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :count)
     @test length(xbin) == length(ybin) == 20
     @test size(c) == (20, 20)
-    @test sum(c) == n
+    # empty bins are NaN
+    @test any(isnan, c)
+    @test sum(filter(!isnan, c)) == n
     # with values = 1, :sum equals :count and every non-empty bin has mean 1
     _, _, s = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :sum)
-    @test s == c
+    @test isequal(s, c)
     _, _, m = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :mean)
     @test all(m[c .> 0] .== 1.0)
+    @test isequal(isnan.(m), isnan.(c))
     # non-finite values are ignored
     v = ones(n); v[1] = NaN
     _, _, c2 = _binned_statistic_2d(x, y, v; nbins = 20, statistic = :count)
-    @test sum(c2) == n - 1
+    @test sum(filter(!isnan, c2)) == n - 1
     # the map contains the projection and the binned values
     map = hammer_aitoff_map(atoms, ones(n); nbins = 20, statistic = :count)
     @test map isa HammerAitoffMap
-    @test map.values == c
+    @test isequal(map.values, c)
     @test (map.projection.x, map.projection.y) == (x, y)
     @test map.projection.atoms === atoms
     @test map.statistic == :count
     # the map computed from a projection is the same
-    @test hammer_aitoff_map(proj, ones(n); nbins = 20, statistic = :count).values == c
+    @test isequal(hammer_aitoff_map(proj, ones(n); nbins = 20, statistic = :count).values, c)
     @test parse_show(map) ≈ """
         HammerAitoffMap of $n atoms
             Bins: 20 × 20, statistic: :count
-            Range of values: $(extrema(c))
+            Range of values: $(PDBTools._finite_extrema(c))
         """
     # errors
     @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n); statistic = :median)
