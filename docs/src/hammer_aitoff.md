@@ -89,7 +89,7 @@ size(cbins)
 
 ## Reference
 
-```
+```@docs
 hammer
 plot_hammeraitoff
 hammeraitoff
