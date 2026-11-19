@@ -11,8 +11,8 @@ PDBTools.jl Changelog
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
 Version 4.2.1-DEV
+- `secondary_structure_diagram` and `SecondaryStructureDiagram`: secondary structure diagrams (DSSP) colored by per-residue values, drawn with plot through the new MakiePlotting extension (CairoMakie weak dependency).
 - `hammer`, `hammeraitoff` and `plot_hammeraitoff`: Hammer-Aitoff projection of structures.
-`ss`: secondary structure diagrams colored by per-residue properties (requires CairoMakie).
 - `helical_wheel`, `residue_values` and `hydrophobic_moment`: helical wheel diagrams.
 ------------- 
 

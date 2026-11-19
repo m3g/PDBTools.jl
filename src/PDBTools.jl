@@ -168,6 +168,6 @@ include("./hammer_aitoff.jl")
 include("./helical_wheel.jl")
 
 # Branch sec-str
-include("./ss_diagram.jl")
+include("./secondary_structure_diagram.jl")
 
 end

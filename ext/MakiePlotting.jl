@@ -1,8 +1,10 @@
-module SecStrDiagram
+module MakiePlotting
 
 using TestItems: @testitem
 using PDBTools
-using PDBTools: Atom, _ss_runs, _ss_transform_contrib, _ss_assign, _SS_HELIX_CODES, _SS_BETA_CODES
+using PDBTools: SecondaryStructureDiagram, _structure_runs, _segment_starts, _color_values,
+    _HELIX_CODES, _STRAND_CODES
+import CairoMakie: plot
 using CairoMakie: CairoMakie, Figure, Axis, Colorbar, Point2f, poly!, limits!, hidespines!,
     rowgap!, resize_to_layout!, cgrad
 
@@ -19,26 +21,26 @@ const COLORBAR_HEIGHT = 6.0    # thickness of the color bar, in pt
 const FIGURE_PADDING = 4.0     # outer margin, in pt
 
 # System and user font folders (Linux, macOS, Windows)
-font_dirs() = [joinpath(homedir(), ".local", "share", "fonts"),
-               joinpath(homedir(), ".fonts"),
-               "/usr/local/share/fonts",
-               "/usr/share/fonts",
-               joinpath(homedir(), "Library", "Fonts"),
-               "/Library/Fonts",
-               joinpath(get(ENV, "LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts"),
-               joinpath(get(ENV, "WINDIR", "C:\\Windows"), "Fonts")]
+_font_directories() = [joinpath(homedir(), ".local", "share", "fonts"),
+                       joinpath(homedir(), ".fonts"),
+                       "/usr/local/share/fonts",
+                       "/usr/share/fonts",
+                       joinpath(homedir(), "Library", "Fonts"),
+                       "/Library/Fonts",
+                       joinpath(get(ENV, "LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts"),
+                       joinpath(get(ENV, "WINDIR", "C:\\Windows"), "Fonts")]
 
 """
-    find_cmu_fonts(dirs = font_dirs())
+    _find_computer_modern_fonts(directories = _font_directories())
 
 Look for the Computer Modern Unicode font files (CMU Serif): `cmunrm` (regular), `cmunbx`
-(bold) and `cmunti` (italic), as `.ttf` or `.otf`, in the folders `dirs` (by default, the
+(bold) and `cmunti` (italic), as `.ttf` or `.otf`, in `directories` (by default, the
 system and user font folders). Returns a NamedTuple with the paths found (empty if the
 regular font is not found).
 """
-function find_cmu_fonts(dirs = font_dirs())
+function _find_computer_modern_fonts(directories = _font_directories())
     found = Dict{String,String}()
-    for d in dirs
+    for d in directories
         isdir(d) || continue
         for (root, _, files) in walkdir(d), file in files
             name, ext = splitext(lowercase(file))
@@ -55,124 +57,66 @@ function find_cmu_fonts(dirs = font_dirs())
     return fonts
 end
 
-function PDBTools.ss(pdbfile::AbstractString,
-    selection::AbstractString = "protein",
-    contrib::Union{Nothing,AbstractVector{<:Real}} = nothing;
-    kwargs...,
-)
-    atoms = if lowercase(splitext(pdbfile)[2]) in (".cif", ".mmcif")
-        read_mmcif(pdbfile, selection)
-    else
-        read_pdb(pdbfile, selection)
-    end
-    return PDBTools.ss(atoms, contrib; kwargs...)
-end
-
-function PDBTools.ss(ats::AbstractVector{<:Atom},
-    contrib::Union{Nothing,AbstractVector{<:Real}} = nothing;
-    color = nothing,
-    normalize::Symbol = :robust,
-    range_mode::Symbol = :auto,
-    scale::Union{Nothing,Real} = nothing,
-    limit::Union{Nothing,Real} = nothing,
-    clip_quantile::Real = 0.99,
-    signed_tol::Real = 1e-6,
-    beta_reduce::Symbol = :mean,
-    per_chain::Bool = false,
-    chain_new_row::Bool = true,
+# Plotting of a SecondaryStructureDiagram. The keyword arguments are documented in the
+# docstring of PDBTools.SecondaryStructureDiagram.
+function plot(diagram::SecondaryStructureDiagram;
+    colormap = nothing,
     colorbar::Bool = true,
-    colorbar_label::AbstractString = "",
-    output::Union{Nothing,AbstractString} = nothing,
+    colorbar_title::AbstractString = "",
+    color_scale::Symbol = :robust,
+    range_mode::Symbol = :auto,
+    color_limit::Union{Nothing,Real} = nothing,
+    asinh_scale::Union{Nothing,Real} = nothing,
+    clip_quantile::Real = 0.99,
+    signed_tolerance::Real = 1e-6,
+    normalize_per_chain::Bool = false,
+    chain_new_row::Bool = true,
 )
-    # --- 1) Residues ---
-    residues = collect(eachresidue(ats))
-    nres = length(residues)
-    nres > 0 || throw(ArgumentError("The atom selection has no residues."))
-
-    chain_ids = [string(chain(first(r))) for r in residues]
-    resnums = [Int(resnum(first(r))) for r in residues]
-
-    # Start of a segment: first position, change of chain or gap in the numbering
-    newseg = [k == 1 ||
-              chain_ids[k] != chain_ids[k-1] ||
-              resnums[k] - resnums[k-1] != 1 for k in 1:nres]
+    chains = diagram.chains
+    nres = length(chains)
+    segment_start = _segment_starts(chains, diagram.residue_numbers)
+    multichain = length(unique(chains)) > 1
 
     # Contiguous blocks of each chain
     chain_blocks = UnitRange{Int}[]
     start = 1
     for k in 2:(nres+1)
-        if k == nres + 1 || chain_ids[k] != chain_ids[k-1]
+        if k == nres + 1 || chains[k] != chains[k-1]
             push!(chain_blocks, start:(k-1))
             start = k
         end
     end
-    multichain = length(unique(chain_ids)) > 1
 
-    # --- 2) Per-residue contributions ---
-    contrib_raw = if isnothing(contrib)
-        betas = [Float64[beta(atom) for atom in r] for r in residues]
-        if beta_reduce == :mean
-            [sum(b) / length(b) for b in betas]
-        elseif beta_reduce == :sum
-            # If all atoms of each residue have the same value, beta is probably already a
-            # per-residue value; summing would multiply it by the number of atoms.
-            if all(b -> all(≈(first(b)), b), betas) && any(b -> length(b) > 1, betas)
-                @warn "beta_reduce = :sum, but the beta values are constant within each " *
-                      "residue (they look like per-residue values). Consider :mean."
-            end
-            sum.(betas)
-        else
-            throw(ArgumentError("beta_reduce must be :mean or :sum, got $beta_reduce"))
-        end
-    else
-        length(contrib) == nres || throw(ArgumentError(
-            "Length of contrib ($(length(contrib))) does not match the number of residues ($nres)."
-        ))
-        Float64.(contrib)
-    end
-
-    if per_chain
+    # --- Colors ---
+    values = copy(diagram.values)
+    if normalize_per_chain
         for b in chain_blocks
-            m = maximum(abs, view(contrib_raw, b))
-            iszero(m) || (contrib_raw[b] ./= m)
+            m = maximum(abs, view(values, b))
+            iszero(m) || (values[b] ./= m)
         end
     end
-
-    # --- 3) Secondary structure (DSSP) ---
-    ssvec = _ss_assign(ats, residues)
-
-    # Helices shorter than 4 residues and strands shorter than 3 become loops
-    for (i, j) in _ss_runs([c in _SS_HELIX_CODES for c in ssvec], newseg)
-        (j - i + 1) < 4 && (ssvec[i:j] .= "C")
-    end
-    for (i, j) in _ss_runs([c in _SS_BETA_CODES for c in ssvec], newseg)
-        (j - i + 1) < 3 && (ssvec[i:j] .= "C")
-    end
-
-    is_helix = [c in _SS_HELIX_CODES for c in ssvec]
-    is_beta = [c in _SS_BETA_CODES for c in ssvec]
-
-    # --- 4) Colors ---
-    contrib_plot, crange, s = _ss_transform_contrib(contrib_raw;
-        mode = normalize, range_mode, scale, limit, clip_quantile, signed_tol)
+    color_values, crange, s = _color_values(values;
+        color_scale, range_mode, asinh_scale, color_limit, clip_quantile, signed_tolerance)
     signed = crange[1] < 0
-    cmap = cgrad(isnothing(color) ? (signed ? :balance : :tempo) : color)
-    # Values out of the range are painted with the color of the extreme of the color map.
+    cmap = cgrad(isnothing(colormap) ? (signed ? :balance : :tempo) : colormap)
 
-    # --- 5) Geometry (global coordinates: residue k occupies x ∈ [k, k+1], y ∈ [0, 3]) ---
+    is_helix = [c in _HELIX_CODES for c in diagram.secondary_structure]
+    is_strand = [c in _STRAND_CODES for c in diagram.secondary_structure]
+
+    # --- Geometry (global coordinates: residue k occupies x ∈ [k, k+1], y ∈ [0, 3]) ---
     # Layers: 1 = loops, 2 = helix (odd position in the segment, behind),
     #         3 = helix (even position in the segment, in front), 4 = β strands
     y_bottom, y_top = 0.0, 3.0
     shapes = Tuple{Int,Int,Vector{Point2f}}[] # (layer, residue, vertices)
 
     for k in 1:nres
-        if !is_helix[k] && !is_beta[k]
+        if !is_helix[k] && !is_strand[k]
             push!(shapes, (1, k, Point2f[(k, y_bottom + 1), (k + 1, y_bottom + 1),
                                          (k + 1, y_top - 1), (k, y_top - 1)]))
         end
     end
 
-    for (i, j) in _ss_runs(is_helix, newseg)
+    for (i, j) in _structure_runs(is_helix, segment_start)
         for k in i:j
             x1, x2, x3 = k - 0.5, k + 0.5, k + 1.5
             idx_in_run = k - i
@@ -196,7 +140,7 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
         end
     end
 
-    for (i, j) in _ss_runs(is_beta, newseg)
+    for (i, j) in _structure_runs(is_strand, segment_start)
         for k in i:(j-1)
             push!(shapes, (4, k, Point2f[(k, y_bottom + 0.8), (k + 1, y_bottom + 0.8),
                                          (k + 1, y_top - 0.8), (k, y_top - 0.8)]))
@@ -207,19 +151,17 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
 
     sort!(shapes; by = first)
 
-    # --- 6) Rows of the figure ---
+    # --- Rows of the figure ---
     blocks = chain_new_row ? chain_blocks : [1:nres]
     rows = UnitRange{Int}[]
     for b in blocks, lo in first(b):RESIDUES_PER_ROW:last(b)
         push!(rows, lo:min(lo + RESIDUES_PER_ROW - 1, last(b)))
     end
     ncols = maximum(length, rows)
+    labels = diagram.residue_labels
 
-    labels = PDBTools.residue_ticks(ats; oneletter = true)[2]
-    length(labels) == nres || error("Residue labels ($(length(labels))) do not match residues ($nres).") # COV_EXCL_LINE
-
-    # --- 7) Font (Computer Modern, if found) ---
-    fonts = find_cmu_fonts()
+    # --- Font (Computer Modern, if found) ---
+    fonts = _find_computer_modern_fonts()
     isempty(fonts) && @warn "Computer Modern (cmunrm.ttf) not found; using the default " *
         "Makie font. Install the CMU Serif fonts to use Computer Modern." maxlog = 1
     fig_kwargs = isempty(fonts) ? (;) : (; fonts = fonts)
@@ -232,7 +174,7 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
     # 0.5 residue of space on each side for the helices at the edges
     xspan = ncols + 1.0
 
-    # --- 8) Plot, row by row ---
+    # --- Plot, row by row ---
     for (r, idx) in enumerate(rows)
         off = first(idx) - 1
         n = length(idx)
@@ -241,7 +183,7 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
             height = ROW_HEIGHT,
             xticks = (collect(1:n) .+ 0.5, labels[idx]),
             xticklabelrotation = pi / 2,
-            ylabel = (multichain && chain_new_row) ? "Chain $(chain_ids[first(idx)])" : "",
+            ylabel = (multichain && chain_new_row) ? "Chain $(chains[first(idx)])" : "",
             backgroundcolor = :transparent)
         ax.xgridvisible = false
         ax.ygridvisible = false
@@ -255,7 +197,7 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
         for (_, k, pts) in shapes
             first(idx) <= k <= last(idx) || continue
             poly!(ax, [p - Point2f(off, 0) for p in pts];
-                color = contrib_plot[k],
+                color = color_values[k],
                 colormap = cmap,
                 colorrange = crange,
                 strokecolor = :black,
@@ -264,10 +206,10 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
     end
     rowgap!(f.layout, ROW_GAP)
 
-    # --- 9) Horizontal color bar below the rows (ticks in original units) ---
+    # --- Horizontal color bar below the rows (ticks in the units of the values) ---
     if colorbar
         tick_pos = collect(range(crange[1], crange[2]; length = 5))
-        tick_val = normalize == :asinh ? sinh.(tick_pos) .* s : tick_pos
+        tick_val = color_scale == :asinh ? sinh.(tick_pos) .* s : tick_pos
         # zero the floating point residue in the central tick (e.g. 1e-17)
         tol = 1e-9 * maximum(abs, tick_val)
         tick_lab = [abs(v) <= tol ? "0" : string(round(v; sigdigits = 2)) for v in tick_val]
@@ -279,70 +221,51 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
             tellwidth = false,
             colormap = cmap,
             limits = crange,
-            label = colorbar_label,
+            label = colorbar_title,
             ticks = (tick_pos, tick_lab))
         rowgap!(f.layout, length(rows), 3 * ROW_GAP)
     end
 
     resize_to_layout!(f)
-
-    # Always SVG (vector); 1 unit = 1 pt
-    if !isnothing(output)
-        svgfile = splitext(output)[1] * ".svg"
-        svgfile != output && @info "Saving as SVG: $svgfile"
-        CairoMakie.save(svgfile, f; pt_per_unit = 1)
-    end
     return f
 end
 
-@testitem "ss diagram" begin
+@testitem "plot(::SecondaryStructureDiagram)" begin
     using PDBTools, LazyArtifacts
     import CairoMakie
     atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     nres = length(eachresidue(atoms))
 
-    f = ss(atoms)
-    @test f isa CairoMakie.Figure
+    fig = CairoMakie.plot(secondary_structure_diagram(atoms); colorbar_title = "B-factor")
+    @test fig isa CairoMakie.Figure
+    svgfile = tempname() * ".svg"
+    CairoMakie.save(svgfile, fig; pt_per_unit = 1)
+    @test isfile(svgfile)
 
-    tmpfile = tempname() * ".png"
-    f = ss(atoms, collect(range(-1.0, 1.0; length = nres)); normalize = :asinh, output = tmpfile)
-    @test isfile(splitext(tmpfile)[1] * ".svg")
+    # signed values, asinh scale, per-chain normalization, one row, no colorbar
+    diagram = secondary_structure_diagram(atoms, collect(range(-1.0, 1.0; length = nres)))
+    @test CairoMakie.plot(diagram; color_scale = :asinh) isa CairoMakie.Figure
+    @test CairoMakie.plot(diagram; color_scale = :linear, color_limit = 0.5, colormap = :viridis) isa CairoMakie.Figure
+    @test CairoMakie.plot(diagram; normalize_per_chain = true) isa CairoMakie.Figure
+    @test CairoMakie.plot(diagram; chain_new_row = false, colorbar = false) isa CairoMakie.Figure
 
-    f = ss(PDBTools.test_file("structure.pdb"), "protein"; beta_reduce = :sum, per_chain = true)
-    @test f isa CairoMakie.Figure
-
-    @test_throws ArgumentError ss(atoms, ones(nres - 1))
-    @test_throws ArgumentError ss(atoms; beta_reduce = :median)
-
-    # reading from an mmCIF file
-    ciffile = tempname() * ".cif"
-    write_mmcif(ciffile, atoms)
-    @test ss(ciffile, "protein") isa CairoMakie.Figure
-
-    # warning when beta_reduce = :sum but beta is constant within each residue
-    atoms_const = deepcopy(atoms)
-    for (i, r) in enumerate(eachresidue(atoms_const)), at in r
-        at.beta = i
-    end
-    @test_logs (:warn, r"beta_reduce = :sum") match_mode = :any ss(atoms_const; beta_reduce = :sum)
-
-    # one-row layout and no colorbar
-    @test ss(atoms; chain_new_row = false, colorbar = false) isa CairoMakie.Figure
+    @test_throws ArgumentError CairoMakie.plot(diagram; color_scale = :log)
+    @test_throws ArgumentError CairoMakie.plot(diagram; range_mode = :negative)
 end
 
-@testitem "ss diagram fonts" begin
+@testitem "Computer Modern fonts" begin
     using PDBTools
     import CairoMakie
-    ext = Base.get_extension(PDBTools, :SecStrDiagram)
+    ext = Base.get_extension(PDBTools, :MakiePlotting)
     dir = mktempdir()
-    @test isempty(ext.find_cmu_fonts([dir]))
+    @test isempty(ext._find_computer_modern_fonts([dir]))
     for name in ("cmunrm.ttf", "cmunbx.ttf", "cmunti.otf")
         touch(joinpath(dir, name))
     end
-    fonts = ext.find_cmu_fonts([dir, joinpath(dir, "does_not_exist")])
+    fonts = ext._find_computer_modern_fonts([dir, joinpath(dir, "does_not_exist")])
     @test fonts.regular == joinpath(dir, "cmunrm.ttf")
     @test fonts.bold == joinpath(dir, "cmunbx.ttf")
     @test fonts.italic == joinpath(dir, "cmunti.otf")
 end
 
-end # module SecStrDiagram
+end # module MakiePlotting

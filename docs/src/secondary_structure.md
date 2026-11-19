@@ -33,53 +33,58 @@ To run with DSSP just use the `dssp_run` function instead.
 
 ## Secondary structure diagrams
 
-[`ss`](@ref) draws the secondary structure of each residue (loop, helix or β strand,
-computed with DSSP through [`dssp_run`](@ref)) as a diagram along the sequence, with each
-residue colored by a per-residue property. `CairoMakie` must be loaded.
+[`secondary_structure_diagram`](@ref) computes the secondary structure of each residue
+with DSSP (through [`dssp_run`](@ref)) and associates one value to each residue. The
+result, a [`SecondaryStructureDiagram`](@ref), is drawn with `plot`, which shows the
+secondary structure along the sequence with each residue colored by its value.
+`CairoMakie` must be loaded.
 
 ```@example ss-diagram
-using PDBTools, CairoMakie
+using PDBTools, LazyArtifacts, CairoMakie
 atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
-ss(atoms; colorbar_label = "B-factor")
+diagram = secondary_structure_diagram(atoms)
 ```
 
-Helices are drawn as a ribbon, β strands as arrows and loops as thin bars. Helices
+```@example ss-diagram
+plot(diagram; colorbar_title = "B-factor")
+```
+
+Helices are drawn as ribbons, β strands as arrows and loops as thin bars. Helices
 shorter than 4 residues and strands shorter than 3 residues are drawn as loops. Each
 row has 50 residues, and each chain starts a new row, labeled on the left
 (`chain_new_row = true`).
 
 The figure has a fixed size (full page width, about 17 cm) and a fixed font size
 (8 pt), so that all diagrams come out identical and ready for publication. If the
-CMU Serif (Computer Modern) font files are installed, they are used. With the
-`output` keyword, the figure is saved as SVG (vector):
+CMU Serif (Computer Modern) font files are installed, they are used. To keep the sizes
+in typographic points, save the figure as SVG with `pt_per_unit = 1`:
 
 ```julia
-ss(atoms; colorbar_label = "B-factor", output = "ss.svg")
+fig = plot(diagram; colorbar_title = "B-factor")
+save("diagram.svg", fig; pt_per_unit = 1)
 ```
 
-### Coloring by a per-residue property
+If `Plots` is also loaded, call `CairoMakie.plot(diagram)`.
 
-Without a second argument, the residues are colored by the `beta` column of the
-structure, combined for each residue by `beta_reduce`:
+### Values of each residue
 
-- `:mean` (default): for B-factors, or when the same per-residue value was written in
+Without a second argument, the value of each residue is computed from a per-atom
+property, by default the `beta` column of the structure, combined for each residue by
+`aggregate`:
+
+- the mean (default): for B-factors, or when the same per-residue value was written in
   all atoms of the residue;
-- `:sum`: for additive per-atom values, such as atomic contributions to a coordination
-  number from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl).
+- `aggregate = sum`: for additive per-atom values, such as atomic contributions to a
+  coordination number from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl).
 
-Any other per-residue property can be given as a vector, with one value per residue
-of the selection:
+Another per-atom property can be chosen with `property`, for example
+`property = occup`. Any per-residue values can also be given as a vector, with one value
+per residue, in the order of `eachresidue(atoms)`:
 
 ```@example ss-diagram
 nres = length(eachresidue(atoms))
 values = [sin(i / 10) for i in 1:nres]
-ss(atoms, values; colorbar_label = "property")
-```
-
-The structure can also be read directly from a file (PDB or mmCIF), with a selection:
-
-```julia
-ss("structure.pdb", "protein and chain A", values; output = "ss.svg")
+plot(secondary_structure_diagram(atoms, values); colorbar_title = "property")
 ```
 
 ### Color scale
@@ -87,9 +92,9 @@ ss("structure.pdb", "protein and chain A", values; output = "ss.svg")
 When some values are negative, the color scale is symmetric around zero and uses a
 diverging color map (`:balance`); otherwise it goes from zero to the maximum and uses a
 sequential color map (`:tempo`). This can be changed with `range_mode`
-(`:auto`, `:symmetric` or `:positive`) and `color`.
+(`:auto`, `:symmetric` or `:positive`) and `colormap`.
 
-The keyword `normalize` defines how the values are mapped to colors:
+The keyword `color_scale` defines how the values are mapped to colors:
 
 - `:robust` (default): linear, with the upper limit at the 99% quantile of the absolute
   values (`clip_quantile`), so that a few extreme residues do not wash out the others;
@@ -98,18 +103,19 @@ The keyword `normalize` defines how the values are mapped to colors:
   span several orders of magnitude.
 
 To compare several structures on the same scale, fix the limit (and, for `:asinh`, the
-scale) in original units, with the same values in all figures:
+scale) in the units of the values, with the same values in all figures:
 
 ```julia
-ss(atoms1, values1; limit = 2.0, output = "system1.svg")
-ss(atoms2, values2; limit = 2.0, output = "system2.svg")
+fig1 = plot(diagram1; color_limit = 2.0)
+fig2 = plot(diagram2; color_limit = 2.0)
 ```
 
-With `per_chain = true`, the values of each chain are divided by the maximum absolute
-value of that chain.
+With `normalize_per_chain = true`, the values of each chain are divided by the maximum
+absolute value of that chain.
 
 ```@docs
-ss
+secondary_structure_diagram
+SecondaryStructureDiagram
 ```
 
 ## Utility functions 
