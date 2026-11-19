@@ -120,21 +120,15 @@ function _ss_transform_contrib(x::AbstractVector{<:Real};
 end
 
 """
-    _ss_assign(atoms, residues, method)
+    _ss_assign(atoms, residues)
 
-Compute the secondary structure and return one code per residue, in the order of
-`residues`. If the method returns a different number of residues, try to match them
-by (chain, residue number); if that is not possible, throw an error instead of
+Compute the secondary structure with DSSP (`dssp_run`) and return one code per residue,
+in the order of `residues`. If DSSP returns a different number of residues, try to match
+them by (chain, residue number); if that is not possible, throw an error instead of
 silently filling the vector.
 """
-function _ss_assign(atoms, residues, method::AbstractString)
-    ssdata = if method == "dssp_run"
-        dssp_run(atoms)
-    elseif method == "stride_run"
-        stride_run(atoms)
-    else
-        throw(ArgumentError("method must be \"dssp_run\" or \"stride_run\", got \"$method\""))
-    end
+function _ss_assign(atoms, residues)
+    ssdata = dssp_run(atoms)
 
     nres = length(residues)
     length(ssdata) == nres && return [string(s.sscode) for s in ssdata]
@@ -157,7 +151,7 @@ function _ss_assign(atoms, residues, method::AbstractString)
         return ssvec
     end
 
-    throw(ArgumentError("$method returned $(length(ssdata)) residues, but the selection has $nres. " *
+    throw(ArgumentError("dssp_run returned $(length(ssdata)) residues, but the selection has $nres. " *
         "Check the selection (e.g. use \"protein\" to exclude water, ions and ligands)."))
 end
 
@@ -165,7 +159,8 @@ end
     ss(atoms::AbstractVector{<:Atom}, contrib = nothing; kwargs...)
     ss(pdbfile::AbstractString, selection = "protein", contrib = nothing; kwargs...)
 
-Draw a per-residue secondary structure diagram (loop/helix/β) colored by a per-residue
+Draw a per-residue secondary structure diagram (loop/helix/β, computed with DSSP through
+[`dssp_run`](@ref)) colored by a per-residue
 property (for example, the coordination number from ComplexMixtures.jl) or, if
 `contrib = nothing`, by the B-factor (beta) column, aggregated per residue according
 to `beta_reduce`. Returns the `CairoMakie.Figure`.
@@ -174,7 +169,6 @@ to `beta_reduce`. Returns the `CairoMakie.Figure`.
     This function requires `using CairoMakie`.
 
 # Keyword arguments
-- `method`: `"dssp_run"` (default) or `"stride_run"`.
 - `beta_reduce` (used only when `contrib = nothing`):
   - `:mean` (default): mean over the atoms of the residue. Use when beta is a
     crystallographic B-factor or when the same per-residue value was written to all atoms.

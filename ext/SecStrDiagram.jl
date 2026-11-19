@@ -68,7 +68,6 @@ end
 
 function PDBTools.ss(ats::AbstractVector{<:Atom},
     contrib::Union{Nothing,AbstractVector{<:Real}} = nothing;
-    method::AbstractString = "dssp_run",
     color = nothing,
     normalize::Symbol = :robust,
     range_mode::Symbol = :auto,
@@ -137,8 +136,8 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
         end
     end
 
-    # --- 3) Secondary structure ---
-    ssvec = _ss_assign(ats, residues, method)
+    # --- 3) Secondary structure (DSSP) ---
+    ssvec = _ss_assign(ats, residues)
 
     # Helices shorter than 4 residues and strands shorter than 3 become loops
     for (i, j) in _ss_runs([c in _SS_HELIX_CODES for c in ssvec], newseg)
@@ -312,7 +311,6 @@ end
 
     @test_throws ArgumentError ss(atoms, ones(nres - 1))
     @test_throws ArgumentError ss(atoms; beta_reduce = :median)
-    @test_throws ArgumentError ss(atoms; method = "foo")
 end
 
 end # module SecStrDiagram
