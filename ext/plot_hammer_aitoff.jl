@@ -83,6 +83,9 @@ function heatmap(
         for label in unique(labels)
             mask_values = [l == label ? hi : lo for l in labels]
             xb, yb, mask = PDBTools._binned_statistic_2d(map.projection.x, map.projection.y, mask_values; nbins, statistic=:mean)
+            # Bins without atoms (NaN) do not belong to the group: contour lines are
+            # not drawn correctly across NaN values
+            mask[isnan.(mask)] .= lo
             Plots.contour!(
                 p, xb, yb, mask;
                 levels=1,
