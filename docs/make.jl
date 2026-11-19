@@ -67,4 +67,7 @@ deploydocs(
     target = "build",
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#"],
+    # Pull requests from branches of this repository are deployed to previews/PR<number>
+    # (removed when the PR is closed, by .github/workflows/DocPreviewCleanup.yml)
+    push_preview = true,
 )
