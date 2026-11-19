@@ -1,5 +1,9 @@
 import Plots: plot
 
+# Color of a text label drawn over a marker of color `c`: white for dark colors, black for
+# light ones (relative luminance of the color).
+_label_color(c) = 0.299 * Plots.red(c) + 0.587 * Plots.green(c) + 0.114 * Plots.blue(c) < 0.5 ? :white : :black
+
 """
     plot(wheel::HelicalWheel; kwargs...)
 
@@ -76,8 +80,14 @@ function plot(
     )
     isnothing(clims) || Plots.plot!(p; clims = clims)
 
+    # Residue labels: white on dark markers, black on light ones. The color of each
+    # marker is that of its value in the color gradient, within the limits of the color
+    # scale (clims, or the range of the values).
+    gradient = Plots.cgrad(colormap)
+    lo, hi = isnothing(clims) ? extrema(weights) : clims
     for i in 1:n
-        Plots.annotate!(p, x[i], y[i], Plots.text(seq[i], :black, :center))
+        t = hi > lo ? clamp((weights[i] - lo) / (hi - lo), 0, 1) : 0.5
+        Plots.annotate!(p, x[i], y[i], Plots.text(seq[i], _label_color(gradient[t]), :center))
     end
     Plots.annotate!(p, x[1], y[1] - 0.16, Plots.text("$(first(wheel.residue_numbers))", :gray10, :center, 4))
     Plots.annotate!(p, x[end], y[end] - 0.16, Plots.text("$(last(wheel.residue_numbers))", :gray10, :center, 4))
@@ -111,6 +121,13 @@ end
     # more than 18 residues (second ring), fixed color limits, no arrow
     p = Plots.plot(helical_wheel(repeat(seq, 2), rand(2n)); normalize = false, clims = (0, 1), show_moment = false)
     @test p isa Plots.Plot
+    # labels are white on dark markers and black on light ones
+    label_color = Base.get_extension(PDBTools, :Plotting)._label_color
+    gradient = Plots.cgrad(:tempo)
+    @test label_color(gradient[0.0]) == :black
+    @test label_color(gradient[1.0]) == :white
+    @test label_color(Plots.RGB(0, 0, 0)) == :white
+    @test label_color(Plots.RGB(1, 1, 1)) == :black
 
     # from a selection of atoms
     pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
