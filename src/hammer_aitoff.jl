@@ -197,14 +197,14 @@ function plot_hammeraitoff end
     @test [(at.x, at.y, at.z) for at in atoms] == coords_before
     # every projected point lies inside the Hammer ellipse
     @test all(@. (x / (2 * sqrt(2)))^2 + (y / sqrt(2))^2 <= 1 + 1e-8)
-    # projection of known directions
-    c = center_of_mass(atoms)
+    # projection of known directions (exact coordinates, center at the origin)
+    c = [0.0, 0.0, 0.0]
     at = deepcopy(atoms[1])
-    at.x, at.y, at.z = c[1] + 1.0, c[2], c[3]       # φ = 0, λ = 0
+    at.x, at.y, at.z = 1.0, 0.0, 0.0                # φ = 0, λ = 0
     xp, yp = hammer([at]; center = c)
     @test xp[1] ≈ 0.0 atol = 1e-12
     @test yp[1] ≈ 0.0 atol = 1e-12
-    at.x, at.y, at.z = c[1], c[2], c[3] + 1.0       # north pole
+    at.x, at.y, at.z = 0.0, 0.0, 1.0                # north pole
     xp, yp = hammer([at]; center = c)
     @test xp[1] ≈ 0.0 atol = 1e-12
     @test yp[1] ≈ sqrt(2)
