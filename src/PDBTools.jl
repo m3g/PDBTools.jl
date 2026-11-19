@@ -167,4 +167,7 @@ include("./hammer_aitoff.jl")
 # Branch helical-wheels
 include("./helical_wheel.jl")
 
+# Branch sec-str
+include("./secondary_structure_diagram.jl")
+
 end
