@@ -69,24 +69,30 @@ function plot(
     x = cos.(rotated_angles) .* radii
     y = sin.(rotated_angles) .* radii
 
+    # Limits of the color scale, used both for the markers and for the colors of their
+    # labels (if all values are equal, the limits are widened, such that the markers
+    # have the color of the center of the scale).
+    lo, hi = isnothing(clims) ? extrema(weights) : clims
+    if lo == hi
+        lo, hi = lo - 0.5, hi + 0.5
+    end
+
+    gradient = Plots.cgrad(colormap)
     p = Plots.plot(x, y; lw = 1, lc = :gray10, alpha = 0.6, label = "", fontfamily = "Computer Modern")
     Plots.scatter!(p, x, y;
         marker_z = weights,
         markersize = 14,
-        color = Plots.cgrad(colormap),
+        color = gradient,
+        clims = (lo, hi),
         colorbar = :left,
         colorbar_title = colorbar_title,
         label = "",
     )
-    isnothing(clims) || Plots.plot!(p; clims = clims)
 
     # Residue labels: white on dark markers, black on light ones. The color of each
-    # marker is that of its value in the color gradient, within the limits of the color
-    # scale (clims, or the range of the values).
-    gradient = Plots.cgrad(colormap)
-    lo, hi = isnothing(clims) ? extrema(weights) : clims
+    # marker is that of its value in the color gradient, within the limits of the color scale.
     for i in 1:n
-        t = hi > lo ? clamp((weights[i] - lo) / (hi - lo), 0, 1) : 0.5
+        t = clamp((weights[i] - lo) / (hi - lo), 0, 1)
         Plots.annotate!(p, x[i], y[i], Plots.text(seq[i], _label_color(gradient[t]), :center))
     end
     Plots.annotate!(p, x[1], y[1] - 0.16, Plots.text("$(first(wheel.residue_numbers))", :gray10, :center, 4))
@@ -121,6 +127,9 @@ end
     # more than 18 residues (second ring), fixed color limits, no arrow
     p = Plots.plot(helical_wheel(repeat(seq, 2), rand(2n)); normalize = false, clims = (0, 1), show_moment = false)
     @test p isa Plots.Plot
+    # all values equal (e.g. zero B-factors), with and without normalization
+    @test Plots.plot(helical_wheel(seq, zeros(n))) isa Plots.Plot
+    @test Plots.plot(helical_wheel(seq, zeros(n)); normalize = false) isa Plots.Plot
     # labels are white on dark markers and black on light ones
     label_color = Base.get_extension(PDBTools, :Plotting)._label_color
     gradient = Plots.cgrad(:tempo)

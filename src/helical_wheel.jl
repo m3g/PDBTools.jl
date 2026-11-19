@@ -153,9 +153,9 @@ julia> plot(wheel; colorbar_title = "property")
 
 julia> pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
-julia> helix = select(pdb, "resnum >= 10 and resnum <= 25");
+julia> helix = select(pdb, "resnum >= 13 and resnum <= 29"); # an α-helix
 
-julia> plot(helical_wheel(helix; aggregate = sum); colorbar_title = "CN")
+julia> plot(helical_wheel(helix; property = mass, aggregate = sum); colorbar_title = "mass")
 ```
 
 Values from other packages can be passed directly. For example, with a

@@ -47,51 +47,65 @@ Some details of the drawing:
   several helices on the same color scale, use `normalize = false` and fix the limits
   with `clims`.
 
-## From a structure
+## Per-residue values
 
-With a selection of atoms (of a single chain), the sequence, the residue numbers and the
-values are taken from the structure itself. The values are computed from a per-atom
-property (`property`, by default the `beta` column of the PDB file), combined for each
-residue by `aggregate`:
+The values of the residues are the input of the helical wheel, and can come from any
+source, as long as there is one value per residue, in the order of the sequence.
 
-- use `aggregate = sum` for additive properties, such as atomic contributions to a
-  coordination number written in the `beta` column;
-- use the mean (default) for intensive properties, such as B-factors or RMSF.
+Residues (and chains, segments, models and structures) are vectors of atoms, such that
+per-residue values of any atomic property can be computed with `sum(f, residue)`, or
+`mean(f, residue)` (with `using Statistics`). Here, we compute the solvent accessible 
+surface area (SASA) of each atom of a protein, store it in the `beta` field of the atoms,
+and sum it for the residues of an α-helix of the protein (residues 13 to 29):
 
 ```@example wheel
 using LazyArtifacts
 pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
-helix = select(pdb, "resnum <= 18")
-plot(helical_wheel(helix); colorbar_title = "B-factor")
+atomic_sasa = sasa_particles(pdb)
+for (i, atom) in enumerate(pdb)
+    atom.beta = atomic_sasa[i] # SASA of atom i
+end
+helix = select(pdb, "resnum >= 13 and resnum <= 29")
+values = [ sum(beta, residue) for residue in eachresidue(helix) ]
 ```
-
-The `property` keyword selects another per-atom property, for example
-`property = occup` for the occupancy column.
-
-## Per-residue values
-
-Residues (and chains, segments, models and structures) are vectors of atoms, such that
-per-residue values of any atomic property can be computed with `sum(f, residue)`, or
-`mean(f, residue)` (with `using Statistics`). For example, the mass of each residue of
-the helix above is:
 
 ```@example wheel
-[ sum(mass, residue) for residue in eachresidue(helix) ]
+sequence = join(oneletter.(resname.(eachresidue(helix))))
+plot(helical_wheel(sequence, values); normalize = false, colorbar_title = "SASA (Å\$^2\$)")
 ```
 
-This is what `helical_wheel` computes from a structure, with `aggregate(property, residue)`.
+The buried face of the helix, which packs against the rest of the protein, is at the bottom.
 
-## Values from other packages
-
-The values can come from any source. For example, with a `ResidueContributions` object
-`rc` from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl), the
-contribution of each residue at a distance `d` is:
+Values computed by other packages can be used as well. For example, with a 
+`ResidueContributions` object `rc` from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl), 
+the contribution of each residue to the solvation of the protein at a distance `d` is:
 
 ```julia
 id = findfirst(>=(d), rc.d)
 values = [rc.residue_contributions[i][id] for i in eachindex(rc.residue_contributions)]
 plot(helical_wheel(sequence, values); colorbar_title = "CN")
 ```
+
+## From a structure
+
+With a selection of atoms (of a single chain), the sequence, the residue numbers and the
+values are taken from the structure itself. The values are computed from a per-atom
+property (`property`, by default the `beta` field of the atoms), combined for each
+residue by `aggregate`, as `aggregate(property, residue)`:
+
+- use `aggregate = sum` for additive properties, such as the SASA computed above, or 
+  atomic contributions to a coordination number;
+- use the mean (default) for intensive properties, such as B-factors or RMSF.
+
+Thus, the helical wheel above is obtained directly from the helix with:
+
+```@example wheel
+plot(helical_wheel(helix; aggregate = sum); normalize = false, colorbar_title = "SASA (Å\$^2\$)")
+```
+
+The `property` keyword selects another per-atom property, for example
+`property = occup` for the occupancy column. The first and last residues are labeled
+with their residue numbers in the structure.
 
 ## Hydrophobic moment and mean hydrophobicity
 
