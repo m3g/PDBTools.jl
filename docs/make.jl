@@ -59,6 +59,7 @@ makedocs(
         "Other" => Any[
             "Auxiliary functions" => "auxiliary.md",
             "Examples" => "examples.md",
+            "Contributing" => "contributing.md",
         ],
     ],
 )
