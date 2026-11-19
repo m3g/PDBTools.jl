@@ -27,13 +27,16 @@ Only the direction of each atom is used: atoms along the same line from the cent
 
 ## Projecting the atoms
 
-[`hammer_aitoff_projection`](@ref) returns the projected coordinates of each atom. The input structure is not modified.
+[`hammer_aitoff_projection`](@ref) projects the atoms, and returns a [`HammerAitoffProjection`](@ref), which contains the atoms, the center of the projection and the projected coordinates of each atom (fields `x` and `y`). The input structure is not modified.
 
 ```@example hammer
 using PDBTools, LazyArtifacts
 atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
-x, y = hammer_aitoff_projection(atoms)
-x[1:3], y[1:3]
+proj = hammer_aitoff_projection(atoms)
+```
+
+```@example hammer
+proj.x[1:3], proj.y[1:3]
 ```
 
 ## Heat maps of per-atom properties
@@ -65,6 +68,14 @@ To compare several structures on the same color scale, fix the limits with `clim
 heatmap(map; clims = (0, 40), colorbar_title = "distance to center (Å)")
 ```
 
+A map can also be computed from a projection, such that maps of several properties of the
+same atoms do not require projecting the atoms again:
+
+```@example hammer
+map_mass = hammer_aitoff_map(proj, mass.(atoms); nbins = 100)
+heatmap(map_mass; colorbar_title = "mass")
+```
+
 The bin centers and the binned values are available in the `xbin`, `ybin` and `values` fields of the map,
 where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`:
 
@@ -80,11 +91,11 @@ With `contours = :chain`, a line is drawn around the region occupied by each cha
 heatmap(map; contours = :chain, colorbar_title = "distance to center (Å)")
 ```
 
-With `contours = :group`, chains are grouped by a function that receives the chain name and returns the name of its group. This is useful when the structure has many copies of a few proteins (for example, the capsid and envelope proteins of a virus):
+With `contours = :group`, the atoms are grouped by a function that receives each atom and returns the name of its group. This is useful, for example, when the structure has many copies of a few proteins (as the capsid and envelope proteins of a virus), whose chains are grouped:
 
 ```julia
 groups = Dict("A" => "protein 1", "B" => "protein 1", "C" => "protein 2")
-heatmap(map; contours = :group, groupfun = ch -> groups[ch])
+heatmap(map; contours = :group, groupfun = at -> groups[chain(at)])
 ```
 
 The figure can be saved with `savefig`.
@@ -93,6 +104,7 @@ The figure can be saved with `savefig`.
 
 ```@docs
 hammer_aitoff_projection
+HammerAitoffProjection
 hammer_aitoff_map
 HammerAitoffMap
 heatmap(::HammerAitoffMap)

@@ -14,7 +14,7 @@ for example, which face interacts with the membrane, the solvent or another prot
 
 [`helical_wheel`](@ref) receives the sequence of the helix (one-letter codes) and one
 value per residue, in the same order. Any property can be used: coordination numbers,
-SASA, RMSF, interaction energies, conservation scores, etc. The resulting 
+SASA, RMSF, interaction energies, conservation scores, etc. The resulting
 [`HelicalWheel`](@ref) is plotted with `plot` (`Plots` must be loaded):
 
 ```@example wheel
@@ -28,7 +28,7 @@ wheel = helical_wheel(sequence, values)
 plot(wheel; colorbar_title = "property")
 ```
 
-The `HelicalWheel` contains the mean hydrophobicity of the helix and its hydrophobic 
+The `HelicalWheel` contains the mean hydrophobicity of the helix and its hydrophobic
 moment, in the `mean_hydrophobicity` and `μ` fields:
 
 ```@example wheel
@@ -49,9 +49,9 @@ Some details of the drawing:
 
 ## From a structure
 
-With a selection of atoms (of a single chain), the sequence, the residue numbers and the 
-values are taken from the structure itself. The values are computed from a per-atom 
-property (`property`, by default the `beta` column of the PDB file), combined for each 
+With a selection of atoms (of a single chain), the sequence, the residue numbers and the
+values are taken from the structure itself. The values are computed from a per-atom
+property (`property`, by default the `beta` column of the PDB file), combined for each
 residue by `aggregate`:
 
 - use `aggregate = sum` for additive properties, such as atomic contributions to a
@@ -70,9 +70,9 @@ The `property` keyword selects another per-atom property, for example
 
 ## Per-residue values
 
-Residues (and chains, segments, models and structures) are vectors of atoms, such that 
-per-residue values of any atomic property can be computed with `sum(f, residue)`, or 
-`mean(f, residue)` (with `using Statistics`). For example, the mass of each residue of 
+Residues (and chains, segments, models and structures) are vectors of atoms, such that
+per-residue values of any atomic property can be computed with `sum(f, residue)`, or
+`mean(f, residue)` (with `using Statistics`). For example, the mass of each residue of
 the helix above is:
 
 ```@example wheel
@@ -93,17 +93,28 @@ values = [rc.residue_contributions[i][id] for i in eachindex(rc.residue_contribu
 plot(helical_wheel(sequence, values); colorbar_title = "CN")
 ```
 
-## Hydrophobic moment
+## Hydrophobic moment and mean hydrophobicity
 
-[`hydrophobic_moment`](@ref) computes the mean hydrophobicity and the hydrophobic
-moment (Eisenberg) of a sequence, without drawing. The default hydrophobicity scale
-is that of Fauchère & Pliska (1983)[^1]. Another scale can be given as a dictionary 
-from one-letter codes to values, with the `hydrophobicity` keyword of `hydrophobic_moment`
-and `helical_wheel`.
+[`hydrophobic_moment`](@ref) computes the hydrophobic moment (Eisenberg) of a sequence,
+without drawing, as a 2D vector, whose magnitude is the amphipathicity of the helix:
 
 ```@example wheel
-hydrophobic_moment("LKKLLKLLKKLLKL")
+m = hydrophobic_moment("LKKLLKLLKKLLKL")
 ```
+
+```@example wheel
+hypot(m...)
+```
+
+[`mean_hydrophobicity`](@ref) computes the mean hydrophobicity of the residues of a sequence:
+
+```@example wheel
+mean_hydrophobicity("LKKLLKLLKKLLKL")
+```
+
+The default hydrophobicity scale is that of Fauchère & Pliska (1983)[^1]. Another scale can
+be given as a dictionary from one-letter codes to values, with the `hydrophobicity` keyword
+of `hydrophobic_moment`, `mean_hydrophobicity` and `helical_wheel`.
 
 [^1]: J. Fauchère and V. Pliska, *Hydrophobic parameters π of amino-acid side chains from the partitioning of N-acetyl-amino-acid amides*, Eur. J. Med. Chem. **18**, 369-375 (1983).
 
@@ -114,4 +125,5 @@ helical_wheel
 HelicalWheel
 plot(::HelicalWheel)
 hydrophobic_moment
+mean_hydrophobicity
 ```

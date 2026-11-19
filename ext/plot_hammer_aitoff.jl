@@ -14,9 +14,10 @@ Plot a heat map of the values of a [`HammerAitoffMap`](@ref), as computed by
 - `contours=:none`: contour mode, one of
   - `:none`: no contours;
   - `:chain` (or `:chains`): draw one contour line around each chain;
-  - `:group`: draw contours around groups of chains, where the group of a
-    chain is given by `groupfun(chainname)`.
-- `groupfun=identity`: function mapping a chain name to its group (only used when
+  - `:group`: draw contours around groups of atoms, where the group of an
+    atom is given by `groupfun(atom)` (for example, groups of chains, with
+    `groupfun = at -> groups[chain(at)]`).
+- `groupfun=chain`: function mapping an atom to its group (only used when
   `contours=:group`).
 - `contour_color=:grey30`: color of the contour lines.
 - `colorbar_title=""`, `title=""`: texts of the color bar and of the plot.
@@ -40,7 +41,7 @@ function heatmap(
     colormap=:tempo,
     clims=nothing,
     contours::Symbol=:none,
-    groupfun=identity,
+    groupfun=PDBTools.chain,
     contour_color=:grey30,
     colorbar_title::AbstractString="",
     title::AbstractString="",
@@ -64,8 +65,9 @@ function heatmap(
     )
 
     if contours != :none
-        # Label of each atom: its chain, or the group of its chain
-        labels = contours == :group ? [string(groupfun(ch)) for ch in map.chains] : map.chains
+        # Label of each atom: its chain, or its group
+        atoms = map.projection.atoms
+        labels = contours == :group ? [string(groupfun(at)) for at in atoms] : [string(PDBTools.chain(at)) for at in atoms]
 
         # The color scale is shared by all series of the plot. To keep the
         # contour masks from changing it, the masks use only the lowest and
@@ -80,7 +82,7 @@ function heatmap(
         nbins = length(map.xbin)
         for label in unique(labels)
             mask_values = [l == label ? hi : lo for l in labels]
-            xb, yb, mask = PDBTools._binned_statistic_2d(map.x, map.y, mask_values; nbins, statistic=:mean)
+            xb, yb, mask = PDBTools._binned_statistic_2d(map.projection.x, map.projection.y, mask_values; nbins, statistic=:mean)
             Plots.contour!(
                 p, xb, yb, mask;
                 levels=1,
@@ -110,7 +112,7 @@ end
         @test isfile(tmpfile)
     end
     map = hammer_aitoff_map(atoms, ones(n); nbins = 30)
-    p = Plots.heatmap(map; contours = :group, groupfun = c -> c == "A" ? "A" : "other")
+    p = Plots.heatmap(map; contours = :group, groupfun = at -> chain(at) == "A" ? "A" : "other")
     @test p isa Plots.Plot
     @test_throws ArgumentError Plots.heatmap(map; contours = :residue)
 end

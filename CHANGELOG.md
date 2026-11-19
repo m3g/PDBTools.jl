@@ -12,8 +12,8 @@ PDBTools.jl Changelog
 
 Version 4.2.1-DEV
 ------------- 
-- ![FEATURE][badge-feature] Helical wheel diagrams: `helical_wheel` computes the helical wheel of a helix (a `HelicalWheel`), with one value per residue of any property, given as values or computed from a structure; `plot(wheel)` draws it, with the residues colored by their values and the hydrophobic moment (requires `using Plots`). `hydrophobic_moment` computes the mean hydrophobicity and the hydrophobic moment of a helix.
-- ![FEATURE][badge-feature] Hammer-Aitoff projection of structures: `hammer_aitoff_projection` projects the atoms onto a plane, preserving areas, as seen from the center of the structure; `hammer_aitoff_map` computes a map of a per-atom property on the projection (a `HammerAitoffMap`), and `heatmap(map)` plots it, optionally with contours around chains or groups of chains (requires `using Plots`).
+- ![FEATURE][badge-feature] Helical wheel diagrams: `helical_wheel` computes the helical wheel of a helix (a `HelicalWheel`), with one value per residue of any property, given as values or computed from a structure; `plot(wheel)` draws it, with the residues colored by their values and the hydrophobic moment (requires `using Plots`). `hydrophobic_moment` computes the hydrophobic moment of a helix (as a 2D vector), and `mean_hydrophobicity` the mean hydrophobicity of its residues.
+- ![FEATURE][badge-feature] Hammer-Aitoff projection of structures: `hammer_aitoff_projection` projects the atoms onto a plane, preserving areas, as seen from the center of the structure (a `HammerAitoffProjection`); `hammer_aitoff_map` computes a map of a per-atom property on the projection (a `HammerAitoffMap`), from the atoms or from a projection, and `heatmap(map)` plots it, optionally with contours around chains or groups of atoms (requires `using Plots`).
 
 Version 4.2.0
 ------------- 

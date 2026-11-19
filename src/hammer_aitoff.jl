@@ -1,7 +1,30 @@
-export hammer_aitoff_projection, hammer_aitoff_map, HammerAitoffMap
+export hammer_aitoff_projection, HammerAitoffProjection, hammer_aitoff_map, HammerAitoffMap
 
 """
-    hammer_aitoff_projection(atoms; center = center_of_mass(atoms)) -> (x, y)
+    HammerAitoffProjection
+
+Projection of a set of atoms onto a plane, with the Hammer-Aitoff equal-area projection,
+as returned by [`hammer_aitoff_projection`](@ref).
+
+# Fields
+- `atoms`: the atoms projected (not a copy: if the atoms are moved, the projection is not updated).
+- `center`: the point from which the directions of the atoms were measured.
+- `x`, `y`: the projected coordinates of each atom.
+"""
+struct HammerAitoffProjection{V<:AbstractVector{<:Atom}}
+    atoms::V
+    center::SVector{3,Float64}
+    x::Vector{Float64}
+    y::Vector{Float64}
+end
+
+function Base.show(io::IO, ::MIME"text/plain", p::HammerAitoffProjection)
+    c = round.(p.center; digits=3)
+    print(io, "HammerAitoffProjection of $(length(p.atoms)) atoms, with center at [$(c[1]), $(c[2]), $(c[3])]")
+end
+
+"""
+    hammer_aitoff_projection(atoms; center = center_of_mass(atoms))
 
 Project the atoms onto a plane using the Hammer-Aitoff equal-area projection.
 
@@ -11,14 +34,10 @@ coordinates. The projected points lie inside the ellipse
 `(x / 2√2)^2 + (y / √2)^2 ≤ 1`. Atoms located exactly at `center` have no
 defined direction and are placed at `(0, 0)`.
 
-The input atoms are not modified.
-
-# Arguments
-- `atoms`: a vector of `PDBTools.Atom`.
-- `center`: the point from which directions are measured (default: the center of mass).
-
-# Returns
-Two vectors with the projected `x` and `y` coordinates of each atom.
+Returns a [`HammerAitoffProjection`](@ref), with the projected coordinates of each atom in
+its `x` and `y` fields. The projection can be used to compute maps of several per-atom
+properties with [`hammer_aitoff_map`](@ref), without projecting the atoms again. The input
+atoms are not modified.
 
 # Example
 
@@ -27,7 +46,8 @@ julia> using PDBTools, LazyArtifacts
 
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
-julia> x, y = hammer_aitoff_projection(atoms);
+julia> proj = hammer_aitoff_projection(atoms)
+HammerAitoffProjection of 1463 atoms, with center at [0.013, -0.095, -0.107]
 ```
 """
 function hammer_aitoff_projection(atoms::AbstractVector{<:Atom}; center = center_of_mass(atoms))
@@ -47,7 +67,7 @@ function hammer_aitoff_projection(atoms::AbstractVector{<:Atom}; center = center
         x_hammer[i] = 2 * sqrt(2) * cos(φ) * sin(λ / 2) / denom
         y_hammer[i] = sqrt(2) * sin(φ) / denom
     end
-    return x_hammer, y_hammer
+    return HammerAitoffProjection(atoms, SVector{3,Float64}(center[1], center[2], center[3]), x_hammer, y_hammer)
 end
 
 #=
@@ -119,16 +139,13 @@ returned by [`hammer_aitoff_map`](@ref). Plot it with `heatmap(map)` (requires
 `using Plots`).
 
 # Fields
-- `x`, `y`: projected coordinates of each atom (see [`hammer_aitoff_projection`](@ref)).
-- `chains`: chain of each atom (used to draw the contours of the chains).
+- `projection`: the [`HammerAitoffProjection`](@ref) of the atoms (which contains the atoms).
 - `xbin`, `ybin`: centers of the bins along each axis.
 - `values`: matrix where `values[j, i]` is the value of the bin with center `(xbin[i], ybin[j])`.
 - `statistic`: how the values inside a bin were combined (`:mean`, `:sum` or `:count`).
 """
-struct HammerAitoffMap
-    x::Vector{Float64}
-    y::Vector{Float64}
-    chains::Vector{String}
+struct HammerAitoffMap{P<:HammerAitoffProjection}
+    projection::P
     xbin::Vector{Float64}
     ybin::Vector{Float64}
     values::Matrix{Float64}
@@ -137,7 +154,7 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", m::HammerAitoffMap)
     print(io, chomp("""
-    HammerAitoffMap of $(length(m.x)) atoms ($(length(unique(m.chains))) chains)
+    HammerAitoffMap of $(length(m.projection.atoms)) atoms
         Bins: $(length(m.xbin)) × $(length(m.ybin)), statistic: :$(m.statistic)
         Range of values: $(extrema(m.values))
     """))
@@ -145,12 +162,13 @@ end
 
 """
     hammer_aitoff_map(atoms, values; nbins=100, statistic=:mean, center=center_of_mass(atoms))
+    hammer_aitoff_map(projection::HammerAitoffProjection, values; nbins=100, statistic=:mean)
 
 Compute the map of a per-atom property (`values`, one value per atom) on the Hammer-Aitoff
-projection of the structure. The atoms are projected with [`hammer_aitoff_projection`](@ref),
-the map is divided into `nbins × nbins` bins, and the value of each bin is a statistic of the
-values of the atoms that fell inside it. Bins without atoms get `0.0`, and values that are
-`NaN` or `Inf` are ignored.
+projection of the structure. The atoms are projected with [`hammer_aitoff_projection`](@ref)
+(or a projection computed before is used), the map is divided into `nbins × nbins` bins, and
+the value of each bin is a statistic of the values of the atoms that fell inside it. Bins
+without atoms get `0.0`, and values that are `NaN` or `Inf` are ignored.
 
 Returns a [`HammerAitoffMap`](@ref), which can be plotted with `heatmap(map)` (requires `using Plots`).
 
@@ -160,7 +178,8 @@ Returns a [`HammerAitoffMap`](@ref), which can be plotted with `heatmap(map)` (r
   - `:mean`: the mean of the values (default), for intensive properties, such as B-factors or distances;
   - `:sum`: the sum of the values, for additive properties, such as atomic contributions to a coordination number;
   - `:count`: the number of atoms in the bin (the values are ignored).
-- `center`: the point from which the directions of the atoms are measured.
+- `center`: the point from which the directions of the atoms are measured (only when
+  the atoms are given).
 
 # Example
 
@@ -170,30 +189,34 @@ julia> using PDBTools, LazyArtifacts
 julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
 julia> map = hammer_aitoff_map(atoms, mass.(atoms); nbins = 50)
-HammerAitoffMap of 1463 atoms (1 chains)
+HammerAitoffMap of 1463 atoms
     Bins: 50 × 50, statistic: :mean
     Range of values: (0.0, 32.060001373291016)
 ```
 """
 function hammer_aitoff_map(
-    atoms::AbstractVector{<:Atom},
+    projection::HammerAitoffProjection,
     values::AbstractVector{<:Real};
     nbins::Integer=100,
     statistic::Symbol=:mean,
-    center = center_of_mass(atoms),
 )
-    length(values) == length(atoms) ||
-        throw(ArgumentError("values has $(length(values)) elements, but there are $(length(atoms)) atoms"))
-    x, y = hammer_aitoff_projection(atoms; center)
-    xbin, ybin, cbins = _binned_statistic_2d(x, y, values; nbins, statistic)
-    return HammerAitoffMap(x, y, string.(chain.(atoms)), xbin, ybin, cbins, statistic)
+    length(values) == length(projection.atoms) ||
+        throw(ArgumentError("values has $(length(values)) elements, but there are $(length(projection.atoms)) atoms"))
+    xbin, ybin, cbins = _binned_statistic_2d(projection.x, projection.y, values; nbins, statistic)
+    return HammerAitoffMap(projection, xbin, ybin, cbins, statistic)
 end
+hammer_aitoff_map(atoms::AbstractVector{<:Atom}, values::AbstractVector{<:Real}; center = center_of_mass(atoms), kargs...) =
+    hammer_aitoff_map(hammer_aitoff_projection(atoms; center), values; kargs...)
 
 @testitem "hammer_aitoff_projection" begin
     using PDBTools, LazyArtifacts
     atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
     coords_before = [(at.x, at.y, at.z) for at in atoms]
-    x, y = hammer_aitoff_projection(atoms)
+    proj = hammer_aitoff_projection(atoms)
+    @test proj isa HammerAitoffProjection
+    @test proj.atoms === atoms
+    @test proj.center ≈ center_of_mass(atoms)
+    x, y = proj.x, proj.y
     @test length(x) == length(y) == length(atoms)
     # the input atoms are not modified
     @test [(at.x, at.y, at.z) for at in atoms] == coords_before
@@ -203,13 +226,13 @@ end
     c = [0.0, 0.0, 0.0]
     at = deepcopy(atoms[1])
     at.x, at.y, at.z = 1.0, 0.0, 0.0                # φ = 0, λ = 0
-    xp, yp = hammer_aitoff_projection([at]; center = c)
-    @test xp[1] ≈ 0.0 atol = 1e-12
-    @test yp[1] ≈ 0.0 atol = 1e-12
+    p = hammer_aitoff_projection([at]; center = c)
+    @test p.x[1] ≈ 0.0 atol = 1e-12
+    @test p.y[1] ≈ 0.0 atol = 1e-12
     at.x, at.y, at.z = 0.0, 0.0, 1.0                # north pole
-    xp, yp = hammer_aitoff_projection([at]; center = c)
-    @test xp[1] ≈ 0.0 atol = 1e-12
-    @test yp[1] ≈ sqrt(2)
+    p = hammer_aitoff_projection([at]; center = c)
+    @test p.x[1] ≈ 0.0 atol = 1e-12
+    @test p.y[1] ≈ sqrt(2)
 end
 
 @testitem "hammer_aitoff_map" begin
@@ -217,7 +240,8 @@ end
     using PDBTools: _binned_statistic_2d
     using ShowMethodTesting
     atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
-    x, y = hammer_aitoff_projection(atoms)
+    proj = hammer_aitoff_projection(atoms)
+    x, y = proj.x, proj.y
     n = length(x)
     xbin, ybin, c = _binned_statistic_2d(x, y, ones(n); nbins = 20, statistic = :count)
     @test length(xbin) == length(ybin) == 20
@@ -236,11 +260,13 @@ end
     map = hammer_aitoff_map(atoms, ones(n); nbins = 20, statistic = :count)
     @test map isa HammerAitoffMap
     @test map.values == c
-    @test (map.x, map.y) == (x, y)
-    @test map.chains == string.(chain.(atoms))
+    @test (map.projection.x, map.projection.y) == (x, y)
+    @test map.projection.atoms === atoms
     @test map.statistic == :count
+    # the map computed from a projection is the same
+    @test hammer_aitoff_map(proj, ones(n); nbins = 20, statistic = :count).values == c
     @test parse_show(map) ≈ """
-        HammerAitoffMap of $n atoms ($(length(unique(chain.(atoms)))) chains)
+        HammerAitoffMap of $n atoms
             Bins: 20 × 20, statistic: :count
             Range of values: $(extrema(c))
         """
@@ -248,4 +274,6 @@ end
     @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n); statistic = :median)
     @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n); nbins = 0)
     @test_throws ArgumentError hammer_aitoff_map(atoms, ones(n - 1))
+    @test_throws ArgumentError hammer_aitoff_map(proj, ones(n - 1))
+    @test parse_show(proj) ≈ "HammerAitoffProjection of $n atoms, with center at [$(join(round.(proj.center; digits=3), ", "))]"
 end
