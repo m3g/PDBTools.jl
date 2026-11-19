@@ -161,6 +161,9 @@ include("./tools/custom_types.jl")
 # Precompilation
 include("./package_internals/precompile.jl")
 
+# Branch helical-wheels
+include("./helical_wheel.jl")
+
 # Branch sec-str
 include("./ss_diagram.jl")
 
