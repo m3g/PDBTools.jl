@@ -163,5 +163,8 @@ include("./package_internals/precompile.jl")
 
 # Branch hammer-aitoff
 include("./hammer_aitoff.jl")
+  
+# Branch helical-wheels
+include("./helical_wheel.jl")
 
 end
