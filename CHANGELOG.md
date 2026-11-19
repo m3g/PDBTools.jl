@@ -12,6 +12,7 @@ PDBTools.jl Changelog
 
 Version 4.2.1-DEV
 - `ss`: secondary structure diagrams colored by per-residue properties (requires CairoMakie).
+- `hammer`, `hammeraitoff` and `plot_hammeraitoff`: Hammer-Aitoff projection of structures.
 - `helical_wheel`, `residue_values` and `hydrophobic_moment`: helical wheel diagrams.
 ------------- 
 
