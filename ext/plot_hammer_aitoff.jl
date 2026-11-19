@@ -74,7 +74,7 @@ end
     using PDBTools, LazyArtifacts
     import Plots
     ENV["GKSwstype"] = "nul"
-    atoms = read_pdb(PDBTools.test_file("6co8.pdb"), "protein")
+    atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
     n = length(atoms)
     for contours in (:none, :chain)
         tmpfile = tempname() * ".png"

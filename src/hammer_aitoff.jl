@@ -189,7 +189,7 @@ function plot_hammeraitoff end
 
 @testitem "hammer" begin
     using PDBTools, LazyArtifacts
-    atoms = read_pdb(PDBTools.test_file("6co8.pdb"), "protein")
+    atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
     coords_before = [(at.x, at.y, at.z) for at in atoms]
     x, y = hammer(atoms)
     @test length(x) == length(y) == length(atoms)
@@ -212,7 +212,7 @@ end
 
 @testitem "hand_made_histogram" begin
     using PDBTools, LazyArtifacts
-    atoms = read_pdb(PDBTools.test_file("6co8.pdb"), "protein")
+    atoms = read_mmcif(PDBTools.test_file("6CO8.cif"), "protein")
     x, y = hammer(atoms)
     n = length(x)
     xbin, ybin, c = hand_made_histogram(x, y, ones(n); nbins = 20, statistic = :count)
