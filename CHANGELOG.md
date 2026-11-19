@@ -11,6 +11,7 @@ PDBTools.jl Changelog
 [badge-info]: https://img.shields.io/badge/Info-gray.svg
 
 Version 4.2.1-DEV
+- `hammer`, `hammeraitoff` and `plot_hammeraitoff`: Hammer-Aitoff projection of structures.
 - `helical_wheel`, `residue_values` and `hydrophobic_moment`: helical wheel diagrams.
 ------------- 
 
