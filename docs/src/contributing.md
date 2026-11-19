@@ -35,7 +35,8 @@ Before writing a helper function, check if the package already provides it. For 
 
 Computation and plotting are separate. A function computes the result and returns it as a
 custom type, which carries everything needed to plot it, and can be used without any 
-plotting package. The plot is a method of a function of `Plots`, for that type:
+plotting package. The plot is a method, for that type, of a function of the plotting package
+(`heatmap`, `plot`, `scatter`, ... of `Plots`):
 
 | Computation | Result | Plot |
 |:------------|:-------|:-----|
@@ -47,9 +48,11 @@ plotting package. The plot is a method of a function of `Plots`, for that type:
 The result types have a `show` method, and fields with descriptive names.
 
 The plotting methods are defined in the `Plotting` extension (in the `ext` directory), which is
-loaded with `using Plots`. Use only `Plots` for plotting: other plotting packages would add 
-dependencies to be maintained, and users would have to learn another interface. If something
-cannot be done with `Plots`, please discuss it in an issue first.
+loaded with `using Plots`. `Plots` is the default plotting package. Another plotting package
+(for example, `CairoMakie`) can be used when it is better suited for a feature: it is then a 
+weak dependency of the package, with its own package extension, loaded only when the user 
+loads that package. A new extension, and the weak dependency it requires, must be clearly 
+stated in the description of the pull request.
 
 Plotting functions return the plot, and do not save it: users save figures with `savefig`
 (so there are no `output` or `outfile` keywords).
@@ -83,7 +86,8 @@ is `false` (default, no periodic boundary conditions), `true` (use the unit cell
   before the precompilation workload.
 - Plotting code goes in the `ext` directory, and is included in `ext/Plotting.jl`.
 - Dependencies: avoid new dependencies. A heavy dependency, needed by a single feature, should
-  be a weak dependency, with a package extension.
+  be a weak dependency, with a package extension. New dependencies and extensions must be 
+  clearly stated in the description of the pull request.
 
 ## Tests
 
