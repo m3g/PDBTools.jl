@@ -43,6 +43,8 @@ makedocs(
             "Solvent Accessible Area" => "sasa.md",
             "Coordinate manipulations" => "coordinates.md",
             "Visualization" => "visualization.md",
+            "Helical wheels" => "helical_wheels.md",
+            "Hammer-Aitoff projection" => "hammer_aitoff.md",
         ],
         "Transfer Free Energy" => Any[
             "Transfer Free Energy" => "mvalues/mvalue.md",
@@ -57,6 +59,7 @@ makedocs(
         "Other" => Any[
             "Auxiliary functions" => "auxiliary.md",
             "Examples" => "examples.md",
+            "Contributing" => "contributing.md",
         ],
     ],
 )
@@ -65,4 +68,7 @@ deploydocs(
     target = "build",
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#"],
+    # Pull requests from branches of this repository are deployed to previews/PR<number>
+    # (removed when the PR is closed, by .github/workflows/DocPreviewCleanup.yml)
+    push_preview = true,
 )
