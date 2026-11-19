@@ -18,23 +18,25 @@ const COLORBAR_WIDTH = 200.0   # length of the horizontal color bar, in pt
 const COLORBAR_HEIGHT = 6.0    # thickness of the color bar, in pt
 const FIGURE_PADDING = 4.0     # outer margin, in pt
 
+# System and user font folders (Linux, macOS, Windows)
+font_dirs() = [joinpath(homedir(), ".local", "share", "fonts"),
+               joinpath(homedir(), ".fonts"),
+               "/usr/local/share/fonts",
+               "/usr/share/fonts",
+               joinpath(homedir(), "Library", "Fonts"),
+               "/Library/Fonts",
+               joinpath(get(ENV, "LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts"),
+               joinpath(get(ENV, "WINDIR", "C:\\Windows"), "Fonts")]
+
 """
-    find_cmu_fonts()
+    find_cmu_fonts(dirs = font_dirs())
 
 Look for the Computer Modern Unicode font files (CMU Serif): `cmunrm` (regular), `cmunbx`
-(bold) and `cmunti` (italic), as `.ttf` or `.otf`, in the system and user font folders
-(Linux, macOS, Windows). Returns a NamedTuple with the paths found (empty if the regular
-font is not found).
+(bold) and `cmunti` (italic), as `.ttf` or `.otf`, in the folders `dirs` (by default, the
+system and user font folders). Returns a NamedTuple with the paths found (empty if the
+regular font is not found).
 """
-function find_cmu_fonts()
-    dirs = [joinpath(homedir(), ".local", "share", "fonts"),
-            joinpath(homedir(), ".fonts"),
-            "/usr/local/share/fonts",
-            "/usr/share/fonts",
-            joinpath(homedir(), "Library", "Fonts"),
-            "/Library/Fonts",
-            joinpath(get(ENV, "LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts"),
-            joinpath(get(ENV, "WINDIR", "C:\\Windows"), "Fonts")]
+function find_cmu_fonts(dirs = font_dirs())
     found = Dict{String,String}()
     for d in dirs
         isdir(d) || continue
@@ -214,7 +216,7 @@ function PDBTools.ss(ats::AbstractVector{<:Atom},
     ncols = maximum(length, rows)
 
     labels = PDBTools.residue_ticks(ats; oneletter = true)[2]
-    length(labels) == nres || error("Residue labels ($(length(labels))) do not match residues ($nres).")
+    length(labels) == nres || error("Residue labels ($(length(labels))) do not match residues ($nres).") # COV_EXCL_LINE
 
     # --- 7) Font (Computer Modern, if found) ---
     fonts = find_cmu_fonts()
@@ -311,6 +313,36 @@ end
 
     @test_throws ArgumentError ss(atoms, ones(nres - 1))
     @test_throws ArgumentError ss(atoms; beta_reduce = :median)
+
+    # reading from an mmCIF file
+    ciffile = tempname() * ".cif"
+    write_mmcif(ciffile, atoms)
+    @test ss(ciffile, "protein") isa CairoMakie.Figure
+
+    # warning when beta_reduce = :sum but beta is constant within each residue
+    atoms_const = deepcopy(atoms)
+    for (i, r) in enumerate(eachresidue(atoms_const)), at in r
+        at.beta = i
+    end
+    @test_logs (:warn, r"beta_reduce = :sum") match_mode = :any ss(atoms_const; beta_reduce = :sum)
+
+    # one-row layout and no colorbar
+    @test ss(atoms; chain_new_row = false, colorbar = false) isa CairoMakie.Figure
+end
+
+@testitem "ss diagram fonts" begin
+    using PDBTools
+    import CairoMakie
+    ext = Base.get_extension(PDBTools, :SecStrDiagram)
+    dir = mktempdir()
+    @test isempty(ext.find_cmu_fonts([dir]))
+    for name in ("cmunrm.ttf", "cmunbx.ttf", "cmunti.otf")
+        touch(joinpath(dir, name))
+    end
+    fonts = ext.find_cmu_fonts([dir, joinpath(dir, "does_not_exist")])
+    @test fonts.regular == joinpath(dir, "cmunrm.ttf")
+    @test fonts.bold == joinpath(dir, "cmunbx.ttf")
+    @test fonts.italic == joinpath(dir, "cmunti.otf")
 end
 
 end # module SecStrDiagram

@@ -151,8 +151,10 @@ function _ss_assign(atoms, residues)
         return ssvec
     end
 
+    # COV_EXCL_START (defensive: dssp_run always returns chain and residue numbers)
     throw(ArgumentError("dssp_run returned $(length(ssdata)) residues, but the selection has $nres. " *
         "Check the selection (e.g. use \"protein\" to exclude water, ions and ligands)."))
+    # COV_EXCL_STOP
 end
 
 """
@@ -240,4 +242,24 @@ function ss end
     @test s == 1.0
     @test_throws ArgumentError tc(x; mode = :log)
     @test_throws ArgumentError tc(x; range_mode = :negative)
+    @test_throws ArgumentError tc(x; limit = -1.0)
+    @test_throws ArgumentError tc(x; mode = :asinh, scale = -1.0)
+    @test_throws ArgumentError runs(Bool[1, 0], Bool[1])
+    @test_throws ArgumentError PDBTools._ss_quantile([1, 2], 1.5)
+end
+
+@testitem "ss diagram assignment" begin
+    using PDBTools, LazyArtifacts
+    pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
+    residues = collect(eachresidue(pdb))
+    # same residues: one code per residue
+    codes = PDBTools._ss_assign(pdb, residues)
+    @test length(codes) == length(residues)
+    # residues that are not in the structure given to DSSP are matched by
+    # (chain, residue number); the missing one is marked as loop
+    first10 = [at for r in residues[1:10] for at in r]
+    first11 = residues[1:11]
+    codes = @test_logs (:warn, r"without secondary structure") PDBTools._ss_assign(first10, first11)
+    @test length(codes) == 11
+    @test codes[end] == "C"
 end
