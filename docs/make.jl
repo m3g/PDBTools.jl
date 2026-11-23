@@ -45,6 +45,7 @@ makedocs(
             "Visualization" => "visualization.md",
             "Helical wheels" => "helical_wheels.md",
             "Hammer-Aitoff projection" => "hammer_aitoff.md",
+            "Secondary structure diagrams" => "secondary_structure_diagram.md",
         ],
         "Transfer Free Energy" => Any[
             "Transfer Free Energy" => "mvalues/mvalue.md",

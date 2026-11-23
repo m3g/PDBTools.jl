@@ -162,6 +162,7 @@ include("./tools/custom_types.jl")
 # Hammer-Aitoff projection and helical wheels
 include("./hammer_aitoff.jl")
 include("./helical_wheel.jl")
+include("./secondary_structure_diagram.jl")
 
 # Legacy compatibility
 
