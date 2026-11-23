@@ -106,7 +106,7 @@ function plot(
     Plots.plot!(p;
         xlim = (-lim, lim), ylim = (-lim, lim),
         aspect_ratio = 1, grid = false, legend = false, frame = :box, ticks = [],
-        background_color = :transparent, dpi = 300,
+        dpi = 300,
     )
 
     return p
