@@ -100,6 +100,8 @@ const _extra_test_files = (
     "1MJC_clean.pdb", "1MJC_native.pdb", "1MJC_straight.pdb",
     "2RN2_clean.pdb", "2RN2_native.pdb", "2RN2_straight.pdb", "2rmm_dimer.pdb",
 )
+# Coarse-grained capsid of the Zika virus (artifact shared with Packmol.jl)
+const _zika_test_files = ("capsid.pdb",)
 """
     PDBTools.test_file(name::AbstractString)
 
@@ -120,6 +122,7 @@ function test_file end
         @test isfile(PDBTools.test_file(name))
     end
     @test all(isfile(PDBTools.test_file(name)) for name in PDBTools._extra_test_files)
+    @test isfile(PDBTools.test_file("capsid.pdb"))
 end
 
 # Analysis functions of residues
@@ -156,18 +159,13 @@ include("./tools/visualize.jl")
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
 
+# Hammer-Aitoff projection and helical wheels
+include("./hammer_aitoff.jl")
+include("./helical_wheel.jl")
+
 # Legacy compatibility
 
 # Precompilation
 include("./package_internals/precompile.jl")
-
-# Branch hammer-aitoff
-include("./hammer_aitoff.jl")
-  
-# Branch helical-wheels
-include("./helical_wheel.jl")
-
-# Branch sec-str
-include("./secondary_structure_diagram.jl")
 
 end
