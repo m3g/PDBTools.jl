@@ -29,7 +29,7 @@ REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 
 [extensions]
-Plotting = "Plots"
+PlotsPlotting = "Plots"
 REPLDisplay = "REPL"
 TestFilesExt = "LazyArtifacts"
 MakiePlotting = "CairoMakie"

@@ -35,11 +35,12 @@ with one value per element of `ss`.
 
 # Layout
 
-The figure has a fixed layout, so that all diagrams come out identical and ready for
-publication: full page width (≈ 17 cm), 50 residues per row, 9 pt per residue and an
-8 pt font (Computer Modern, `cmr10`, if available). The height grows with the number of
-rows. To keep the sizes in typographic points, save as SVG with
-`save("diagram.svg", fig; pt_per_unit = 1)`.
+The figure has a fixed layout, so that all diagrams come out identical: 50 residues per
+row, 13.5 pt per residue (≈ 24 cm wide rows) and a 12 pt font (Computer Modern, `cmr10`,
+if available). The height grows with the number of rows. To keep the sizes in typographic
+points, save as SVG with `CairoMakie.save("diagram.svg", fig; pt_per_unit = 1)` (`save`
+alone is ambiguous, because it is also exported by PDBTools). With `pt_per_unit = 2/3`,
+the figure has the width of a full page (≈ 16 cm), with an 8 pt font.
 
 # Keyword arguments
 - `colormap = nothing`: color map. If `nothing`, uses `:balance` (diverging, zero = white)
@@ -63,6 +64,10 @@ rows. To keep the sizes in typographic points, save as SVG with
 - `chain_new_row = true`: each chain starts in a new row, labeled on the left.
 - `background_color = :white`: background of the figure (e.g. `:transparent`).
 - `font = "cmr10"`: font of the labels. Makie uses a default font if it is not found.
+- `size = nothing`: size of the figure, as `(width, height)`, in pt. By default, the
+  size is fixed by the content (675 pt wide rows, 60 pt high), such that all diagrams
+  have the same scale. With a given size, the rows are stretched to fill the figure
+  (the font size is not changed).
 
 Values beyond the color limits take the color of the extreme of the color map.
 
@@ -79,7 +84,7 @@ julia> ss = dssp_run(atoms);
 
 julia> fig = plot_ss_diagram(ss); # only the drawing
 
-julia> save("diagram.svg", fig; pt_per_unit = 1)
+julia> CairoMakie.save("diagram.svg", fig; pt_per_unit = 1)
 ```
 """
 function plot_ss_diagram end

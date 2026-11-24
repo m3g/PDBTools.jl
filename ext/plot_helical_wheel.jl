@@ -131,7 +131,7 @@ end
     @test Plots.plot(helical_wheel(seq, zeros(n))) isa Plots.Plot
     @test Plots.plot(helical_wheel(seq, zeros(n)); normalize = false) isa Plots.Plot
     # labels are white on dark markers and black on light ones
-    label_color = Base.get_extension(PDBTools, :Plotting)._label_color
+    label_color = Base.get_extension(PDBTools, :PlotsPlotting)._label_color
     gradient = Plots.cgrad(:tempo)
     @test label_color(gradient[0.0]) == :black
     @test label_color(gradient[1.0]) == :white
@@ -141,6 +141,6 @@ end
     # from a selection of atoms
     pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     atoms = select(pdb, at -> resnum(at) <= 18)
-    p = Plots.plot(helical_wheel(atoms; aggregate = sum))
+    p = Plots.plot(helical_wheel(atoms); colorbar_title = "B-factor")
     @test p isa Plots.Plot
 end

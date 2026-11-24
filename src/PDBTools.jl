@@ -117,10 +117,13 @@ function test_file end
 @testitem "test_file" begin
     using LazyArtifacts
     using PDBTools
-    # files of PDBToolsBase and of PDBTools (lazy artifacts)
+    # files of the pdbtools set (shared with PDBToolsBase) and of PDBTools (lazy artifacts)
     for name in ("structure.pdb", "small.cif", "hbonds.pdb", "sirah.pdb", "1MJC_native.pdb")
         @test isfile(PDBTools.test_file(name))
     end
+    # independent of the version of the test files of PDBToolsBase
+    @test dirname(PDBTools.test_file("structure.pdb")) == LazyArtifacts.artifact"pdbtools_test_files"
+    @test_throws ArgumentError PDBTools.test_file("not_a_test_file.pdb")
     @test all(isfile(PDBTools.test_file(name)) for name in PDBTools._extra_test_files)
     @test isfile(PDBTools.test_file("capsid.pdb"))
 end
@@ -159,10 +162,13 @@ include("./tools/visualize.jl")
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
 
-# Hammer-Aitoff projection and helical wheels
-include("./hammer_aitoff.jl")
-include("./helical_wheel.jl")
-include("./secondary_structure_diagram.jl")
+# Hammer-Aitoff projection, helical wheels and secondary structure diagrams
+include("./tools/hammer_aitoff.jl")
+include("./tools/helical_wheel.jl")
+include("./tools/secondary_structure_diagram.jl")
+
+# Hints for functions defined in package extensions
+include("./package_internals/error_hints.jl")
 
 # Legacy compatibility
 

@@ -18,7 +18,7 @@ using PDBTools, LazyArtifacts, CairoMakie
 atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
 nres = length(eachresidue(atoms))
 values = [sin(i / 10) for i in 1:nres]
-plot_ss_diagram(atoms; property = values, colorbar_title = "property")
+plot_ss_diagram(atoms; property = values, colorbar_title = "sin of residue index")
 ```
 
 The secondary structure is computed with DSSP (`ss_method = :dssp`, default) or STRIDE
@@ -37,6 +37,13 @@ By default, the residues are colored by the B-factor column of the structure
   all atoms of the residue;
 - `aggregate = sum`: for additive per-atom values, such as atomic contributions to a
   coordination number from [ComplexMixtures.jl](https://github.com/m3g/ComplexMixtures.jl).
+
+Here, the residues are colored by their mean B-factor (in this test structure, the
+B-factors grow from the core to the surface of the protein):
+
+```@example ss-diagram
+plot_ss_diagram(atoms; colorbar_title = "B-factor")
+```
 
 `property` can also be a function of the atom. Here, each residue is colored by the mean
 distance of its atoms to the center of mass:
@@ -58,27 +65,38 @@ plot_ss_diagram(ss)
 ```
 
 Values can be given with `property`, one per element of the output of `dssp_run` or
-`stride_run`. These programs may skip residues (for example, residues with missing
-backbone atoms), so the number of values must match the length of `ss`:
+`stride_run`, which has one element per protein residue (residues that DSSP or STRIDE
+cannot classify, e.g. with missing backbone atoms, are assigned as loop or coil):
 
-```julia
-plot_ss_diagram(ss; property = values_for_each_residue_of_ss)
+```@example ss-diagram
+plot_ss_diagram(ss; 
+    property = [sum(beta, r) / length(r) for r in eachresidue(atoms)], 
+    colorbar_title = "B-factor"
+)
 ```
 
 ## Saving
 
-The figure has a fixed size (full page width, about 17 cm) and a fixed font size
-(8 pt, Computer Modern if available), so that all diagrams come out identical and ready
-for publication. To keep the sizes in typographic points, save it as SVG with
-`pt_per_unit = 1`:
+The figure has a fixed layout (rows of 50 residues, ≈ 24 cm wide, and a 12 pt font,
+Computer Modern if available), so that all diagrams come out identical. To keep the sizes
+in typographic points, save it as SVG with `pt_per_unit = 1`. With `pt_per_unit = 2/3`,
+the figure has the width of a full page (≈ 16 cm), with an 8 pt font:
 
 ```julia
 fig = plot_ss_diagram(atoms; colorbar_title = "B-factor")
-save("diagram.svg", fig; pt_per_unit = 1)
+CairoMakie.save("diagram.svg", fig; pt_per_unit = 1) # `save` is also exported by PDBTools
+CairoMakie.save("diagram_page_width.svg", fig; pt_per_unit = 2/3)
 ```
 
 The background is white by default; use `background_color = :transparent` for a
 transparent background.
+
+To set the size of the figure, use `size = (width, height)` (in pt). The rows are then
+stretched to fill the figure, and the font size is kept:
+
+```julia
+fig = plot_ss_diagram(atoms; size = (800, 600))
+```
 
 ## Color scale
 
