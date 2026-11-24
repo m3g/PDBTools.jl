@@ -3,7 +3,7 @@ using Plots
 using PDBTools
 using LazyArtifacts # loads the extension that defines PDBTools.test_file
 # Download the test files before the doctests, so that the download messages are not part of their output
-PDBTools.test_file("structure.pdb") # files of PDBToolsBase
+PDBTools.test_file("structure.pdb") # pdbtools set (shared with PDBToolsBase)
 PDBTools.test_file("hbonds.pdb") # files of PDBTools
 ENV["GKSwstype"] = "100"
 ENV["LINES"] = 10
@@ -13,7 +13,7 @@ makedocs(
     modules = [
         PDBTools, 
         PDBTools.PDBToolsBase,
-        isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :Plotting) : PDBTools.Plotting
+        isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :PlotsPlotting) : PDBTools.PlotsPlotting
     ],
     # The core functions are defined in PDBToolsBase: the docstrings of the public names of 
     # both modules must be included in the manual.
@@ -45,6 +45,7 @@ makedocs(
             "Visualization" => "visualization.md",
             "Helical wheels" => "helical_wheels.md",
             "Hammer-Aitoff projection" => "hammer_aitoff.md",
+            "Secondary structure diagrams" => "secondary_structure_diagram.md",
         ],
         "Transfer Free Energy" => Any[
             "Transfer Free Energy" => "mvalues/mvalue.md",

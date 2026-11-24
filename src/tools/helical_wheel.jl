@@ -253,12 +253,13 @@ end
     pdb = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     atoms = select(pdb, at -> resnum(at) <= 18)
     residues = collect(eachresidue(atoms))
-    w = helical_wheel(atoms; property = mass, aggregate = sum)
-    @test w.values ≈ [sum(mass, r) for r in residues]
+    w = helical_wheel(atoms) # default: mean B-factor of each residue
+    @test w.values ≈ [sum(beta, r) / length(r) for r in residues]
+    @test !allequal(w.values)
     @test w.sequence == join(oneletter.(resname.(residues)))
     @test w.residue_numbers == resnum.(residues)
-    w = helical_wheel(atoms; property = mass)
-    @test w.values ≈ [sum(mass, r) / length(r) for r in residues]
+    @test helical_wheel(atoms; aggregate = sum).values ≈ [sum(beta, r) for r in residues]
+    @test helical_wheel(atoms; property = mass, aggregate = sum).values ≈ [sum(mass, r) for r in residues]
     @test_throws ArgumentError helical_wheel(atoms[1:0])
     @test_throws ArgumentError helical_wheel(read_pdb(PDBTools.test_file("dimer.pdb"), "protein"))
 end

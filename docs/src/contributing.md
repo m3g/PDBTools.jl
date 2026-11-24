@@ -47,7 +47,7 @@ plotting package. The plot is a method, for that type, of a function of the plot
 
 The result types have a `show` method, and fields with descriptive names.
 
-The plotting methods are defined in the `Plotting` extension (in the `ext` directory), which is
+The plotting methods are defined in the `PlotsPlotting` extension (in the `ext` directory), which is
 loaded with `using Plots`. `Plots` is the default plotting package. Another plotting package
 (for example, `CairoMakie`) can be used when it is better suited for a feature: it is then a 
 weak dependency of the package, with its own package extension, loaded only when the user 
@@ -84,7 +84,8 @@ is `false` (default, no periodic boundary conditions), `true` (use the unit cell
 - Source files go in `src` (or in a subdirectory of `src`), with the `export` statements at the
   top of the file. They are included in `src/PDBTools.jl`, in the section they belong to, 
   before the precompilation workload.
-- Plotting code goes in the `ext` directory, and is included in `ext/Plotting.jl`.
+- Plotting code goes in the `ext` directory, in a `plot_<feature>.jl` file included in the 
+  module of its extension: `ext/PlotsPlotting.jl` (Plots) or `ext/MakiePlotting.jl` (Makie, any backend).
 - Dependencies: avoid new dependencies. A heavy dependency, needed by a single feature, should
   be a weak dependency, with a package extension. New dependencies and extensions must be 
   clearly stated in the description of the pull request.

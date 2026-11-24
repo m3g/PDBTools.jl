@@ -27,7 +27,7 @@ julia> findfirst(Select("name CA"), atoms)
 julia> filter(Select("name CA and residue 1"), atoms)
    Structure{Atom{Nothing}} with 1 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00 24.52     1    PROT         5
 
 ```
 
@@ -107,12 +107,12 @@ julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 julia> select(atoms, "name CA and (residue > 1 and residue < 3)")
    Structure{Atom{Nothing}} with 1 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00 22.01     1    PROT        15
 
 julia> select(atoms, at -> name(at) == "CA" && 1 < residue(at) < 3)
    Structure{Atom{Nothing}} with 1 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15  
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00 22.01     1    PROT        15  
 
 ```
 

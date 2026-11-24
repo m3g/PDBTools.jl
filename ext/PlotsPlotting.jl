@@ -1,4 +1,4 @@
-module Plotting
+module PlotsPlotting
     using TestItems: @testitem
     using PDBTools
     import Plots

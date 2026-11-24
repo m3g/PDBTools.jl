@@ -130,9 +130,9 @@ julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein and residu
 julia> filter(Select("name CA"), atoms)
    Structure{Atom{Nothing}} with 3 atoms
    index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
-      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00  0.00     1    PROT        15
-      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00  0.00     1    PROT        26
+       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00 24.52     1    PROT         5
+      15   CA     CYS     A        2        2   -5.113  -13.737   -5.466  1.00 22.01     1    PROT        15
+      26   CA     ASP     A        3        3   -3.903  -11.262   -8.062  1.00 20.88     1    PROT        26
 
 julia> findfirst(Select("beta = 0.00"), atoms)
 1
