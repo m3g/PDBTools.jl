@@ -24,6 +24,10 @@ _n(dmax) = dmax > 9.9 ? "\n" : ""
 
 Plot a contact map.
 
+!!! warning
+    Deprecated: plots with Plots.jl will be removed in a future breaking release. Use a
+    Makie backend instead (e.g. `using CairoMakie`).
+
 # Arguments
 
 - `map::ContactMap`: the contact map to plot

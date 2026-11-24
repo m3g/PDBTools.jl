@@ -56,13 +56,11 @@ atom_sasa = sasa_particles(prot; n_dots=100, output_dots=true)
 
 Where the `atom_sasa.dots` field contains the dots that are accessible to the surface for each atom. These can be plotted, for example, with:
 ```@example sasa
-using Plots
+using CairoMakie: scatter, scatter!, Point3f # PDBTools also exports `save`
 dots = reduce(vcat, atom_sasa.dots)
-scatter(Tuple.(positions(prot)); color=:orange, msw=0, label="") # atom coordinates
-scatter!(Tuple.(dots); # surface dots
-    color=:blue, ms=1, msw=0, ma=0.5, # marker properties
-    label="",
-)
+fig, ax, _ = scatter(Point3f.(positions(prot)); color = :orange) # atom coordinates
+scatter!(ax, Point3f.(dots); color = (:blue, 0.5), markersize = 3) # surface dots
+fig
 ```
 
 ## SIRAH solvent accessible area

@@ -18,7 +18,7 @@ scatter(::Ramachandran)
 The `dihedral` function computes the dihedral angle given four atoms:
 
 ```jldoctest; filter = r"(\d*)\.(\d{4})\d+" => s"\1.\2***"
-julia> using PDBTools, Plots, LazyArtifacts
+julia> using PDBTools, LazyArtifacts
 
 julia> prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 
@@ -36,15 +36,16 @@ prot = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
 ram = Ramachandran(prot)
 ```
 
-Given the `ram::Ramachandran` object, the `scatter` function from `Plots` can be used to 
-produce the Ramachandran plot:
+Given the `ram::Ramachandran` object, the `scatter` function produces the Ramachandran plot
+(a Makie backend must be loaded, e.g. `using CairoMakie`):
 
 ```@example ramachandran
-using Plots
+using CairoMakie
 scatter(ram)
 ```
 
-All `scatter` parameters can be customized using the `Plots` keyword syntax. 
+The color and size of the markers, and other attributes of the points, can be set with the
+keywords of Makie's `scatter` (e.g. `color = :red`, `markersize = 6`).
 
 ## Setting backbone dihedral angles
 

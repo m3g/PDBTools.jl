@@ -1,19 +1,19 @@
 using Documenter
-using Plots
+# Loads the MakiePlotting extension. Only the names of the plotting functions are imported
+# (for the @docs blocks): PDBTools also exports `save`.
+using CairoMakie: CairoMakie, plot, heatmap, scatter
 using PDBTools
 using LazyArtifacts # loads the extension that defines PDBTools.test_file
 # Download the test files before the doctests, so that the download messages are not part of their output
-PDBTools.test_file("structure.pdb") # files of PDBToolsBase
+PDBTools.test_file("structure.pdb") # pdbtools set (shared with PDBToolsBase)
 PDBTools.test_file("hbonds.pdb") # files of PDBTools
-ENV["GKSwstype"] = "100"
 ENV["LINES"] = 10
 ENV["COLUMNS"] = 120
-ENV["GKSwstype"] = "nul"
 makedocs(
     modules = [
         PDBTools, 
         PDBTools.PDBToolsBase,
-        isdefined(Base, :get_extension) ? Base.get_extension(PDBTools, :Plotting) : PDBTools.Plotting
+        Base.get_extension(PDBTools, :MakiePlotting)
     ],
     # The core functions are defined in PDBToolsBase: the docstrings of the public names of 
     # both modules must be included in the manual.
@@ -43,6 +43,10 @@ makedocs(
             "Solvent Accessible Area" => "sasa.md",
             "Coordinate manipulations" => "coordinates.md",
             "Visualization" => "visualization.md",
+            "Helical wheels" => "helical_wheels.md",
+            "Hammer-Aitoff projection" => "hammer_aitoff.md",
+            "Secondary structure diagrams" => "secondary_structure_diagram.md",
+            "Advanced plotting" => "advanced_plotting.md",
         ],
         "Transfer Free Energy" => Any[
             "Transfer Free Energy" => "mvalues/mvalue.md",
@@ -57,6 +61,8 @@ makedocs(
         "Other" => Any[
             "Auxiliary functions" => "auxiliary.md",
             "Examples" => "examples.md",
+            "Contributing" => "contributing.md",
+            "Deprecated: Plots" => "deprecated_plots.md",
         ],
     ],
 )
@@ -65,4 +71,7 @@ deploydocs(
     target = "build",
     branch = "gh-pages",
     versions = ["stable" => "v^", "v#.#"],
+    # Pull requests from branches of this repository are deployed to previews/PR<number>
+    # (removed when the PR is closed, by .github/workflows/DocPreviewCleanup.yml)
+    push_preview = true,
 )

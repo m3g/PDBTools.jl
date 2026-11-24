@@ -100,6 +100,8 @@ const _extra_test_files = (
     "1MJC_clean.pdb", "1MJC_native.pdb", "1MJC_straight.pdb",
     "2RN2_clean.pdb", "2RN2_native.pdb", "2RN2_straight.pdb", "2rmm_dimer.pdb",
 )
+# Coarse-grained capsid of the Zika virus (artifact shared with Packmol.jl)
+const _zika_test_files = ("capsid.pdb",)
 """
     PDBTools.test_file(name::AbstractString)
 
@@ -115,11 +117,15 @@ function test_file end
 @testitem "test_file" begin
     using LazyArtifacts
     using PDBTools
-    # files of PDBToolsBase and of PDBTools (lazy artifacts)
+    # files of the pdbtools set (shared with PDBToolsBase) and of PDBTools (lazy artifacts)
     for name in ("structure.pdb", "small.cif", "hbonds.pdb", "sirah.pdb", "1MJC_native.pdb")
         @test isfile(PDBTools.test_file(name))
     end
+    # independent of the version of the test files of PDBToolsBase
+    @test dirname(PDBTools.test_file("structure.pdb")) == LazyArtifacts.artifact"pdbtools_test_files"
+    @test_throws ArgumentError PDBTools.test_file("not_a_test_file.pdb")
     @test all(isfile(PDBTools.test_file(name)) for name in PDBTools._extra_test_files)
+    @test isfile(PDBTools.test_file("capsid.pdb"))
 end
 
 # Analysis functions of residues
@@ -156,15 +162,17 @@ include("./tools/visualize.jl")
 # Custom element and residue definitions
 include("./tools/custom_types.jl")
 
+# Hammer-Aitoff projection, helical wheels and secondary structure diagrams
+include("./tools/hammer_aitoff.jl")
+include("./tools/helical_wheel.jl")
+include("./tools/secondary_structure_diagram.jl")
+
+# Hints for functions defined in package extensions
+include("./package_internals/error_hints.jl")
+
 # Legacy compatibility
 
 # Precompilation
 include("./package_internals/precompile.jl")
-
-# Branch hammer-aitoff
-include("./hammer_aitoff.jl")
-  
-# Branch helical-wheels
-include("./helical_wheel.jl")
 
 end

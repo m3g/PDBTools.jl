@@ -1,5 +1,18 @@
-# PDBTools.jl-only test files, from https://github.com/m3g/MolSimTestFiles (downloaded only when
-# needed). The test files shared with PDBToolsBase.jl are provided by PDBToolsBase.test_file.
+# Test files, from https://github.com/m3g/MolSimTestFiles (downloaded only when needed).
+#
+# The pdbtools set is also used by PDBToolsBase.jl. It is referenced here, and not obtained
+# from PDBToolsBase.test_file, such that the tests of PDBTools do not depend on the version
+# of PDBToolsBase. Artifacts are stored by content hash, so if both packages use the same 
+# version of the set, it is downloaded only once.
+[pdbtools_test_files]
+git-tree-sha1 = "541eb7a321acaa5ef054b2f9c8acdcd7d38c65be"
+lazy = true
+
+    [[pdbtools_test_files.download]]
+    url = "https://github.com/m3g/MolSimTestFiles/releases/download/pdbtools-v3/pdbtools.tar.gz"
+    sha256 = "a5287322e4e881c37446b7502494359d69ad8327723751fd534413d8c483cbf9"
+
+# PDBTools.jl-only test files.
 [pdbtools_extra_test_files]
 git-tree-sha1 = "ca652874a9d3d488c4451b472cd9fccdc26fa53d"
 lazy = true
@@ -7,3 +20,13 @@ lazy = true
     [[pdbtools_extra_test_files.download]]
     url = "https://github.com/m3g/MolSimTestFiles/releases/download/pdbtools_extra-v1/pdbtools_extra.tar.gz"
     sha256 = "5deb3c35d721c8fb6afcd83ddab4364f6a919dc13bb235e60379f49d99fa663f"
+
+# The Zika virus capsid (coarse-grained, SIRAH), shared with the Packmol.jl tutorial
+# (set packmol_zika of https://github.com/m3g/MolSimTestFiles). Used in the documentation.
+[zika_test_files]
+git-tree-sha1 = "ce933b9393bca9f26d31577873b7dae55f8b9b3d"
+lazy = true
+
+    [[zika_test_files.download]]
+    url = "https://github.com/m3g/MolSimTestFiles/releases/download/packmol_zika-v2/packmol_zika.tar.gz"
+    sha256 = "c736719c3a210ceedf790dade5e5903885d7a845e01e98c004ef6b3694d749af"
