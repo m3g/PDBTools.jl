@@ -9,6 +9,12 @@ function _label_color(c)
     return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b < 0.5 ? :white : :black
 end
 
+# Square of side 1 centered at the origin: a rectangle of size `markersize` as a marker
+const _UNIT_SQUARE = Makie.BezierPath([
+    Makie.MoveTo(-0.5, -0.5), Makie.LineTo(0.5, -0.5), Makie.LineTo(0.5, 0.5),
+    Makie.LineTo(-0.5, 0.5), Makie.ClosePath(),
+])
+
 """
     plot(wheel::HelicalWheel; kwargs...)
 
@@ -24,13 +30,15 @@ by its value. Returns a `Makie.Figure`.
 - `clims = nothing`: fixed limits of the color scale, e.g. `(0, 1)`.
   Use (with `normalize = false`) to compare several helices on the same scale.
 - `show_moment = true`: draw the arrow of the hydrophobic moment.
+- `residue_numbers = :default`: residue numbers shown next to the residues: `:default` (the
+  first and last residues), `:all` or `:none`.
 - `colorbar = true`, `colorbar_title = ""`, `title = ""`: color bar and title of the plot.
 - `size = (500, 420)`, `font = nothing`, `fontsize = 14`: size of the figure, font
   (default: New Computer Modern, distributed with Makie) and font size.
 
 The residues are placed at 100° from each other; after 18 residues (5 turns) a new ring
 starts, with a larger radius. The wheel is rotated such that the hydrophobic moment points
-down. The first and last residues are labeled with their residue numbers.
+down. By default, the first and last residues are labeled with their residue numbers.
 
 # Example
 
@@ -67,7 +75,10 @@ function Makie.plot!(ax::Axis, wheel::HelicalWheel;
     colormap = :tempo,
     clims = nothing,
     show_moment::Bool = true,
+    residue_numbers::Symbol = :default,
 )
+    residue_numbers in (:default, :all, :none) || throw(ArgumentError(
+        "residue_numbers must be :default, :all or :none, got :$residue_numbers"))
     seq = collect(wheel.sequence)
     n = length(seq)
     μx, μy = wheel.μx, wheel.μy
@@ -120,18 +131,25 @@ function Makie.plot!(ax::Axis, wheel::HelicalWheel;
         arrows2d!(ax, [Point2f(0, 0)], [Vec2f(μx_rot, μy_rot)]; color = :gray30, shaftwidth = 1.5)
     end
 
-    # Residue numbers of the first and last residues, in small badges at the lower right of
-    # their markers (slightly overlapping them), drawn over the lines of the wheel. The
-    # offset is in pixels, as the size of the markers.
-    badge_offset = Vec2f(13, -13)
-    xb, yb = [x[1], x[n]], [y[1], y[n]]
-    scatter!(ax, xb, yb;
-        marker = :circle, markersize = 22, marker_offset = badge_offset,
-        color = :white, strokecolor = :gray30, strokewidth = 0.75,
-    )
-    text!(ax, xb, yb;
-        text = string.([first(wheel.residue_numbers), last(wheel.residue_numbers)]),
-        offset = badge_offset, color = :gray10, align = (:center, :center), fontsize = 9)
+    # Residue numbers in small rectangles at the lower right of the markers of the residues
+    # (slightly overlapping them), drawn over the lines of the wheel. The sizes and offsets
+    # are in pixels, as the size of the markers.
+    if residue_numbers != :none
+        ib = residue_numbers == :all ? collect(1:n) : unique([1, n])
+        labels = string.(wheel.residue_numbers[ib])
+        # width proportional to the number of digits; the upper left corner of the
+        # rectangle is inside the marker of the residue
+        h = 11.0f0
+        widths = [4.6f0 * length(l) + 4 for l in labels]
+        badge_offsets = [Vec2f(6.5 + w / 2, -6.5 - h / 2) for w in widths]
+        scatter!(ax, x[ib], y[ib];
+            marker = _UNIT_SQUARE, markersize = [Vec2f(w, h) for w in widths],
+            marker_offset = badge_offsets,
+            color = :white, strokecolor = :gray30, strokewidth = 0.75,
+        )
+        text!(ax, x[ib], y[ib];
+            text = labels, offset = badge_offsets, color = :gray10, align = (:center, :center), fontsize = 8)
+    end
 
     lim = maximum(radii) + 0.4
     limits!(ax, -lim, lim, -lim, lim)
@@ -156,6 +174,11 @@ end
     # all values equal (e.g. zero B-factors), with and without normalization
     @test CairoMakie.plot(helical_wheel(seq, zeros(n))) isa CairoMakie.Figure
     @test CairoMakie.plot(helical_wheel(seq, zeros(n)); normalize = false) isa CairoMakie.Figure
+    # residue numbers: first and last (default), all or none
+    for residue_numbers in (:default, :all, :none)
+        @test CairoMakie.plot(helical_wheel(seq, rand(n)); residue_numbers) isa CairoMakie.Figure
+    end
+    @test_throws ArgumentError CairoMakie.plot(helical_wheel(seq, rand(n)); residue_numbers = :first)
     # labels are white on dark markers and black on light ones
     label_color = Base.get_extension(PDBTools, :MakiePlotting)._label_color
     gradient = CairoMakie.cgrad(:tempo)

@@ -42,8 +42,9 @@ Some details of the drawing:
   ring starts, with a larger radius, so that long helices do not overlap;
 - the arrow is the hydrophobic moment, and the wheel is rotated so that it always
   points down: the hydrophobic face of the helix is at the bottom of the figure;
-- the first and last residues are labeled with their residue numbers
-  (keyword `residue_numbers` of `helical_wheel`);
+- the first and last residues are labeled with their residue numbers (keyword
+  `residue_numbers` of `helical_wheel`); use `residue_numbers = :all` (or `:none`) in
+  `plot` to label all residues (or none);
 - by default the values are normalized to `[0, 1]` (`normalize = true`). To compare
   several helices on the same color scale, use `normalize = false` and fix the limits
   with `clims`.
