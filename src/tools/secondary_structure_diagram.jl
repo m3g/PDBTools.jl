@@ -6,7 +6,8 @@ export plot_ss_diagram
 
 Draw the secondary structure of each residue along the sequence (helices as ribbons,
 β strands as arrows and loops as thin bars), with each residue colored by a value.
-Requires `using CairoMakie`, and returns a `CairoMakie.Figure`.
+Requires a Makie backend (e.g. `using CairoMakie`, or `GLMakie` for interactive use), and
+returns a `Makie.Figure`.
 
 # Input
 
@@ -38,7 +39,7 @@ with one value per element of `ss`.
 The figure has a fixed layout, so that all diagrams come out identical: 50 residues per
 row, 13.5 pt per residue (≈ 24 cm wide rows) and a 12 pt font (Computer Modern, `cmr10`,
 if available). The height grows with the number of rows. To keep the sizes in typographic
-points, save as SVG with `CairoMakie.save("diagram.svg", fig; pt_per_unit = 1)` (`save`
+points, save as SVG with CairoMakie: `CairoMakie.save("diagram.svg", fig; pt_per_unit = 1)` (`save`
 alone is ambiguous, because it is also exported by PDBTools). With `pt_per_unit = 2/3`,
 the figure has the width of a full page (≈ 16 cm), with an 8 pt font.
 

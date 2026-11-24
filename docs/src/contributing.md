@@ -85,7 +85,7 @@ is `false` (default, no periodic boundary conditions), `true` (use the unit cell
   top of the file. They are included in `src/PDBTools.jl`, in the section they belong to, 
   before the precompilation workload.
 - Plotting code goes in the `ext` directory, in a `plot_<feature>.jl` file included in the 
-  module of its extension: `ext/PlotsPlotting.jl` (Plots) or `ext/MakiePlotting.jl` (CairoMakie).
+  module of its extension: `ext/PlotsPlotting.jl` (Plots) or `ext/MakiePlotting.jl` (Makie, any backend).
 - Dependencies: avoid new dependencies. A heavy dependency, needed by a single feature, should
   be a weak dependency, with a package extension. New dependencies and extensions must be 
   clearly stated in the description of the pull request.

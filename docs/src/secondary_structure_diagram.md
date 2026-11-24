@@ -6,7 +6,8 @@ CollapsedDocStrings = true
 
 [`plot_ss_diagram`](@ref) draws the secondary structure of each residue along the
 sequence, with each residue colored by a value: helices as ribbons, β strands as arrows
-and loops as thin bars. `CairoMakie` must be loaded.
+and loops as thin bars. A Makie backend must be loaded: `CairoMakie` (used here, for
+figures saved as SVG or PDF), or `GLMakie`/`WGLMakie` for interactive use.
 
 ## Coloring by custom values
 
@@ -79,7 +80,8 @@ plot_ss_diagram(ss;
 
 The figure has a fixed layout (rows of 50 residues, ≈ 24 cm wide, and a 12 pt font,
 Computer Modern if available), so that all diagrams come out identical. To keep the sizes
-in typographic points, save it as SVG with `pt_per_unit = 1`. With `pt_per_unit = 2/3`,
+in typographic points, save it as SVG with CairoMakie and `pt_per_unit = 1` (with another
+backend, call `CairoMakie.activate!()` before saving). With `pt_per_unit = 2/3`,
 the figure has the width of a full page (≈ 16 cm), with an 8 pt font:
 
 ```julia

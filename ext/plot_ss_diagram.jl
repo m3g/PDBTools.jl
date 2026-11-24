@@ -1,5 +1,5 @@
 using PDBTools: Atom, SSData
-using CairoMakie: CairoMakie, Figure, Axis, Colorbar, Point2f, poly!, limits!, hidespines!,
+using Makie: Makie, Figure, Axis, Colorbar, Point2f, poly!, limits!, hidespines!,
     rowgap!, resize_to_layout!, cgrad
 
 # --- Fixed layout of the figure (units = typographic points; 72 pt = 1 inch) ---

@@ -4,16 +4,16 @@
 # the hint tells the user which package to load.
 #
 const _extension_functions = (
-    (f = plot_ss_diagram, ext = :MakiePlotting, pkg = "CairoMakie"),
-    (f = test_file, ext = :TestFilesExt, pkg = "LazyArtifacts"),
+    (f = plot_ss_diagram, ext = :MakiePlotting, requires = "a Makie backend", pkg = "CairoMakie"),
+    (f = test_file, ext = :TestFilesExt, requires = "the LazyArtifacts package", pkg = "LazyArtifacts"),
 )
 
 function _extension_error_hint(io, exc, argtypes, kwargs)
-    for (; f, ext, pkg) in _extension_functions
+    for (; f, ext, requires, pkg) in _extension_functions
         if exc.f === f && isnothing(Base.get_extension(@__MODULE__, ext))
-            print(io, "\n\n`PDBTools.$(nameof(f))` requires the ")
-            printstyled(io, pkg; color = :cyan, bold = true)
-            print(io, " package. Load it with:\n\n    using $pkg\n")
+            print(io, "\n\n`PDBTools.$(nameof(f))` requires ")
+            printstyled(io, requires; color = :cyan, bold = true)
+            print(io, ". Load it with, for example:\n\n    using $pkg\n")
         end
     end
 end
