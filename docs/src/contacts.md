@@ -5,12 +5,12 @@ CollapsedDocStrings = true
 
 The `contact_map` function computes a contact map for a structure or a pair of structures.
 These structures are typically proteins, but any structures defined by sequences of residues
-can be provided as inputs. The `heatmap` function, from `Plots`, is overloaded here
-to provide a convenient way to plot the contact or distance maps.
+can be provided as inputs. The maps are plotted with `heatmap` (a Makie backend must be
+loaded, e.g. `using CairoMakie`).
 
 ```@docs
 contact_map
-heatmap(::ContactMap{<:Real})
+heatmap(::ContactMap)
 ```
 
 !!! note
@@ -31,8 +31,7 @@ heatmap(::ContactMap{<:Real})
 A typical usage consists in computing the contact map and plotting it:
 
 ```@example contacts
-using PDBTools, LazyArtifacts
-using Plots
+using PDBTools, LazyArtifacts, CairoMakie
 ats = read_pdb(PDBTools.test_file("dimer.pdb"));
 cA = select(ats, "chain A");
 cB = select(ats, "chain B");
@@ -59,12 +58,12 @@ by less than 4 residues:
 
 ```@example contacts
 distance_map = contact_map(cA; gap=4, discrete=false, dmax=8.0) # chain A only
+heatmap(distance_map; colormap=:davos)
+```
+
+```@example contacts
 discrete_map = contact_map(cA; gap=4, discrete=true, dmax=8.0) # chain A only
-plot(
-    heatmap(distance_map; colorbar=nothing, color=:davos), 
-    heatmap(discrete_map); 
-    layout=(1,2), size=(800,500)
-)
+heatmap(discrete_map)
 ```
 
 ## Difference (and sum) of maps
@@ -101,16 +100,17 @@ heatmap(c_diff)
 
 ## Customizing the plot
 
-All `heatmap` parameters can be customized using the `Plots` keyword syntax. Above, 
-we illustrated this by removing the color bar and changing the color scale. 
+Common customization options of `heatmap` are (see [`heatmap(::ContactMap)`](@ref) for all of them):
 
-Common customization options are:
+- `xstep`, `ystep`: the stride of the residue labels on the axes;
+- `colormap`: the color map (default: `:grayC` for distances, black for binary maps);
+- `clims`: the range of the color scale;
+- `colorbar`, `colorbar_title`: the color bar and its title (default: "distance (Å)" for
+  distances, no color bar for binary maps);
+- `size`: the size of the figure.
 
-- `xstep`: the stride of the x-axis ticks 
-- `ystep`: the stride of the y-axis ticks
-- `color`: the color palette to use (default: `:grayC` for distances, `:Greys_9` for binary maps)
-- `clims`: the range of the color scale.
-- `colorbar_title`: the title of the colorbar. Default: "distance (Å)" for distances, no title for binary maps.
+Above, we illustrated this by changing the color map of the distance map. The figure can be
+saved with `CairoMakie.save("map.png", fig)`.
 
 ## REPL visualization of the contact matrix
 

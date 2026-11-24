@@ -12,7 +12,7 @@ the lists of corresponding angles, that is:
 If any of the above atoms is missing, the function errors. The residues are expected
 to belong to a single chain and consecutive. 
 
-The resulting `Ramachandran` object can be plotted with the `Plots.scatter` function.
+The resulting `Ramachandran` object can be plotted with `scatter(ram)` (requires a Makie backend, e.g. `using CairoMakie`).
 
 # Example
 

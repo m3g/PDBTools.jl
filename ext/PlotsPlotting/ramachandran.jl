@@ -5,6 +5,10 @@ import Plots: scatter
 
 Creates a Ramachandran plot given a `Ramachandran` object.
 
+!!! warning
+    Deprecated: plots with Plots.jl will be removed in a future breaking release. Use a
+    Makie backend instead (e.g. `using CairoMakie`).
+
 # Arguments
 
 - `ram::Ramachandran`: the Ramachandran object, containing ϕ and ψ angles, 

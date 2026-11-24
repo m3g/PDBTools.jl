@@ -15,10 +15,11 @@ for example, which face interacts with the membrane, the solvent or another prot
 [`helical_wheel`](@ref) receives the sequence of the helix (one-letter codes) and one
 value per residue, in the same order. Any property can be used: coordination numbers,
 SASA, RMSF, interaction energies, conservation scores, etc. The resulting
-[`HelicalWheel`](@ref) is plotted with `plot` (`Plots` must be loaded):
+[`HelicalWheel`](@ref) is plotted with `plot` (a Makie backend must be loaded, e.g.
+`using CairoMakie`):
 
 ```@example wheel
-using PDBTools, Plots
+using PDBTools, CairoMakie
 sequence = "LKKLLKLLKKLLKL"
 values = [1.0, 0.1, 0.2, 0.9, 0.8, 0.1, 0.7, 1.0, 0.2, 0.1, 0.9, 0.8, 0.2, 0.9]
 wheel = helical_wheel(sequence, values)
@@ -41,8 +42,9 @@ Some details of the drawing:
   ring starts, with a larger radius, so that long helices do not overlap;
 - the arrow is the hydrophobic moment, and the wheel is rotated so that it always
   points down: the hydrophobic face of the helix is at the bottom of the figure;
-- the first and last residues are labeled with their residue numbers
-  (keyword `residue_numbers` of `helical_wheel`);
+- the first and last residues are labeled with their residue numbers (keyword
+  `residue_numbers` of `helical_wheel`); use `residue_numbers = :all` (or `:none`) in
+  `plot` to label all residues (or none);
 - by default the values are normalized to `[0, 1]` (`normalize = true`). To compare
   several helices on the same color scale, use `normalize = false` and fix the limits
   with `clims`.
@@ -65,7 +67,7 @@ values = [ sasa(atomic_sasa, at -> residue(at) == residue(r)) for r in eachresid
 
 ```@example wheel
 sequence = join(oneletter.(resname.(eachresidue(helix))))
-plot(helical_wheel(sequence, values); normalize = false, colorbar_title = "SASA (Å\$^2\$)")
+plot(helical_wheel(sequence, values); normalize = false, colorbar_title = "SASA (Å²)")
 ```
 
 The buried face of the helix, which packs against the rest of the protein, is at the bottom.
@@ -104,7 +106,7 @@ for (i, atom) in enumerate(pdb)
     atom.beta = atomic_sasa[i] # SASA of atom i (the atoms of helix are those of pdb)
 end
 wheel = helical_wheel(helix; aggregate = sum)
-plot(wheel; normalize = false, colorbar_title = "SASA (Å\$^2\$)")
+plot(wheel; normalize = false, colorbar_title = "SASA (Å²)")
 ```
 
 The `property` keyword selects another per-atom property, for example

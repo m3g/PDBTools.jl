@@ -90,7 +90,7 @@ mean_hydrophobicity(sequence::AbstractString; hydrophobicity::AbstractDict = FAU
     HelicalWheel
 
 Helical wheel of a helix, with one value per residue, as returned by [`helical_wheel`](@ref).
-Plot it with `plot(wheel)` (requires `using Plots`).
+Plot it with `plot(wheel)` (requires a Makie backend, e.g. `using CairoMakie`).
 
 # Fields
 - `sequence`: sequence of the helix (one-letter codes).
@@ -126,7 +126,7 @@ Compute the helical wheel of a helix, with one value per residue. The values can
 per-residue property (coordination number, SASA, RMSF, interaction energy, conservation, etc.),
 in the same order as the sequence.
 
-Returns a [`HelicalWheel`](@ref), which can be plotted with `plot(wheel)` (requires `using Plots`).
+Returns a [`HelicalWheel`](@ref), which can be plotted with `plot(wheel)` (requires a Makie backend, e.g. `using CairoMakie`).
 
 With a vector of atoms (of a single chain), the sequence, the residue numbers and the values
 are taken from the structure: the value of each residue is `aggregate(property, residue)`,
@@ -145,7 +145,7 @@ The mean hydrophobicity and the hydrophobic moment are computed with the scale g
 # Examples
 
 ```julia-repl
-julia> using PDBTools, LazyArtifacts, Plots
+julia> using PDBTools, LazyArtifacts, CairoMakie
 
 julia> wheel = helical_wheel("LKKLLKLLKKLLKL", rand(14));
 

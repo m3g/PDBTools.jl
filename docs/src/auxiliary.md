@@ -116,39 +116,36 @@ threeletter
 
 Here we illustrate how to plot the average temperature factor of each residue of a crystallographic model as function of the residues.
 
-```julia-repl
-julia> using PDBTools, Plots, LazyArtifacts
-
-julia> atoms = wget("1UBQ", "protein");
-
-julia> residue_ticks(atoms; stride=10) # example of output
-([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
-
-julia> plot(
-           resnum.(eachresidue(atoms)), # x-axis: residue numbers
-           [ mean(beta.(res)) for res in eachresidue(atoms) ], # y-axis: average b-factor per residue
-           xlabel="Residue", 
-           xticks=residue_ticks(atoms; stride=10), # here we define the x-tick labels
-           ylabel="b-factor", 
-           xrotation=60,
-           label=nothing, framestyle=:box,
-      )
+```@example residue_ticks
+using PDBTools, LazyArtifacts, CairoMakie
+atoms = read_mmcif(PDBTools.test_file("1UBQ.cif"), "protein")
+residue_ticks(atoms; stride=10) # example of output
 ```
 
-Produces the following plot:
-
-![./assets/residue_ticks.png](./assets/residue_ticks.png)
+```@example residue_ticks
+residues = collect(eachresidue(atoms))
+fig = Figure(size = (600, 350))
+ax = Axis(fig[1, 1];
+    xlabel = "Residue",
+    ylabel = "b-factor",
+    xticks = residue_ticks(atoms; stride=10), # here we define the x-tick labels
+    xticklabelrotation = π / 3,
+)
+lines!(ax, resnum.(residues), [sum(beta, r) / length(r) for r in residues]) # average b-factor per residue
+fig
+```
 
 Alternatively (and sometimes conveniently), the residue ticks can be obtained by providing, 
 instead of the `atoms` array, the residue iterator or the residue vector, as:
 
-```julia-repl
-julia> residue_ticks(eachresidue(atoms); stride=10)
-([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
-
-julia> residue_ticks(collect(eachresidue(atoms)); stride=10)
-([1, 11, 21, 31, 41, 51, 61, 71], ["M1", "K11", "D21", "Q31", "Q41", "E51", "I61", "L71"])
+```@example residue_ticks
+residue_ticks(eachresidue(atoms); stride=10)
 ```
+
+```@example residue_ticks
+residue_ticks(collect(eachresidue(atoms)); stride=10)
+```
+
 ## Add hydrogens with OpenBabel
 
 ```@docs
