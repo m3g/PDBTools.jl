@@ -116,24 +116,22 @@ function Makie.plot!(ax::Axis, wheel::HelicalWheel;
     # marker is that of its value in the color gradient, within the limits of the color scale.
     label_colors = [_label_color(gradient[clamp((w - lo) / (hi - lo), 0, 1)]) for w in weights]
     text!(ax, x, y; text = string.(seq), color = label_colors, align = (:center, :center), fontsize = 14)
-    # Residue numbers of the first and last residues, on the line from the center of the
-    # wheel to the center of the residue, outside its marker. The first residue is in the
-    # inner ring: with more than one ring, the residue 18 positions ahead is exactly beyond
-    # it, so its number is placed inside the marker's ring instead.
-    # The offset is in pixels (as the size of the markers), from the center of the residue.
-    label_offset = 21
-    s_first = n > turn_residues ? -label_offset : label_offset
-    text!(ax, [x[1], x[n]], [y[1], y[n]];
-        text = string.([first(wheel.residue_numbers), last(wheel.residue_numbers)]),
-        offset = [
-            Vec2f(s_first * cos(rotated_angles[1]), s_first * sin(rotated_angles[1])),
-            Vec2f(label_offset * cos(rotated_angles[n]), label_offset * sin(rotated_angles[n])),
-        ],
-        color = :gray10, align = (:center, :center), fontsize = 10)
-
     if show_moment
         arrows2d!(ax, [Point2f(0, 0)], [Vec2f(μx_rot, μy_rot)]; color = :gray30, shaftwidth = 1.5)
     end
+
+    # Residue numbers of the first and last residues, in small badges at the lower right of
+    # their markers (slightly overlapping them), drawn over the lines of the wheel. The
+    # offset is in pixels, as the size of the markers.
+    badge_offset = Vec2f(13, -13)
+    xb, yb = [x[1], x[n]], [y[1], y[n]]
+    scatter!(ax, xb, yb;
+        marker = :circle, markersize = 22, marker_offset = badge_offset,
+        color = :white, strokecolor = :gray30, strokewidth = 0.75,
+    )
+    text!(ax, xb, yb;
+        text = string.([first(wheel.residue_numbers), last(wheel.residue_numbers)]),
+        offset = badge_offset, color = :gray10, align = (:center, :center), fontsize = 9)
 
     lim = maximum(radii) + 0.4
     limits!(ax, -lim, lim, -lim, lim)
