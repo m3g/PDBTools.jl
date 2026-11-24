@@ -1,0 +1,1075 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1000 460"
+   role="img"
+   aria-label="Three-panel diagram: a ring of atoms with a sealed central cavity has exposed dots on both its outer surface and its inner cavity wall; connecting dots within a cutoff distance forms two disconnected rings, since the gap between them is wider than the cutoff; only the ring reachable from a seeded extreme dot is kept, the other is cleared."
+   version="1.1"
+   id="svg377"
+   sodipodi:docname="cavity_exclusion.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview379"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.294"
+     inkscape:cx="493.43122"
+     inkscape:cy="230.29366"
+     inkscape:window-width="1890"
+     inkscape:window-height="1048"
+     inkscape:window-x="30"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg377" />
+  <defs
+     id="defs5">
+    <marker
+       style="overflow:visible"
+       id="TriangleStart"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="TriangleStart"
+       markerWidth="5.3244081"
+       markerHeight="6.155385"
+       viewBox="0 0 5.3244081 6.1553851"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135" />
+    </marker>
+    <marker
+       id="cavex-arrow"
+       viewBox="0 0 10 10"
+       refX="8"
+       refY="5"
+       markerWidth="7"
+       markerHeight="7"
+       orient="auto-start-reverse">
+      <path
+         d="M0,0 L10,5 L0,10 z"
+         fill="#1C2022"
+         id="path2" />
+    </marker>
+  </defs>
+  <!-- ============ PANEL 1 : exposed dots, undifferentiated ============ -->
+  <text
+     x="160"
+     y="34"
+     text-anchor="middle"
+     font-family="sans-serif"
+     font-weight="700"
+     font-size="15"
+     fill="#1C2022"
+     id="text9">1. Exposed dots (pairwise test)</text>
+  <g
+     transform="translate(30,50)"
+     fill="none"
+     id="g83">
+    <g
+       stroke="#1C2022"
+       stroke-opacity="0.4"
+       fill="#1C2022"
+       fill-opacity="0.06"
+       id="g27">
+      <circle
+         cx="185"
+         cy="130"
+         r="34"
+         id="circle11" />
+      <circle
+         cx="169"
+         cy="169"
+         r="34"
+         id="circle13" />
+      <circle
+         cx="130"
+         cy="185"
+         r="34"
+         id="circle15" />
+      <circle
+         cx="91"
+         cy="169"
+         r="34"
+         id="circle17" />
+      <circle
+         cx="75"
+         cy="130"
+         r="34"
+         id="circle19" />
+      <circle
+         cx="91"
+         cy="91"
+         r="34"
+         id="circle21" />
+      <circle
+         cx="130"
+         cy="75"
+         r="34"
+         id="circle23" />
+      <circle
+         cx="169"
+         cy="91"
+         r="34"
+         id="circle25" />
+    </g>
+    <g
+       fill="#1C2022"
+       id="g81">
+      <circle
+         cx="216"
+         cy="130"
+         r="5"
+         id="circle29" />
+      <circle
+         cx="209"
+         cy="163"
+         r="5"
+         id="circle31" />
+      <circle
+         cx="191"
+         cy="191"
+         r="5"
+         id="circle33" />
+      <circle
+         cx="163"
+         cy="209"
+         r="5"
+         id="circle35" />
+      <circle
+         cx="130"
+         cy="216"
+         r="5"
+         id="circle37" />
+      <circle
+         cx="97"
+         cy="209"
+         r="5"
+         id="circle39" />
+      <circle
+         cx="69"
+         cy="191"
+         r="5"
+         id="circle41" />
+      <circle
+         cx="51"
+         cy="163"
+         r="5"
+         id="circle43" />
+      <circle
+         cx="44"
+         cy="130"
+         r="5"
+         id="circle45" />
+      <circle
+         cx="51"
+         cy="97"
+         r="5"
+         id="circle47" />
+      <circle
+         cx="69"
+         cy="69"
+         r="5"
+         id="circle49" />
+      <circle
+         cx="97"
+         cy="51"
+         r="5"
+         id="circle51" />
+      <circle
+         cx="130"
+         cy="44"
+         r="5"
+         id="circle53" />
+      <circle
+         cx="163"
+         cy="51"
+         r="5"
+         id="circle55" />
+      <circle
+         cx="191"
+         cy="69"
+         r="5"
+         id="circle57" />
+      <circle
+         cx="209"
+         cy="97"
+         r="5"
+         id="circle59" />
+      <circle
+         cx="156"
+         cy="130"
+         r="5"
+         id="circle61" />
+      <circle
+         cx="151"
+         cy="145"
+         r="5"
+         id="circle63" />
+      <circle
+         cx="138"
+         cy="155"
+         r="5"
+         id="circle65" />
+      <circle
+         cx="122"
+         cy="155"
+         r="5"
+         id="circle67" />
+      <circle
+         cx="109"
+         cy="145"
+         r="5"
+         id="circle69" />
+      <circle
+         cx="104"
+         cy="130"
+         r="5"
+         id="circle71" />
+      <circle
+         cx="109"
+         cy="115"
+         r="5"
+         id="circle73" />
+      <circle
+         cx="122"
+         cy="105"
+         r="5"
+         id="circle75" />
+      <circle
+         cx="138"
+         cy="105"
+         r="5"
+         id="circle77" />
+      <circle
+         cx="151"
+         cy="115"
+         r="5"
+         id="circle79" />
+    </g>
+  </g>
+  <text
+     font-family="monospace"
+     font-size="12.5"
+     fill="#1C2022"
+     fill-opacity="0.75"
+     id="text93"><tspan
+       x="20"
+       y="332"
+       id="tspan85">Both rings of dots passed the atom-</tspan><tspan
+       x="20"
+       y="349"
+       id="tspan87">atom occlusion test. Nothing here</tspan><tspan
+       x="20"
+       y="366"
+       id="tspan89">yet marks the inner ring as a sealed</tspan><tspan
+       x="20"
+       y="383"
+       id="tspan91">interior pocket rather than surface.</tspan></text>
+  <line
+     x1="298"
+     y1="180"
+     x2="358"
+     y2="180"
+     stroke="#1C2022"
+     stroke-width="1.6"
+     marker-end="url(#cavex-arrow)"
+     id="line95" />
+  <text
+     x="328"
+     y="170"
+     text-anchor="middle"
+     font-family="monospace"
+     font-size="11.5"
+     fill="#1C2022"
+     fill-opacity="0.75"
+     id="text97">union–find</text>
+  <!-- ============ PANEL 2 : build adjacency graph + seeds ============ -->
+  <text
+     x="500"
+     y="34"
+     text-anchor="middle"
+     font-family="sans-serif"
+     font-weight="700"
+     font-size="15"
+     fill="#1C2022"
+     id="text99">2. Connect dots ≤ cutoff apart</text>
+  <g
+     stroke="#1c2022"
+     stroke-opacity="0.25"
+     fill="#1c2022"
+     fill-opacity="0.05"
+     id="g117"
+     transform="translate(370,50)">
+    <circle
+       cx="185"
+       cy="130"
+       r="34"
+       id="circle101" />
+    <circle
+       cx="169"
+       cy="169"
+       r="34"
+       id="circle103" />
+    <circle
+       cx="130"
+       cy="185"
+       r="34"
+       id="circle105" />
+    <circle
+       cx="91"
+       cy="169"
+       r="34"
+       id="circle107" />
+    <circle
+       cx="75"
+       cy="130"
+       r="34"
+       id="circle109" />
+    <circle
+       cx="91"
+       cy="91"
+       r="34"
+       id="circle111" />
+    <circle
+       cx="130"
+       cy="75"
+       r="34"
+       id="circle113" />
+    <circle
+       cx="169"
+       cy="91"
+       r="34"
+       id="circle115" />
+  </g>
+  <g
+     stroke="#1c2022"
+     stroke-opacity="0.55"
+     stroke-width="1.5"
+     id="g151"
+     transform="translate(370,50)"
+     style="fill:none">
+    <line
+       x1="216"
+       y1="130"
+       x2="209"
+       y2="163"
+       id="line119" />
+    <line
+       x1="209"
+       y1="163"
+       x2="191"
+       y2="191"
+       id="line121" />
+    <line
+       x1="191"
+       y1="191"
+       x2="163"
+       y2="209"
+       id="line123" />
+    <line
+       x1="163"
+       y1="209"
+       x2="130"
+       y2="216"
+       id="line125" />
+    <line
+       x1="130"
+       y1="216"
+       x2="97"
+       y2="209"
+       id="line127" />
+    <line
+       x1="97"
+       y1="209"
+       x2="69"
+       y2="191"
+       id="line129" />
+    <line
+       x1="69"
+       y1="191"
+       x2="51"
+       y2="163"
+       id="line131" />
+    <line
+       x1="51"
+       y1="163"
+       x2="44"
+       y2="130"
+       id="line133" />
+    <line
+       x1="44"
+       y1="130"
+       x2="51"
+       y2="97"
+       id="line135" />
+    <line
+       x1="51"
+       y1="97"
+       x2="69"
+       y2="69"
+       id="line137" />
+    <line
+       x1="69"
+       y1="69"
+       x2="97"
+       y2="51"
+       id="line139" />
+    <line
+       x1="97"
+       y1="51"
+       x2="130"
+       y2="44"
+       id="line141" />
+    <line
+       x1="130"
+       y1="44"
+       x2="163"
+       y2="51"
+       id="line143" />
+    <line
+       x1="163"
+       y1="51"
+       x2="191"
+       y2="69"
+       id="line145" />
+    <line
+       x1="191"
+       y1="69"
+       x2="209"
+       y2="97"
+       id="line147" />
+    <line
+       x1="209"
+       y1="97"
+       x2="216"
+       y2="130"
+       id="line149" />
+  </g>
+  <g
+     stroke="#1c2022"
+     stroke-opacity="0.55"
+     stroke-width="1.5"
+     id="g173"
+     transform="translate(370,50)"
+     style="fill:none">
+    <line
+       x1="156"
+       y1="130"
+       x2="151"
+       y2="145"
+       id="line153" />
+    <line
+       x1="151"
+       y1="145"
+       x2="138"
+       y2="155"
+       id="line155" />
+    <line
+       x1="138"
+       y1="155"
+       x2="122"
+       y2="155"
+       id="line157" />
+    <line
+       x1="122"
+       y1="155"
+       x2="109"
+       y2="145"
+       id="line159" />
+    <line
+       x1="109"
+       y1="145"
+       x2="104"
+       y2="130"
+       id="line161" />
+    <line
+       x1="104"
+       y1="130"
+       x2="109"
+       y2="115"
+       id="line163" />
+    <line
+       x1="109"
+       y1="115"
+       x2="122"
+       y2="105"
+       id="line165" />
+    <line
+       x1="122"
+       y1="105"
+       x2="138"
+       y2="105"
+       id="line167" />
+    <line
+       x1="138"
+       y1="105"
+       x2="151"
+       y2="115"
+       id="line169" />
+    <line
+       x1="151"
+       y1="115"
+       x2="156"
+       y2="130"
+       id="line171" />
+  </g>
+  <line
+     x1="586"
+     y1="180"
+     x2="526"
+     y2="180"
+     stroke="#1c2022"
+     stroke-opacity="0.55"
+     stroke-width="1.3"
+     stroke-dasharray="3, 4"
+     id="line175"
+     style="fill:none" />
+  <g
+     stroke="#1c2022"
+     stroke-opacity="0.8"
+     stroke-width="1.6"
+     id="g181"
+     transform="translate(370,50)"
+     style="fill:none">
+    <line
+       x1="182"
+       y1="124"
+       x2="190"
+       y2="136"
+       id="line177" />
+    <line
+       x1="190"
+       y1="124"
+       x2="182"
+       y2="136"
+       id="line179" />
+  </g>
+  <text
+     x="583.28278"
+     y="244.30296"
+     text-anchor="middle"
+     font-family="monospace"
+     font-size="10.5px"
+     fill="#1c2022"
+     fill-opacity="0.8"
+     id="text183"
+     transform="rotate(-11.898112)">gap &gt; cutoff</text>
+  <g
+     fill="#1c2022"
+     id="g229"
+     transform="translate(370,50)">
+    <circle
+       cx="209"
+       cy="163"
+       r="5"
+       id="circle185" />
+    <circle
+       cx="191"
+       cy="191"
+       r="5"
+       id="circle187" />
+    <circle
+       cx="163"
+       cy="209"
+       r="5"
+       id="circle189" />
+    <circle
+       cx="97"
+       cy="209"
+       r="5"
+       id="circle191" />
+    <circle
+       cx="69"
+       cy="191"
+       r="5"
+       id="circle193" />
+    <circle
+       cx="51"
+       cy="163"
+       r="5"
+       id="circle195" />
+    <circle
+       cx="51"
+       cy="97"
+       r="5"
+       id="circle197" />
+    <circle
+       cx="69"
+       cy="69"
+       r="5"
+       id="circle199" />
+    <circle
+       cx="97"
+       cy="51"
+       r="5"
+       id="circle201" />
+    <circle
+       cx="163"
+       cy="51"
+       r="5"
+       id="circle203" />
+    <circle
+       cx="191"
+       cy="69"
+       r="5"
+       id="circle205" />
+    <circle
+       cx="209"
+       cy="97"
+       r="5"
+       id="circle207" />
+    <circle
+       cx="156"
+       cy="130"
+       r="5"
+       id="circle209" />
+    <circle
+       cx="151"
+       cy="145"
+       r="5"
+       id="circle211" />
+    <circle
+       cx="138"
+       cy="155"
+       r="5"
+       id="circle213" />
+    <circle
+       cx="122"
+       cy="155"
+       r="5"
+       id="circle215" />
+    <circle
+       cx="109"
+       cy="145"
+       r="5"
+       id="circle217" />
+    <circle
+       cx="104"
+       cy="130"
+       r="5"
+       id="circle219" />
+    <circle
+       cx="109"
+       cy="115"
+       r="5"
+       id="circle221" />
+    <circle
+       cx="122"
+       cy="105"
+       r="5"
+       id="circle223" />
+    <circle
+       cx="138"
+       cy="105"
+       r="5"
+       id="circle225" />
+    <circle
+       cx="151"
+       cy="115"
+       r="5"
+       id="circle227" />
+  </g>
+  <g
+     fill="#1c2022"
+     id="g239"
+     transform="translate(370,50)">
+    <circle
+       cx="216"
+       cy="130"
+       r="5"
+       id="circle231" />
+    <circle
+       cx="130"
+       cy="216"
+       r="5"
+       id="circle233" />
+    <circle
+       cx="44"
+       cy="130"
+       r="5"
+       id="circle235" />
+    <circle
+       cx="130"
+       cy="44"
+       r="5"
+       id="circle237" />
+  </g>
+  <g
+     fill="none"
+     stroke="#1c2022"
+     stroke-width="1.3"
+     id="g249"
+     transform="translate(370,50)">
+    <circle
+       cx="216"
+       cy="130"
+       r="9"
+       id="circle241" />
+    <circle
+       cx="130"
+       cy="216"
+       r="9"
+       id="circle243" />
+    <circle
+       cx="44"
+       cy="130"
+       r="9"
+       id="circle245" />
+    <circle
+       cx="130"
+       cy="44"
+       r="9"
+       id="circle247" />
+  </g>
+  <text
+     x="596.99011"
+     y="196.06879"
+     font-family="monospace"
+     font-size="10.5px"
+     fill="#1c2022"
+     fill-opacity="0.85"
+     id="text251">seed</text>
+  <text
+     font-family="monospace"
+     font-size="12.5"
+     fill="#1C2022"
+     fill-opacity="0.75"
+     id="text263"><tspan
+       x="360"
+       y="332"
+       id="tspan255">Chaining nearby dots rebuilds the</tspan><tspan
+       x="360"
+       y="349"
+       id="tspan257">surface's real adjacency. The outer</tspan><tspan
+       x="360"
+       y="366"
+       id="tspan259">ring closes on itself; so does the</tspan><tspan
+       x="360"
+       y="383"
+       id="tspan261">inner one — nothing bridges the gap.</tspan></text>
+  <line
+     x1="638"
+     y1="180"
+     x2="698"
+     y2="180"
+     stroke="#1C2022"
+     stroke-width="1.6"
+     marker-end="url(#cavex-arrow)"
+     id="line265" />
+  <text
+     x="666.974"
+     y="152.82695"
+     text-anchor="middle"
+     font-family="monospace"
+     font-size="11.5px"
+     fill="#1c2022"
+     fill-opacity="0.75"
+     id="text267"><tspan
+       sodipodi:role="line"
+       id="tspan1802"
+       x="666.974"
+       y="152.82695">does root</tspan><tspan
+       sodipodi:role="line"
+       id="tspan1804"
+       x="666.974"
+       y="167.20195">reach a seed?</tspan></text>
+  <!-- ============ PANEL 3 : keep seeded component, drop the rest ============ -->
+  <text
+     x="840"
+     y="34"
+     text-anchor="middle"
+     font-family="sans-serif"
+     font-weight="700"
+     font-size="15"
+     fill="#1C2022"
+     id="text269">3. Keep seeded component, drop rest</text>
+  <g
+     transform="translate(710,50)"
+     fill="none"
+     id="g345">
+    <g
+       stroke="#1C2022"
+       stroke-opacity="0.2"
+       fill="#1C2022"
+       fill-opacity="0.04"
+       id="g287">
+      <circle
+         cx="185"
+         cy="130"
+         r="34"
+         id="circle271" />
+      <circle
+         cx="169"
+         cy="169"
+         r="34"
+         id="circle273" />
+      <circle
+         cx="130"
+         cy="185"
+         r="34"
+         id="circle275" />
+      <circle
+         cx="91"
+         cy="169"
+         r="34"
+         id="circle277" />
+      <circle
+         cx="75"
+         cy="130"
+         r="34"
+         id="circle279" />
+      <circle
+         cx="91"
+         cy="91"
+         r="34"
+         id="circle281" />
+      <circle
+         cx="130"
+         cy="75"
+         r="34"
+         id="circle283" />
+      <circle
+         cx="169"
+         cy="91"
+         r="34"
+         id="circle285" />
+    </g>
+    <g
+       fill="#136F58"
+       id="g321">
+      <circle
+         cx="216"
+         cy="130"
+         r="5.5"
+         id="circle289" />
+      <circle
+         cx="209"
+         cy="163"
+         r="5.5"
+         id="circle291" />
+      <circle
+         cx="191"
+         cy="191"
+         r="5.5"
+         id="circle293" />
+      <circle
+         cx="163"
+         cy="209"
+         r="5.5"
+         id="circle295" />
+      <circle
+         cx="130"
+         cy="216"
+         r="5.5"
+         id="circle297" />
+      <circle
+         cx="97"
+         cy="209"
+         r="5.5"
+         id="circle299" />
+      <circle
+         cx="69"
+         cy="191"
+         r="5.5"
+         id="circle301" />
+      <circle
+         cx="51"
+         cy="163"
+         r="5.5"
+         id="circle303" />
+      <circle
+         cx="44"
+         cy="130"
+         r="5.5"
+         id="circle305" />
+      <circle
+         cx="51"
+         cy="97"
+         r="5.5"
+         id="circle307" />
+      <circle
+         cx="69"
+         cy="69"
+         r="5.5"
+         id="circle309" />
+      <circle
+         cx="97"
+         cy="51"
+         r="5.5"
+         id="circle311" />
+      <circle
+         cx="130"
+         cy="44"
+         r="5.5"
+         id="circle313" />
+      <circle
+         cx="163"
+         cy="51"
+         r="5.5"
+         id="circle315" />
+      <circle
+         cx="191"
+         cy="69"
+         r="5.5"
+         id="circle317" />
+      <circle
+         cx="209"
+         cy="97"
+         r="5.5"
+         id="circle319" />
+    </g>
+    <g
+       stroke="#AE4B24"
+       stroke-width="1.6"
+       fill="#ffffff"
+       id="g343">
+      <circle
+         cx="156"
+         cy="130"
+         r="5"
+         id="circle323" />
+      <circle
+         cx="151"
+         cy="145"
+         r="5"
+         id="circle325" />
+      <circle
+         cx="138"
+         cy="155"
+         r="5"
+         id="circle327" />
+      <circle
+         cx="122"
+         cy="155"
+         r="5"
+         id="circle329" />
+      <circle
+         cx="109"
+         cy="145"
+         r="5"
+         id="circle331" />
+      <circle
+         cx="104"
+         cy="130"
+         r="5"
+         id="circle333" />
+      <circle
+         cx="109"
+         cy="115"
+         r="5"
+         id="circle335" />
+      <circle
+         cx="122"
+         cy="105"
+         r="5"
+         id="circle337" />
+      <circle
+         cx="138"
+         cy="105"
+         r="5"
+         id="circle339" />
+      <circle
+         cx="151"
+         cy="115"
+         r="5"
+         id="circle341" />
+    </g>
+  </g>
+  <text
+     font-family="monospace"
+     font-size="12.5"
+     fill="#1C2022"
+     fill-opacity="0.75"
+     id="text355"><tspan
+       x="700"
+       y="332"
+       id="tspan347">Only the component holding a seed</tspan><tspan
+       x="700"
+       y="349"
+       id="tspan349">is real exterior. The pocket's dots</tspan><tspan
+       x="700"
+       y="366"
+       id="tspan351">never reach one, so exposed is set</tspan><tspan
+       x="700"
+       y="383"
+       id="tspan353">to false for every one of them.</tspan></text>
+  <!-- ============ legend ============ -->
+  <g
+     font-family="monospace"
+     font-size="12"
+     fill="#1C2022"
+     fill-opacity="0.8"
+     id="g375">
+    <circle
+       cx="30"
+       cy="430"
+       r="5"
+       fill="#1C2022"
+       id="circle357" />
+    <circle
+       cx="30"
+       cy="430"
+       r="9"
+       fill="none"
+       stroke="#1C2022"
+       stroke-width="1.3"
+       id="circle359" />
+    <text
+       x="46"
+       y="434"
+       id="text361">extreme dot (seed)</text>
+    <line
+       x1="280"
+       y1="430"
+       x2="310"
+       y2="430"
+       stroke="#1C2022"
+       stroke-width="1.5"
+       id="line363" />
+    <text
+       x="318"
+       y="434"
+       id="text365">edge ≤ cavity_dot_cutoff</text>
+    <circle
+       cx="560"
+       cy="430"
+       r="5.5"
+       fill="#136F58"
+       id="circle367" />
+    <text
+       x="574"
+       y="434"
+       id="text369">kept (reaches a seed)</text>
+    <circle
+       cx="800"
+       cy="430"
+       r="5"
+       stroke="#AE4B24"
+       stroke-width="1.6"
+       fill="#ffffff"
+       id="circle371" />
+    <text
+       x="814"
+       y="434"
+       id="text373">excluded (sealed cavity)</text>
+  </g>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:1.2;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleStart)"
+     d="m 578.15495,127.04432 c -14.97471,7.40616 -31.61481,13.56934 -21.65022,39.58899"
+     id="path678"
+     sodipodi:nodetypes="cc" />
+</svg>
