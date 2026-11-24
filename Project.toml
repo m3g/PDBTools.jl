@@ -64,7 +64,7 @@ TestItemRunner = "1.1"
 TestItems = "1"
 julia = "1.11"
 CairoMakie = "0.15.14"
-Makie = "0.24"
+Makie = "0.24.14"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"

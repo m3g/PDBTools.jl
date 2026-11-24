@@ -210,7 +210,7 @@ ContactMap{Bool} of size (243, 243) with 2285 contacts, threshold 4.0 and gap 0
 julia> map[95,95] # fetch the existence of a contact
 true
 
-julia> # using Plots; heatmap(map); # uncomment to plot the contact map
+julia> # using CairoMakie; heatmap(map); # uncomment to plot the contact map
 ```
 
 ## Contact map between residues in two different structures
@@ -230,7 +230,7 @@ ContactMap{Bool} of size (243, 12) with 17 contacts, threshold 4.0 and gap 0
 julia> map[80, 5] # fetch existence of contact 
 true
 
-julia> # using Plots; heatmap(map); # uncomment plot the contact map
+julia> # using CairoMakie; heatmap(map); # uncomment to plot the contact map
 ```
 
 """

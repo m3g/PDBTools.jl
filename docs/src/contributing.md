@@ -36,7 +36,7 @@ Before writing a helper function, check if the package already provides it. For 
 Computation and plotting are separate. A function computes the result and returns it as a
 custom type, which carries everything needed to plot it, and can be used without any 
 plotting package. The plot is a method, for that type, of a function of the plotting package
-(`heatmap`, `plot`, `scatter`, ... of `Plots`):
+(`heatmap`, `plot`, `scatter` of Makie):
 
 | Computation | Result | Plot |
 |:------------|:-------|:-----|
@@ -44,18 +44,28 @@ plotting package. The plot is a method, for that type, of a function of the plot
 | [`Ramachandran`](@ref) | `Ramachandran` | `scatter(ram)` |
 | [`hammer_aitoff_map`](@ref) | [`HammerAitoffMap`](@ref) | `heatmap(map)` |
 | [`helical_wheel`](@ref) | [`HelicalWheel`](@ref) | `plot(wheel)` |
+| [`secondary_structure_diagram`](@ref) | [`SecondaryStructureDiagram`](@ref) | `plot(diagram)` |
 
 The result types have a `show` method, and fields with descriptive names.
 
-The plotting methods are defined in the `PlotsPlotting` extension (in the `ext` directory), which is
-loaded with `using Plots`. `Plots` is the default plotting package. Another plotting package
-(for example, `CairoMakie`) can be used when it is better suited for a feature: it is then a 
-weak dependency of the package, with its own package extension, loaded only when the user 
-loads that package. A new extension, and the weak dependency it requires, must be clearly 
-stated in the description of the pull request.
+The plots are made with Makie, in the `MakiePlotting` extension (in `ext/MakiePlotting`), which
+is loaded with any Makie backend (e.g. `using CairoMakie`). The plotting methods are methods of
+the functions of Makie (`plot`, `heatmap`, `scatter`), for the type returned by the computation.
+Each type has three methods (for `f` = `plot`, `heatmap` or `scatter`):
 
-Plotting functions return the plot, and do not save it: users save figures with `savefig`
-(so there are no `output` or `outfile` keywords).
+- `f(x; kwargs...)`: the complete figure, with its color bar, returned as a `Makie.Figure`.
+  This is the method described in the section of the manual of the feature. It has the 
+  `size`, `font` and `fontsize` keywords, and the keywords of the position method.
+- `f(fig[i, j], x; kwargs...)`: draws the plot and its color bar into a position of a figure,
+  and returns the `GridLayout` of the position. 
+- `f!(ax, x; kwargs...)`: draws the plot into an existing `Axis`, without color bar and 
+  without changing the axis, and returns the plot object.
+
+The last two methods are documented only in the [Advanced plotting](@ref) section of the manual.
+
+Plotting functions return the figure, and do not save it: users save figures with 
+`CairoMakie.save` (so there are no `output` or `outfile` keywords). The plots with `Plots.jl`
+of the `PlotsPlotting` extension are deprecated, and do not receive new features.
 
 ### One quantity per function
 
@@ -84,8 +94,8 @@ is `false` (default, no periodic boundary conditions), `true` (use the unit cell
 - Source files go in `src` (or in a subdirectory of `src`), with the `export` statements at the
   top of the file. They are included in `src/PDBTools.jl`, in the section they belong to, 
   before the precompilation workload.
-- Plotting code goes in the `ext` directory, in a `plot_<feature>.jl` file included in the 
-  module of its extension: `ext/PlotsPlotting.jl` (Plots) or `ext/MakiePlotting.jl` (Makie, any backend).
+- Plotting code goes in the `ext/MakiePlotting` directory, in a `<feature>.jl` file included
+  in `ext/MakiePlotting/MakiePlotting.jl`.
 - Dependencies: avoid new dependencies. A heavy dependency, needed by a single feature, should
   be a weak dependency, with a package extension. New dependencies and extensions must be 
   clearly stated in the description of the pull request.

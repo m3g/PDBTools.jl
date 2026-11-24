@@ -142,7 +142,7 @@ end
 
 Values of a per-atom property on the Hammer-Aitoff projection of a structure, as
 returned by [`hammer_aitoff_map`](@ref). Plot it with `heatmap(map)` (requires
-`using Plots`).
+a Makie backend, e.g. `using CairoMakie`).
 
 # Fields
 - `projection`: the [`HammerAitoffProjection`](@ref) of the atoms (which contains the atoms).
@@ -178,7 +178,7 @@ the value of each bin is a statistic of the values of the atoms that fell inside
 without atoms have no value (`NaN`, which is not shown in the heat map), and values that
 are `NaN` or `Inf` are ignored.
 
-Returns a [`HammerAitoffMap`](@ref), which can be plotted with `heatmap(map)` (requires `using Plots`).
+Returns a [`HammerAitoffMap`](@ref), which can be plotted with `heatmap(map)` (requires a Makie backend, e.g. `using CairoMakie`).
 
 # Keyword arguments
 - `nbins`: number of bins along each axis.

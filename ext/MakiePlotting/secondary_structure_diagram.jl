@@ -1,7 +1,6 @@
-using PDBTools: Atom, SSData
-using Makie: Makie, Figure, Axis, Colorbar, Point2f, poly!, limits!, hidespines!,
-    rowgap!, resize_to_layout!, cgrad
-
+#
+# Secondary structure diagrams: plot(::SecondaryStructureDiagram)
+#
 # --- Fixed layout of the figure (units = typographic points; 72 pt = 1 inch) ---
 # Rows of 50 residues × 13.5 pt = 675 pt ≈ 24 cm, with a 12 pt font. Saved with
 # `pt_per_unit = 2/3`, the width is that of a full page (≈ 16 cm), with an 8 pt font.
@@ -18,9 +17,6 @@ const NO_VALUE_COLOR = :grey85 # color of the residues when there are no values
 
 const HELIX_CODES = ("G", "H", "I", "P")
 const STRAND_CODES = ("E", "B")
-
-# Mean of f over the elements of x (Statistics is not a dependency)
-_residue_mean(f, x) = sum(f, x) / length(x)
 
 # Contiguous segments (i, j) where mask is true. A segment is broken when
 # segment_start[k] is true (start of a new chain or a gap in the numbering), so that
@@ -118,61 +114,103 @@ function _color_values(x::AbstractVector{<:Real};
     return y, crange, s
 end
 
-# Per-atom function from the `property` keyword: a field name (Symbol or String) or a function
-const FIELD_ALIASES = Dict(:occupancy => :occup)
-function _atom_property(property::Union{Symbol,AbstractString})
-    field = get(FIELD_ALIASES, Symbol(property), Symbol(property))
-    field in fieldnames(Atom) ||
-        throw(ArgumentError("property = :$property is not a field of the atoms. Use, e.g., :beta or :occupancy."))
-    return at -> getproperty(at, field)
-end
-_atom_property(property::Function) = property
+"""
+    plot(diagram::SecondaryStructureDiagram; kwargs...)
 
-# One value per residue of `atoms`, from `property` and `aggregate`
-function _residue_values(atoms, residues, property, aggregate)
-    if property isa AbstractVector
-        length(property) == length(residues) || throw(ArgumentError(
-            "property has $(length(property)) elements, but there are $(length(residues)) residues."))
-        return Float64.(property)
-    end
-    f = _atom_property(property)
-    # If the property is constant within each residue, it is probably already a
-    # per-residue value; summing would multiply it by the number of atoms.
-    if aggregate === sum
-        per_atom = [f.(r) for r in residues]
-        # Base.all: PDBTools defines its own `all` (the "all" selection)
-        if Base.all(v -> Base.all(≈(first(v)), v), per_atom) && any(v -> length(v) > 1, per_atom)
-            @warn "aggregate = sum, but the property is constant within each residue " *
-                  "(it looks like a per-residue value). Consider the mean."
-        end
-    end
-    return [Float64(aggregate(f, r)) for r in residues]
-end
+Plot a secondary structure diagram, as computed by [`secondary_structure_diagram`](@ref): the secondary
+structure of each residue along the sequence (helices as ribbons, β strands as arrows and
+loops as thin bars), with each residue colored by its value.
 
-function PDBTools.plot_ss_diagram(atoms::AbstractVector{<:Atom};
-    property = :beta,
-    aggregate = _residue_mean,
-    ss_method::Symbol = :dssp,
+!!! note
+    This function requires a Makie backend, e.g. `using CairoMakie`.
+
+Returns a `Makie.Figure`. Helices shorter than 4 residues and strands shorter than 3
+residues are drawn as loops.
+
+# Layout
+
+The figure has a fixed layout, so that all diagrams come out identical: 50 residues per
+row, 13.5 pt per residue (≈ 24 cm wide rows) and a 12 pt font. The height grows with the
+number of rows. To keep the sizes in typographic points, save it as SVG with CairoMakie:
+`CairoMakie.save("diagram.svg", fig; pt_per_unit = 1)`. With `pt_per_unit = 2/3`, the
+figure has the width of a full page (≈ 16 cm), with an 8 pt font.
+
+# Keyword arguments
+- `colormap = nothing`: color map. If `nothing`, uses `:balance` (diverging, zero = white)
+  when the color range is symmetric and `:tempo` (sequential) when it is `(0, limit)`.
+- `colorbar = true`, `colorbar_title = ""`: horizontal color bar below the rows (not drawn
+  when there are no values).
+- `color_scale = :robust`: how values are mapped to colors:
+  - `:robust`: linear, with the limit at the quantile `clip_quantile` of the absolute values;
+  - `:linear`: linear, with the limit at the maximum absolute value;
+  - `:asinh`: `asinh(value / asinh_scale)`, linear for small values and logarithmic for
+    large ones, for values that span several orders of magnitude.
+- `range_mode = :auto`: `:symmetric` (`(-limit, limit)`, zero at the center of the color
+  map), `:positive` (`(0, limit)`) or `:auto` (symmetric if there are negative values).
+- `color_limit = nothing`, `asinh_scale = nothing`: limit of the color scale and scale of
+  `:asinh`, in the units of the values. Use the same values to compare several diagrams.
+- `clip_quantile = 0.99`: quantile used by `:robust`.
+- `signed_tolerance = 1e-6`: values smaller than `-signed_tolerance * maximum(abs, values)`
+  are considered negative by `range_mode = :auto`.
+- `normalize_per_chain = false`: divide the values of each chain by the maximum absolute
+  value of that chain.
+- `chain_new_row = true`: each chain starts in a new row, labeled on the left.
+- `background_color = :white`: background of the figure (e.g. `:transparent`).
+- `font = nothing`: font of the labels (default: New Computer Modern, distributed with Makie).
+- `size = nothing`: size of the figure, as `(width, height)`, in pt. By default, the
+  size is fixed by the content. With a given size, the rows are stretched to fill the
+  figure (the font size is not changed).
+
+Values beyond the color limits take the color of the extreme of the color map.
+
+# Example
+
+```julia-repl
+julia> using PDBTools, LazyArtifacts, CairoMakie
+
+julia> atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein");
+
+julia> fig = plot(secondary_structure_diagram(atoms); colorbar_title = "B-factor")
+
+julia> CairoMakie.save("diagram.svg", fig; pt_per_unit = 1)
+```
+
+"""
+function Makie.plot(d::SecondaryStructureDiagram;
+    size = nothing,
+    font = nothing,
+    background_color = :white,
     kwargs...,
 )
-    residues = collect(eachresidue(atoms))
-    isempty(residues) && throw(ArgumentError("The atom selection has no residues."))
-    values = _residue_values(atoms, residues, property, aggregate)
-    ss = if ss_method == :dssp
-        dssp_run(atoms)
-    elseif ss_method == :stride
-        stride_run(atoms)
-    else
-        throw(ArgumentError("ss_method must be :dssp or :stride, got :$ss_method"))
-    end
-    # The output of dssp_run and stride_run has one element per protein residue, in order
-    # (only of the first model, for DSSP): non-protein residues have no secondary structure.
-    ss_values = values[findall(r -> isprotein(first(r)), residues)][1:length(ss)]
-    return PDBTools.plot_ss_diagram(ss; property = ss_values, kwargs...)
+    # By default, the size of the figure is adjusted to the content at the end
+    # (resize_to_layout!), from the fixed width per residue and the fixed height per row.
+    # With a given `size`, the rows are stretched to fill the figure.
+    f = Figure(; fontsize = FONTSIZE, figure_padding = FIGURE_PADDING,
+        backgroundcolor = background_color, fonts = _fonts(font),
+        (isnothing(size) ? (;) : (; size = _check_size(size)))...)
+    _draw_ss!(f.layout, d; fixed = isnothing(size), background_color, kwargs...)
+    isnothing(size) && resize_to_layout!(f)
+    return f
 end
 
-function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
-    property::Union{Nothing,AbstractVector{<:Real}} = nothing,
+function Makie.plot(gp::GridPos, d::SecondaryStructureDiagram; background_color = :white, kwargs...)
+    gl = GridLayout(gp)
+    _draw_ss!(gl, d; fixed = false, background_color, kwargs...)
+    return gl
+end
+
+function Makie.plot!(::Axis, ::SecondaryStructureDiagram; kwargs...)
+    throw(ArgumentError("""\n
+        A secondary structure diagram has one axis per row, and cannot be drawn into an existing Axis.
+        Use plot(fig[i, j], diagram) to draw it into a position of a figure.
+
+    """))
+end
+
+# Draw the diagram into the layout `gl`: rows of residues, and the color bar below. With
+# `fixed = true`, the axes have the fixed size of the layout; otherwise they fill `gl`.
+function _draw_ss!(gl::GridLayout, d::SecondaryStructureDiagram;
+    fixed::Bool,
     colormap = nothing,
     colorbar::Bool = true,
     colorbar_title::AbstractString = "",
@@ -185,15 +223,10 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
     normalize_per_chain::Bool = false,
     chain_new_row::Bool = true,
     background_color = :white,
-    font = "cmr10",
-    size::Union{Nothing,Tuple{Real,Real}} = nothing,
 )
+    ss = d.ss
     nres = length(ss)
     nres > 0 || throw(ArgumentError("The secondary structure data is empty."))
-    if !isnothing(property)
-        length(property) == nres || throw(ArgumentError(
-            "property has $(length(property)) elements, but there are $nres residues."))
-    end
 
     chains = [string(s.chain) for s in ss]
     residue_numbers = [Int(s.resnum) for s in ss]
@@ -223,9 +256,9 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
     end
 
     # --- Colors ---
-    has_values = !isnothing(property)
+    has_values = !isnothing(d.values)
     if has_values
-        values = Float64.(property)
+        values = copy(d.values)
         if normalize_per_chain
             for b in chain_blocks
                 m = maximum(abs, view(values, b))
@@ -296,16 +329,6 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
     end
     ncols = maximum(length, rows)
 
-    # By default, the size of the figure is adjusted to the content at the end
-    # (resize_to_layout!), from the fixed width per residue and the fixed height per row.
-    # With a given `size`, the rows are stretched to fill the figure.
-    if !isnothing(size)
-        all(>(0), size) || throw(ArgumentError("size must be positive, got $size"))
-    end
-    f = Figure(; fontsize = FONTSIZE, figure_padding = FIGURE_PADDING,
-        backgroundcolor = background_color, fonts = (; regular = font),
-        (isnothing(size) ? (;) : (; size = Float64.(size)))...)
-
     # 0.5 residue of space on each side for the helices at the edges
     xspan = ncols + 1.0
 
@@ -313,8 +336,8 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
     for (r, idx) in enumerate(rows)
         off = first(idx) - 1
         n = length(idx)
-        ax = Axis(f[r, 1];
-            (isnothing(size) ? (; width = xspan * PT_PER_RESIDUE, height = ROW_HEIGHT) : (;))...,
+        ax = Axis(gl[r, 1];
+            (fixed ? (; width = xspan * PT_PER_RESIDUE, height = ROW_HEIGHT) : (;))...,
             xticks = (collect(1:n) .+ 0.5, labels[idx]),
             xticklabelrotation = pi / 2,
             ylabel = (multichain && chain_new_row) ? "Chain $(chains[first(idx)])" : "",
@@ -336,7 +359,7 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
                 strokewidth = STROKEWIDTH)
         end
     end
-    rowgap!(f.layout, ROW_GAP)
+    rowgap!(gl, ROW_GAP)
 
     # --- Horizontal color bar below the rows (ticks in the units of the values) ---
     if colorbar && has_values
@@ -345,7 +368,7 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
         # zero the floating point residue in the central tick (e.g. 1e-17)
         tol = 1e-9 * maximum(abs, tick_val)
         tick_lab = [abs(v) <= tol ? "0" : string(round(v; sigdigits = 2)) for v in tick_val]
-        Colorbar(f[length(rows)+1, 1];
+        Colorbar(gl[length(rows)+1, 1];
             vertical = false,
             flipaxis = false,
             width = COLORBAR_WIDTH,
@@ -355,14 +378,12 @@ function PDBTools.plot_ss_diagram(ss::AbstractVector{<:SSData};
             limits = crange,
             label = colorbar_title,
             ticks = (tick_pos, tick_lab))
-        rowgap!(f.layout, length(rows), 3 * ROW_GAP)
+        rowgap!(gl, length(rows), 3 * ROW_GAP)
     end
-
-    isnothing(size) && resize_to_layout!(f)
-    return f
+    return gl
 end
 
-@testitem "plot_ss_diagram helpers" begin
+@testitem "plot(::SecondaryStructureDiagram) helpers" begin
     using PDBTools
     import CairoMakie
     ext = Base.get_extension(PDBTools, :MakiePlotting)
@@ -408,71 +429,41 @@ end
     @test_throws ArgumentError cv(x; color_scale = :asinh, asinh_scale = -1.0)
 end
 
-@testitem "plot_ss_diagram values" begin
-    using PDBTools, LazyArtifacts
-    import CairoMakie
-    ext = Base.get_extension(PDBTools, :MakiePlotting)
-    atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
-    residues = collect(eachresidue(atoms))
-    nres = length(residues)
-    rv(property, aggregate) = ext._residue_values(atoms, residues, property, aggregate)
-
-    @test !allequal(rv(:beta, ext._residue_mean)) # the test file has non-trivial B-factors
-    @test rv(:beta, ext._residue_mean) ≈ [sum(beta, r) / length(r) for r in residues]
-    @test rv("beta", sum)[1] ≈ sum(beta, residues[1])
-    @test rv(:occupancy, maximum)[1] ≈ maximum(occup, residues[1])
-    @test rv(:occupancy, maximum) == rv(:occup, maximum)
-    @test rv(at -> 2 * at.beta, sum)[1] ≈ 2 * sum(beta, residues[1])
-    values = collect(range(-1.0, 1.0; length = nres))
-    @test rv(values, sum) == values
-    @test_throws ArgumentError rv(ones(nres - 1), sum)
-    @test_throws ArgumentError rv(:not_a_field, sum)
-
-    # warning when aggregate = sum but the property is constant within each residue
-    atoms_const = deepcopy(atoms)
-    residues_const = collect(eachresidue(atoms_const))
-    for (i, r) in enumerate(residues_const), at in r
-        at.beta = i
-    end
-    @test_logs (:warn, r"aggregate = sum") match_mode = :any ext._residue_values(atoms_const, residues_const, :beta, sum)
-end
-
-@testitem "plot_ss_diagram" begin
+@testitem "plot(::SecondaryStructureDiagram)" begin
     using PDBTools, LazyArtifacts
     import CairoMakie
     atoms = read_pdb(PDBTools.test_file("structure.pdb"), "protein")
     nres = length(eachresidue(atoms))
 
-    # from the atoms: default property (:beta), DSSP and STRIDE
-    fig = plot_ss_diagram(atoms; colorbar_title = "B-factor")
+    # default property (B-factors)
+    d = secondary_structure_diagram(atoms)
+    fig = CairoMakie.plot(d; colorbar_title = "B-factor")
     @test fig isa CairoMakie.Figure
-    @test plot_ss_diagram(atoms; property = :occupancy, ss_method = :stride) isa CairoMakie.Figure
     svgfile = tempname() * ".svg"
     CairoMakie.save(svgfile, fig; pt_per_unit = 1)
     @test isfile(svgfile)
 
-    # a vector of values, one per residue: signed values, color options, layouts
-    values = collect(range(-1.0, 1.0; length = nres))
-    @test plot_ss_diagram(atoms; property = values, color_scale = :asinh) isa CairoMakie.Figure
-    @test plot_ss_diagram(atoms; property = values, color_scale = :linear, color_limit = 0.5,
-        colormap = :viridis, background_color = :transparent) isa CairoMakie.Figure
-    @test plot_ss_diagram(atoms; property = values, normalize_per_chain = true) isa CairoMakie.Figure
-    @test plot_ss_diagram(atoms; property = values, chain_new_row = false, colorbar = false) isa CairoMakie.Figure
+    # signed values, color options, layouts
+    ds = secondary_structure_diagram(atoms, collect(range(-1.0, 1.0; length = nres)))
+    @test CairoMakie.plot(ds; color_scale = :asinh) isa CairoMakie.Figure
+    @test CairoMakie.plot(ds; color_scale = :linear, color_limit = 0.5,
+        colormap = :viridis, background_color = :transparent, font = "Arial") isa CairoMakie.Figure
+    @test CairoMakie.plot(ds; normalize_per_chain = true) isa CairoMakie.Figure
+    @test CairoMakie.plot(ds; chain_new_row = false, colorbar = false) isa CairoMakie.Figure
     # fixed size by default; a given size is respected
-    fig = plot_ss_diagram(atoms; property = values, size = (800, 600))
+    fig = CairoMakie.plot(ds; size = (800, 600))
     @test Tuple(fig.scene.viewport[].widths) == (800, 600)
-    @test Tuple(plot_ss_diagram(atoms; property = values).scene.viewport[].widths) != (800, 600)
-    @test_throws ArgumentError plot_ss_diagram(atoms; property = values, size = (0, 600))
+    @test Tuple(CairoMakie.plot(ds).scene.viewport[].widths) != (800, 600)
+    @test_throws ArgumentError CairoMakie.plot(ds; size = (0, 600))
 
-    # from the output of dssp_run: only the drawing, or one value per residue of the output
-    ss = dssp_run(atoms)
-    @test plot_ss_diagram(ss) isa CairoMakie.Figure
-    @test plot_ss_diagram(ss; property = collect(1.0:length(ss))) isa CairoMakie.Figure
+    # only the secondary structure
+    @test CairoMakie.plot(secondary_structure_diagram(dssp_run(atoms))) isa CairoMakie.Figure
 
-    @test_throws ArgumentError plot_ss_diagram(atoms; ss_method = :foo)
-    @test_throws ArgumentError plot_ss_diagram(atoms; property = values, color_scale = :log)
-    @test_throws ArgumentError plot_ss_diagram(atoms; property = values, range_mode = :negative)
-    @test_throws ArgumentError plot_ss_diagram(ss; property = ones(length(ss) - 1))
-    @test_throws ArgumentError plot_ss_diagram(atoms[1:0])
-    @test_throws ArgumentError plot_ss_diagram(ss[1:0])
+    # into a position of a figure; not into an Axis
+    fig = CairoMakie.Figure(; size = (900, 600))
+    @test CairoMakie.plot(fig[1, 1], d) isa CairoMakie.GridLayout
+    @test_throws ArgumentError CairoMakie.plot!(CairoMakie.Axis(fig[2, 1]), d)
+
+    @test_throws ArgumentError CairoMakie.plot(ds; color_scale = :log)
+    @test_throws ArgumentError CairoMakie.plot(ds; range_mode = :negative)
 end

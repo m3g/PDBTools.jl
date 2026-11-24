@@ -124,7 +124,7 @@ julia> residue_ticks(atoms; first=10, stride=50, serial=true) # using serial=tru
 
 ```
 
-The resulting tuple of residue numbers and labels can be used as `xticks` in `Plots.plot`, for example.
+The resulting tuple of residue numbers and labels can be used as `xticks` of a Makie `Axis`, for example.
 
 """
 function residue_ticks(residues::Union{AbstractVector{Residue},EachStructuralElement{<:Residue}};

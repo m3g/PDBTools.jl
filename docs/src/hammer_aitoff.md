@@ -53,15 +53,15 @@ proj.x[1:3], proj.y[1:3]
 [`hammer_aitoff_map`](@ref) projects the atoms, divides the map into `nbins × nbins` bins and
 computes, for each bin, a statistic of the values of the atoms that fell inside it. Any per-atom
 property can be used: B-factors, partial charges, contributions to coordination numbers,
-distances, etc. The resulting [`HammerAitoffMap`](@ref) is plotted with `heatmap` (`Plots` must
-be loaded).
+distances, etc. The resulting [`HammerAitoffMap`](@ref) is plotted with `heatmap` (a Makie
+backend must be loaded, e.g. `using CairoMakie`).
 
 Here, each bead is colored by its distance to the center of the capsid, which shows the
 arrangement of the E proteins on the surface of the virus, repeated by the icosahedral 
 symmetry of the capsid:
 
 ```@example hammer
-using Plots
+using CairoMakie
 c = center_of_mass(capsid)
 dist = [ sqrt((at.x - c[1])^2 + (at.y - c[2])^2 + (at.z - c[3])^2) for at in capsid ]
 map = hammer_aitoff_map(capsid, dist; nbins = 100)
@@ -122,7 +122,7 @@ groups = Dict("A" => "protein 1", "B" => "protein 1", "C" => "protein 2")
 heatmap(map; contours = :group, groupfun = at -> groups[chain(at)])
 ```
 
-The figure can be saved with `savefig`.
+The figure can be saved with `CairoMakie.save("map.png", fig)`.
 
 ## Reference
 

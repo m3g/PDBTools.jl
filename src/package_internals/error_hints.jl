@@ -3,8 +3,11 @@
 # package that triggers the extension was not loaded, a MethodError is thrown, and
 # the hint tells the user which package to load.
 #
+#
+# (The plotting functions are methods of functions of the plotting packages, as
+# `Makie.plot`, so they cannot have hints here.)
+#
 const _extension_functions = (
-    (f = plot_ss_diagram, ext = :MakiePlotting, requires = "a Makie backend", pkg = "CairoMakie"),
     (f = test_file, ext = :TestFilesExt, requires = "the LazyArtifacts package", pkg = "LazyArtifacts"),
 )
 
@@ -26,10 +29,10 @@ end
 
 @testitem "extension error hints" begin
     using PDBTools
-    exc = MethodError(PDBTools.plot_ss_diagram, (1,))
-    msg = sprint(PDBTools._extension_error_hint, exc, (Int,), (;))
-    if isnothing(Base.get_extension(PDBTools, :MakiePlotting))
-        @test occursin("using CairoMakie", msg)
+    exc = MethodError(PDBTools.test_file, ("structure.pdb",))
+    msg = sprint(PDBTools._extension_error_hint, exc, (String,), (;))
+    if isnothing(Base.get_extension(PDBTools, :TestFilesExt))
+        @test occursin("using LazyArtifacts", msg)
     else
         @test isempty(msg)
     end
