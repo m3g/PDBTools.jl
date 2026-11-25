@@ -32,6 +32,7 @@ by its value. Returns a `Makie.Figure`.
 - `show_moment = true`: draw the arrow of the hydrophobic moment.
 - `residue_numbers = :default`: residue numbers shown next to the residues: `:default` (the
   first and last residues), `:all` or `:none`.
+- `ring_spacing = 0.2`: distance between consecutive rings of the wheel (a new ring starts every 18 residues).
 - `colorbar = true`, `colorbar_title = ""`, `title = ""`: color bar and title of the plot.
 - `size = (500, 420)`, `font = nothing`, `fontsize = 14`: size of the figure, font
   (default: New Computer Modern, distributed with Makie) and font size.
@@ -75,7 +76,7 @@ function Makie.plot!(ax::Axis, wheel::HelicalWheel;
     colormap = :tempo,
     clims = nothing,
     show_moment::Bool = true,
-    residue_numbers::Symbol = :default,
+    residue_numbers::Symbol = :default, ring_spacing::Real = 0.2,
 )
     residue_numbers in (:default, :all, :none) || throw(ArgumentError(
         "residue_numbers must be :default, :all or :none, got :$residue_numbers"))
@@ -92,7 +93,7 @@ function Makie.plot!(ax::Axis, wheel::HelicalWheel;
 
     # Geometry: 100° per residue; new ring every 18 residues (5 turns)
     turn_residues = 18
-    radius_step = 0.25
+    radius_step = ring_spacing
     angles = PDBTools._helical_wheel_angles(n)
     radii = [1 + div(i, turn_residues) * radius_step for i in 0:n-1]
 
@@ -131,17 +132,27 @@ function Makie.plot!(ax::Axis, wheel::HelicalWheel;
         arrows2d!(ax, [Point2f(0, 0)], [Vec2f(μx_rot, μy_rot)]; color = :gray30, shaftwidth = 1.5)
     end
 
-    # Residue numbers in small rectangles at the lower right of the markers of the residues
-    # (slightly overlapping them), drawn over the lines of the wheel. The sizes and offsets
-    # are in pixels, as the size of the markers.
+    # Residue numbers in small rectangles next to the markers of the residues, along the
+    # radial direction: outward on the outer ring and inward on the inner rings, so that
+    # they cover neither the marker of the residue nor the markers of the other rings.
+    # The sizes and offsets are in pixels, as the size of the markers.
     if residue_numbers != :none
         ib = residue_numbers == :all ? collect(1:n) : unique([1, n])
         labels = string.(wheel.residue_numbers[ib])
-        # width proportional to the number of digits; the upper left corner of the
-        # rectangle is inside the marker of the residue
         h = 11.0f0
         widths = [4.6f0 * length(l) + 4 for l in labels]
-        badge_offsets = [Vec2f(6.5 + w / 2, -6.5 - h / 2) for w in widths]
+        marker_radius = 14.0f0 # half of the markersize of the residues
+        gap = 2.0f0
+        outer_radius = maximum(radii)
+        badge_offsets = map(zip(ib, widths)) do (i, w)
+            r = hypot(x[i], y[i])
+            u = Vec2f(x[i] / r, y[i] / r)
+            u = radii[i] == outer_radius ? u : -u
+            # distance from the center of the rectangle to its border along u
+            ex = abs(u[1]) > 0 ? (w / 2) / abs(u[1]) : Inf32
+            ey = abs(u[2]) > 0 ? (h / 2) / abs(u[2]) : Inf32
+            u * (marker_radius + gap + min(ex, ey))
+        end
         scatter!(ax, x[ib], y[ib];
             marker = _UNIT_SQUARE, markersize = [Vec2f(w, h) for w in widths],
             marker_offset = badge_offsets,
@@ -178,6 +189,7 @@ end
     for residue_numbers in (:default, :all, :none)
         @test CairoMakie.plot(helical_wheel(seq, rand(n)); residue_numbers) isa CairoMakie.Figure
     end
+    @test CairoMakie.plot(helical_wheel(repeat(seq, 2), rand(2n)); ring_spacing = 0.3, residue_numbers = :all) isa CairoMakie.Figure
     @test_throws ArgumentError CairoMakie.plot(helical_wheel(seq, rand(n)); residue_numbers = :first)
     # labels are white on dark markers and black on light ones
     label_color = Base.get_extension(PDBTools, :MakiePlotting)._label_color

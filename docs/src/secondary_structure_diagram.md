@@ -30,6 +30,11 @@ The secondary structure is computed with DSSP (`ss_method = :dssp`, default) or 
 residues are drawn as loops. Each row has 50 residues, and each chain starts a new row,
 labeled on the left (`chain_new_row = true`).
 
+!!! note
+    DSSP and STRIDE need the backbone atoms (N, CA, C, O) of each residue. In coarse-grained
+    structures (e.g. Martini or SIRAH) these atoms are missing, so all residues are assigned
+    as loops, and the diagram does not represent the secondary structure.
+
 The value of each residue is computed from a per-atom property (`property`, by default the
 `beta` field of the atoms), combined for each residue by `aggregate`, as
 `aggregate(property, residue)`:

@@ -37,6 +37,9 @@ Compute the secondary structure diagram of a protein: the secondary structure of
 residue, with one value per residue. Returns an [`SecondaryStructureDiagram`](@ref), which is plotted
 with `plot(diagram)` (requires a Makie backend, e.g. `using CairoMakie`).
 
+DSSP and STRIDE need the backbone atoms of each residue, so coarse-grained structures
+(e.g. Martini or SIRAH) are not supported: all residues are assigned as loops.
+
 # Input
 
 - `atoms`: the secondary structure is computed with [`dssp_run`](@ref) (`ss_method = :dssp`,

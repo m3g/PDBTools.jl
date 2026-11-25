@@ -45,6 +45,8 @@ Some details of the drawing:
 - the first and last residues are labeled with their residue numbers (keyword
   `residue_numbers` of `helical_wheel`); use `residue_numbers = :all` (or `:none`) in
   `plot` to label all residues (or none);
+- after 18 residues (5 turns) a new ring starts; the distance between consecutive rings
+  is set with `ring_spacing` in `plot` (default `0.2`);
 - by default the values are normalized to `[0, 1]` (`normalize = true`). To compare
   several helices on the same color scale, use `normalize = false` and fix the limits
   with `clims`.
